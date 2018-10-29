@@ -117,10 +117,6 @@
       <Project>{a9769ac2-f2ca-41cf-af02-1fa1d4ce3462}</Project>
       <Name>Corekit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ToolKitWPF\ToolKitWPF.csproj">
-      <Project>{FD46BA66-88FD-4CD4-8E0D-D25A8C349D75}</Project>
-      <Name>ToolKitWPF</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Toolkit\Toolkit.csproj">
       <Project>{1c3076e3-cb94-4018-87d5-d3f504780284}</Project>
       <Name>Toolkit</Name>
