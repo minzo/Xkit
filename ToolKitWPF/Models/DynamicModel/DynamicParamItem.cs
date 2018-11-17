@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Corekit;
 
-namespace Toolkit.WPF.Models
+namespace ToolKit.WPF.Models
 {
     using DynamicPropertyCollection = List<IDynamicProperty>;
 
@@ -176,7 +176,7 @@ namespace Toolkit.WPF.Models
                         Description = i.Description,
                         IsReadOnly = i.IsReadOnly,
                     })));
-            }            
+            }
         }
 
         private void OnDefinitionPropertyChanged(object sender, PropertyChangedEventArgs e)

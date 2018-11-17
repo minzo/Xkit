@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Corekit;
 using ToolKit.WPF.Models;
 
-namespace Toolkit.WPF.Models
+namespace ToolKit.WPF.Models
 {
     public class DynamicParamTable<T> : DynamicProperty<TypedColletion<DynamicParamItem<T>>>
     {

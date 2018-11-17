@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Toolkit.WPF.Models
+namespace ToolKit.WPF.Models
 {
     public interface IDynamicPropertyDefinition : INotifyPropertyChanged
     {

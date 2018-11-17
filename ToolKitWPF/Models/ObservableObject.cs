@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Toolkit.WPF.Models
+namespace ToolKit.WPF.Models
 {
     public class ObservableObject : INotifyPropertyChanging, INotifyPropertyChanged
     {

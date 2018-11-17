@@ -114,7 +114,7 @@ ipch/
 # TFS 2012 Local Workspace
 $tf/
 
-# Guidance Automation Toolkit
+# Guidance Automation CoreKit
 *.gpState
 
 # ReSharper is a .NET coding add-in

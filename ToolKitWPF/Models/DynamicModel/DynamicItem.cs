@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Corekit;
 
-namespace Toolkit.WPF.Models
+namespace ToolKit.WPF.Models
 {
     using DynamicPropertyCollection = List<IDynamicProperty>;
 
@@ -92,7 +92,7 @@ namespace Toolkit.WPF.Models
         public object GetPropertyValue(int index)
         {
             return Value[index]?.GetValue();
-        }    
+        }
         public void SetPropertyValue(string propertyName, object value)
         {
             Value.FirstOrDefault(i => i.DefinitionName == propertyName)?.SetValue(value);
@@ -154,7 +154,7 @@ namespace Toolkit.WPF.Models
             }
             else
             {
-                e.OldItems?                
+                e.OldItems?
                     .OfType<IDynamicPropertyDefinition>()
                     .Run(i => RemoveProperty(i.Name));
 
@@ -162,7 +162,7 @@ namespace Toolkit.WPF.Models
                 e.NewItems?
                     .OfType<IDynamicPropertyDefinition>()
                     .Run(i => InsertProperty(insertIndex++, i.Create()));
-            }            
+            }
         }
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)

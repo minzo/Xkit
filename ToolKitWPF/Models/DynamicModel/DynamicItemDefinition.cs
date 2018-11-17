@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Corekit;
 
-namespace Toolkit.WPF.Models
+namespace ToolKit.WPF.Models
 {
     public interface IDynamicItemDefinition
         : IEnumerable<IDynamicPropertyDefinition>

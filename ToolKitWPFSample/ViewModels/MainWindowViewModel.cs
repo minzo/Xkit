@@ -41,7 +41,7 @@ namespace ToolKit.WPF.Sample.ViewModels
         /// 情報メッセージ数
         /// </summary>
         public int InfomationMessageCount => Logger.InfomationMessageCount;
-   
+
 
         public ICommand AddLogCommand { get; }
 
@@ -58,21 +58,28 @@ namespace ToolKit.WPF.Sample.ViewModels
             };
 
             Logger.LogAdded += (s, e) => {
-                Logs.Add(e);                
-                InvokePropertyChanged(nameof(LatestLogMessage));
+                lock(Logs)
+                {
+                    Logs.Add(e);
+                    InvokePropertyChanged(nameof(LatestLogMessage));
+                }
             };
 
             AddLogCommand = new DelegateCommand(_ => {
-                Logger?.AddLog("TEST", LogLevel.Information);
-                Task.Factory.StartNew(() =>
-                {
-                    for(var i=0; i<200; i++)
-                    {
-                        Logger.AddLog($"TASK{i}", LogLevel.Information);
-                        System.Threading.Thread.Sleep(100);
-                    }
-                });
+                Enumerable.Range(0, 100)
+                    .AsParallel()
+                    .WithDegreeOfParallelism(Environment.ProcessorCount)
+                    .ForAll(i => Logger.AddLog($"TASK{i}", LogLevel.Information));
             });
+        }
+
+        private int count = 0;
+        IEnumerable<string> Enumerate()
+        {
+            while(count < 100000)
+            {
+                yield return (count++).ToString();
+            }
         }
 
 

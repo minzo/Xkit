@@ -42,8 +42,6 @@ namespace Corekit
     /// </summary>
     public class Logger : INotifyPropertyChanged
     {
-        private MutablePropertyChangedEventArgs propertyChangedEventArgs = new MutablePropertyChangedEventArgs();
-
         private ConcurrentQueue<LogData> logs = new ConcurrentQueue<LogData>();
 
         /// <summary>
@@ -130,7 +128,7 @@ namespace Corekit
         /// </summary>
         private void InvokePropertyChanged(string propertyName)
         {
-            PropertyChanged?.Invoke(this, propertyChangedEventArgs.Get(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
