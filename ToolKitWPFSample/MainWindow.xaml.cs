@@ -20,9 +20,20 @@ namespace ToolKit.WPF.Sample
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static RoutedUICommand OpenWindow { get; } = new RoutedUICommand("OpenWindow", nameof(OpenWindow), typeof(Window));
+
         public MainWindow()
         {
             InitializeComponent();
+
+            CommandBindings.Add(new CommandBinding(OpenWindow, OnOpenWindow));
+        }
+
+        private void OnOpenWindow(object sender, ExecutedRoutedEventArgs e)
+        {
+            var window = Activator.CreateInstance((e.Parameter as Type)) as Window;
+            window.Owner = this;
+            window.Show();
         }
     }
 }

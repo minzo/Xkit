@@ -1,40 +1,14 @@
-﻿<Window x:Class="ToolKit.WPF.Sample.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ToolKit.WPF.Sample"
-        xmlns:vm="clr-namespace:ToolKit.WPF.Sample.ViewModels"
-        xmlns:tkitwpf="clr-namespace:ToolKit.WPF.Controls;assembly=ToolKit.WPF"
+        x:Class="ToolKit.WPF.Sample.MainWindow"
         mc:Ignorable="d"
         Title="ToolKit.WPF.Sample" Height="450" Width="800">
-    <Window.DataContext>
-        <vm:MainWindowViewModel />
-    </Window.DataContext>
-
-    <DockPanel>
-        <StatusBar DockPanel.Dock="Top" Height="30" Margin="0 0 0 4">
-            <StatusBar.BitmapEffect>
-                <DropShadowBitmapEffect Direction="270" ShadowDepth="1" Softness="0.5" Color="Gray" />
-            </StatusBar.BitmapEffect>
-            <Button Content="Addlog" Command="{Binding AddLogCommand}" />
-        </StatusBar>
-
-        <Expander DockPanel.Dock="Bottom" ExpandDirection="Down">
-            <Expander.Header>
-                <TextBlock>
-                    <Run Text="ログ" />　
-                    <Run Text="{Binding LatestLogMessage, Mode=OneWay}" />
-                </TextBlock>
-            </Expander.Header>
-            <tkitwpf:LoggerConsole MinHeight="100" MaxHeight="100"/>
-        </Expander>
-
-        <ContentPresenter />
-
-        <!--<StatusBar DockPanel.Dock="Bottom" Height="20" Margin="0 4 0 0">
-            <StatusBarItem Content="{Binding LatestLogMessage}" />
-        </StatusBar>-->
-
-    </DockPanel>
+    <StackPanel>
+        <Button Command="{x:Static local:MainWindow.OpenWindow}" CommandParameter="{x:Type local:LoggerConsoleWindow}"       Content="LoggerConsole" />
+        <Button Command="{x:Static local:MainWindow.OpenWindow}" CommandParameter="{x:Type local:MutilSelectDataGridWindow}" Content="MultiSelectDataGrid" />
+        <Button Command="{x:Static local:MainWindow.OpenWindow}" CommandParameter="{x:Type local:ColorSelectComboBoxWindow}" Content="ColorSelectComboBox" />
+    </StackPanel>
 </Window>
