@@ -48,12 +48,18 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationFramework.Aero2" />
     <Reference Include="PresentationFramework.AeroLite">
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -72,7 +78,21 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ColorSelectComboBox\ColorSelectComboBoxWindow.xaml.cs">
+      <DependentUpon>ColorSelectComboBoxWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LoggerConsole\LoggerConsoleWindowViewModel.cs" />
+    <Compile Include="LoggerConsole\LoggerConsoleWindow.xaml.cs">
+      <DependentUpon>LoggerConsoleWindow.xaml</DependentUpon>
+    </Compile>
+    <Page Include="ColorSelectComboBox\ColorSelectComboBoxWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LoggerConsole\LoggerConsoleWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -85,8 +105,23 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MultiSelectDataGrid\MultiSelectDataGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MultiSelectDataGrid\MutilSelectDataGridWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MultiSelectDataGrid\MultiSelectDataGrid.xaml.cs">
+      <DependentUpon>MultiSelectDataGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MultiSelectDataGrid\MultiSelectDataGridWindowViewModel.cs" />
+    <Compile Include="MultiSelectDataGrid\MutilSelectDataGridWindow.xaml.cs">
+      <DependentUpon>MutilSelectDataGridWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -138,5 +173,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

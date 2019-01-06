@@ -7,19 +7,6 @@ using System.Threading.Tasks;
 
 namespace ToolKit.WPF.Models
 {
-    public interface IDynamicProperty : INotifyPropertyChanged
-    {
-        IDynamicPropertyDefinition Definition { get; }
-
-        string DefinitionName { get; }
-
-        Type ValueType { get; }
-
-        object GetValue();
-
-        void SetValue(object value);
-    }
-
     public class DynamicProperty<T> : ObservableObject, IDynamicProperty
     {
         public IDynamicPropertyDefinition Definition { get; }

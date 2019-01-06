@@ -11,21 +11,6 @@ namespace ToolKit.WPF.Models
 {
     using DynamicPropertyCollection = List<IDynamicProperty>;
 
-    public interface IDynamicItem
-    {
-        string Name { get; set; }
-        string DisplayName { get; set; }
-        string Description { get; set; }
-        bool IsReadOnly { get; set; }
-
-        IDynamicProperty GetProperty(string propertyName);
-        IDynamicProperty GetProperty(int index);
-        object GetPropertyValue(string propertyName);
-        object GetPropertyValue(int index);
-        void SetPropertyValue(string propertyName, object value);
-        void SetPropertyValue(int index, object value);
-    }
-
     public class DynamicItem : DynamicProperty<DynamicPropertyCollection>, IDynamicItem, ICustomTypeDescriptor
     {
         private static DynamicPropertyDefinition<DynamicPropertyCollection> definition__ = new DynamicPropertyDefinition<DynamicPropertyCollection>() { Name = nameof(DynamicItem) };
@@ -58,21 +43,6 @@ namespace ToolKit.WPF.Models
             }
 
             return this;
-        }
-
-        public DynamicItem Build<T>(T[] array)
-        {
-            for(int i=0; i<array.Length; i++)
-            {
-                SetPropertyValue(i, array[i]);
-            }
-
-            return this;
-        }
-
-        public T[] ToArray<T>()
-        {
-            return Value.Select(i => (T)i.GetValue()).ToArray();
         }
 
         #region getter setter
@@ -143,6 +113,8 @@ namespace ToolKit.WPF.Models
 
         #endregion
 
+        #region event
+
         private void OnDefinitionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Move)
@@ -170,32 +142,26 @@ namespace ToolKit.WPF.Models
             NotifyPropertyChanged(e.PropertyName);
         }
 
+        #endregion
+
         #region ICustomTypeDescripter
 
         public AttributeCollection GetAttributes() => AttributeCollection.Empty;
         public string GetClassName() => nameof(DynamicItem);
         public string GetComponentName() => DefinitionName;
         public TypeConverter GetConverter() => null;
-
         public EventDescriptor GetDefaultEvent() => null;
-
         public PropertyDescriptor GetDefaultProperty() => null;
-
         public object GetEditor(Type editorBaseType) => null;
-
         public EventDescriptorCollection GetEvents() => EventDescriptorCollection.Empty;
-
         public EventDescriptorCollection GetEvents(Attribute[] attributes) => GetEvents();
-
         public PropertyDescriptorCollection GetProperties()
         {
             var descripters = Value.Select(i => new DynamicPropertyDescriptor(i.Definition)).ToArray();
             return new PropertyDescriptorCollection(descripters);
         }
-
         public PropertyDescriptorCollection GetProperties(Attribute[] attributes) => GetProperties();
-
-        public object GetPropertyOwner(PropertyDescriptor pd) => null;
+        public object GetPropertyOwner(PropertyDescriptor pd) => this;
 
         #endregion
     }

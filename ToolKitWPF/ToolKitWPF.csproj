@@ -53,6 +53,9 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\ColorSelectComboBox.xaml.cs">
+      <DependentUpon>ColorSelectComboBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\CompactLogPanel.xaml.cs">
       <DependentUpon>CompactLogPanel.xaml</DependentUpon>
     </Compile>
@@ -70,6 +73,8 @@
     <Compile Include="Models\DynamicModel\DynamicProperty.cs" />
     <Compile Include="Models\DynamicModel\DynamicPropertyDefinition.cs" />
     <Compile Include="Models\DynamicModel\DynamicPropertyDescriptor.cs" />
+    <Compile Include="Models\DynamicModel\IDynamicItem.cs" />
+    <Compile Include="Models\DynamicModel\IDynamicProperty.cs" />
     <Compile Include="Models\ObservableObject.cs" />
     <Compile Include="Models\PropertyDescripter.cs" />
     <Compile Include="Models\TypedCollection.cs" />
@@ -106,6 +111,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Controls\ColorSelectComboBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\CompactLogPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

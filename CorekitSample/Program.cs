@@ -1,32 +1,36 @@
 ﻿using System;
+using System.Text;
+using Corekit;
 
 namespace CorekitSample
 {
-    public interface IMappingInfo
-    {
-        string SourceName { get; set; }
-        string TargetName { get; set; }
-    }
-
-    public class MappingInfo : IMappingInfo
-    {
-        public string SourceName { get; set; }
-
-        public string TargetName { get; set; }
-
-        public string PhysicsMaterialName { get; set; }
-
-        public string LayerEntityHitMask { get; set; }
-
-        public string SubLayerEntityHitMask { get; set; }
-    }
-
-
     public class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+
+            throw new Exception("Exception", new InvalidOperationException("Inner"));
+
+            return 0;
+        }
+
+        static void OnUnhandledException(object sender, UnhandledExceptionEventArgs ex)
+        {
+            string ExceptionFormat(Exception e)
+            {
+                var builer = new StringBuilder();
+                while(e != null)
+                {
+                    builer.AppendLine(e.Message);
+                    builer.AppendLine(e.StackTrace);
+                    e = e.InnerException;
+                }
+                return builer.ToString();
+            }
+
+            Console.Error.WriteLine(ExceptionFormat(ex.ExceptionObject as Exception));
+            Environment.Exit(1);
         }
     }
 }
