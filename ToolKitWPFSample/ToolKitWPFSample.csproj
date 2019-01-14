@@ -85,6 +85,10 @@
     <Compile Include="LoggerConsole\LoggerConsoleWindow.xaml.cs">
       <DependentUpon>LoggerConsoleWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TreeGrid\TreeGridWindowViewModel.cs" />
+    <Compile Include="TreeGrid\TreeGridWindow.xaml.cs">
+      <DependentUpon>TreeGridWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="ColorSelectComboBox\ColorSelectComboBoxWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -110,6 +114,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MultiSelectDataGrid\MutilSelectDataGridWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TreeGrid\TreeGridWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

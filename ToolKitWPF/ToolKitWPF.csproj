@@ -59,12 +59,15 @@
     <Compile Include="Controls\CompactLogPanel.xaml.cs">
       <DependentUpon>CompactLogPanel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ContentPresenterColumn.cs" />
+    <Compile Include="Controls\DataGridBindingColumn.cs" />
     <Compile Include="Controls\IconToggleButton.xaml.cs">
       <DependentUpon>IconToggleButton.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\LoggerConsole.xaml.cs">
       <DependentUpon>LoggerConsole.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\DataGridTreeColumn.cs" />
     <Compile Include="Models\DelegateCommand.cs" />
     <Compile Include="Models\DynamicModel\DynamicItem.cs" />
     <Compile Include="Models\DynamicModel\DynamicItemDefinition.cs" />
@@ -91,6 +94,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Sandbox\DataGridContentPresenterColumn.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
