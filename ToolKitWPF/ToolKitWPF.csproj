@@ -59,7 +59,6 @@
     <Compile Include="Controls\CompactLogPanel.xaml.cs">
       <DependentUpon>CompactLogPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\ContentPresenterColumn.cs" />
     <Compile Include="Controls\DataGridBindingColumn.cs" />
     <Compile Include="Controls\IconToggleButton.xaml.cs">
       <DependentUpon>IconToggleButton.xaml</DependentUpon>

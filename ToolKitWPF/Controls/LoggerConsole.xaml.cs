@@ -25,11 +25,41 @@ namespace ToolKit.WPF.Controls
     public partial class LoggerConsole : UserControl
     {
         /// <summary>
+        /// フィルターテキスト
+        /// </summary>
+        public string FilterText
+        {
+            get { return (string)GetValue(FilterTextProperty); }
+            set { SetValue(FilterTextProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for FilterText.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty FilterTextProperty =
+            DependencyProperty.Register("FilterText", typeof(string), typeof(LoggerConsole), new PropertyMetadata(null, (d,e) => {
+                (d as LoggerConsole)?.UpdateFilter();
+            }));
+
+
+        public static readonly RoutedCommand ShowFilterCommand = new RoutedCommand("ShowFilterCommand", typeof(LoggerConsole));
+
+        public static readonly RoutedCommand HideFilterCommand = new RoutedCommand("HideFilterCommand", typeof(LoggerConsole));
+
+        private CollectionViewSource collectionViewSource = null;
+
+        internal void UpdateFilter()
+        {
+            collectionViewSource?.View?.Refresh();
+        }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         public LoggerConsole()
         {
             InitializeComponent();
+
+            CommandBindings.Add(new CommandBinding(ShowFilterCommand, (s, e) => FilterPanel.Visibility = Visibility.Visible, (s, e) => e.CanExecute = true));
+            CommandBindings.Add(new CommandBinding(HideFilterCommand, (s, e) => FilterPanel.Visibility = Visibility.Hidden, (s, e) => e.CanExecute = true));
 
             Loaded += OnLoaded;
         }
@@ -40,13 +70,10 @@ namespace ToolKit.WPF.Controls
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             // 追加されたときに末尾をCurrentItemにする
-            var collectionViewSource = FindResource("Source") as CollectionViewSource;
+            collectionViewSource = FindResource("Source") as CollectionViewSource;
             if(collectionViewSource?.View != null)
             {
-                void OnCheckedChanged(object s, RoutedEventArgs ev)
-                {
-                    collectionViewSource?.View?.Refresh();
-                }
+                void OnCheckedChanged(object s, RoutedEventArgs ev) => UpdateFilter();
 
                 ToggleButtonError.Checked += OnCheckedChanged;
                 ToggleButtonError.Unchecked += OnCheckedChanged;
@@ -70,11 +97,14 @@ namespace ToolKit.WPF.Controls
         {
             if( e.Item is LogData data)
             {
-                e.Accepted =
-                    (ToggleButtonError.IsChecked == true      && data.Level == LogLevel.Error) ||
-                    (ToggleButtonWarning.IsChecked == true    && data.Level == LogLevel.Warning) ||
+                bool isAcceptedFilTerText = string.IsNullOrWhiteSpace(FilterText) || data.Message.Contains(FilterText.ToLower());
+                bool isAcceptedCategory =
+                    (ToggleButtonError.IsChecked == true && data.Level == LogLevel.Error) ||
+                    (ToggleButtonWarning.IsChecked == true && data.Level == LogLevel.Warning) ||
                     (ToggleButtonInfomation.IsChecked == true && data.Level == LogLevel.Information) ||
                     (data.Level == LogLevel.Developer);
+
+                e.Accepted = isAcceptedFilTerText && isAcceptedCategory;
             }
         }
     }

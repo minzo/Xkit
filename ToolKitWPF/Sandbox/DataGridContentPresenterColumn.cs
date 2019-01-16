@@ -3,10 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace ToolKit.WPF.Sandbox
 {
-    public class DataGridContentPresenterColumn
+    public class DataGridContentPresenterColumn : DataGridBoundColumn
     {
         #region template
 
@@ -18,7 +23,7 @@ namespace ToolKit.WPF.Sandbox
 
         // Using a DependencyProperty as the backing store for CellTemplate.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty CellTemplateProperty =
-            DependencyProperty.Register("CellTemplate", typeof(DataTemplate), typeof(DataGridBindingColumn), new PropertyMetadata(null));
+            DependencyProperty.Register("CellTemplate", typeof(DataTemplate), typeof(DataGridContentPresenterColumn), new PropertyMetadata(null));
 
 
 
@@ -30,7 +35,7 @@ namespace ToolKit.WPF.Sandbox
 
         // Using a DependencyProperty as the backing store for CellTemplateSelector.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty CellTemplateSelectorProperty =
-            DependencyProperty.Register("CellTemplateSelector", typeof(DataTemplateSelector), typeof(DataGridBindingColumn), new PropertyMetadata(null));
+            DependencyProperty.Register("CellTemplateSelector", typeof(DataTemplateSelector), typeof(DataGridContentPresenterColumn), new PropertyMetadata(null));
 
 
 
@@ -42,7 +47,7 @@ namespace ToolKit.WPF.Sandbox
 
         // Using a DependencyProperty as the backing store for CellEditingTemplate.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty CellEditingTemplateProperty =
-            DependencyProperty.Register("CellEditingTemplate", typeof(DataTemplate), typeof(DataGridBindingColumn), new PropertyMetadata(null));
+            DependencyProperty.Register("CellEditingTemplate", typeof(DataTemplate), typeof(DataGridContentPresenterColumn), new PropertyMetadata(null));
 
 
         public DataTemplateSelector CellEditingTemplateSelector
@@ -53,7 +58,7 @@ namespace ToolKit.WPF.Sandbox
 
         // Using a DependencyProperty as the backing store for CellEditingTemplateSelector.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty CellEditingTemplateSelectorProperty =
-            DependencyProperty.Register("CellEditingTemplateSelector", typeof(DataTemplateSelector), typeof(DataGridBindingColumn), new PropertyMetadata(null));
+            DependencyProperty.Register("CellEditingTemplateSelector", typeof(DataTemplateSelector), typeof(DataGridContentPresenterColumn), new PropertyMetadata(null));
 
         #endregion
 
