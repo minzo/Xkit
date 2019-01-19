@@ -39,17 +39,7 @@ namespace ToolKit.WPF.Controls
                 (d as LoggerConsole)?.UpdateFilter();
             }));
 
-
-        public static readonly RoutedCommand ShowFilterCommand = new RoutedCommand("ShowFilterCommand", typeof(LoggerConsole));
-
-        public static readonly RoutedCommand HideFilterCommand = new RoutedCommand("HideFilterCommand", typeof(LoggerConsole));
-
         private CollectionViewSource collectionViewSource = null;
-
-        internal void UpdateFilter()
-        {
-            collectionViewSource?.View?.Refresh();
-        }
 
         /// <summary>
         /// コンストラクタ
@@ -58,35 +48,47 @@ namespace ToolKit.WPF.Controls
         {
             InitializeComponent();
 
-            CommandBindings.Add(new CommandBinding(ShowFilterCommand, (s, e) => FilterPanel.Visibility = Visibility.Visible, (s, e) => e.CanExecute = true));
-            CommandBindings.Add(new CommandBinding(HideFilterCommand, (s, e) => FilterPanel.Visibility = Visibility.Hidden, (s, e) => e.CanExecute = true));
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Find, (s, e) => FilterTextBox.Focus(), (s, e) => e.CanExecute = true));
 
-            Loaded += OnLoaded;
+            collectionViewSource = FindResource("Source") as CollectionViewSource;
+
+            void OnCheckedChanged(object sender, RoutedEventArgs ev) => UpdateFilter();
+            ToggleButtonError.Checked += OnCheckedChanged;
+            ToggleButtonError.Unchecked += OnCheckedChanged;
+            ToggleButtonWarning.Checked += OnCheckedChanged;
+            ToggleButtonWarning.Unchecked += OnCheckedChanged;
+            ToggleButtonInfomation.Checked += OnCheckedChanged;
+            ToggleButtonInfomation.Unchecked += OnCheckedChanged;
         }
 
         /// <summary>
-        /// 読み込み直後
+        /// フィルタを更新
         /// </summary>
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        internal void UpdateFilter()
         {
-            // 追加されたときに末尾をCurrentItemにする
-            collectionViewSource = FindResource("Source") as CollectionViewSource;
-            if(collectionViewSource?.View != null)
+            collectionViewSource?.View?.Refresh();
+        }
+
+        /// <summary>
+        /// コレクション変更通知
+        /// </summary>
+        private void OnColletionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add && ListBox.SelectedItem == null)
             {
-                void OnCheckedChanged(object s, RoutedEventArgs ev) => UpdateFilter();
+                ListBox.ScrollIntoView(e?.NewItems[0]);
+            }
+        }
 
-                ToggleButtonError.Checked += OnCheckedChanged;
-                ToggleButtonError.Unchecked += OnCheckedChanged;
-                ToggleButtonWarning.Checked += OnCheckedChanged;
-                ToggleButtonWarning.Unchecked += OnCheckedChanged;
-                ToggleButtonInfomation.Checked += OnCheckedChanged;
-                ToggleButtonInfomation.Unchecked += OnCheckedChanged;
-
-                collectionViewSource.View.CollectionChanged += (s, ev) =>
-                {
-                    if (ev.Action == NotifyCollectionChangedAction.Add)
-                        ListBox.ScrollIntoView(ev?.NewItems[0]);
-                };
+        /// <summary>
+        /// ListBoxのターゲット更新
+        /// </summary>
+        private void OnTargetUpdated(object sender, DataTransferEventArgs e)
+        {
+            if (ListBox.ItemsSource is INotifyCollectionChanged collection)
+            {
+                collection.CollectionChanged -= OnColletionChanged;
+                collection.CollectionChanged += OnColletionChanged;
             }
         }
 
@@ -97,14 +99,14 @@ namespace ToolKit.WPF.Controls
         {
             if( e.Item is LogData data)
             {
-                bool isAcceptedFilTerText = string.IsNullOrWhiteSpace(FilterText) || data.Message.Contains(FilterText.ToLower());
+                bool isAcceptedFilterText = string.IsNullOrWhiteSpace(FilterText) || data.Message.ToLower().Contains(FilterText.ToLower());
                 bool isAcceptedCategory =
                     (ToggleButtonError.IsChecked == true && data.Level == LogLevel.Error) ||
                     (ToggleButtonWarning.IsChecked == true && data.Level == LogLevel.Warning) ||
                     (ToggleButtonInfomation.IsChecked == true && data.Level == LogLevel.Information) ||
                     (data.Level == LogLevel.Developer);
 
-                e.Accepted = isAcceptedFilTerText && isAcceptedCategory;
+                e.Accepted = isAcceptedFilterText && isAcceptedCategory;
             }
         }
     }

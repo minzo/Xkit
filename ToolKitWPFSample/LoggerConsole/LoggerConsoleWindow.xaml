@@ -11,29 +11,17 @@
         <local:LoggerConsoleWindowViewModel />
     </Window.DataContext>
 
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+F" Command="ApplicationCommands.Find" />
+    </Window.InputBindings>
+
     <DockPanel>
         <StatusBar DockPanel.Dock="Top" Height="30" Margin="0 0 0 4">
             <StatusBar.BitmapEffect>
                 <DropShadowBitmapEffect Direction="270" ShadowDepth="1" Softness="0.5" Color="Gray" />
             </StatusBar.BitmapEffect>
-            <Button Content="Addlog" Command="{Binding AddLogCommand}" />
+            <Button Content="ログを生成" Command="{Binding AddLogCommand}" />
         </StatusBar>
-
-        <Expander DockPanel.Dock="Bottom" ExpandDirection="Down">
-            <Expander.Header>
-                <TextBlock>
-                    <Run Text="ログ" />　
-                    <Run Text="{Binding LatestLogMessage, Mode=OneWay}" />
-                </TextBlock>
-            </Expander.Header>
-            <tkitwpf:LoggerConsole MinHeight="100" MaxHeight="100"/>
-        </Expander>
-
-        <ContentPresenter />
-
-        <!--<StatusBar DockPanel.Dock="Bottom" Height="20" Margin="0 4 0 0">
-            <StatusBarItem Content="{Binding LatestLogMessage}" />
-        </StatusBar>-->
-
+        <tkitwpf:LoggerConsole />
     </DockPanel>
 </Window>

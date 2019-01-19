@@ -9,6 +9,7 @@ using System.Windows.Input;
 using CoreKit;
 using ToolKit.WPF.Models;
 
+
 namespace ToolKit.WPF.Sample
 {
     public class LoggerConsoleWindowViewModel : INotifyPropertyChanged
@@ -16,7 +17,7 @@ namespace ToolKit.WPF.Sample
         public event PropertyChangedEventHandler PropertyChanged;
 
         private Logger Logger { get; } = new Logger();
-
+    
         /// <summary>
         /// ログメッセージ一覧
         /// </summary>
@@ -66,20 +67,11 @@ namespace ToolKit.WPF.Sample
             };
 
             AddLogCommand = new DelegateCommand(_ => {
-                Enumerable.Range(0, 100)
-                    .AsParallel()
-                    .WithDegreeOfParallelism(Environment.ProcessorCount)
-                    .ForAll(i => Logger.AddLog($"TASK{i}", LogLevel.Information));
+                foreach(var i in Enumerable.Range(0, 100))
+                {
+                    Logger.AddLog($"TextLog{i}", LogLevel.Information);
+                }
             });
-        }
-
-        private int count = 0;
-        IEnumerable<string> Enumerate()
-        {
-            while (count < 100000)
-            {
-                yield return (count++).ToString();
-            }
         }
 
 

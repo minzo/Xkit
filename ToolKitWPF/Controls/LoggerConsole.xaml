@@ -6,10 +6,32 @@
              xmlns:ckit="clr-namespace:CoreKit;assembly=CoreKit"
              xmlns:local="clr-namespace:ToolKit.WPF.Controls"
              mc:Ignorable="d" 
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
              d:DesignHeight="200" d:DesignWidth="400">
-
     <!-- Resource -->
     <UserControl.Resources>
+        <!-- Icon -->
+        <Viewbox x:Key="Icon_Error">
+            <Canvas Width="24" Height="24">
+                <Path Data="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2C6.47,2 2,6.47 2,12C2,17.53 6.47,22 12,22C17.53,22 22,17.53 22,12C22,6.47 17.53,2 12,2M14.59,8L12,10.59L9.41,8L8,9.41L10.59,12L8,14.59L9.41,16L12,13.41L14.59,16L16,14.59L13.41,12L16,9.41L14.59,8Z" Fill="Black" />
+            </Canvas>
+        </Viewbox>
+        <Viewbox x:Key="Icon_Warning">
+            <Canvas Width="24" Height="24">
+                <Path Data="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16" Fill="Black" />
+            </Canvas>
+        </Viewbox>
+        <Viewbox x:Key="Icon_Infomation">
+            <Canvas Width="24" Height="24">
+                <Path Data="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z" Fill="Black" />
+            </Canvas>
+        </Viewbox>
+        <Viewbox x:Key="Icon_Close">
+            <Canvas Width="24" Height="24">
+                <Path Data="M19,3H16.3H7.7H5A2,2 0 0,0 3,5V7.7V16.4V19A2,2 0 0,0 5,21H7.7H16.4H19A2,2 0 0,0 21,19V16.3V7.7V5A2,2 0 0,0 19,3M15.6,17L12,13.4L8.4,17L7,15.6L10.6,12L7,8.4L8.4,7L12,10.6L15.6,7L17,8.4L13.4,12L17,15.6L15.6,17Z" Fill="Black" />
+            </Canvas>
+        </Viewbox>
         <!-- Style -->
         <Style TargetType="{x:Type ListBox}" BasedOn="{StaticResource {x:Type ListBox}}">
             <Setter Property="ItemTemplate">
@@ -17,42 +39,29 @@
                     <DataTemplate DataType="{x:Type ckit:LogData}">
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Left" Text="{Binding DateTime}" />
-                            <TextBlock Text="{Binding Message}" Margin="16 0"/>
+                            <TextBlock Text="{Binding Message}" Margin="16 0" TextTrimming="CharacterEllipsis" />
                         </DockPanel>
                     </DataTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
         <!-- CollectionViewSource -->
-        <CollectionViewSource x:Key="Source" Source="{Binding Logs, IsAsync=True}" Filter="Filter" IsLiveFilteringRequested="True">
-            <CollectionViewSource.LiveFilteringProperties>Level Message</CollectionViewSource.LiveFilteringProperties>
-        </CollectionViewSource>
+        <CollectionViewSource x:Key="Source" Source="{Binding Logs, IsAsync=True}" Filter="Filter" />
     </UserControl.Resources>
-
+    <!-- Panel -->
     <DockPanel>
         <!-- ステータスバー -->
-        <StatusBar DockPanel.Dock="Top" Background="WhiteSmoke" Panel.ZIndex="1">
+        <StatusBar DockPanel.Dock="Top" Background="WhiteSmoke">
             <StatusBar.Resources>
                 <Style TargetType="{x:Type local:IconToggleButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
                     <Setter Property="MinWidth"  Value="45" />
                     <Setter Property="Height" Value="20" />
                 </Style>
-                <Viewbox x:Key="Icon_Error">
-                    <Canvas Width="24" Height="24">
-                        <Path Data="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2C6.47,2 2,6.47 2,12C2,17.53 6.47,22 12,22C17.53,22 22,17.53 22,12C22,6.47 17.53,2 12,2M14.59,8L12,10.59L9.41,8L8,9.41L10.59,12L8,14.59L9.41,16L12,13.41L14.59,16L16,14.59L13.41,12L16,9.41L14.59,8Z" Fill="Black" />
-                    </Canvas>
-                </Viewbox>
-                <Viewbox x:Key="Icon_Warning">
-                    <Canvas Width="24" Height="24">
-                        <Path Data="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16" Fill="Black" />
-                    </Canvas>
-                </Viewbox>
-                <Viewbox x:Key="Icon_Infomation">
-                    <Canvas Width="24" Height="24">
-                        <Path Data="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z" Fill="Black" />
-                    </Canvas>
-                </Viewbox>
             </StatusBar.Resources>
+            <StatusBarItem DockPanel.Dock="Right">
+                <TextBox x:Name="FilterTextBox" Width="120" Margin="0 0 4 0"
+                         Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged, Delay=500, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />
+            </StatusBarItem>
             <local:IconToggleButton x:Name="ToggleButtonError"
                                     Icon="{StaticResource Icon_Error}" 
                                     Content="{Binding ErrorMessageCount}" 
@@ -70,22 +79,11 @@
                                     ToolTip="情報" />
         </StatusBar>
         <!-- ログ -->
-        <Grid>
-            <ListBox x:Name="ListBox"                     
-                     HorizontalContentAlignment="Stretch"
-                     ItemsSource="{Binding Source={StaticResource Source}}"
-                     VirtualizingPanel.IsVirtualizing="True"
-                     VirtualizingPanel.VirtualizationMode="Recycling" />
-            <Border x:Name="FilterPanel" Padding="4" HorizontalAlignment="Right" VerticalAlignment="Top" Background="WhiteSmoke" Visibility="Hidden">
-                <Border.BitmapEffect>
-                    <DropShadowBitmapEffect Direction="270" ShadowDepth="1" Softness="0.5" Color="Gray" />
-                </Border.BitmapEffect>
-                <DockPanel>
-                    <Button DockPanel.Dock="Right" Content="X" Width="20" Command="{x:Static local:LoggerConsole.HideFilterCommand}" />
-                    <TextBox Width="120" Height="20" Margin="0 0 4 0" 
-                             Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged, Delay=500, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />
-                </DockPanel>
-            </Border>
-        </Grid>
+        <ListBox x:Name="ListBox"                     
+                 HorizontalContentAlignment="Stretch"
+                 ItemsSource="{Binding Source={StaticResource Source}, NotifyOnTargetUpdated=True}"
+                 TargetUpdated="OnTargetUpdated"
+                 VirtualizingPanel.IsVirtualizing="True"
+                 VirtualizingPanel.VirtualizationMode="Recycling" />
     </DockPanel>
 </UserControl>
