@@ -22,6 +22,9 @@
             </StatusBar.BitmapEffect>
             <Button Content="ログを生成" Command="{Binding AddLogCommand}" />
         </StatusBar>
+
+        <tkitwpf:ExpanderLoggerConsole DockPanel.Dock="Bottom" />
+
         <tkitwpf:LoggerConsole />
     </DockPanel>
 </Window>

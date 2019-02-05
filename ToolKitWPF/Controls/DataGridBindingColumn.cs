@@ -88,6 +88,17 @@ namespace ToolKit.WPF.Controls
             cell.VerticalContentAlignment = VerticalAlignment.Stretch;
             cell.HorizontalAlignment = HorizontalAlignment.Stretch;
 
+            if (Binding != null)
+            {
+                BindingOperations.SetBinding(contentPresenter, ContentPresenter.ContentProperty, Binding);
+                cell.PreviewKeyDown += OnPreviewKeyDown;
+            }
+            else
+            {
+                BindingOperations.ClearBinding(contentPresenter, ContentPresenter.ContentProperty);
+                cell.PreviewKeyDown -= OnPreviewKeyDown;
+            }
+
             return contentPresenter;
         }
 

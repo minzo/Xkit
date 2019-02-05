@@ -10,16 +10,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ToolKit.WPF.Sample
+namespace ToolKit.WPF.Controls
 {
     /// <summary>
-    /// TreeGridWindow.xaml の相互作用ロジック
+    /// ExpanderLoggerConsole.xaml の相互作用ロジック
     /// </summary>
-    public partial class TreeGridWindow : Window
+    public partial class ExpanderLoggerConsole : Expander
     {
-        public TreeGridWindow()
+        public ExpanderLoggerConsole()
         {
             InitializeComponent();
         }

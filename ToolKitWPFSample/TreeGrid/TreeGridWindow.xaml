@@ -4,35 +4,97 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:tkitwpf="clr-namespace:ToolKit.WPF.Controls;assembly=ToolKit.WPF"
-        xmlns:cm="clr-namespace:System.ComponentModel;assembly=System"
         xmlns:local="clr-namespace:ToolKit.WPF.Sample"
         mc:Ignorable="d"
         Title="TreeGridWindow" Height="450" Width="800">
+    <Window.Resources>
+        <Style x:Key="ToggleButtonStyle1" TargetType="{x:Type ToggleButton}">
+            <Setter Property="FocusVisualStyle">
+                <Setter.Value>
+                    <Style>
+                        <Setter Property="Control.Template">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <Rectangle Margin="2" SnapsToDevicePixels="True" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="#FFDDDDDD"/>
+            <Setter Property="BorderBrush" Value="#FF707070"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                            <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Button.IsDefaulted" Value="True">
+                                <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" TargetName="border" Value="#FFBEE6FD"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="#FF3C7FB1"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" TargetName="border" Value="#FFC4E5F6"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="#FF2C628B"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Background" TargetName="border" Value="#FFBCDDEE"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="#FF245A83"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" TargetName="border" Value="#FFF4F4F4"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="#FFADB2B5"/>
+                                <Setter Property="Foreground" Value="#FF838383"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Window.DataContext>
         <local:TreeGridWindowViewModel />
     </Window.DataContext>
 
-    <Window.Resources>
 
-        <CollectionViewSource x:Key="Items" Source="{Binding Items}">
-            <CollectionViewSource.SortDescriptions>
-            </CollectionViewSource.SortDescriptions>
-        </CollectionViewSource>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="4" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
 
-        <DataTemplate x:Key="template">
-            <TextBox Text="{Binding Proxy.Name}" />
-        </DataTemplate>
+        <TreeView>
+            <TreeViewItem Header="TITLE">
+                <Viewbox>
+                    <Canvas Width="24" Height="24">
+                        <Path Data="M0,9C0,9 5,4.5 5,4.5 5,4.5 0,0 0,0 0,0 0,9 0,9z" />
+                    </Canvas>
+                </Viewbox>
+            </TreeViewItem>
+            <TreeViewItem>
+                <TreeViewItem.Header>
+                    <ToggleButton Width="30" Height="30" Style="{DynamicResource ToggleButtonStyle1}"/>
+                </TreeViewItem.Header>
+            </TreeViewItem>
+        </TreeView>
 
-    </Window.Resources>
-    
-    <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False" 
-              Initialized="DataGrid_Initialized"
-              AddingNewItem="DataGrid_AddingNewItem" 
-              InitializingNewItem="DataGrid_InitializingNewItem">
-        <DataGrid.Columns>
-            <tkitwpf:DataGridBindingColumn Binding="{Binding Name}" CellTemplate="{StaticResource template}"/>
-            <tkitwpf:DataGridTreeColumn Binding="{Binding Name}" />
-            <DataGridTextColumn Binding="{Binding Name}" />
-        </DataGrid.Columns>
-    </DataGrid>
+        <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+
+        <tkitwpf:TreeGrid Grid.Column="2"
+                          ItemsSource="{Binding Items}" 
+                          IsExpandedPropertyPath="IsExpanded"
+                          ChildrenPropertyPath="Children"
+                          DisplayMemberPath="PropertyPath" />
+    </Grid>
 </Window>

@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ToolKit.WPF.Sample
 {
-    public class TreeGridItem
+    public class TreeGridItem : INotifyPropertyChanged
     {
         public List<TreeGridItem> Children { get; set; } = new List<TreeGridItem>();
 
@@ -14,7 +17,20 @@ namespace ToolKit.WPF.Sample
 
         public string Name { get; set; }
 
-        public bool IsExpanded { get; set; }
+        public bool IsExpanded {
+            get => isExpanded;
+            set {
+                if(isExpanded != value)
+                {
+                    isExpanded = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsExpanded)));
+                }
+            }
+        }
+
+        private bool isExpanded;
+        
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 
 
@@ -30,6 +46,6 @@ namespace ToolKit.WPF.Sample
             new TreeGridItem() { Name = "Parent2" },
         };
 
-        public List<TreeGridItem> Items => items.SelectMany( i=> i.Children.Prepend(i) ).ToList();
+        public ObservableCollection<TreeGridItem> Items { get; } = new ObservableCollection<TreeGridItem>( items.SelectMany(i => i.Children.Prepend(i)) );
     }
 }

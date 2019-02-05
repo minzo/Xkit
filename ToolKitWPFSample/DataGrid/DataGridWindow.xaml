@@ -12,12 +12,12 @@
     
     <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False">
         <DataGrid.Columns>
-            <DataGridHyperlinkColumn Header="HyperlinkColumn" Binding="{Binding Column0}" />
+            <DataGridHyperlinkColumn Header="HyperlinkColumn" Binding="{Binding Column0}" ContentBinding="{Binding Column1}" />
             <DataGridTemplateColumn Header="ExpanderColumn">
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
                         <Expander Header="{Binding Column2[0]}" BorderThickness="1" BorderBrush="Black">
-                            <ListBox ItemsSource="{Binding Column2}" />
+                            <ListBox ItemsSource="{Binding Column2}" Margin="16 0 0 0"/>
                         </Expander>
                     </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
