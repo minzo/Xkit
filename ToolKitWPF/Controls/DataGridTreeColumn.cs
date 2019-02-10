@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 
 namespace ToolKit.WPF.Controls
@@ -77,7 +79,18 @@ namespace ToolKit.WPF.Controls
 
         #endregion
 
-        #region PropertyPath
+        #region ChildrenProperty
+
+        public BindingBase ChildrenBinding
+        {
+            get { return (BindingBase)GetValue(ChildrenBindingProperty); }
+            set { SetValue(ChildrenBindingProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ChildrenBinding.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ChildrenBindingProperty =
+            DependencyProperty.Register("ChildrenBinding", typeof(BindingBase), typeof(DataGridTreeColumn), new PropertyMetadata(null));
+
 
         public string ChildrenPropertyPath
         {
@@ -88,6 +101,20 @@ namespace ToolKit.WPF.Controls
         // Using a DependencyProperty as the backing store for ChildrenPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ChildrenPropertyPathProperty =
             DependencyProperty.Register("ChildrenPropertyPath", typeof(string), typeof(DataGridTreeColumn), new PropertyMetadata(null));
+
+        #endregion
+
+        #region IsExpandedProperty
+
+        public BindingBase IsExpandedBinding
+        {
+            get { return (BindingBase)GetValue(IsExpandedBindingProperty); }
+            set { SetValue(IsExpandedBindingProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for IsExpandedBinding.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty IsExpandedBindingProperty =
+            DependencyProperty.Register("IsExpandedBinding", typeof(BindingBase), typeof(DataGridTreeColumn), new PropertyMetadata(null));
 
         public string ExpandedPropertyPath
         {
@@ -113,45 +140,81 @@ namespace ToolKit.WPF.Controls
 
         private FrameworkElement LoadTemplateContent(DataGridCell cell, object dataItem, bool isEditing)
         {
-            DataTemplate template = null;
-            DataTemplateSelector selector = null;
-
-            ChooseCellTemplateAndSelector(isEditing, out template, out selector);
-
-            var contentPresenter = new ContentPresenter()
+            if(TryLoadTemplate(cell, dataItem, isEditing, out var element))
             {
-                ContentTemplate = template,
-                ContentTemplateSelector = selector
-            };
-            
-            cell.VerticalContentAlignment = VerticalAlignment.Stretch;
-            cell.HorizontalAlignment = HorizontalAlignment.Stretch;
+                if( element.FindName("DockPanel") is DockPanel panel)
+                {
 
-            if (Binding != null)
-            {
-                BindingOperations.SetBinding(contentPresenter, ContentPresenter.ContentProperty, Binding);
-            }
-            else
-            {
-                BindingOperations.ClearBinding(contentPresenter, ContentPresenter.ContentProperty);
+                }
+
+                if( element.FindName("ExpandedButton") is ToggleButton button)
+                {
+                }
             }
 
-            return contentPresenter;
+            return element;
         }
 
-        private void ChooseCellTemplateAndSelector(bool isEditing, out DataTemplate template, out DataTemplateSelector selector)
+        private bool TryLoadTemplate(DataGridCell cell, object dataItem, bool isEditing, out FrameworkElement element)
         {
+            DataTemplate template = null;
+
             if (isEditing)
             {
-                template = CellEditingTemplate;
-                selector = CellEditingTemplateSelector;
+                template = CellEditingTemplate ?? CellEditingTemplateSelector?.SelectTemplate(dataItem, cell);
             }
             else
             {
-                template = CellTemplate;
-                selector = CellTemplateSelector;
+                template = CellTemplate ?? CellTemplateSelector.SelectTemplate(dataItem, cell);
+            }
+
+            element = template?.LoadContent() as FrameworkElement;
+
+            return element != null;
+        }
+
+        private void UpdateFilter(object item, bool isContracted)
+        {
+            if (contractedList.Contains(item) != isContracted)
+            {
+                MakeFilterFlag(item, isContracted);
+                var collection = CollectionViewSource.GetDefaultView(DataGridOwner.ItemsSource);
+                collection.Filter = i => !unvisibleList.Contains(i);
             }
         }
 
+        private void MakeFilterFlag(object item, bool isContracted)
+        {
+            var children = childrenPropertyInfo.GetValue(item) as IEnumerable<object>;
+
+            if (isContracted)
+            {
+                contractedList.Add(item);
+                foreach (var child in children)
+                {
+                    MakeFilterFlag(child, isContracted);
+                    unvisibleList.Add(child);
+                }
+            }
+            else
+            {
+                contractedList.Remove(item);
+                foreach (var child in children)
+                {
+                    MakeFilterFlag(child, isContracted);
+                    unvisibleList.Remove(child);
+                }
+            }
+        }
+
+        private IEnumerable<object> GetChildren(object item)
+        {
+            return childrenPropertyInfo?.GetValue(item) as IEnumerable<object>;
+        }
+
+        private HashSet<object> contractedList = new HashSet<object>();
+        private HashSet<object> unvisibleList = new HashSet<object>();
+        private Dictionary<object, int> levelOfTreeDepth = new Dictionary<object, int>();
+        private PropertyInfo childrenPropertyInfo;
     }
 }

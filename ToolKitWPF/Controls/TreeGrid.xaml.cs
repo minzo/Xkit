@@ -89,6 +89,9 @@ namespace ToolKit.WPF.Controls
             if (oldValue != null)
             {
                 CollectionViewSource.GetDefaultView(oldValue).CollectionChanged -= OnCollectionChanged;
+                contractedList.Clear();
+                unvisibleList.Clear();
+                levelOfTreeDepth.Clear();
             }
 
             if (newValue != null)
@@ -100,11 +103,23 @@ namespace ToolKit.WPF.Controls
                     ?.GetType()
                     ?.GetProperty(ChildrenPropertyPath);
 
-
-                foreach(var item in collection)
+                void calcLevelOfTreeDepth(IEnumerable<object> items, int level = 0)
                 {
-                    var children = childrenPropertyInfo.GetValue(item) as IEnumerable<object>;
+                    foreach(var item in items)
+                    {
+                        if(!levelOfTreeDepth.ContainsKey(item))
+                        {
+                            levelOfTreeDepth.Add(item, level);
+                        }
+
+                        if (childrenPropertyInfo.GetValue(item) is IEnumerable<object> children)
+                        {
+                            calcLevelOfTreeDepth(children, level + 1);
+                        }
+                    }
                 }
+
+                calcLevelOfTreeDepth(collection);
             }
         }
 
@@ -160,6 +175,11 @@ namespace ToolKit.WPF.Controls
             return children.Any();
         }
 
+        internal int  GetIndent(object item)
+        {
+            levelOfTreeDepth.TryGetValue(item, out int result);
+            return result;
+        }
 
         /// <summary>
         /// 
@@ -179,8 +199,7 @@ namespace ToolKit.WPF.Controls
         /// </summary>
         private void MakeFilterFlag(object item, bool isContracted)
         {
-            var info = item.GetType().GetProperty(ChildrenPropertyPath);
-            var children = info.GetValue(item) as IEnumerable<object>;
+            var children = childrenPropertyInfo.GetValue(item) as IEnumerable<object>;
 
             if (isContracted)
             {
@@ -204,7 +223,6 @@ namespace ToolKit.WPF.Controls
 
         private HashSet<object> contractedList = new HashSet<object>();
         private HashSet<object> unvisibleList = new HashSet<object>();
-
         private Dictionary<object, int> levelOfTreeDepth = new Dictionary<object, int>();
 
         private PropertyInfo childrenPropertyInfo;
@@ -303,7 +321,8 @@ namespace ToolKit.WPF.Controls
 
             if( element?.FindName("DockPanel") is DockPanel dockPanel)
             {
-                dockPanel.Margin = new Thickness(10.0, 0.0, 0.0, 0.0);
+                var indent = treeGrid?.GetIndent(dataItem) * 12.0 ?? 0.0;
+                dockPanel.Margin = new Thickness(indent, 0.0, 0.0, 0.0);
             }
 
             if (element?.FindName("ExpandButton") is ToggleButton button)
@@ -360,6 +379,26 @@ namespace ToolKit.WPF.Controls
             }
         }
 
+
+        private Dictionary<object, int> levelOfTreeDepth = new Dictionary<object, int>();
+
+        private int CaldLevelOfTreeDepth(object dataItem)
+        {
+            if ( levelOfTreeDepth.TryGetValue(dataItem, out int level) )
+            {
+                return level;
+            }
+
+            var info = dataItem?.GetType()?.GetProperty("Children");
+            var children = info.GetValue(dataItem) as IEnumerable<object>;
+
+            foreach (var child in children)
+            {
+
+            }
+
+            return level;
+        }
 
         protected override object PrepareCellForEdit(FrameworkElement editingElement, RoutedEventArgs editingEventArgs)
         {
