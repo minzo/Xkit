@@ -10,8 +10,6 @@ namespace CorekitSample
         {
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
-            throw new Exception("Exception", new InvalidOperationException("Inner"));
-
             return 0;
         }
 

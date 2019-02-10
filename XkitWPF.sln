@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolKitWPF", "ToolKitWPF\To
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolKitWPFSample", "ToolKitWPFSample\ToolKitWPFSample.csproj", "{B1C835BD-64B3-4CA1-8B01-C61B65830E4F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CorekitSample", "CorekitSample\CorekitSample.csproj", "{F2B2C8CA-4441-443D-A278-EC4FC91A262B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{B1C835BD-64B3-4CA1-8B01-C61B65830E4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1C835BD-64B3-4CA1-8B01-C61B65830E4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1C835BD-64B3-4CA1-8B01-C61B65830E4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2B2C8CA-4441-443D-A278-EC4FC91A262B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2B2C8CA-4441-443D-A278-EC4FC91A262B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2B2C8CA-4441-443D-A278-EC4FC91A262B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2B2C8CA-4441-443D-A278-EC4FC91A262B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
