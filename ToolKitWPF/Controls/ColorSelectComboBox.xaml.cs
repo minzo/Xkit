@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace ToolKit.WPF.Controls
@@ -9,7 +10,7 @@ namespace ToolKit.WPF.Controls
     /// <summary>
     /// ColorSelectComboBox.xaml の相互作用ロジック
     /// </summary>
-    public partial class ColorSelectComboBox
+    public partial class ColorSelectComboBox : ComboBox
     {
         public int ItemWidth
         {
@@ -32,9 +33,6 @@ namespace ToolKit.WPF.Controls
         public static readonly DependencyProperty ItemHeightProperty =
             DependencyProperty.Register("ItemHeight", typeof(int), typeof(ColorSelectComboBox), new PropertyMetadata(26));
 
-
-
-
         public int ItemMaxWidth
         {
             get { return (int)GetValue(ItemMaxWidthProperty); }
@@ -44,7 +42,6 @@ namespace ToolKit.WPF.Controls
         // Using a DependencyProperty as the backing store for ItemMaxWidth.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ItemMaxWidthProperty =
             DependencyProperty.Register("ItemMaxWidth", typeof(int), typeof(ColorSelectComboBox), new PropertyMetadata(200));
-
 
 
         /// <summary>
@@ -58,21 +55,58 @@ namespace ToolKit.WPF.Controls
         public int div_v { get; set; } = 16;
 
         /// <summary>
+        /// SelectedValueに設定された値をColorBrushListの一番近い値に設定する
+        /// </summary>
+        public bool EnableSnap { get; set; }
+
+        /// <summary>
+        /// static コンストラクタ
+        /// OverrideMedatadataしてる
+        /// </summary>
+        static ColorSelectComboBox()
+        {
+            SelectedValueProperty.OverrideMetadata(typeof(ColorSelectComboBox), new FrameworkPropertyMetadata((d, e) => {
+                var comboBox = d as ColorSelectComboBox;
+                var brush = e.NewValue as SolidColorBrush;
+                if (comboBox.EnableSnap && brush != null)
+                {
+                    var color = brush.Color;
+                    var value = comboBox.ColorBrushList.OrderBy(i => {
+                        var r = (double)i.Color.R - color.R;
+                        var g = (double)i.Color.G - color.G;
+                        var b = (double)i.Color.B - color.B;
+                        return r * r + g * g + b * b;
+                    }).First();
+
+                    if(brush.Color != value.Color)
+                    {
+                        comboBox.SelectedValue = value;
+                        comboBox.SelectedIndex = comboBox.ColorBrushList.IndexOf(value);
+                    }
+                }
+            }));
+        }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         public ColorSelectComboBox()
         {
             InitializeComponent();
 
-            ItemsSource = GetColorBrushList(div_h, div_v);
-
             Loaded += (s, e) => {
                 var width = (int)System.Math.Max(ActualWidth, div_h * ItemWidth);
                 ItemMaxWidth = width;
                 ItemWidth = width / div_h;
                 ItemHeight = ItemWidth;
+                ItemsSource = GetColorBrushList(div_h, div_v);
             };
         }
+
+        #region 選択肢の色生成
+
+        private List<SolidColorBrush> colorBrushList = null;
+        private List<SolidColorBrush> ColorBrushList => colorBrushList ?? (colorBrushList = GetColorBrushList(div_h, div_v));
 
         private List<SolidColorBrush> GetColorBrushList(int div_horizontal, int div_vertical)
         {
@@ -134,5 +168,7 @@ namespace ToolKit.WPF.Controls
 
             return colors;
         }
+
+        #endregion
     }
 }
