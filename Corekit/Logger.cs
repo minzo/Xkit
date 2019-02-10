@@ -81,6 +81,11 @@ namespace CoreKit
         public IReadOnlyCollection<LogData> Logs => logs;
 
         /// <summary>
+        /// ç≈êVÇÃÉçÉO
+        /// </summary>
+        public LogData LatestLog { get; private set; }
+
+        /// <summary>
         /// ÉçÉOÇí«â¡
         /// </summary>
         public void AddLog(string message, LogLevel level, string category = null)
@@ -96,6 +101,8 @@ namespace CoreKit
             var log = new LogData(level, message, description, category);
 
             logs.Enqueue(log);
+            LatestLog = log;
+            InvokePropertyChanged(nameof(LatestLog));
             LogAdded?.BeginInvoke(this, log, null, null);
 
             switch (level)
