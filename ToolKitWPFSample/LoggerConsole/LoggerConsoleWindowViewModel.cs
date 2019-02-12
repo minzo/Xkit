@@ -24,9 +24,14 @@ namespace ToolKit.WPF.Sample
         public ObservableCollection<LogData> Logs { get; } = new ObservableCollection<LogData>();
 
         /// <summary>
+        /// 直近のログ
+        /// </summary>
+        public LogData LatestLog => Logger.LatestLog;
+
+        /// <summary>
         /// 直近のメッセージ
         /// </summary>
-        public string LatestLogMessage => Logger.Logs.LastOrDefault().Message;
+        public string LatestLogMessage => Logger.LatestLog.Message;
 
         /// <summary>
         /// エラーメッセージ数

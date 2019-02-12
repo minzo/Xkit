@@ -1,5 +1,7 @@
-﻿using System;
+﻿using CoreKit;
+using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,13 +18,18 @@ using System.Windows.Shapes;
 namespace ToolKit.WPF.Controls
 {
     /// <summary>
-    /// CompactLogPanel.xaml の相互作用ロジック
+    /// LoggerConsolePanel.xaml の相互作用ロジック
     /// </summary>
-    public partial class CompactLogPanel : UserControl
+    public partial class LoggerConsolePanel : UserControl
     {
-        public CompactLogPanel()
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public LoggerConsolePanel()
         {
             InitializeComponent();
+
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Find, (s, e) => FilterTextBox.Focus(), (s, e) => e.CanExecute = true));
         }
     }
 }

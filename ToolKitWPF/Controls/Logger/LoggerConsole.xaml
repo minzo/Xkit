@@ -1,0 +1,24 @@
+﻿<ListBox x:Class="ToolKit.WPF.Controls.LoggerConsole"
+         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+         xmlns:ckit="clr-namespace:CoreKit;assembly=CoreKit"
+         xmlns:local="clr-namespace:ToolKit.WPF.Controls"
+         mc:Ignorable="d" 
+         HorizontalAlignment="Stretch"
+         VerticalAlignment="Stretch"
+         VirtualizingPanel.IsVirtualizing="True"
+         VirtualizingPanel.VirtualizationMode="Recycling"
+         HorizontalContentAlignment="Stretch"
+         d:DesignHeight="200" d:DesignWidth="400"
+         IsSynchronizedWithCurrentItem="True">
+    <ListBox.ItemTemplate>
+        <DataTemplate DataType="{x:Type ckit:LogData}">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left" Text="{Binding DateTime}" />
+                <TextBlock Text="{Binding Message}" Margin="16 0" TextTrimming="CharacterEllipsis" />
+            </DockPanel>
+        </DataTemplate>
+    </ListBox.ItemTemplate>
+</ListBox>

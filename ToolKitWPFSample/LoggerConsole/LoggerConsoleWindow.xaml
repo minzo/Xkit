@@ -25,6 +25,6 @@
 
         <tkitwpf:ExpanderLoggerConsole DockPanel.Dock="Bottom" />
 
-        <tkitwpf:LoggerConsole />
+        <tkitwpf:LoggerConsolePanel />
     </DockPanel>
 </Window>
