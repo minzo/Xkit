@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace ToolKit.WPF.Models
 {
+    /// <summary>
+    /// CustomTypeDescriptor を実装したオブジェクトの ObservableCollection
+    /// </summary>
     public class TypedColletion<T> : ObservableCollection<T>, ITypedList where T : ICustomTypeDescriptor
     {
         public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)

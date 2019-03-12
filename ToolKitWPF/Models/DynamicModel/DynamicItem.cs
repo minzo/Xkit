@@ -11,37 +11,45 @@ namespace ToolKit.WPF.Models
 {
     using DynamicPropertyCollection = List<IDynamicProperty>;
 
+    /// <summary>
+    /// DynamicItem
+    /// </summary>
     public class DynamicItem : DynamicProperty<DynamicPropertyCollection>, IDynamicItem, ICustomTypeDescriptor
     {
-        private static DynamicPropertyDefinition<DynamicPropertyCollection> definition__ = new DynamicPropertyDefinition<DynamicPropertyCollection>() { Name = nameof(DynamicItem) };
+        /// <summary>
+        /// 定義
+        /// </summary>
+        public new IDynamicItemDefinition Definition { get; private set; }
 
-        private IDynamicItemDefinition definition_;
-
-
-        public string Name { get; set; }
-
-        public string DisplayName { get; set; }
-
-        public string Description { get; set; }
-
-        public bool IsReadOnly { get; set; }
-
-
-        public DynamicItem() : base(definition__)
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public DynamicItem() : base(definition__) 
         {
-            Value = new DynamicPropertyCollection();
         }
 
-        public DynamicItem Setup(IDynamicItemDefinition definition)
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public DynamicItem(IDynamicItemDefinition definition) : this()
         {
-            definition_ = definition;
-            definition_.CollectionChanged += OnDefinitionChanged;
+            Attach(definition);
+        }
 
-            foreach (var propDef in definition_)
+        /// <summary>
+        /// 定義を適用する
+        /// </summary>
+        public DynamicItem Attach(IDynamicItemDefinition definition)
+        {
+            if(isAttached)
             {
-                AddProperty(propDef.Create());
+                throw new InvalidOperationException("DynamicItem Definition Already Attached");
             }
 
+            Definition = definition;
+            Definition.CollectionChanged += OnDefinitionChanged;
+            Definition.Run(i => AddProperty(i.Create()));
+            isAttached = true;
             return this;
         }
 
@@ -49,7 +57,7 @@ namespace ToolKit.WPF.Models
 
         public IDynamicProperty GetProperty(string propertyName)
         {
-            return Value.FirstOrDefault(i => i.DefinitionName == propertyName);
+            return Value.FirstOrDefault(i => i.Definition.Name == propertyName);
         }
         public IDynamicProperty GetProperty(int index)
         {
@@ -65,7 +73,7 @@ namespace ToolKit.WPF.Models
         }
         public void SetPropertyValue(string propertyName, object value)
         {
-            Value.FirstOrDefault(i => i.DefinitionName == propertyName)?.SetValue(value);
+            Value.FirstOrDefault(i => i.Definition.Name == propertyName)?.SetValue(value);
         }
         public void SetPropertyValue(int index, object value)
         {
@@ -80,7 +88,6 @@ namespace ToolKit.WPF.Models
         {
             InsertProperty(-1, property);
         }
-
         private void InsertProperty(int index, IDynamicProperty property)
         {
             property.PropertyChanged += OnPropertyChanged;
@@ -90,20 +97,18 @@ namespace ToolKit.WPF.Models
             else
                 Value.Insert(index, property);
         }
-
         private void RemoveProperty(string propertyName)
         {
-            var property = Value.FirstOrDefault(i => i.DefinitionName == propertyName);
+            var property = Value.FirstOrDefault(i => i.Definition.Name == propertyName);
             if (property != null)
             {
                 Value.Remove(property);
                 property.PropertyChanged -= OnPropertyChanged;
             }
         }
-
         private void MoveProperty(string propertyName, int newIndex)
         {
-            var property = Value.FirstOrDefault(i => i.DefinitionName == propertyName);
+            var property = Value.FirstOrDefault(i => i.Definition.Name == propertyName);
             if (property != null)
             {
                 Value.Remove(property);
@@ -119,28 +124,29 @@ namespace ToolKit.WPF.Models
         {
             if (e.Action == NotifyCollectionChangedAction.Move)
             {
-                foreach (var property in e.OldItems.OfType<IDynamicPropertyDefinition>())
-                {
-                    MoveProperty(property.Name, e.NewStartingIndex);
-                }
+                e.OldItems?
+                    .Cast<IDynamicPropertyDefinition>()
+                    .Run(i => MoveProperty(i.Name, e.NewStartingIndex));
             }
             else
             {
                 e.OldItems?
-                    .OfType<IDynamicPropertyDefinition>()
+                    .Cast<IDynamicPropertyDefinition>()
                     .Run(i => RemoveProperty(i.Name));
 
                 int insertIndex = e.NewStartingIndex;
                 e.NewItems?
-                    .OfType<IDynamicPropertyDefinition>()
+                    .Cast<IDynamicPropertyDefinition>()
                     .Run(i => InsertProperty(insertIndex++, i.Create()));
             }
         }
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            NotifyPropertyChanged(e.PropertyName);
+            PropertyChanged.Invoke(this, e);
         }
+
+        public new event PropertyChangedEventHandler PropertyChanged = null;
 
         #endregion
 
@@ -148,7 +154,7 @@ namespace ToolKit.WPF.Models
 
         public AttributeCollection GetAttributes() => AttributeCollection.Empty;
         public string GetClassName() => nameof(DynamicItem);
-        public string GetComponentName() => DefinitionName;
+        public string GetComponentName() => definition__.Name;
         public TypeConverter GetConverter() => null;
         public EventDescriptor GetDefaultEvent() => null;
         public PropertyDescriptor GetDefaultProperty() => null;
@@ -164,5 +170,12 @@ namespace ToolKit.WPF.Models
         public object GetPropertyOwner(PropertyDescriptor pd) => this;
 
         #endregion
+
+        private bool isAttached = false;
+
+        private static IDynamicPropertyDefinition definition__ = new DynamicPropertyDefinition<DynamicPropertyCollection>()
+        {
+            Name = nameof(DynamicItem),
+        };
     }
 }

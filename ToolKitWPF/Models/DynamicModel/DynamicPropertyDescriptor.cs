@@ -16,13 +16,9 @@ namespace ToolKit.WPF.Models
             this.definition = definition;
         }
 
-        public override string DisplayName => definition.DisplayName;
-
-        public override string Description => definition.Description;
-
         public override Type ComponentType => typeof(IDynamicItem);
 
-        public override bool IsReadOnly => definition.IsReadOnly;
+        public override bool IsReadOnly => definition.IsReadOnly == true;
 
         public override Type PropertyType => typeof(IDynamicProperty);
 
@@ -32,7 +28,7 @@ namespace ToolKit.WPF.Models
 
         public override void SetValue(object component, object value) => (component as IDynamicItem)?.SetPropertyValue(Name, value);
 
-        public override void ResetValue(object component) => (component as IDynamicItem).SetPropertyValue( Name, null );
+        public override void ResetValue(object component) => (component as IDynamicItem)?.SetPropertyValue( Name, null );
 
         public override bool ShouldSerializeValue(object component) => false;
     }

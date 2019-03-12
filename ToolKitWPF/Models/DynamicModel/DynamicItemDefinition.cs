@@ -11,45 +11,138 @@ using Corekit;
 
 namespace ToolKit.WPF.Models
 {
-    public interface IDynamicItemDefinition
-        : IEnumerable<IDynamicPropertyDefinition>
-        , INotifyCollectionChanged
-        , INotifyPropertyChanged
+    /// <summary>
+    /// アイテム定義
+    /// </summary>
+    public interface IDynamicItemDefinition : IEnumerable<IDynamicPropertyDefinition>, INotifyCollectionChanged, INotifyPropertyChanged
     {
+        /// <summary>
+        /// プロパティ定義の名前
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
+        /// 読み取り専用・編集不可能か（nullは未指定）
+        /// </summary>
+        bool IsReadOnly { get; }
+
+        /// <summary>
+        /// 削除可能か
+        /// </summary>
+        bool IsDeletable { get; }
+
+        /// <summary>
+        /// 移動が可能か
+        /// </summary>
+        bool IsMovable { get; }
     }
 
-    public class DynamicItemDefinition<T> : IDynamicItemDefinition where T : IDynamicPropertyDefinition
+
+    /// <summary>
+    /// アイテム定義
+    /// </summary>
+    public class DynamicItemDefinition : IDynamicItemDefinition
     {
-        private ObservableCollection<T> definitions;
+        /// <summary>
+        /// プロパティ変更通知
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged = null;
 
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
-        public event PropertyChangedEventHandler PropertyChanged;
+        /// <summary>
+        /// コレクション変更通知
+        /// </summary>
+        public event NotifyCollectionChangedEventHandler CollectionChanged = null;
 
-        public DynamicItemDefinition(ObservableCollection<T> collection)
+        /// <summary>
+        /// アイテム定義の名前
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// 読み取り専用・編集不可能か（nullは未指定）
+        /// </summary>
+        public bool IsReadOnly { get; set; }
+
+        /// <summary>
+        /// 削除可能か
+        /// </summary>
+        public bool IsDeletable { get; set; }
+
+        /// <summary>
+        /// 移動が可能か
+        /// </summary>
+        public bool IsMovable { get; set; }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public DynamicItemDefinition(IEnumerable<IDynamicPropertyDefinition> collection)
         {
-            definitions = collection;
-            definitions.CollectionChanged += OnCollectionChanged;
-            definitions.Run(i => i.PropertyChanged += OnPropertyChanged);
+            if(collection is INotifyCollectionChanged notify)
+            {
+                notify.CollectionChanged += (s, e) => {
+                    e.OldItems?.Cast<IDynamicPropertyDefinition>().Run(i => this.collection.Remove(i));
+                    int insertIndex = e.NewStartingIndex;
+                    e.NewItems?.Cast<IDynamicPropertyDefinition>().Run(i => this.collection.Insert(insertIndex++, i));
+                };
+            }
+
+            this.collection = new ObservableCollection<IDynamicPropertyDefinition>(collection);
+            this.collection.CollectionChanged += OnCollectionChanged;
+            this.collection.Run(i => i.PropertyChanged += OnPropertyChanged);
         }
 
+        /// <summary>
+        /// 追加
+        /// </summary>
+        public void Add(IDynamicPropertyDefinition definition)
+        {
+            collection.Add(definition);
+        }
+
+        /// <summary>
+        /// 削除
+        /// </summary>
+        public void Remove(IDynamicPropertyDefinition definition)
+        {
+            collection.Remove(definition);
+        }
+
+        /// <summary>
+        /// コレクションを反復処理する列挙子を返す
+        /// </summary>
+        public IEnumerator<IDynamicPropertyDefinition> GetEnumerator()
+        {
+            return collection.GetEnumerator();
+        }
+
+        /// <summary>
+        /// コレクションを反復処理する列挙子を返す
+        /// </summary>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return collection.GetEnumerator();
+        }
+
+        /// <summary>
+        /// プロパティの定義の増減通知
+        /// </summary>
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             e.OldItems?.Cast<IDynamicPropertyDefinition>().Run(i => i.PropertyChanged -= OnPropertyChanged);
             e.NewItems?.Cast<IDynamicPropertyDefinition>().Run(i => i.PropertyChanged += OnPropertyChanged);
-            CollectionChanged?.Invoke(sender, e);
+
+            CollectionChanged?.Invoke(this, e);
         }
 
+        /// <summary>
+        /// プロパティの定義の変更通知
+        /// </summary>
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            PropertyChanged?.Invoke(sender, e);
+            PropertyChanged?.Invoke(this, e);
         }
-
-        public IEnumerator<IDynamicPropertyDefinition> GetEnumerator()
-        {
-            return definitions.GetEnumerator() as IEnumerator<IDynamicPropertyDefinition>;
-        }
-
-
-        IEnumerator IEnumerable.GetEnumerator() => definitions.GetEnumerator();
+        
+        private ObservableCollection<IDynamicPropertyDefinition> collection;
     }
 }

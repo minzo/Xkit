@@ -2,46 +2,109 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ToolKit.WPF.Models
 {
+    /// <summary>
+    /// プロパティ定義
+    /// </summary>
     public interface IDynamicPropertyDefinition : INotifyPropertyChanged
     {
+        /// <summary>
+        /// プロパティ定義の名前
+        /// </summary>
         string Name { get; set; }
 
-        string DisplayName { get; set; }
+        /// <summary>
+        /// 読み取り専用・編集不可能か（nullは未指定）
+        /// </summary>
+        bool? IsReadOnly { get; }
 
-        string Description { get; set; }
-
-        bool IsReadOnly { get; set; }
-
+        /// <summary>
+        /// 型
+        /// </summary>
         Type ValueType { get; }
 
-        object DefaultValue { get; }
+        /// <summary>
+        /// デフォルト値
+        /// </summary>
+        object GetDefaultValue();
 
+        /// <summary>
+        /// プロパティから生成
+        /// </summary>
         IDynamicProperty Create();
     }
 
-    public class DynamicPropertyDefinition<T> : ObservableObject, IDynamicPropertyDefinition
+    /// <summary>
+    /// プロパティ定義
+    /// </summary>
+    public class DynamicPropertyDefinition<T> : IDynamicPropertyDefinition
     {
-        private string displayName;
-        private string description;
-        private bool isReadOnly;
+        /// <summary>
+        /// プロパティ定義の名前
+        /// </summary>
+        public string Name { get => name; set => SetProperty(ref name, value); }
 
-        public string Name { get; set; }
+        /// <summary>
+        /// 読み取り専用（編集不可能か）
+        /// </summary>
+        public bool? IsReadOnly { get => isReadOnly; set => SetProperty(ref isReadOnly, value); }
 
-        public string DisplayName { get => displayName; set => SetPropertyValue(ref displayName, value); }
-
-        public string Description { get => description; set => SetPropertyValue(ref description, value); }
-
-        public bool IsReadOnly { get => isReadOnly; set => SetPropertyValue(ref isReadOnly, value); }
-
+        /// <summary>
+        /// 型
+        /// </summary>
         public Type ValueType => typeof(T);
 
-        public object DefaultValue { get; set; } = default(T);
+        /// <summary>
+        /// デフォルト値
+        /// </summary>
+        public object GetDefaultValue()
+        {
+            if (default(T) != null)
+            {
+                return default(T);
+            }
+            else if (typeof(T) == typeof(string))
+            {
+                return string.Empty;
+            }
+            else
+            {
+                return Activator.CreateInstance<T>();
+            }
+        }
 
+        /// <summary>
+        /// プロパティを生成する
+        /// </summary>
         public IDynamicProperty Create() => new DynamicProperty<T>(this);
+
+
+        public event PropertyChangingEventHandler PropertyChanging;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private string name = null;
+        private bool? isReadOnly = null;
+
+
+        /// <summary>
+        /// プロパティ設定
+        /// </summary>
+        private bool SetProperty<TValue>(ref TValue field, TValue value, [CallerMemberName] string propertyName = null)
+        {
+            if (!Equals(field, value))
+            {
+                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
+                field = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                return true;
+            }
+            return false;
+        }
     }
 }
