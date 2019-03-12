@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using ToolKit.WPF.Models;
 
 namespace ToolKit.WPF.Sample
 {
@@ -22,11 +24,21 @@ namespace ToolKit.WPF.Sample
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public ObservableCollection<Data> Items { get; } = new ObservableCollection<Data>(Enumerable.Range(0, 100).Select(i => new Data {
-            Column0 = $"Row{i}",
-            Column1 = $"Row{i}",
-            Column2 = Enumerable.Range(0,10).Select(x => $"Item{x}").ToList()
-        }));
+        //public ObservableCollection<Data> Items { get; } = new ObservableCollection<Data>(Enumerable.Range(0, 100).Select(i => new Data {
+        //    Column0 = $"Row{i}",
+        //    Column1 = $"Row{i}",
+        //    Column2 = Enumerable.Range(0,10).Select(x => $"Item{x}").ToList()
+        //}));
+
+        public TypedColletion<DynamicItem> Items { get; } = new TypedColletion<DynamicItem>();
+
+        public ICommand AddCommand { get; }
+
+        public IDynamicItemDefinition definition = new DynamicItemDefinition(new ObservableCollection<IDynamicPropertyDefinition>() {
+            new DynamicPropertyDefinition<string>() {Name = "Col00"},
+            new DynamicPropertyDefinition<string>() {Name = "Col01"},
+            new DynamicPropertyDefinition<int>() {Name = "Col02"},
+        });
 
         /// <summary>
         /// PropertyChangedイベント発行
@@ -34,6 +46,13 @@ namespace ToolKit.WPF.Sample
         private void InvokePropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public DataGridWindowViewModel()
+        {
+            AddCommand = new DelegateCommand(_ => {
+                Items.Add(new DynamicItem(definition));
+            });
         }
     }
 }

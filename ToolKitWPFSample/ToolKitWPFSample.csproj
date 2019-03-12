@@ -86,6 +86,13 @@
       <DependentUpon>ColorSelectComboBoxWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="DataGrid\DataGridWindowViewModel.cs" />
+    <Compile Include="Editor\EditorPanelViewModel.cs" />
+    <Compile Include="Editor\EditorPanel.xaml.cs">
+      <DependentUpon>EditorPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editor\Model\Config.cs" />
+    <Compile Include="Editor\Model\Layer.cs" />
+    <Compile Include="Editor\Model\Module.cs" />
     <Compile Include="LoggerConsole\LoggerConsoleWindowViewModel.cs" />
     <Compile Include="LoggerConsole\LoggerConsoleWindow.xaml.cs">
       <DependentUpon>LoggerConsoleWindow.xaml</DependentUpon>
@@ -99,6 +106,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="DataGrid\DataGridWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editor\EditorPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

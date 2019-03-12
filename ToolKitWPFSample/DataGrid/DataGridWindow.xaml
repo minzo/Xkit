@@ -9,26 +9,38 @@
     <Window.DataContext>
         <local:DataGridWindowViewModel />
     </Window.DataContext>
+
+    <StackPanel>
+        <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridHyperlinkColumn Header="HyperlinkColumn" Binding="{Binding Column0}" ContentBinding="{Binding Column1}" />
+                <DataGridTemplateColumn Header="ExpanderColumn">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Expander Header="{Binding Column2[0]}" BorderThickness="1" BorderBrush="Black">
+                                <ListBox ItemsSource="{Binding Column2}" Margin="16 0 0 0"/>
+                            </Expander>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <Expander Header="{Binding Column2[0]}" BorderThickness="1" BorderBrush="Black">
+                                <ListBox ItemsSource="{Binding Column2}" />
+                            </Expander>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Orientation="Horizontal">
+            <Button Content="+" Width="20" Command="{Binding AddCommand}"/>
+        </StackPanel>
+
+        <DataGrid ItemsSource="{Binding Items}" CanUserAddRows="False" />
+
+
+    </StackPanel>
     
-    <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False">
-        <DataGrid.Columns>
-            <DataGridHyperlinkColumn Header="HyperlinkColumn" Binding="{Binding Column0}" ContentBinding="{Binding Column1}" />
-            <DataGridTemplateColumn Header="ExpanderColumn">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                        <Expander Header="{Binding Column2[0]}" BorderThickness="1" BorderBrush="Black">
-                            <ListBox ItemsSource="{Binding Column2}" Margin="16 0 0 0"/>
-                        </Expander>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
-                <DataGridTemplateColumn.CellEditingTemplate>
-                    <DataTemplate>
-                        <Expander Header="{Binding Column2[0]}" BorderThickness="1" BorderBrush="Black">
-                            <ListBox ItemsSource="{Binding Column2}" />
-                        </Expander>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellEditingTemplate>
-            </DataGridTemplateColumn>
-        </DataGrid.Columns>
-    </DataGrid>
+
 </Window>
