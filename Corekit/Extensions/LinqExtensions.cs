@@ -9,6 +9,9 @@ namespace Corekit
 {
     public static class LinqExtensions
     {
+        /// <summary>
+        /// 指定したアクションを実行する
+        /// </summary>
         public static void Run<T>(this IEnumerable<T> collection, Action<T> action)
         {
             if(action != null)
@@ -20,6 +23,9 @@ namespace Corekit
             }
         }
 
+        /// <summary>
+        /// 指定したアクションを実行する
+        /// </summary>
         public static void Run(this IEnumerable collection, Action<object> action)
         {
             if (action != null)
@@ -30,11 +36,17 @@ namespace Corekit
             }
         }
 
+        /// <summary>
+        /// コレクションが空か
+        /// </summary>
         public static bool IsEmpty<T>(this IEnumerable<T> collection)
         {
             return !collection.Any();
         }
 
+        /// <summary>
+        /// Indexを取得する
+        /// </summary>
         public static int IndexOf<T>(this IEnumerable<T> collection, Func<T,bool> predicate)
         {
             int index = 0;
