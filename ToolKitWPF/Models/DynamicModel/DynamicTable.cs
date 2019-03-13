@@ -53,11 +53,11 @@ namespace ToolKit.WPF.Models
                 throw new InvalidOperationException("DynamicTable Definition Already Attached");
             }
 
-            this.definition = new DynamicItemDefinition(definition.Cols.Select(i => new DynamicPropertyDefinition<T>() { Name = i.Name })) { Name = "HOGE" };
+            properties = definition.Cols.Select(i => new DynamicPropertyDefinition<T>() { Name = i.Name }).ToObservableCollection();
 
             foreach (var row in definition.Rows)
             {
-                AddItem(new DynamicItem( this.definition ));
+                AddItem(new DynamicItem(new DynamicItemDefinition(properties) { Name = row.Name }));
             }
 
             if (definition.Rows is INotifyCollectionChanged rows)
@@ -95,7 +95,7 @@ namespace ToolKit.WPF.Models
                 int index = e.NewStartingIndex;
                 e.NewItems?
                     .Cast<IDynamicTableFrame>()
-                    .Run(i => InsertItem(index++, new DynamicItem( this.definition ) ));
+                    .Run(i => InsertItem(index++, new DynamicItem(new DynamicItemDefinition(properties) { Name = i.Name })));
             }
         }
 
@@ -195,7 +195,7 @@ namespace ToolKit.WPF.Models
         /// </summary>
         private void AddDefinition(string name)
         {
-            definition.Add(new DynamicPropertyDefinition<T>() { Name = name });
+            properties.Add(new DynamicPropertyDefinition<T>() { Name = name });
         }
 
         /// <summary>
@@ -203,10 +203,10 @@ namespace ToolKit.WPF.Models
         /// </summary>
         private void RemoveDefinition(string name)
         {
-            var prop = definition.FirstOrDefault(i => i.Name == name);
+            var prop = properties.FirstOrDefault(i => i.Name == name);
             if(prop != null)
             {
-                definition.Remove(prop);
+                properties.Remove(prop);
             }
         }
 
@@ -224,7 +224,7 @@ namespace ToolKit.WPF.Models
 
         #endregion
 
-        private DynamicItemDefinition definition;
+        private ObservableCollection<DynamicPropertyDefinition<T>> properties;
 
         private bool isAttached = false;
     }
