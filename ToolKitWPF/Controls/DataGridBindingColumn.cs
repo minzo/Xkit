@@ -62,6 +62,8 @@ namespace ToolKit.WPF.Controls
 
         #endregion
 
+        #region Generate Element
+
         protected override FrameworkElement GenerateEditingElement(DataGridCell cell, object dataItem)
         {
             return LoadTemplateContent(cell, dataItem, true);
@@ -72,6 +74,11 @@ namespace ToolKit.WPF.Controls
             return LoadTemplateContent(cell, dataItem, false);
         }
 
+        #endregion
+
+        /// <summary>
+        /// LoadTempalteContent
+        /// </summary>
         private FrameworkElement LoadTemplateContent(DataGridCell cell, object dataItem, bool isEditing)
         {
             DataTemplate template = null;
@@ -92,16 +99,21 @@ namespace ToolKit.WPF.Controls
             {
                 BindingOperations.SetBinding(contentPresenter, ContentPresenter.ContentProperty, Binding);
                 cell.PreviewKeyDown += OnPreviewKeyDown;
+                cell.PreviewMouseLeftButtonDown += OnPrevMouseLeftButtonDown;
             }
             else
             {
                 BindingOperations.ClearBinding(contentPresenter, ContentPresenter.ContentProperty);
                 cell.PreviewKeyDown -= OnPreviewKeyDown;
+                cell.PreviewMouseLeftButtonDown -= OnPrevMouseLeftButtonDown;
             }
 
             return contentPresenter;
         }
 
+        /// <summary>
+        /// CellTemplateセレクタ
+        /// </summary>
         private void ChooseCellTemplateAndSelector(bool isEditing, out DataTemplate template, out DataTemplateSelector selector)
         {
             if(isEditing)
@@ -116,7 +128,9 @@ namespace ToolKit.WPF.Controls
             }
         }
 
-
+        /// <summary>
+        /// セル編集開始前
+        /// </summary>
         protected override object PrepareCellForEdit(FrameworkElement editingElement, RoutedEventArgs editingEventArgs)
         {
             void FindVisualChildren(DependencyObject dp)
@@ -159,6 +173,9 @@ namespace ToolKit.WPF.Controls
             return base.PrepareCellForEdit(editingElement, editingEventArgs);
         }
 
+        /// <summary>
+        /// キー押下
+        /// </summary>
         private void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
             var cell = sender as DataGridCell;
@@ -189,8 +206,69 @@ namespace ToolKit.WPF.Controls
                     Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Background);
                 }
             }
+
+            if (e.Key == Key.Space)
+            {
+                e.Handled = CheckBoxEditAssist(cell);
+            }
         }
 
+        /// <summary>
+        /// マウスクリック
+        /// </summary>
+        private void OnPrevMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = CheckBoxEditAssist(sender as DataGridCell);
+        }
+
+
+        /// <summary>
+        /// チェックボックス入力補助
+        /// </summary>
+        private bool CheckBoxEditAssist(DataGridCell cell)
+        {
+            if (cell == null || cell.IsReadOnly || !cell.IsSelected)
+                return false;
+
+            var checkBox = FindVisualChildren<CheckBox>(cell);
+            if (checkBox?.IsEnabled ?? false)
+            {
+                checkBox.IsChecked = !checkBox.IsChecked;
+                return true;
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
+        /// VisualChildren から型に一致する要素を探索
+        /// </summary>
+        private T FindVisualChildren<T>(DependencyObject dp) where T : FrameworkElement
+        {
+            var elements = Enumerable
+                .Range(0, VisualTreeHelper.GetChildrenCount(dp))
+                .Select(i => VisualTreeHelper.GetChild(dp, i));
+
+            foreach(var element in elements)
+            {
+                switch (element)
+                {
+                    case T v:
+                        return v;
+                    case FrameworkElement v:
+                        return FindVisualChildren<T>(v);
+                    default:
+                        break;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// セル編集開始キー判定
+        /// </summary>
         private bool IsBeginEditCharacter(Key key)
         {
             var isCharacter = key >= Key.A && key <= Key.Z;
@@ -199,11 +277,17 @@ namespace ToolKit.WPF.Controls
             return isCharacter || isNumber || isSpecial;
         }
 
+        /// <summary>
+        /// コピー
+        /// </summary>
         public override object OnCopyingCellClipboardContent(object item)
         {
             return base.OnCopyingCellClipboardContent(item);
         }
 
+        /// <summary>
+        /// ペースト
+        /// </summary>
         public override void OnPastingCellClipboardContent(object item, object cellContent)
         {
             base.OnPastingCellClipboardContent(item, cellContent);
