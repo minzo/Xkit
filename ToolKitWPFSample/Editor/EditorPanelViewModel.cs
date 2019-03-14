@@ -5,10 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ToolKit.WPF.Models;
-using ToolKit.WPF.Sample.Editor.Model;
+using ToolKit.WPF.Sample.Editor.Models;
 
 namespace ToolKit.WPF.Sample
 {
+    /// <summary>
+    /// EditorPanelのVM
+    /// </summary>
     public class EditorPanelViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;

@@ -36,11 +36,7 @@ namespace ToolKit.WPF.Controls
             var column = Resources["BindingColumn"] as DataGridBindingColumn;
 
             column.IsReadOnly = descriptor.IsReadOnly;
-            column.Header = new {
-                Name = descriptor.Name,
-                DisplayName = descriptor.DisplayName,
-                Description = descriptor.Description
-            };
+            column.Header = descriptor;
             column.Binding = new Binding(e.PropertyName);
             e.Column = column;
         }
@@ -51,8 +47,9 @@ namespace ToolKit.WPF.Controls
             var item = e.Row.Item as IDynamicItem;
             var column = e.Column.GetCellContent(item) as ContentPresenter;
             var cell = column.Content as IDynamicProperty;
-
-            e.Cancel = item.Definition.IsReadOnly || cell.Definition.IsReadOnly == true;
+            e.Cancel = cell.IsReadOnly;
         }
+
+        // todo: ホイールでの拡大縮小の実装
     }
 }

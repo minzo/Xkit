@@ -4,71 +4,16 @@
           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
           xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
           xmlns:local="clr-namespace:ToolKit.WPF.Controls"
+          xmlns:converters="clr-namespace:ToolKit.WPF.Converters"
           xmlns:system="clr-namespace:System;assembly=mscorlib"
           CanUserAddRows="False"
           CanUserDeleteRows="False"
           CanUserResizeRows="False"
           CanUserSortColumns="True"
           SelectionUnit="CellOrRowHeader"
+          BorderBrush="#F0F0F0"
           mc:Ignorable="d" 
           d:DesignHeight="450" d:DesignWidth="800">
-    <DataGrid.Resources>
-
-        <DataTemplate x:Key="ColumnHeaderTemplate">
-            <StackPanel Width="80">
-                <TextBlock Text="{Binding Name}" FontWeight="UltraBold" />
-                <TextBlock Text="{Binding DisplayName}" />
-            </StackPanel>
-        </DataTemplate>
-
-        <local:DynamicPropertyTemplateSelector x:Key="CellTemplateSelector">
-            <DataTemplate DataType="{x:Type system:Int32}">
-                <TextBlock Text="{Binding Value}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:Single}">
-                <TextBlock Text="{Binding Value, StringFormat={}{0:0.00######}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:Double}">
-                <TextBlock Text="{Binding Value, StringFormat={}{0:0.00######}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:String}">
-                <TextBlock Text="{Binding Value}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:Boolean}">
-                <Border>
-                    <CheckBox IsChecked="{Binding Value}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                </Border>
-            </DataTemplate>
-        </local:DynamicPropertyTemplateSelector>
-
-        <local:DynamicPropertyTemplateSelector x:Key="CellEditingTemplateSelector">
-            <DataTemplate DataType="{x:Type system:Int32}">
-                <TextBox Text="{Binding Value}" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:Single}">
-                <TextBox Text="{Binding Value}" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:Double}">
-                <TextBox Text="{Binding Value}" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:String}">
-                <TextBox Text="{Binding Value}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:Boolean}">
-                <Border>
-                    <CheckBox IsChecked="{Binding Value}" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                </Border>
-            </DataTemplate>
-        </local:DynamicPropertyTemplateSelector>
-
-
-        <local:DataGridBindingColumn x:Key="BindingColumn" x:Shared="False"
-                                     ClipboardContentBinding="{Binding Value}"
-                                     HeaderTemplate="{StaticResource ColumnHeaderTemplate}"
-                                     CellTemplateSelector="{StaticResource CellTemplateSelector}"
-                                     CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}" />
-    </DataGrid.Resources>
-
     <DataGrid.RowHeaderTemplate>
         <DataTemplate>
             <StackPanel MaxWidth="80" DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}">
@@ -77,4 +22,89 @@
             </StackPanel>
         </DataTemplate>
     </DataGrid.RowHeaderTemplate>
+        
+    <DataGrid.Resources>
+
+        <converters:BoolNot x:Key="BoolNot" />
+
+        <DataTemplate x:Key="ColumnHeaderTemplate">
+            <StackPanel Width="80">
+                <TextBlock Text="{Binding Name}" FontWeight="UltraBold" />
+                <TextBlock Text="{Binding DisplayName}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <Style x:Key="BorderStyle" TargetType="{x:Type Border}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Value}" Value="True">
+                    <Setter Property="Background" Value="#50ff661a" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="CheckBoxStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="IsEnabled" Value="{Binding IsReadOnly, Converter={StaticResource BoolNot}}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="TextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="IsEnabled" Value="{Binding IsReadOnly, Converter={StaticResource BoolNot}}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="TextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="IsEnabled" Value="{Binding IsReadOnly, Converter={StaticResource BoolNot}}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+
+        <local:DynamicPropertyTemplateSelector x:Key="CellTemplateSelector">
+            <DataTemplate DataType="{x:Type system:Int32}">
+                <TextBlock Text="{Binding Value}" Style="{StaticResource TextBlockStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Single}">
+                <TextBlock Text="{Binding Value, StringFormat={}{0:0.00######}}" Style="{StaticResource TextBlockStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Double}">
+                <TextBlock Text="{Binding Value, StringFormat={}{0:0.00######}}" Style="{StaticResource TextBlockStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:String}">
+                <TextBlock Text="{Binding Value}" Style="{StaticResource TextBlockStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Boolean}">
+                <Border Style="{StaticResource BorderStyle}">
+                    <CheckBox IsChecked="{Binding Value}" Style="{StaticResource CheckBoxStyle}" />
+                </Border>
+            </DataTemplate>
+        </local:DynamicPropertyTemplateSelector>
+
+        <local:DynamicPropertyTemplateSelector x:Key="CellEditingTemplateSelector">
+            <DataTemplate DataType="{x:Type system:Int32}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBoxStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Single}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBoxStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Double}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBoxStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:String}">
+                <TextBox Text="{Binding Value}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Boolean}">
+                <Border>
+                    <CheckBox IsChecked="{Binding Value}" Style="{StaticResource CheckBoxStyle}" />
+                </Border>
+            </DataTemplate>
+        </local:DynamicPropertyTemplateSelector>
+
+        <local:DataGridBindingColumn x:Key="BindingColumn" x:Shared="False"
+                                     ClipboardContentBinding="{Binding Value}"
+                                     HeaderTemplate="{StaticResource ColumnHeaderTemplate}"
+                                     CellTemplateSelector="{StaticResource CellTemplateSelector}"
+                                     CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}" />
+    </DataGrid.Resources>
 </DataGrid>
