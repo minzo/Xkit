@@ -90,9 +90,9 @@
     <Compile Include="Editor\EditorPanel.xaml.cs">
       <DependentUpon>EditorPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Editor\Model\Config.cs" />
-    <Compile Include="Editor\Model\Layer.cs" />
-    <Compile Include="Editor\Model\Module.cs" />
+    <Compile Include="Editor\Models\Config.cs" />
+    <Compile Include="Editor\Models\Layer.cs" />
+    <Compile Include="Editor\Models\Module.cs" />
     <Compile Include="LoggerConsole\LoggerConsoleWindowViewModel.cs" />
     <Compile Include="LoggerConsole\LoggerConsoleWindow.xaml.cs">
       <DependentUpon>LoggerConsoleWindow.xaml</DependentUpon>

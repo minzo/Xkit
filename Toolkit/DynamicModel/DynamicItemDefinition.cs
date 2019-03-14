@@ -24,7 +24,7 @@ namespace ToolKit.WPF.Models
         /// <summary>
         /// 読み取り専用・編集不可能か（nullは未指定）
         /// </summary>
-        bool IsReadOnly { get; }
+        bool? IsReadOnly { get; }
 
         /// <summary>
         /// 削除可能か
@@ -61,7 +61,7 @@ namespace ToolKit.WPF.Models
         /// <summary>
         /// 読み取り専用・編集不可能か（nullは未指定）
         /// </summary>
-        public bool IsReadOnly { get; set; }
+        public bool? IsReadOnly { get; set; }
 
         /// <summary>
         /// 削除可能か

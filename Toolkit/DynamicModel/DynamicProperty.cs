@@ -21,7 +21,13 @@ namespace ToolKit.WPF.Models
         /// <summary>
         /// Owner
         /// </summary>
-        public IDynamicItem PropertyOwner { get; } = null;
+        public IDynamicItem Owner { get; }
+
+        /// <summary>
+        /// 読み取り専用か (Ownerの状態も考慮して最終的な状態を返します)
+        /// </summary>
+        public bool IsReadOnly => Owner?.Definition?.IsReadOnly == true || Definition.IsReadOnly == true;
+
 
         /// <summary>
         /// 値
@@ -51,9 +57,10 @@ namespace ToolKit.WPF.Models
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        internal DynamicProperty(IDynamicPropertyDefinition definition) : base()
+        internal DynamicProperty(IDynamicPropertyDefinition definition, IDynamicItem owner = null)
         {
             Definition = definition;
+            Owner = owner;
             value_ = (T)Definition.GetDefaultValue();
         }
 

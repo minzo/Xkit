@@ -19,7 +19,7 @@ namespace ToolKit.WPF.Models
         string Name { get; set; }
 
         /// <summary>
-        /// 読み取り専用・編集不可能か（nullは未指定）
+        /// 読み取り専用・編集不可能か（nullは未指定なのでそのほかの要因に従う）
         /// </summary>
         bool? IsReadOnly { get; }
 
@@ -36,7 +36,7 @@ namespace ToolKit.WPF.Models
         /// <summary>
         /// プロパティから生成
         /// </summary>
-        IDynamicProperty Create();
+        IDynamicProperty Create(IDynamicItem owner);
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ namespace ToolKit.WPF.Models
         /// <summary>
         /// プロパティを生成する
         /// </summary>
-        public IDynamicProperty Create() => new DynamicProperty<T>(this);
+        public IDynamicProperty Create(IDynamicItem owner) => new DynamicProperty<T>(this, owner);
 
 
         public event PropertyChangingEventHandler PropertyChanging;

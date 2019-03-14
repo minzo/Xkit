@@ -37,6 +37,7 @@ namespace ToolKit.WPF.Models
 
         /// <summary>
         /// コンストラクタ
+        /// rowsとcolsに同じインスタンスが入ると対角の値を同期します
         /// </summary>
         public DynamicTable(IEnumerable<IDynamicTableFrame> rows, IEnumerable<IDynamicTableFrame> cols)
         {
@@ -57,7 +58,17 @@ namespace ToolKit.WPF.Models
 
             foreach (var row in definition.Rows)
             {
-                AddItem(new DynamicItem(new DynamicItemDefinition(properties) { Name = row.Name }));
+                //todo: 行のReadOnlyの要素をわたせるようにする
+                //var itemDefinition = row as IDynamicItemDefinition;
+                //bool isReadOnly    = itemDefinition?.IsReadOnly ?? false;
+                //bool isMovable     = itemDefinition?.IsMovable ?? false;
+                //bool isDeletable   = itemDefinition?.IsDeletable ?? false;
+                AddItem(new DynamicItem(new DynamicItemDefinition(properties) {
+                    Name = row.Name,
+                    //IsReadOnly = isReadOnly,
+                    //IsMovable = isMovable,
+                    //IsDeletable = isDeletable,
+                }));
             }
 
             if (definition.Rows is INotifyCollectionChanged rows)
@@ -70,7 +81,8 @@ namespace ToolKit.WPF.Models
                 cols.CollectionChanged += OnColsCollectionChanged;
             }
 
-            isAttached = true;
+            this.isAttached = true;
+            this.definition = definition;
 
             return this;
         }
@@ -217,14 +229,19 @@ namespace ToolKit.WPF.Models
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             // 対角の値を同期する
-            var item = sender as DynamicItem;
-            this.FirstOrDefault(i => i.Definition.Name == e.PropertyName)?
-                .SetPropertyValue(item.Definition.Name, item.GetPropertyValue(e.PropertyName));
+            if (definition.Rows == definition.Cols)
+            {
+                var item = sender as DynamicItem;
+                this.FirstOrDefault(i => i.Definition.Name == e.PropertyName)?
+                    .SetPropertyValue(item.Definition.Name, item.GetPropertyValue(e.PropertyName));
+            }
         }
 
         #endregion
 
         private ObservableCollection<DynamicPropertyDefinition<T>> properties;
+
+        private DynamicTableDefinition definition = null;
 
         private bool isAttached = false;
     }

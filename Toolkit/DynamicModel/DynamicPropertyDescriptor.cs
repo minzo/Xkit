@@ -9,16 +9,16 @@ namespace ToolKit.WPF.Models
 {
     public class DynamicPropertyDescriptor : PropertyDescriptor
     {
-        private IDynamicPropertyDefinition definition;
+        private IDynamicProperty property;
 
-        public DynamicPropertyDescriptor(IDynamicPropertyDefinition definition) : base(definition.Name, null)
+        public DynamicPropertyDescriptor(IDynamicProperty property) : base(property.Definition.Name, null)
         {
-            this.definition = definition;
+            this.property = property;
         }
 
         public override Type ComponentType => typeof(IDynamicItem);
 
-        public override bool IsReadOnly => definition.IsReadOnly == true;
+        public override bool IsReadOnly => property.IsReadOnly;
 
         public override Type PropertyType => typeof(IDynamicProperty);
 

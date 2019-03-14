@@ -20,7 +20,12 @@ namespace ToolKit.WPF.Models
         /// <summary>
         /// Owner
         /// </summary>
-        IDynamicItem PropertyOwner { get; }
+        IDynamicItem Owner { get; }
+
+        /// <summary>
+        /// 読み取り専用か (Ownerの状態も考慮して最終的な状態を返します)
+        /// </summary>
+        bool IsReadOnly { get; }
 
         /// <summary>
         /// 値を取得

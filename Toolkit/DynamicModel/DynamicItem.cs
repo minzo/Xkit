@@ -14,6 +14,7 @@ namespace ToolKit.WPF.Models
     /// <summary>
     /// DynamicItem
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{Definition.Name}")]
     public class DynamicItem : DynamicProperty<DynamicPropertyCollection>, IDynamicItem, ICustomTypeDescriptor
     {
         /// <summary>
@@ -48,7 +49,7 @@ namespace ToolKit.WPF.Models
 
             Definition = definition;
             Definition.CollectionChanged += OnDefinitionChanged;
-            Definition.Run(i => AddProperty(i.Create()));
+            Definition.Run(i => AddProperty(i.Create(this)));
             isAttached = true;
             return this;
         }
@@ -137,13 +138,14 @@ namespace ToolKit.WPF.Models
                 int insertIndex = e.NewStartingIndex;
                 e.NewItems?
                     .Cast<IDynamicPropertyDefinition>()
-                    .Run(i => InsertProperty(insertIndex++, i.Create()));
+                    .Run(i => InsertProperty(insertIndex++, i.Create(this)));
             }
         }
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            PropertyChanged.Invoke(this, e);
+            var property = sender as IDynamicProperty;
+            PropertyChanged.Invoke(this, new PropertyChangedEventArgs(property.Definition.Name));
         }
 
         public new event PropertyChangedEventHandler PropertyChanged = null;
@@ -163,7 +165,7 @@ namespace ToolKit.WPF.Models
         public EventDescriptorCollection GetEvents(Attribute[] attributes) => GetEvents();
         public PropertyDescriptorCollection GetProperties()
         {
-            var descripters = Value.Select(i => new DynamicPropertyDescriptor(i.Definition)).ToArray();
+            var descripters = Value.Select(i => new DynamicPropertyDescriptor(i)).ToArray();
             return new PropertyDescriptorCollection(descripters);
         }
         public PropertyDescriptorCollection GetProperties(Attribute[] attributes) => GetProperties();

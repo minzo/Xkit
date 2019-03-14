@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ToolKit.WPF.Models;
 
-namespace ToolKit.WPF.Sample.Editor.Model
+namespace ToolKit.WPF.Sample.Editor.Models
 {
     public class Config
     {
@@ -21,7 +21,7 @@ namespace ToolKit.WPF.Sample.Editor.Model
         /// </summary>
         public Config()
         {
-            PauseTable = new DynamicTable<bool>(A_Modules, B_Modules);
+            PauseTable = new DynamicTable<bool>(A_Modules, A_Modules);
         }
     }
 }
