@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ToolKit.WPF.Models
+namespace Corekit.Models
 {
     /// <summary>
     /// CustomTypeDescriptor を実装したオブジェクトの ObservableCollection

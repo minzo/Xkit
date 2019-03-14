@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
-using ToolKit.WPF.Models;
+using Corekit.Models;
 
 namespace ToolKit.WPF.Controls
 {

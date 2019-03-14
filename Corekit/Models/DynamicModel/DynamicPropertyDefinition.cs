@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ToolKit.WPF.Models
+namespace Corekit.Models
 {
     /// <summary>
     /// プロパティ定義
