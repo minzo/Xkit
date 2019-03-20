@@ -13,6 +13,7 @@
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -25,7 +26,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -75,10 +75,10 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
+    <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </ApplicationDefinition>
+    </Page>
     <Compile Include="DataGrid\DataGridWindow.xaml.cs">
       <DependentUpon>DataGridWindow.xaml</DependentUpon>
     </Compile>
@@ -93,10 +93,14 @@
     <Compile Include="Editor\Models\Config.cs" />
     <Compile Include="Editor\Models\Layer.cs" />
     <Compile Include="Editor\Models\Module.cs" />
+    <Compile Include="FilterTextBox\FilterTextBoxWindow.xaml.cs">
+      <DependentUpon>FilterTextBoxWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LoggerConsole\LoggerConsoleWindowViewModel.cs" />
     <Compile Include="LoggerConsole\LoggerConsoleWindow.xaml.cs">
       <DependentUpon>LoggerConsoleWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Program.cs" />
     <Compile Include="TreeGrid\TreeGridWindowViewModel.cs" />
     <Compile Include="TreeGrid\TreeGridWindow.xaml.cs">
       <DependentUpon>TreeGridWindow.xaml</DependentUpon>
@@ -110,6 +114,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Editor\EditorPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FilterTextBox\FilterTextBoxWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

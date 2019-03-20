@@ -1,7 +1,7 @@
-﻿<Application x:Class="CoreKitWPFSample.App"
+﻿<Application x:Class="Toolkit.WPF.Sample.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:CoreKitWPFSample"
+             xmlns:local="clr-namespace:Toolkit.WPF.Sample"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>

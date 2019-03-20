@@ -63,19 +63,24 @@
     <Compile Include="Controls\DynamicTable\DynamicTableGrid.xaml.cs">
       <DependentUpon>DynamicTableGrid.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\HotKey.cs" />
-    <Compile Include="Controls\Logger\ExpanderLoggerConsole.xaml.cs">
-      <DependentUpon>ExpanderLoggerConsole.xaml</DependentUpon>
+    <Compile Include="Controls\FilterTextBox.xaml.cs">
+      <DependentUpon>FilterTextBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\HotKey.cs" />
     <Compile Include="Controls\IconToggleButton.xaml.cs">
       <DependentUpon>IconToggleButton.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Logger\ExpanderLoggerConsole.xaml.cs">
+      <DependentUpon>ExpanderLoggerConsole.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Logger\LoggerConsole.xaml.cs">
       <DependentUpon>LoggerConsole.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\DataGridTreeColumn.cs" />
     <Compile Include="Controls\Logger\LoggerConsolePanel.xaml.cs">
       <DependentUpon>LoggerConsolePanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TreeGrid.xaml.cs">
+      <DependentUpon>TreeGrid.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\BoolNot.cs" />
     <Compile Include="Converters\ColorToBrush.cs" />
@@ -97,9 +102,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Sandbox\DataGridContentPresenterColumn.cs" />
-    <Compile Include="Controls\TreeGrid.xaml.cs">
-      <DependentUpon>TreeGrid.xaml</DependentUpon>
-    </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -122,33 +124,39 @@
   <ItemGroup>
     <Page Include="Controls\ColorSelectComboBox.xaml">
       <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
     <Page Include="Controls\DynamicTable\DynamicTableGrid.xaml">
       <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
-    <Page Include="Controls\Logger\ExpanderLoggerConsole.xaml">
+    <Page Include="Controls\FilterTextBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\IconToggleButton.xaml">
       <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="Controls\Logger\ExpanderLoggerConsole.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
     <Page Include="Controls\Logger\LoggerConsole.xaml">
       <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
     <Page Include="Controls\Logger\LoggerConsolePanel.xaml">
       <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
     <Page Include="Controls\TreeGrid.xaml">
       <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Controls\Adorners\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

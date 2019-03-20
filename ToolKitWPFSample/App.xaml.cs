@@ -5,8 +5,9 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Markup;
 
-namespace CoreKitWPFSample
+namespace ToolKit.WPF.Sample
 {
     /// <summary>
     /// App.xaml の相互作用ロジック

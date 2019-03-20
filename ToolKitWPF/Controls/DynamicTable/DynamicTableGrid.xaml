@@ -12,6 +12,7 @@
           CanUserSortColumns="True"
           SelectionUnit="CellOrRowHeader"
           BorderBrush="#F0F0F0"
+          RenderTransformOrigin="0 0"
           mc:Ignorable="d" 
           d:DesignHeight="450" d:DesignWidth="800">
     <DataGrid.RowHeaderTemplate>
@@ -22,6 +23,10 @@
             </StackPanel>
         </DataTemplate>
     </DataGrid.RowHeaderTemplate>
+
+    <DataGrid.LayoutTransform>
+        <ScaleTransform />
+    </DataGrid.LayoutTransform>
         
     <DataGrid.Resources>
 

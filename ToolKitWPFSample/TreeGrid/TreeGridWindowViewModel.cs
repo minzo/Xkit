@@ -28,7 +28,7 @@ namespace ToolKit.WPF.Sample
             }
         }
 
-        private bool isExpanded;
+        private bool isExpanded = false;
         
         public event PropertyChangedEventHandler PropertyChanged;
     }

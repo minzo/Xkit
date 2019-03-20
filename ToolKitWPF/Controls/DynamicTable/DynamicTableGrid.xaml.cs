@@ -51,6 +51,42 @@ namespace ToolKit.WPF.Controls
             e.Cancel = cell.IsReadOnly;
         }
 
-        // todo: ホイールでの拡大縮小の実装
+        protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnPreviewMouseWheel(e);
+
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                ChangeScale(e.Delta > 0 ? 0.2 : -0.2 , false);
+            }
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+
+            bool isResetScale = Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.D0;
+            if (isResetScale)
+            {
+                ChangeScale(0.0, true);
+            }
+        }
+
+        private void ChangeScale(double rate, bool isReset)
+        {
+            if (LayoutTransform is ScaleTransform transform)
+            {
+                if (isReset)
+                {
+                    transform.ScaleX = 1.0;
+                    transform.ScaleY = 1.0;
+                }
+                else
+                {
+                    transform.ScaleX = Math.Min(Math.Max(transform.ScaleX + rate, 0.2), 4.0);
+                    transform.ScaleY = Math.Min(Math.Max(transform.ScaleY + rate, 0.2), 4.0);
+                }
+            }
+        }
     }
 }

@@ -380,26 +380,6 @@ namespace ToolKit.WPF.Controls
         }
 
 
-        private Dictionary<object, int> levelOfTreeDepth = new Dictionary<object, int>();
-
-        private int CaldLevelOfTreeDepth(object dataItem)
-        {
-            if ( levelOfTreeDepth.TryGetValue(dataItem, out int level) )
-            {
-                return level;
-            }
-
-            var info = dataItem?.GetType()?.GetProperty("Children");
-            var children = info.GetValue(dataItem) as IEnumerable<object>;
-
-            foreach (var child in children)
-            {
-
-            }
-
-            return level;
-        }
-
         protected override object PrepareCellForEdit(FrameworkElement editingElement, RoutedEventArgs editingEventArgs)
         {
             void FindVisualChildren(DependencyObject dp)
