@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace ToolKit.WPF.Sample
+namespace Toolkit.WPF.Sample
 {
     public class DelegateCommand : ICommand
     {

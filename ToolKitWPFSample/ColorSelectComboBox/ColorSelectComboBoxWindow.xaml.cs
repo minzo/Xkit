@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace ToolKit.WPF.Sample
+namespace Toolkit.WPF.Sample
 {
     /// <summary>
     /// ColorSelectComboBoxWindow.xaml の相互作用ロジック

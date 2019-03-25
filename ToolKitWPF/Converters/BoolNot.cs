@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace ToolKit.WPF.Converters
+namespace Toolkit.WPF.Converters
 {
     public class BoolNot : IValueConverter
     {

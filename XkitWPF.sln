@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2000
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreKit", "CoreKit\CoreKit.csproj", "{746DFADC-C397-4194-8515-7C75E9D68A15}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Corekit", "Corekit\Corekit.csproj", "{746DFADC-C397-4194-8515-7C75E9D68A15}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit", "ToolKit\ToolKit.csproj", "{CC49D8BA-6407-4059-8B45-7812B8615C8E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolkit", "Toolkit\Toolkit.csproj", "{CC49D8BA-6407-4059-8B45-7812B8615C8E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolKitWPF", "ToolKitWPF\ToolKitWPF.csproj", "{FD46BA66-88FD-4CD4-8E0D-D25A8C349D75}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolkitWPF", "ToolkitWPF\ToolkitWPF.csproj", "{FD46BA66-88FD-4CD4-8E0D-D25A8C349D75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolKitWPFSample", "ToolKitWPFSample\ToolKitWPFSample.csproj", "{B1C835BD-64B3-4CA1-8B01-C61B65830E4F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolkitWPFSample", "ToolkitWPFSample\ToolkitWPFSample.csproj", "{B1C835BD-64B3-4CA1-8B01-C61B65830E4F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CorekitSample", "CorekitSample\CorekitSample.csproj", "{F2B2C8CA-4441-443D-A278-EC4FC91A262B}"
 EndProject

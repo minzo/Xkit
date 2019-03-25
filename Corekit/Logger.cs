@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace CoreKit
+namespace Corekit
 {
     /// <summary>
     /// ƒƒOƒŒƒxƒ‹

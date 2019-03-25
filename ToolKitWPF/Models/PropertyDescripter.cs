@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ToolKit.WPF.Models
+namespace Toolkit.WPF.Models
 {
     public class CustomPropertyDescriptor : PropertyDescriptor
     {

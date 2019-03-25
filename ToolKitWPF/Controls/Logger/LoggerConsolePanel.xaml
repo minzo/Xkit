@@ -1,10 +1,10 @@
-﻿<UserControl x:Class="ToolKit.WPF.Controls.LoggerConsolePanel"
+﻿<UserControl x:Class="Toolkit.WPF.Controls.LoggerConsolePanel"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:ToolKit.WPF.Controls"
-             mc:Ignorable="d" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Toolkit.WPF.Controls"
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <!-- Resource -->
     <UserControl.Resources>
@@ -30,7 +30,7 @@
             </Canvas>
         </Viewbox>
     </UserControl.Resources>
-    
+
     <!-- Panel -->
     <DockPanel>
         <!-- ステータスバー -->
@@ -45,18 +45,18 @@
                 <TextBox x:Name="FilterTextBox" Width="120" Margin="0 0 4 0" />
             </StatusBarItem>
             <local:IconToggleButton x:Name="ButtonError"
-                                    Icon="{StaticResource Icon_Error}" 
-                                    Content="{Binding ErrorMessageCount}" 
+                                    Icon="{StaticResource Icon_Error}"
+                                    Content="{Binding ErrorMessageCount}"
                                     IsChecked="true"
                                     ToolTip="エラー" />
             <local:IconToggleButton x:Name="ButtonWarning"
                                     Icon="{StaticResource Icon_Warning}"
-                                    Content="{Binding WarningMessageCount}" 
+                                    Content="{Binding WarningMessageCount}"
                                     IsChecked="true"
                                     ToolTip="警告" />
             <local:IconToggleButton x:Name="ButtonInfomation"
-                                    Icon="{StaticResource Icon_Infomation}" 
-                                    Content="{Binding InfomationMessageCount}" 
+                                    Icon="{StaticResource Icon_Infomation}"
+                                    Content="{Binding InfomationMessageCount}"
                                     IsChecked="true"
                                     ToolTip="情報" />
         </StatusBar>

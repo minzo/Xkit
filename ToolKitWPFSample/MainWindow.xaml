@@ -2,10 +2,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ToolKit.WPF.Sample"
-        x:Class="ToolKit.WPF.Sample.MainWindow"
+        xmlns:local="clr-namespace:Toolkit.WPF.Sample"
+        x:Class="Toolkit.WPF.Sample.MainWindow"
         mc:Ignorable="d"
-        Title="ToolKit.WPF.Sample" Height="450" Width="800">
+        Title="Toolkit.WPF.Sample" Height="450" Width="800">
     <StackPanel>
         <Button Command="{x:Static local:MainWindow.OpenWindow}" CommandParameter="{x:Type local:EditorPanel}" Content="EditorPanel" />
         <Button Command="{x:Static local:MainWindow.OpenWindow}" CommandParameter="{x:Type local:LoggerConsoleWindow}" Content="LoggerConsole" />

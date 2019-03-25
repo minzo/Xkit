@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace ToolKit.WPF.Converters
+namespace Toolkit.WPF.Converters
 {
     public class ValueToAlphaColorConverter : IValueConverter
     {

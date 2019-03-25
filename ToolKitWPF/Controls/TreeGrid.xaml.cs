@@ -18,7 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ToolKit.WPF.Controls
+namespace Toolkit.WPF.Controls
 {
     /// <summary>
     /// TreeGrid.xaml の相互作用ロジック
@@ -38,12 +38,12 @@ namespace ToolKit.WPF.Controls
         public static readonly DependencyProperty FilterTextProperty =
             DependencyProperty.Register("FilterText", typeof(string), typeof(TreeGrid), new PropertyMetadata(null, (d, e) =>
             {
-                
+
             }));
 
 
         /// <summary>
-        /// 
+        /// 子要素のプロパティのパス
         /// </summary>
         public string ChildrenPropertyPath
         {
@@ -57,7 +57,7 @@ namespace ToolKit.WPF.Controls
 
 
         /// <summary>
-        /// 
+        /// 開閉状態のプロパティのパス
         /// </summary>
         public string IsExpandedPropertyPath
         {
@@ -80,7 +80,7 @@ namespace ToolKit.WPF.Controls
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
         {
@@ -124,7 +124,7 @@ namespace ToolKit.WPF.Controls
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -147,7 +147,7 @@ namespace ToolKit.WPF.Controls
 
 
         /// <summary>
-        /// OnAutoGeneratingColumn    
+        /// OnAutoGeneratingColumn
         /// </summary>
         protected override void OnAutoGeneratingColumn(DataGridAutoGeneratingColumnEventArgs e)
         {
@@ -166,7 +166,7 @@ namespace ToolKit.WPF.Controls
 
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         internal bool HasChildren(object item)
         {
@@ -182,7 +182,7 @@ namespace ToolKit.WPF.Controls
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         internal void UpdateFilter(object item, bool isContracted)
         {
@@ -195,7 +195,7 @@ namespace ToolKit.WPF.Controls
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         private void MakeFilterFlag(object item, bool isContracted)
         {
@@ -365,11 +365,11 @@ namespace ToolKit.WPF.Controls
 
         private void SetBinding(DependencyObject target, DependencyProperty dp, BindingBase binding, string path)
         {
-            if(binding != null)
+            if (binding != null)
             {
                 BindingOperations.SetBinding(target, dp, binding);
             }
-            else if(path !=null)
+            else if (path != null)
             {
                 BindingOperations.SetBinding(target, dp, new Binding(path) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
             }
@@ -458,6 +458,18 @@ namespace ToolKit.WPF.Controls
             var isNumber = (key >= Key.D0 && key <= Key.D9) || (key >= Key.NumPad0 && key <= Key.NumPad9);
             var isSpecial = key == Key.F2 || key == Key.Space || key == Key.Enter;
             return isCharacter || isNumber || isSpecial;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        private T FindVisualChildren<T>(DependencyObject dp)
+        {
+            return Enumerable
+                .Range(0, VisualTreeHelper.GetChildrenCount(dp))
+                .Select(i => VisualTreeHelper.GetChild(dp, i))
+                .Select(i => FindVisualChildren<T>(i))
+                .FirstOrDefault(i => i is T);
         }
     }
 }

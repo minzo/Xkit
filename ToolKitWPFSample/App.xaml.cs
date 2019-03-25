@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Markup;
 
-namespace ToolKit.WPF.Sample
+namespace Toolkit.WPF.Sample
 {
     /// <summary>
     /// App.xaml の相互作用ロジック

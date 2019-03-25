@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ToolKit.WPF.Sample
+namespace Toolkit.WPF.Sample
 {
     public class TreeGridItem : INotifyPropertyChanged
     {
@@ -29,7 +29,7 @@ namespace ToolKit.WPF.Sample
         }
 
         private bool isExpanded = false;
-        
+
         public event PropertyChangedEventHandler PropertyChanged;
     }
 

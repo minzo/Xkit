@@ -16,7 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ToolKit.WPF.Controls
+namespace Toolkit.WPF.Controls
 {
     /// <summary>
     /// IconToggleButton.xaml の相互作用ロジック

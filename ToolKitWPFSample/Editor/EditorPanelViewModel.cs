@@ -5,9 +5,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ToolKit.WPF.Sample.Editor.Models;
+using Toolkit.WPF.Sample.Editor.Models;
 
-namespace ToolKit.WPF.Sample
+namespace Toolkit.WPF.Sample
 {
     /// <summary>
     /// EditorPanelのVM

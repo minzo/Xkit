@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using ToolKit.WPF.Models;
+using Toolkit.WPF.Models;
 
-namespace ToolKit.WPF.Sample
+namespace Toolkit.WPF.Sample
 {
     public class Data
     {

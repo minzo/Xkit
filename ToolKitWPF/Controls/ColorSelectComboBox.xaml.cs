@@ -1,11 +1,11 @@
-﻿using CoreKit;
+﻿using Corekit;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace ToolKit.WPF.Controls
+namespace Toolkit.WPF.Controls
 {
     /// <summary>
     /// ColorSelectComboBox.xaml の相互作用ロジック

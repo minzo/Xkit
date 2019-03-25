@@ -5,7 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
-namespace CoreKit
+namespace Corekit
 {
     public class PrePostCommandUtil : IDisposable
     {
@@ -35,7 +35,7 @@ namespace CoreKit
             var startInfo = new ProcessStartInfo()
             {
                 FileName = command,
-                CreateNoWindow = true,                
+                CreateNoWindow = true,
             };
 
             using (var process = new Process() { StartInfo = startInfo })

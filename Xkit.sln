@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Corekit", "Corekit\Corekit.csproj", "{A9769AC2-F2CA-41CF-AF02-1FA1D4CE3462}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit", "ToolKit\ToolKit.csproj", "{1C3076E3-CB94-4018-87D5-D3F504780284}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolkit", "Toolkit\Toolkit.csproj", "{1C3076E3-CB94-4018-87D5-D3F504780284}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CorekitSample", "CorekitSample\CorekitSample.csproj", "{E97A50C5-6924-4D5B-9156-F332067CB304}"
 EndProject

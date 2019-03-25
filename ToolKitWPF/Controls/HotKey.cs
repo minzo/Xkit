@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 //using System.Windows.Forms;
 
-//namespace ToolKit.WPF.Controls
+//namespace Toolkit.WPF.Controls
 //{
 //    class HotKey
 //    {

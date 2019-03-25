@@ -4,9 +4,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ToolKit.WPF.Models;
+using Toolkit.WPF.Models;
 
-namespace ToolKit.WPF.Sample.Editor.Models
+namespace Toolkit.WPF.Sample.Editor.Models
 {
     public class Layer
     {

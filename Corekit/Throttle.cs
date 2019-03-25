@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CoreKit
+namespace Corekit
 {
     public class Throttle<T> where T : EventArgs
     {

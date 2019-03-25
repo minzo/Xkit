@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ToolKit.WPF.Controls
+namespace Toolkit.WPF.Controls
 {
     /// <summary>
     /// FilterTextBox.xaml の相互作用ロジック

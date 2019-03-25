@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Markup;
 using Corekit.Models;
 
-namespace ToolKit.WPF.Controls
+namespace Toolkit.WPF.Controls
 {
     [ContentProperty("Templates")]
     public class DynamicPropertyTemplateSelector : DataTemplateSelector

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ToolKit.WPF.Sample
+namespace Toolkit.WPF.Sample
 {
     public class Program
     {

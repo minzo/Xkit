@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ToolKit.WPF.Sample.Editor.Models
+namespace Toolkit.WPF.Sample.Editor.Models
 {
     public class Module : IDynamicTableFrame
     {

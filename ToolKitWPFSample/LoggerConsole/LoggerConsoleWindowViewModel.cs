@@ -6,18 +6,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using CoreKit;
-using ToolKit.WPF.Models;
+using Corekit;
+using Toolkit.WPF.Models;
 
 
-namespace ToolKit.WPF.Sample
+namespace Toolkit.WPF.Sample
 {
     public class LoggerConsoleWindowViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
         private Logger Logger { get; } = new Logger();
-    
+
         /// <summary>
         /// ログメッセージ一覧
         /// </summary>

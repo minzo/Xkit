@@ -9,7 +9,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace ToolKit.WPF.Controls
+namespace Toolkit.WPF.Controls
 {
     public class DataGridBindingColumn : DataGridBoundColumn
     {

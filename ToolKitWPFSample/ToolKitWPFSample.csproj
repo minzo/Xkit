@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{B1C835BD-64B3-4CA1-8B01-C61B65830E4F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>ToolKit.WPF.Sample</RootNamespace>
-    <AssemblyName>ToolKit.WPF.Sample</AssemblyName>
+    <RootNamespace>Toolkit.WPF.Sample</RootNamespace>
+    <AssemblyName>Toolkit.WPF.Sample</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -188,13 +188,13 @@
       <Project>{a9769ac2-f2ca-41cf-af02-1fa1d4ce3462}</Project>
       <Name>Corekit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ToolKitWPF\ToolKitWPF.csproj">
+    <ProjectReference Include="..\ToolkitWPF\ToolkitWPF.csproj">
       <Project>{fd46ba66-88fd-4cd4-8e0d-d25a8c349d75}</Project>
-      <Name>CoreKitWPF</Name>
+      <Name>CorekitWPF</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ToolKit\ToolKit.csproj">
+    <ProjectReference Include="..\Toolkit\Toolkit.csproj">
       <Project>{1c3076e3-cb94-4018-87d5-d3f504780284}</Project>
-      <Name>ToolKit</Name>
+      <Name>Toolkit</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

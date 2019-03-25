@@ -9,7 +9,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace ToolKit.WPF.Sandbox
+namespace Toolkit.WPF.Sandbox
 {
     public class DataGridContentPresenterColumn : DataGridBoundColumn
     {
