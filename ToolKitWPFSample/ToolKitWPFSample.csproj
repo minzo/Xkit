@@ -190,7 +190,7 @@
     </ProjectReference>
     <ProjectReference Include="..\ToolkitWPF\ToolkitWPF.csproj">
       <Project>{fd46ba66-88fd-4cd4-8e0d-d25a8c349d75}</Project>
-      <Name>CorekitWPF</Name>
+      <Name>ToolkitWPF</Name>
     </ProjectReference>
     <ProjectReference Include="..\Toolkit\Toolkit.csproj">
       <Project>{1c3076e3-cb94-4018-87d5-d3f504780284}</Project>

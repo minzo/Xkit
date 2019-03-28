@@ -164,8 +164,8 @@ namespace Corekit.Models
         public EventDescriptorCollection GetEvents(Attribute[] attributes) => GetEvents();
         public PropertyDescriptorCollection GetProperties()
         {
-            var descripters = Value.Select(i => new DynamicPropertyDescriptor(i)).ToArray();
-            return new PropertyDescriptorCollection(descripters);
+            var descriptors = Value.Select(i => new DynamicPropertyDescriptor(i)).ToArray();
+            return new PropertyDescriptorCollection(descriptors);
         }
         public PropertyDescriptorCollection GetProperties(Attribute[] attributes) => GetProperties();
         public object GetPropertyOwner(PropertyDescriptor pd) => this;

@@ -79,6 +79,10 @@
     <Compile Include="Controls\Logger\LoggerConsolePanel.xaml.cs">
       <DependentUpon>LoggerConsolePanel.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\Styles\TabControlStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Compile Include="Controls\TreeGrid.xaml.cs">
       <DependentUpon>TreeGrid.xaml</DependentUpon>
     </Compile>

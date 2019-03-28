@@ -48,7 +48,7 @@ namespace Toolkit.WPF.Controls
             var item = e.Row.Item as IDynamicItem;
             var column = e.Column.GetCellContent(item) as ContentPresenter;
             var cell = column.Content as IDynamicProperty;
-            e.Cancel = cell.IsReadOnly;
+            e.Cancel = cell?.IsReadOnly ?? true;
         }
 
         protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)

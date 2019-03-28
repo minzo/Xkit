@@ -8,6 +8,7 @@ using System.Windows.Data;
 
 namespace Toolkit.WPF.Converters
 {
+    [ValueConversion(typeof(bool), typeof(bool))]
     public class BoolNot : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

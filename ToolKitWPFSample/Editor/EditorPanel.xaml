@@ -12,5 +12,40 @@
         <local:EditorPanelViewModel />
     </Window.DataContext>
 
-    <toolwpf:DynamicTableGrid ItemsSource="{Binding Table}" />
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Toolkit.WPF;component/Controls/Styles/TabControlStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <TabControl>
+        <TabControl.Resources>
+            <Style TargetType="{x:Type TabPanel}" BasedOn="{StaticResource TabPanelCenterStyle}" />
+            <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource TabItemToggleButtonStyle}" />
+        </TabControl.Resources>
+        
+        <TabItem Header="Pause">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+                    <Button Content="+" Command="{Binding AddCommand}" Width="30" />
+                    <Button Content="-" Command="{Binding DelCommand}" Width="30" />
+                </StackPanel>
+                <toolwpf:DynamicTableGrid ItemsSource="{Binding PauseTable}" />
+            </DockPanel>
+        </TabItem>
+
+        <TabItem Header="Scale">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+                    <Button Content="+" Command="{Binding AddCommand}" Width="30" />
+                    <Button Content="-" Command="{Binding DelCommand}" Width="30" />
+                </StackPanel>
+                <toolwpf:DynamicTableGrid ItemsSource="{Binding ScaleTable}" />
+            </DockPanel>
+        </TabItem>
+        
+    </TabControl>
+    
 </Window>

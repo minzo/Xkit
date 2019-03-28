@@ -70,14 +70,14 @@ namespace Corekit.Models
                 }));
             }
 
-            if (definition.Rows is INotifyCollectionChanged rows)
-            {
-                rows.CollectionChanged += OnRowsCollectionChanged;
-            }
-
             if (definition.Cols is INotifyCollectionChanged cols)
             {
                 cols.CollectionChanged += OnColsCollectionChanged;
+            }
+
+            if (definition.Rows is INotifyCollectionChanged rows)
+            {
+                rows.CollectionChanged += OnRowsCollectionChanged;
             }
 
             this.isAttached = true;
@@ -193,11 +193,10 @@ namespace Corekit.Models
         /// </summary>
         private void MoveItem(string rowName, int newIndex)
         {
-            var item = this.FirstOrDefault(i => i.Definition.Name == rowName);
-            if (item != null)
+            var index = this.IndexOf(i => i.Definition.Name == rowName);
+            if (index >= 0)
             {
-                this.Remove(item);
-                this.Insert(newIndex, item);
+                this.Move(index, newIndex);
             }
         }
 

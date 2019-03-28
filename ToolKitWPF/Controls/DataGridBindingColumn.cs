@@ -143,6 +143,10 @@ namespace Toolkit.WPF.Controls
                             v.Focus();
                             v.SelectAll();
                             v.Height = editingElement.Height;
+                            v.HorizontalAlignment = HorizontalAlignment.Stretch;
+                            v.VerticalAlignment = VerticalAlignment.Stretch;
+                            v.HorizontalContentAlignment = HorizontalAlignment.Center;
+                            v.VerticalContentAlignment = VerticalAlignment.Center;
                             return;
 
                         case ComboBox v:

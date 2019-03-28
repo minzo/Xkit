@@ -29,7 +29,7 @@
     </DataGrid.LayoutTransform>
 
     <DataGrid.Resources>
-
+        
         <converters:BoolNot x:Key="BoolNot" />
 
         <DataTemplate x:Key="ColumnHeaderTemplate">
