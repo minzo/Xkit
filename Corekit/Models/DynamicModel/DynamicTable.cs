@@ -53,21 +53,13 @@ namespace Corekit.Models
                 throw new InvalidOperationException("DynamicTable Definition Already Attached");
             }
 
-            properties = definition.Cols.Select(i => new DynamicPropertyDefinition<T>() { Name = i.Name }).ToObservableCollection();
+            properties = definition.Cols
+                .Select(i => CreateDefinition(i))
+                .ToObservableCollection();
 
             foreach (var row in definition.Rows)
             {
-                //todo: 行のReadOnlyの要素をわたせるようにする
-                //var itemDefinition = row as IDynamicItemDefinition;
-                //bool isReadOnly    = itemDefinition?.IsReadOnly ?? false;
-                //bool isMovable     = itemDefinition?.IsMovable ?? false;
-                //bool isDeletable   = itemDefinition?.IsDeletable ?? false;
-                AddItem(new DynamicItem(new DynamicItemDefinition(properties) {
-                    Name = row.Name,
-                    //IsReadOnly = isReadOnly,
-                    //IsMovable = isMovable,
-                    //IsDeletable = isDeletable,
-                }));
+                AddItem(CreateDynamicItem(row));
             }
 
             if (definition.Cols is INotifyCollectionChanged cols)
@@ -106,7 +98,7 @@ namespace Corekit.Models
                 int index = e.NewStartingIndex;
                 e.NewItems?
                     .Cast<IDynamicTableFrame>()
-                    .Run(i => InsertItem(index++, new DynamicItem(new DynamicItemDefinition(properties) { Name = i.Name })));
+                    .Run(i => InsertItem(index++, CreateDynamicItem(i)));                    
             }
         }
 
@@ -117,7 +109,9 @@ namespace Corekit.Models
         {
             if(e.Action == NotifyCollectionChangedAction.Move)
             {
-                throw new NotImplementedException("列の並び替えは未実装です");
+                e.OldItems?
+                    .Cast<IDynamicTableFrame>()
+                    .Run(i => MoveDefinition(i.Name, e.OldStartingIndex));
             }
             else
             {
@@ -125,9 +119,10 @@ namespace Corekit.Models
                     .Cast<IDynamicTableFrame>()
                     .Run(i => RemoveDefinition(i.Name));
 
+                int index = e.NewStartingIndex;
                 e.NewItems?
                     .Cast<IDynamicTableFrame>()
-                    .Run(i => AddDefinition(i.Name));
+                    .Run(i => InsertDefinition(index++, CreateDefinition(i)));
             }
         }
 
@@ -152,7 +147,28 @@ namespace Corekit.Models
 
         #endregion
 
-        #region add remove
+        #region add remove rows
+
+        /// <summary>
+        /// 行を生成する
+        /// </summary>
+        private DynamicItem CreateDynamicItem(IDynamicTableFrame row)
+        {
+            //todo: 行のReadOnlyの要素をわたせるようにする
+            //var itemDefinition = row as IDynamicItemDefinition;
+            //bool isReadOnly    = itemDefinition?.IsReadOnly ?? false;
+            //bool isMovable     = itemDefinition?.IsMovable ?? false;
+            //bool isDeletable   = itemDefinition?.IsDeletable ?? false;
+            var item = new DynamicItem(new DynamicItemDefinition(properties)
+            {
+                Name = row.Name,
+                //IsReadOnly = isReadOnly,
+                //IsMovable = isMovable,
+                //IsDeletable = isDeletable,
+            });
+
+            return item;
+        }
 
         /// <summary>
         /// 行を追加する
@@ -193,19 +209,36 @@ namespace Corekit.Models
         /// </summary>
         private void MoveItem(string rowName, int newIndex)
         {
-            var index = this.IndexOf(i => i.Definition.Name == rowName);
-            if (index >= 0)
-            {
-                this.Move(index, newIndex);
-            }
+            MoveItem(this.IndexOf(i => i.Definition.Name == rowName), newIndex);
+        }
+
+        #endregion
+
+        #region add remove cols
+
+        /// <summary>
+        /// 列の定義を生成する
+        /// </summary>
+        private DynamicPropertyDefinition<T> CreateDefinition(IDynamicTableFrame col)
+        {
+            var definition = new DynamicPropertyDefinition<T>() { Name = col.Name };
+            return definition;
         }
 
         /// <summary>
         /// 列の定義を追加する
         /// </summary>
-        private void AddDefinition(string name)
+        private void AddDefinition(DynamicPropertyDefinition<T> definition)
         {
-            properties.Add(new DynamicPropertyDefinition<T>() { Name = name });
+            properties.Add(definition);
+        }
+
+        /// <summary>
+        /// 列の定義を挿入する
+        /// </summary>
+        private void InsertDefinition(int index, DynamicPropertyDefinition<T> definition)
+        {
+            properties.Insert(index, definition);
         }
 
         /// <summary>
@@ -213,17 +246,32 @@ namespace Corekit.Models
         /// </summary>
         private void RemoveDefinition(string name)
         {
-            var prop = properties.FirstOrDefault(i => i.Name == name);
-            if(prop != null)
-            {
-                properties.Remove(prop);
-            }
+            properties.Remove(properties.FirstOrDefault(i => i.Name == name));
+        }
+
+        /// <summary>
+        /// 列を移動する
+        /// </summary>
+        private void MoveDefinition(string propertyName, int newIndex)
+        {
+            MoveDefinition(this.IndexOf(i => i.Definition.Name == propertyName), newIndex);
+        }
+
+        /// <summary>
+        /// 列を移動する
+        /// </summary>
+        private void MoveDefinition(int oldIndex, int newIndex)
+        {
+            properties.Move(oldIndex, newIndex);
         }
 
         #endregion
 
         #region event
 
+        /// <summary>
+        /// プロパティ変更通知
+        /// </summary>
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             // 対角の値を同期する

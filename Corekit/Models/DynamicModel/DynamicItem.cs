@@ -55,26 +55,49 @@ namespace Corekit.Models
 
         #region getter setter
 
+        /// <summary>
+        /// プロパティを取得する
+        /// </summary>
         public IDynamicProperty GetProperty(string propertyName)
         {
             return Value.FirstOrDefault(i => i.Definition.Name == propertyName);
         }
+
+        /// <summary>
+        /// プロパティを取得する
+        /// </summary>
         public IDynamicProperty GetProperty(int index)
         {
             return Value[index];
         }
+
+        /// <summary>
+        /// 値を取得する
+        /// </summary>
         public object GetPropertyValue(string propertyName)
         {
             return GetProperty(propertyName)?.GetValue();
         }
+
+        /// <summary>
+        /// 値を取得する
+        /// </summary>
         public object GetPropertyValue(int index)
         {
             return Value[index]?.GetValue();
         }
+
+        /// <summary>
+        /// 値を設定する
+        /// </summary>
         public void SetPropertyValue(string propertyName, object value)
         {
             Value.FirstOrDefault(i => i.Definition.Name == propertyName)?.SetValue(value);
         }
+
+        /// <summary>
+        /// 値を設定する
+        /// </summary>
         public void SetPropertyValue(int index, object value)
         {
             Value[index]?.SetValue(value);
@@ -84,10 +107,17 @@ namespace Corekit.Models
 
         #region add remove move property
 
+        /// <summary>
+        /// プロパティを追加する
+        /// </summary>
         private void AddProperty(IDynamicProperty property)
         {
             InsertProperty(-1, property);
         }
+
+        /// <summary>
+        /// プロパティを挿入する
+        /// </summary>
         private void InsertProperty(int index, IDynamicProperty property)
         {
             property.PropertyChanged += OnPropertyChanged;
@@ -97,6 +127,10 @@ namespace Corekit.Models
             else
                 Value.Insert(index, property);
         }
+
+        /// <summary>
+        /// プロパティを削除する
+        /// </summary>
         private void RemoveProperty(string propertyName)
         {
             var property = Value.FirstOrDefault(i => i.Definition.Name == propertyName);
@@ -106,6 +140,10 @@ namespace Corekit.Models
                 property.PropertyChanged -= OnPropertyChanged;
             }
         }
+
+        /// <summary>
+        /// プロパティを移動する
+        /// </summary>
         private void MoveProperty(string propertyName, int newIndex)
         {
             var property = Value.FirstOrDefault(i => i.Definition.Name == propertyName);

@@ -8,9 +8,10 @@ using System.Threading.Tasks;
 namespace Corekit.Models
 {
     /// <summary>
-    /// DynamicItemInheritance
+    /// DynamicItemInheritable
     /// </summary>
-    public class DynamicItemInheritance : DynamicItem
+    [System.Diagnostics.DebuggerDisplay("{Definition.Name}")]
+    public class DynamicItemInheritable : DynamicItem
     {
         // todo: 継承機能付き DynamicItem の実装
     }

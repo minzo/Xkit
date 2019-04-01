@@ -29,5 +29,4 @@ namespace Toolkit.WPF.Converters
             return null;
         }
     }
-
 }
