@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Runtime.CompilerServices;
 
 namespace Corekit.DB
 {
@@ -17,10 +18,13 @@ namespace Corekit.DB
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public class DbColumnAttribute : Attribute
     {
+        public SqlDbType Type { get; }
+
         public string ColumnName { get; }
 
-        public DbColumnAttribute(string columnName)
+        public DbColumnAttribute(SqlDbType type, [CallerMemberName] string columnName = null)
         {
+            Type = type;
             ColumnName = columnName;
         }
     }
@@ -32,6 +36,7 @@ namespace Corekit.DB
     public class DbTableAttribute : Attribute
     {
         public string TableName { get; }
+
         public DbTableAttribute(string tableName)
         {
             TableName = tableName;
