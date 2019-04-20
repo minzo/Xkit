@@ -12,7 +12,7 @@ namespace Corekit.Models
     /// <summary>
     /// DynamicTable
     /// </summary>
-    public class DynamicTable<T> : TypedColletion<DynamicItem>
+    public class DynamicTable<T> : TypedColletion<DynamicItem>, IDynamicTable<DynamicItem, T>
     {
         /// <summary>
         /// 名前
@@ -53,9 +53,7 @@ namespace Corekit.Models
                 throw new InvalidOperationException("DynamicTable Definition Already Attached");
             }
 
-            properties = definition.Cols
-                .Select(i => CreateDefinition(i))
-                .ToObservableCollection();
+            properties = new ObservableCollection<DynamicPropertyDefinition<T>>(definition.Cols.Select(i => CreateDefinition(i)));
 
             foreach (var row in definition.Rows)
             {

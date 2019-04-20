@@ -58,40 +58,5 @@ namespace Corekit
             }
             return -1;
         }
-
-        public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> collection)
-        {
-            return new ObservableCollection<T>(collection);
-        }
-
-        public static ObservableCollection<TResult> ToConnectCollection<T,TResult>(this ObservableCollection<T> collection, Func<T, TResult> predicate)
-        {
-            var result = new ObservableCollection<TResult>();
-
-            var enumerator = collection.GetEnumerator();
-
-            foreach(var item in collection)
-            {
-                result.Add(predicate(item));
-            }
-
-            void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-            {
-                var removeIndex = e.OldStartingIndex;
-                e.OldItems?.Run(i => result.RemoveAt(removeIndex));
-
-                var insertIndex = e.NewStartingIndex;
-                e.NewItems?.Run(i => result.Insert(insertIndex++, predicate((T)i)));
-            }
-
-            collection.CollectionChanged += OnCollectionChanged;
-
-            return result;
-        }
-
-        public static ReadOnlyObservableCollection<TResult> ToConnectReadOnlyCollection<T,TResult>(this ObservableCollection<T> collection, Func<T, TResult> predicate)
-        {
-            return new ReadOnlyObservableCollection<TResult>(collection.ToConnectCollection(predicate));
-        }
     }
 }
