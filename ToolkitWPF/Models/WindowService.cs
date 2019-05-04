@@ -73,7 +73,7 @@ namespace Toolkit.WPF.Models
         /// <summary>
         /// メッセージボックスを表示
         /// </summary>
-        public System.Windows.MessageBoxResult ShowMessageBox(System.Windows.Window owner, string messageText, string caption)
+        public System.Windows.MessageBoxResult ShowMessageBox(System.Windows.Window owner, string messageBoxText, string caption)
         {
             return dispatcher?.Invoke(() => System.Windows.MessageBox.Show(owner, messageBoxText, caption)) ?? System.Windows.MessageBoxResult.None;
         }
