@@ -70,9 +70,6 @@
     <Compile Include="Controls\IconToggleButton.xaml.cs">
       <DependentUpon>IconToggleButton.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\InterEditCell.xaml.cs">
-      <DependentUpon>InterEditCell.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\Logger\ExpanderLoggerConsole.xaml.cs">
       <DependentUpon>ExpanderLoggerConsole.xaml</DependentUpon>
     </Compile>
@@ -82,10 +79,6 @@
     <Compile Include="Controls\Logger\LoggerConsolePanel.xaml.cs">
       <DependentUpon>LoggerConsolePanel.xaml</DependentUpon>
     </Compile>
-    <Page Include="Controls\InterEditCell.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Controls\Styles\TabControlStyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -99,7 +92,6 @@
     <Compile Include="Models\DelegateCommand.cs" />
     <Compile Include="Models\ObservableObject.cs" />
     <Compile Include="Models\PropertyDescripter.cs" />
-    <Compile Include="Models\WindowService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

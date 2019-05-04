@@ -9,38 +9,19 @@ namespace Toolkit.WPF.Models
     /// <summary>
     /// Window表示サービス
     /// </summary>
-    public interface IWindowService
+    interface IWindowService
     {
         bool? Show(Func<System.Windows.Window> createWinowFunc);
         bool? ShowDialog(Func<System.Windows.Window> createWinowFunc);
-    }
-
-    /// <summary>
-    /// メッセージボックス表示サービス
-    /// </summary>
-    public interface IMessageBoxService
-    {
-        //System.Windows.MessageBoxResult ShowMessageBox(string messageBoxText, string caption, MessageBoxButton button, MessageBoxImage icon, MessageBoxResult defaultResult, MessageBoxOptions options);
-        //System.Windows.MessageBoxResult ShowMessageBox(string messageBoxText, string caption, MessageBoxButton button, MessageBoxImage icon, MessageBoxResult defaultResult);
-        //System.Windows.MessageBoxResult ShowMessageBox(string messageBoxText, string caption, MessageBoxButton button, MessageBoxImage icon);
-        //System.Windows.MessageBoxResult ShowMessageBox(string messageBoxText, string caption, MessageBoxButton button);
-        System.Windows.MessageBoxResult ShowMessageBox(string messageBoxText, string caption);
-        //System.Windows.MessageBoxResult ShowMessageBox(string messageBoxText);
-        //System.Windows.MessageBoxResult ShowMessageBox(System.Windows.Window owner, string messageBoxText, string caption, MessageBoxButton button, MessageBoxImage icon, MessageBoxResult defaultResult, MessageBoxOptions options);
-        //System.Windows.MessageBoxResult ShowMessageBox(System.Windows.Window owner, string messageBoxText, string caption, MessageBoxButton button, MessageBoxImage icon, MessageBoxResult defaultResult);        //
-        //System.Windows.MessageBoxResult ShowMessageBox(System.Windows.Window owner, string messageBoxText, string caption, MessageBoxButton button, MessageBoxImage icon);
-        //System.Windows.MessageBoxResult ShowMessageBox(System.Windows.Window owner, string messageBoxText, string caption, MessageBoxButton button);
-        System.Windows.MessageBoxResult ShowMessageBox(System.Windows.Window owner, string messageBoxText, string caption);
-        //System.Windows.MessageBoxResult ShowMessageBox(Window owner, string messageBoxText);
     }
 
 
     /// <summary>
     /// Window表示サービス
     /// </summary>
-    public class WindowService : IWindowService, IMessageBoxService
+    public class WindowService : IWindowService
     {
-        private System.Windows.Threading.Dispatcher dispatcher;
+        System.Windows.Threading.Dispatcher dispatcher;
 
         /// <summary>
         /// ウィンドウを表示
@@ -60,22 +41,6 @@ namespace Toolkit.WPF.Models
             var window = createWinowFunc?.Invoke();
             dispatcher?.Invoke(() => window.ShowDialog());
             return window.DialogResult;
-        }
-
-        /// <summary>
-        /// メッセージボックスを表示
-        /// </summary>
-        public System.Windows.MessageBoxResult ShowMessageBox(string messageBoxText, string caption)
-        {
-            return dispatcher?.Invoke(() => System.Windows.MessageBox.Show(messageBoxText, caption)) ?? System.Windows.MessageBoxResult.None;
-        }
-
-        /// <summary>
-        /// メッセージボックスを表示
-        /// </summary>
-        public System.Windows.MessageBoxResult ShowMessageBox(System.Windows.Window owner, string messageText, string caption)
-        {
-            return dispatcher?.Invoke(() => System.Windows.MessageBox.Show(owner, messageBoxText, caption)) ?? System.Windows.MessageBoxResult.None;
         }
     }
 }

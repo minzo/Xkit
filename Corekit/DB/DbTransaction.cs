@@ -18,11 +18,11 @@ namespace Corekit.DB
                 .FirstOrDefault()
                 ?.TableName;
 
-            DbPrimaryKeyInfo = propertyInfos.FirstOrDefault(i => i.GetCustomAttribute<DbPrimaryKeyAttribute>() != null);
+            DbPrimaryKeyPropertyInfo = propertyInfos.FirstOrDefault(i => i.GetCustomAttribute<DbPrimaryKeyAttribute>() != null);
 
-            PrimaryKeyName = DbPrimaryKeyInfo?.Name ?? throw new Exception($"{nameof(DbPrimaryKeyAttribute)}が指定されていません");
+            PrimaryKeyName = DbPrimaryKeyPropertyInfo?.Name ?? throw new Exception($"{nameof(DbPrimaryKeyAttribute)}が指定されていません");
 
-            DbColumnInfos = propertyInfos
+            DbColumnPropertyInfos = propertyInfos
                 .Where(i => i.GetCustomAttribute<DbColumnAttribute>() != null)
                 .ToArray();
 
@@ -55,7 +55,7 @@ namespace Corekit.DB
                 .SelectMany(i => i.GetCustomAttributes(typeof(DbColumnAttribute), false))
                 .Cast<DbColumnAttribute>()
                 .Select(i => i.ColumnName.Replace("'", "''"));
-            return $"insert into {tableName} ( {string.Join(",", columnNames) } ) values ";
+            return $"insert into {tableName} ( {string.Join(",", columnNames) } ) values ( ";
         }
 
         private static string GetDeleteQuery(string tableName)
@@ -69,8 +69,8 @@ namespace Corekit.DB
         public static readonly string DeleteTableQuery;
         public static readonly string CreateQuery;
         public static readonly string DeleteQuery;
-        public static readonly PropertyInfo DbPrimaryKeyInfo;
-        public static readonly PropertyInfo[] DbColumnInfos;
+        public static readonly PropertyInfo DbPrimaryKeyPropertyInfo;
+        public static readonly PropertyInfo[] DbColumnPropertyInfos;
     }
 
     public struct Transaction<T> : IDisposable where T : IDbConnection, new()
@@ -101,8 +101,6 @@ namespace Corekit.DB
             DbConnection.Dispose();
         }
 
-        #region Table
-
         public void CreateTable<TRecord>()
         {
             ExecuteQuery(GetQueryCache<TRecord>.CreateTableQuery);
@@ -113,54 +111,83 @@ namespace Corekit.DB
             ExecuteQuery(GetQueryCache<TRecord>.DeleteTableQuery);
         }
 
-        #endregion
-
-        #region Record
-
         public void Create<TRecord>(TRecord record)
         {
-            var query  = $"{GetQueryCache<TRecord>.CreateQuery} {GetCreateValue(record)}";
-            ExecuteQuery(query);
+            ExecuteQuery(GetCreateQuery(record));
         }
 
         public void CreateRange<TRecord>(IEnumerable<TRecord> records)
         {
-            var values = string.Join(",", records.Select(i => GetCreateValue(i)));
-            var query = $"{GetQueryCache<TRecord>.CreateQuery} {values}";
-            ExecuteQuery(query);
+            ExecuteQuery(GetCreateRangeQuery(records));
         }
 
-        public IEnumerable<TRecord> ReadRange<TRecord>(string query)
+        public IEnumerable<TRecord> ReadRange<TRecord>(IEnumerable<TRecord> records)
         {
-            return ExecuteReader(query)
-                .Select(r => r.GetData(0))
-                .Select(i => Activator.CreateInstance<TRecord>());
+            return Enumerable.Empty<TRecord>();
+//            return ExecuteReader(GetReadRangeQuery(records)).Select(i => i.FieldCount)
         }
 
         public void Update<TRecord>(TRecord record)
         {
-         //   ExecuteQuery(GetUpdateQuery(record));
+            ExecuteQuery(GetUpdateQuery(record));
         }
 
         public void UpdateRange<TRecord>(IEnumerable<TRecord> records)
         {
-          //  ExecuteQuery(GetUpdateRangeQuery(records));
+            ExecuteQuery(GetUpdateRangeQuery(records));
         }
 
         public void Delete<TRecord>(TRecord record)
         {
-            var primeryKey = GetQueryCache<TRecord>.DbPrimaryKeyInfo.GetValue(record);
-            var query = $"{GetQueryCache<TRecord>.DeleteQuery} \"{primeryKey}\"";
-            ExecuteQuery(query);
+            ExecuteQuery(GetDeleteQuery(record));
         }
 
         public void GetDeleteRange<TRecord>(IEnumerable<TRecord> records)
         {
-            //ExecuteQuery(GetDeleteRangeQuery(records));
+            ExecuteQuery(GetDeleteRangeQuery(records));
         }
 
-        #endregion
+        public string GetCreateQuery<TRecord>(TRecord record)
+        {
+            var values = GetQueryCache<TRecord>.DbColumnPropertyInfos.Select(i => $"'{i.GetValue(record)}'");
+            return $"{GetQueryCache<TRecord>.CreateQuery} {string.Join(",", values)} )";
+        }
 
+        public string GetCreateRangeQuery<TRecord>(IEnumerable<TRecord> records)
+        {
+            return $"";
+        }
+
+        public string GetReadQuery<TRecord>(TRecord record)
+        {
+            return $"";
+        }
+
+        public string GetReadRangeQuery<TRecord>(IEnumerable<TRecord> records)
+        {
+            return $"";
+        }
+
+        public string GetUpdateQuery<TRecord>(TRecord record)
+        {
+            return $"";
+        }
+
+        public string GetUpdateRangeQuery<TRecord>(IEnumerable<TRecord> records)
+        {
+            return $"";
+        }
+
+        public string GetDeleteQuery<TRecord>(TRecord record)
+        {
+            var primeryKey = GetQueryCache<TRecord>.DbPrimaryKeyPropertyInfo.GetValue(record);
+            return $"{GetQueryCache<TRecord>.DeleteQuery} \"{primeryKey}\"";
+        }
+
+        public string GetDeleteRangeQuery<TRecord>(IEnumerable<TRecord> records)
+        {
+            return $"";
+        }
 
         public void ExecuteQuery(string query)
         {
@@ -168,6 +195,21 @@ namespace Corekit.DB
             {
                 command.CommandText = query;
                 command.ExecuteNonQuery();
+            }
+        }
+
+        public void ExecuteReader(string query, Action<IDataReader> sequence)
+        {
+            using(var command = DbConnection.CreateCommand())
+            {
+                command.CommandText = query;
+                using(var reader = command.ExecuteReader())
+                {
+                    while(reader.Read())
+                    {
+                        sequence?.Invoke(reader);
+                    }
+                }
             }
         }
 
@@ -184,12 +226,6 @@ namespace Corekit.DB
                     }
                 }
             }
-        }
-
-        private static string GetCreateValue<TRecord>(TRecord record)
-        {
-            var values = GetQueryCache<TRecord>.DbColumnInfos.Select(i => $"'{i.GetValue(record)}'");
-            return $"({string.Join(",", values)})";
         }
     }
 }
