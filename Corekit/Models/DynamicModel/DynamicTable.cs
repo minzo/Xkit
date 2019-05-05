@@ -53,7 +53,7 @@ namespace Corekit.Models
                 throw new InvalidOperationException("DynamicTable Definition Already Attached");
             }
 
-            properties = new ObservableCollection<DynamicPropertyDefinition<T>>(definition.Cols.Select(i => CreateDefinition(i)));
+            properties = new ObservableCollection<IDynamicPropertyDefinition>(definition.Cols.Select(i => CreateDefinition(i)));
 
             foreach (var row in definition.Rows)
             {
@@ -217,16 +217,15 @@ namespace Corekit.Models
         /// <summary>
         /// 列の定義を生成する
         /// </summary>
-        private DynamicPropertyDefinition<T> CreateDefinition(IDynamicTableFrame col)
+        protected virtual IDynamicPropertyDefinition CreateDefinition(IDynamicTableFrame col)
         {
-            var definition = new DynamicPropertyDefinition<T>() { Name = col.Name };
-            return definition;
+            return new DynamicPropertyDefinition<T>() { Name = col.Name };
         }
 
         /// <summary>
         /// 列の定義を追加する
         /// </summary>
-        private void AddDefinition(DynamicPropertyDefinition<T> definition)
+        private void AddDefinition(IDynamicPropertyDefinition definition)
         {
             properties.Add(definition);
         }
@@ -234,7 +233,7 @@ namespace Corekit.Models
         /// <summary>
         /// 列の定義を挿入する
         /// </summary>
-        private void InsertDefinition(int index, DynamicPropertyDefinition<T> definition)
+        private void InsertDefinition(int index, IDynamicPropertyDefinition definition)
         {
             properties.Insert(index, definition);
         }
@@ -283,7 +282,7 @@ namespace Corekit.Models
 
         #endregion
 
-        private ObservableCollection<DynamicPropertyDefinition<T>> properties;
+        private ObservableCollection<IDynamicPropertyDefinition> properties;
 
         private DynamicTableDefinition definition = null;
 
