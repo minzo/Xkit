@@ -104,6 +104,10 @@
       <DependentUpon>ColorSelectComboBoxWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="DataGrid\DataGridWindowViewModel.cs" />
+    <Compile Include="DynamicTable\DynamicTableWindow.xaml.cs">
+      <DependentUpon>DynamicTableWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicTable\DynamicTableWindowViewModel.cs" />
     <Compile Include="Editor\EditorPanelViewModel.cs" />
     <Compile Include="Editor\EditorPanel.xaml.cs">
       <DependentUpon>EditorPanel.xaml</DependentUpon>
@@ -134,6 +138,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="DataGrid\DataGridWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DynamicTable\DynamicTableWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -238,9 +246,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DB\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.110.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.110.0\build\net46\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
