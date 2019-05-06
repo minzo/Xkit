@@ -55,6 +55,8 @@ namespace Corekit.Models
 
             properties = new ObservableCollection<IDynamicPropertyDefinition>(definition.Cols.Select(i => CreateDefinition(i)));
 
+            properties.CollectionChanged += OnPropertyDefinitionsChanged;
+
             foreach (var row in definition.Rows)
             {
                 AddItem(CreateDynamicItem(row));
@@ -124,6 +126,16 @@ namespace Corekit.Models
             }
         }
 
+        /// <summary>
+        /// プロパティ定義数変更通知（列定義の変更に伴って呼ばれる）
+        /// </summary>
+        private void OnPropertyDefinitionsChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            PropertyDefinitionsChanged?.Invoke(this, e);
+        }
+
+        /// プロパティ定義数変更通知
+        public event EventHandler PropertyDefinitionsChanged;
 
         #region getter setter
 
