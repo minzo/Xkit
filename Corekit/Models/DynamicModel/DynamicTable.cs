@@ -98,7 +98,7 @@ namespace Corekit.Models
                 int index = e.NewStartingIndex;
                 e.NewItems?
                     .Cast<IDynamicTableFrame>()
-                    .Run(i => InsertItem(index++, CreateDynamicItem(i)));                    
+                    .Run(i => InsertItem(index++, CreateDynamicItem(i)));
             }
         }
 
@@ -164,17 +164,12 @@ namespace Corekit.Models
         /// </summary>
         private DynamicItem CreateDynamicItem(IDynamicTableFrame row)
         {
-            //todo: 行のReadOnlyの要素をわたせるようにする
-            //var itemDefinition = row as IDynamicItemDefinition;
-            //bool isReadOnly    = itemDefinition?.IsReadOnly ?? false;
-            //bool isMovable     = itemDefinition?.IsMovable ?? false;
-            //bool isDeletable   = itemDefinition?.IsDeletable ?? false;
             var item = new DynamicItem(new DynamicItemDefinition(properties)
             {
-                Name = row.Name,
-                //IsReadOnly = isReadOnly,
-                //IsMovable = isMovable,
-                //IsDeletable = isDeletable,
+                Name        = row.Name,
+                IsReadOnly  = row.IsReadOnly,
+                IsMovable   = row.IsMovable,
+                IsDeletable = row.IsDeletable,
             });
 
             return item;
@@ -231,7 +226,11 @@ namespace Corekit.Models
         /// </summary>
         protected virtual IDynamicPropertyDefinition CreateDefinition(IDynamicTableFrame col)
         {
-            return new DynamicPropertyDefinition<T>() { Name = col.Name };
+            return new DynamicPropertyDefinition<T>()
+            {
+                Name = col.Name,
+                IsReadOnly = col.IsReadOnly
+            };
         }
 
         /// <summary>
