@@ -1,6 +1,7 @@
 ﻿using Corekit.Models;
 using System;
-using System.Collections.Generic;
+using System.Collections;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -11,9 +12,6 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Toolkit.WPF.Models;
 
 namespace Toolkit.WPF.Controls
@@ -29,6 +27,26 @@ namespace Toolkit.WPF.Controls
 
             this.AutoGeneratingColumn += OnAutoGeneratingColumn;
             this.BeginningEdit += OnBeginningEdit;
+        }
+
+        protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
+        {
+            base.OnItemsSourceChanged(oldValue, newValue);
+
+            if (oldValue is IDynamicTable oldTable)
+            {
+                oldTable.PropertyDefinitionsChanged -= OnPropertyDefinitionsChanged;
+            }
+
+            if (newValue is IDynamicTable newTable)
+            {
+                newTable.PropertyDefinitionsChanged += OnPropertyDefinitionsChanged;
+            }
+        }
+
+        private void OnPropertyDefinitionsChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            // todo: ここでプロパティの定義にあわせて列の増減をさせればいけるはず
         }
 
         private void OnAutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)

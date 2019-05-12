@@ -108,14 +108,6 @@
       <DependentUpon>DynamicTableWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="DynamicTable\DynamicTableWindowViewModel.cs" />
-    <Compile Include="Editor\EditorPanelViewModel.cs" />
-    <Compile Include="Editor\EditorPanel.xaml.cs">
-      <DependentUpon>EditorPanel.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Editor\Models\Config.cs" />
-    <Compile Include="Editor\Models\Layer.cs" />
-    <Compile Include="Editor\Models\Module.cs" />
-    <Compile Include="Editor\ViewModels\ExpressionViewModel.cs" />
     <Compile Include="FilterTextBox\FilterTextBoxWindow.xaml.cs">
       <DependentUpon>FilterTextBoxWindow.xaml</DependentUpon>
     </Compile>
@@ -142,10 +134,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="DynamicTable\DynamicTableWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Editor\EditorPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

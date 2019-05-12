@@ -135,7 +135,7 @@ namespace Corekit.Models
         }
 
         /// プロパティ定義数変更通知
-        public event EventHandler PropertyDefinitionsChanged;
+        public event NotifyCollectionChangedEventHandler PropertyDefinitionsChanged;
 
         #region getter setter
 

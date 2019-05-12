@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Toolkit.WPF.Sample
 {
@@ -17,6 +18,12 @@ namespace Toolkit.WPF.Sample
         public class Module : IDynamicTableFrame
         {
             public string Name { get; set; }
+
+            public bool? IsReadOnly => false;
+
+            public bool IsDeletable => true;
+
+            public bool IsMovable => true;
 
             public event PropertyChangedEventHandler PropertyChanged;
         }
@@ -27,9 +34,21 @@ namespace Toolkit.WPF.Sample
 
         public DynamicTableViewModel<bool> Table { get; }
 
+        public ICommand AddCommand { get; }
+
+        public ICommand RemoveCommand { get; }
+
         public DynamicTableWindowViewModel()
         {
             Table = new DynamicTableViewModel<bool>(A_Modules, B_Modules);
+
+            AddCommand = new DelegateCommand(_ => {
+                B_Modules.Add(new Module() { Name = $"B_Module{B_Modules.Count}"});
+            });
+
+            //RemoveCommand = new DelegateCommand(item => {
+            //    B_Modules.Remove(item as Module);
+            //});
         }
     }
 
@@ -101,6 +120,7 @@ namespace Toolkit.WPF.Sample
             private string name = null;
             private bool? isReadOnly = null;
 
+#pragma warning disable CS0693 
             /// <summary>
             /// プロパティ設定
             /// </summary>
@@ -115,6 +135,7 @@ namespace Toolkit.WPF.Sample
                 }
                 return false;
             }
+#pragma warning restore CS0693
         }
 
         /// <summary>

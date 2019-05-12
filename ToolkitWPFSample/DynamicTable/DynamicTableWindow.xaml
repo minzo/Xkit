@@ -10,5 +10,32 @@
     <Window.DataContext>
         <local:DynamicTableWindowViewModel />
     </Window.DataContext>
-    <tkit:DynamicTableGrid ItemsSource="{Binding Table}"/>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <DockPanel Grid.Column="0">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                <Button Content="+" Width="20" />
+                <Button Content="-" Width="20" />
+            </StackPanel>
+            <ListBox DisplayMemberPath="Name" ItemsSource="{Binding A_Modules}" />
+        </DockPanel>
+
+        <DockPanel Grid.Column="1">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                <Button Content="+" Width="20" Command="{Binding AddCommand}" />
+                <Button Content="-" Width="20" />
+            </StackPanel>
+            <ListBox DisplayMemberPath="Name" ItemsSource="{Binding B_Modules}" />
+        </DockPanel>
+
+        <tkit:DynamicTableGrid     
+            Grid.Column="3"
+            ItemsSource="{Binding Table}"/>
+
+    </Grid>
 </Window>
