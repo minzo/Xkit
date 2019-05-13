@@ -19,7 +19,7 @@
 
         <DockPanel Grid.Column="0">
             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                <Button Content="+" Width="20" />
+                <Button Content="+" Width="20" Command="{Binding AddRowCommand}"/>
                 <Button Content="-" Width="20" />
             </StackPanel>
             <ListBox DisplayMemberPath="Name" ItemsSource="{Binding A_Modules}" />
@@ -27,7 +27,7 @@
 
         <DockPanel Grid.Column="1">
             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                <Button Content="+" Width="20" Command="{Binding AddCommand}" />
+                <Button Content="+" Width="20" Command="{Binding AddColCommand}" />
                 <Button Content="-" Width="20" />
             </StackPanel>
             <ListBox DisplayMemberPath="Name" ItemsSource="{Binding B_Modules}" />

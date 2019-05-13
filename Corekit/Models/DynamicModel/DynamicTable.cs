@@ -87,18 +87,18 @@ namespace Corekit.Models
             {
                 e.OldItems?
                     .Cast<IDynamicTableFrame>()
-                    .Run(i => MoveItem(i.Name, e.NewStartingIndex));
+                    .ForEach(i => MoveItem(i.Name, e.NewStartingIndex));
             }
             else
             {
                 e.OldItems?
                     .Cast<IDynamicTableFrame>()
-                    .Run(i => RemoveItem(i.Name));
+                    .ForEach(i => RemoveItem(i.Name));
 
                 int index = e.NewStartingIndex;
                 e.NewItems?
                     .Cast<IDynamicTableFrame>()
-                    .Run(i => InsertItem(index++, CreateDynamicItem(i)));
+                    .ForEach(i => InsertItem(index++, CreateDynamicItem(i)));
             }
         }
 
@@ -111,18 +111,18 @@ namespace Corekit.Models
             {
                 e.OldItems?
                     .Cast<IDynamicTableFrame>()
-                    .Run(i => MoveDefinition(i.Name, e.OldStartingIndex));
+                    .ForEach(i => MoveDefinition(i.Name, e.OldStartingIndex));
             }
             else
             {
                 e.OldItems?
                     .Cast<IDynamicTableFrame>()
-                    .Run(i => RemoveDefinition(i.Name));
+                    .ForEach(i => RemoveDefinition(i.Name));
 
                 int index = e.NewStartingIndex;
                 e.NewItems?
                     .Cast<IDynamicTableFrame>()
-                    .Run(i => InsertDefinition(index++, CreateDefinition(i)));
+                    .ForEach(i => InsertDefinition(index++, CreateDefinition(i)));
             }
         }
 

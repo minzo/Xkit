@@ -11,6 +11,8 @@ namespace Corekit.Models
     {
         private IDynamicProperty property;
 
+        public IDynamicPropertyDefinition Definition => property.Definition;
+
         public DynamicPropertyDescriptor(IDynamicProperty property) : base(property.Definition.Name, null)
         {
             this.property = property;

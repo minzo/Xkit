@@ -1,4 +1,5 @@
-﻿using Corekit.Models;
+﻿using Corekit;
+using Corekit.Models;
 using System;
 using System.Collections;
 using System.Collections.Specialized;
@@ -21,6 +22,25 @@ namespace Toolkit.WPF.Controls
     /// </summary>
     public partial class DynamicTableGrid : DataGrid
     {
+        /// <summary>
+        /// 列のプロパティ名
+        /// </summary>
+        public static string GetPropertyName(DependencyObject obj)
+        {
+            return (string)obj.GetValue(PropertyNameProperty);
+        }
+
+        public static void SetPropertyName(DependencyObject obj, string value)
+        {
+            obj.SetValue(PropertyNameProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for PropertyName.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty PropertyNameProperty =
+            DependencyProperty.RegisterAttached("PropertyName", typeof(string), typeof(DynamicTableGrid), new PropertyMetadata(null));
+
+
+
         public DynamicTableGrid()
         {
             InitializeComponent();
@@ -46,18 +66,38 @@ namespace Toolkit.WPF.Controls
 
         private void OnPropertyDefinitionsChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            // todo: ここでプロパティの定義にあわせて列の増減をさせればいけるはず
+            if(e.Action == NotifyCollectionChangedAction.Move)
+            {
+
+            }
+            else
+            {
+                e.OldItems?
+                    .Cast<IDynamicPropertyDefinition>()
+                    .Select(i => i.Name)
+                    .ForEach(i => Columns.Remove(Columns.FirstOrDefault(c => GetPropertyName(c) == i)));
+
+                int index = e.NewStartingIndex;
+                e.NewItems?
+                    .Cast<IDynamicPropertyDefinition>()
+                    .Select(i => GenerateColumn(i.Name, i.IsReadOnly ?? false, i))
+                    .ForEach(i => Columns.Insert(index++, i));
+            }
         }
 
         private void OnAutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            var descriptor = e.PropertyDescriptor as PropertyDescriptor;
-            var column = Resources["BindingColumn"] as DataGridBindingColumn;
+            var descriptor = e.PropertyDescriptor as DynamicPropertyDescriptor;
+            e.Column = GenerateColumn(e.PropertyName, descriptor.IsReadOnly, descriptor.Definition);
+        }
 
-            column.IsReadOnly = descriptor.IsReadOnly;
-            column.Header = descriptor;
-            column.Binding = new Binding(e.PropertyName);
-            e.Column = column;
+        private DataGridColumn GenerateColumn(string propertyName, bool isReadOnly, IDynamicPropertyDefinition definition)
+        {
+            var column = Resources["BindingColumn"] as DataGridBindingColumn;
+            column.Binding = new Binding(propertyName);
+            column.IsReadOnly = isReadOnly;
+            column.Header     = definition;
+            return column;
         }
 
         private void OnBeginningEdit(object sender, DataGridBeginningEditEventArgs e)

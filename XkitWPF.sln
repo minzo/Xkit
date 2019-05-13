@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolkitWPFSample", "Toolkit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CorekitSample", "CorekitSample\CorekitSample.csproj", "{F2B2C8CA-4441-443D-A278-EC4FC91A262B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Corekit.Tests", "Corekit.Tests\Corekit.Tests.csproj", "{FB98A495-2803-4779-B579-8ABB0F1528E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{F2B2C8CA-4441-443D-A278-EC4FC91A262B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2B2C8CA-4441-443D-A278-EC4FC91A262B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2B2C8CA-4441-443D-A278-EC4FC91A262B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB98A495-2803-4779-B579-8ABB0F1528E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB98A495-2803-4779-B579-8ABB0F1528E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB98A495-2803-4779-B579-8ABB0F1528E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB98A495-2803-4779-B579-8ABB0F1528E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

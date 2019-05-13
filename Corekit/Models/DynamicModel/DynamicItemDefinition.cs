@@ -80,15 +80,15 @@ namespace Corekit.Models
             if(collection is INotifyCollectionChanged notify)
             {
                 notify.CollectionChanged += (s, e) => {
-                    e.OldItems?.Cast<IDynamicPropertyDefinition>().Run(i => this.collection.Remove(i));
+                    e.OldItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => this.collection.Remove(i));
                     int insertIndex = e.NewStartingIndex;
-                    e.NewItems?.Cast<IDynamicPropertyDefinition>().Run(i => this.collection.Insert(insertIndex++, i));
+                    e.NewItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => this.collection.Insert(insertIndex++, i));
                 };
             }
 
             this.collection = new ObservableCollection<IDynamicPropertyDefinition>(collection);
             this.collection.CollectionChanged += OnCollectionChanged;
-            this.collection.Run(i => i.PropertyChanged += OnPropertyChanged);
+            this.collection.ForEach(i => i.PropertyChanged += OnPropertyChanged);
         }
 
         /// <summary>
@@ -128,8 +128,8 @@ namespace Corekit.Models
         /// </summary>
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            e.OldItems?.Cast<IDynamicPropertyDefinition>().Run(i => i.PropertyChanged -= OnPropertyChanged);
-            e.NewItems?.Cast<IDynamicPropertyDefinition>().Run(i => i.PropertyChanged += OnPropertyChanged);
+            e.OldItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => i.PropertyChanged -= OnPropertyChanged);
+            e.NewItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => i.PropertyChanged += OnPropertyChanged);
 
             CollectionChanged?.Invoke(this, e);
         }

@@ -34,21 +34,21 @@ namespace Toolkit.WPF.Sample
 
         public DynamicTableViewModel<bool> Table { get; }
 
-        public ICommand AddCommand { get; }
+        public ICommand AddRowCommand { get; }
 
-        public ICommand RemoveCommand { get; }
+        public ICommand AddColCommand { get; }
 
         public DynamicTableWindowViewModel()
         {
             Table = new DynamicTableViewModel<bool>(A_Modules, B_Modules);
 
-            AddCommand = new DelegateCommand(_ => {
-                B_Modules.Add(new Module() { Name = $"B_Module{B_Modules.Count}"});
+            AddRowCommand = new DelegateCommand(_ => {
+                A_Modules.Add(new Module() { Name = $"A_Module{A_Modules.Count}" });
             });
 
-            //RemoveCommand = new DelegateCommand(item => {
-            //    B_Modules.Remove(item as Module);
-            //});
+            AddColCommand = new DelegateCommand(_ => {
+                B_Modules.Add(new Module() { Name = $"B_Module{B_Modules.Count}"});
+            });
         }
     }
 

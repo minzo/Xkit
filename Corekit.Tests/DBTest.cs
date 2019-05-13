@@ -43,6 +43,7 @@ namespace Corekit.DB.Tests
             using (var trans = Transaction<SQLiteConnection>.Begin())
             {
                 trans.CreateTable<Record>();
+                trans.ExecuteReader("select count(*) from sqlite_master where type = 'table' and name = 'TestRecord'");
             }
 
             Assert.IsTrue(System.IO.File.Exists(_DBPath));

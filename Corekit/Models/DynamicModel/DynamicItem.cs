@@ -48,7 +48,7 @@ namespace Corekit.Models
 
             Definition = definition;
             Definition.CollectionChanged += OnDefinitionChanged;
-            Definition.Run(i => AddProperty(i.Create(this)));
+            Definition.ForEach(i => AddProperty(i.Create(this)));
             isAttached = true;
             return this;
         }
@@ -164,18 +164,18 @@ namespace Corekit.Models
             {
                 e.OldItems?
                     .Cast<IDynamicPropertyDefinition>()
-                    .Run(i => MoveProperty(i.Name, e.NewStartingIndex));
+                    .ForEach(i => MoveProperty(i.Name, e.NewStartingIndex));
             }
             else
             {
                 e.OldItems?
                     .Cast<IDynamicPropertyDefinition>()
-                    .Run(i => RemoveProperty(i.Name));
+                    .ForEach(i => RemoveProperty(i.Name));
 
                 int insertIndex = e.NewStartingIndex;
                 e.NewItems?
                     .Cast<IDynamicPropertyDefinition>()
-                    .Run(i => InsertProperty(insertIndex++, i.Create(this)));
+                    .ForEach(i => InsertProperty(insertIndex++, i.Create(this)));
             }
         }
 
