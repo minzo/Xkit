@@ -40,7 +40,12 @@ namespace Toolkit.WPF.Models
     /// </summary>
     public class WindowService : IWindowService, IMessageBoxService
     {
-        private System.Windows.Threading.Dispatcher dispatcher;
+        private System.Windows.Threading.Dispatcher dispatcher = null;
+
+        public WindowService(System.Windows.Threading.Dispatcher dispatcher)
+        {
+            this.dispatcher = dispatcher;
+        }
 
         /// <summary>
         /// ウィンドウを表示
