@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Text;
 using Corekit.DB;
+using System.Linq;
 
 namespace Corekit.DB.Tests
 {
@@ -37,23 +38,32 @@ namespace Corekit.DB.Tests
         }
 
         [TestMethod]
-        public void TableCreate()
+        public void TableCreateAndDelete()
         {
             bool isExistTable = false;
             using (var trans = Transaction<SQLiteConnection>.Begin())
             {
                 trans.CreateTable<Record>();
-                trans.ExecuteReader("select count(*) from sqlite_master where type = 'table' and name = 'TestRecord'");
+                isExistTable = trans
+                    .ExecuteReader("select count(*) from sqlite_master where type = 'table' and name = 'TestRecord'")
+                    .Select(i => i.GetBoolean(0))
+                    .FirstOrDefault();
             }
 
             Assert.IsTrue(System.IO.File.Exists(_DBPath));
             Assert.IsTrue(isExistTable);
-        }
 
-        [TestMethod]
-        public void TableDelete()
-        {
-            throw new NotImplementedException();
+            using (var trans = Transaction<SQLiteConnection>.Begin())
+            {
+                trans.DeleteTable<Record>();
+                isExistTable = trans
+                    .ExecuteReader("select count(*) from sqlite_master where type = 'table' and name = 'TestRecord'")
+                    .Select(i => i.GetBoolean(0))
+                    .FirstOrDefault();
+            }
+
+            Assert.IsTrue(System.IO.File.Exists(_DBPath));
+            Assert.IsFalse(isExistTable);
         }
     }
 }
