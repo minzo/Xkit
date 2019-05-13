@@ -12,7 +12,7 @@ namespace Corekit
         /// <summary>
         /// 指定したアクションを実行する
         /// </summary>
-        public static void Run<T>(this IEnumerable<T> collection, Action<T> action)
+        public static void ForEach<T>(this IEnumerable<T> collection, Action<T> action)
         {
             if(action != null)
             {
@@ -26,7 +26,7 @@ namespace Corekit
         /// <summary>
         /// 指定したアクションを実行する
         /// </summary>
-        public static void Run(this IEnumerable collection, Action<object> action)
+        public static void ForEach(this IEnumerable collection, Action<object> action)
         {
             if (action != null)
             {
