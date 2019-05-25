@@ -93,6 +93,12 @@
     <Compile Include="Controls\TreeGrid.xaml.cs">
       <DependentUpon>TreeGrid.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\VectorControl\VectorEditor.xaml.cs">
+      <DependentUpon>VectorEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VectorControl\VectorViewer.xaml.cs">
+      <DependentUpon>VectorViewer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Converters\BoolNot.cs" />
     <Compile Include="Converters\ColorToBrush.cs" />
     <Compile Include="Converters\ValueToAlpha.cs" />
@@ -122,6 +128,14 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Page Include="Controls\VectorControl\VectorEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\VectorControl\VectorViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Corekit\Corekit.csproj">

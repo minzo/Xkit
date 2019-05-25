@@ -4,43 +4,76 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Toolkit.WPF.Sample"
+        xmlns:tkitwpf="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="DataGridWindow" Height="450" Width="800">
+
+    <!-- DataContext -->
     <Window.DataContext>
         <local:DataGridWindowViewModel />
     </Window.DataContext>
 
-    <StackPanel>
-        <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False">
-            <DataGrid.Columns>
-                <DataGridHyperlinkColumn Header="HyperlinkColumn" Binding="{Binding Column0}" ContentBinding="{Binding Column1}" />
-                <DataGridTemplateColumn Header="ExpanderColumn">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Expander Header="{Binding Column2[0]}" BorderThickness="1" BorderBrush="Black">
-                                <ListBox ItemsSource="{Binding Column2}" Margin="16 0 0 0"/>
-                            </Expander>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <Expander Header="{Binding Column2[0]}" BorderThickness="1" BorderBrush="Black">
-                                <ListBox ItemsSource="{Binding Column2}" />
-                            </Expander>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+    <!-- Resources -->
+    <Window.Resources>
+        <!--  -->
+        <tkitwpf:DynamicPropertyTemplateSelector x:Key="CellSelector">
+            <DataTemplate DataType="{x:Type system:Boolean}">
+                <CheckBox IsChecked="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:String}">
+                <TextBlock Text="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Int32}">
+                <TextBlock Text="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:UInt32}">
+                <TextBlock Text="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Single}">
+                <TextBlock Text="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Double}">
+                <TextBlock Text="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type local:Vector3}">
+                <tkitwpf:VectorViewer DataContext="{Binding Value}" />
+            </DataTemplate>
+        </tkitwpf:DynamicPropertyTemplateSelector>
+        <!--  -->
+        <tkitwpf:DynamicPropertyTemplateSelector x:Key="CellEditingSelector">
+            <DataTemplate DataType="{x:Type system:Boolean}">
+                <CheckBox IsChecked="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:String}">
+                <TextBox Text="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Int32}">
+                <TextBlock Text="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:UInt32}">
+                <TextBlock Text="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Single}">
+                <TextBlock Text="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Double}">
+                <TextBlock Text="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type local:Vector3}">
+                <tkitwpf:VectorEditor DataContext="{Binding Value}" />
+            </DataTemplate>
+        </tkitwpf:DynamicPropertyTemplateSelector>
+    </Window.Resources>
 
+    <StackPanel>
         <StackPanel Orientation="Horizontal">
             <Button Content="+" Width="20" Command="{Binding AddCommand}"/>
         </StackPanel>
-
-        <DataGrid ItemsSource="{Binding Items}" CanUserAddRows="False" />
-
-
+        <tkitwpf:DynamicTableGrid 
+            ItemsSource="{Binding Items}" 
+            CellTemplateSelector="{StaticResource CellSelector}"
+            CellEditingTemplateSelector="{StaticResource CellEditingSelector}"
+            />
     </StackPanel>
-
-
 </Window>

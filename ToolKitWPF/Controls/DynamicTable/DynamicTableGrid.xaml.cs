@@ -39,7 +39,67 @@ namespace Toolkit.WPF.Controls
         public static readonly DependencyProperty PropertyNameProperty =
             DependencyProperty.RegisterAttached("PropertyName", typeof(string), typeof(DynamicTableGrid), new PropertyMetadata(null));
 
+        #region DataTemplate
 
+        /// <summary>
+        /// CellTemplate
+        /// </summary>
+        public DataTemplate CellTemplate
+        {
+            get { return (DataTemplate)GetValue(CellTemplateProperty); }
+            set { SetValue(CellTemplateProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CellTemplate.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CellTemplateProperty =
+            DependencyProperty.Register("CellTemplate", typeof(DataTemplate), typeof(DynamicTableGrid), new PropertyMetadata(null));
+
+
+        /// <summary>
+        /// CellEditingTamplate
+        /// </summary>
+        public DataTemplate CellEditingTemplate
+        {
+            get { return (DataTemplate)GetValue(CellEditingTemplateProperty); }
+            set { SetValue(CellEditingTemplateProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CellEditingTemplate.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CellEditingTemplateProperty =
+            DependencyProperty.Register("CellEditingTemplate", typeof(DataTemplate), typeof(DynamicTableGrid), new PropertyMetadata(null));
+
+        #endregion
+
+        #region DataTemplateSelector
+
+        /// <summary>
+        /// CellTemplateSelector
+        /// </summary>
+        public DataTemplateSelector CellTemplateSelector
+        {
+            get { return (DataTemplateSelector)GetValue(CellTemplateSelectorProperty); }
+            set { SetValue(CellTemplateSelectorProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CellTemplateSelector.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CellTemplateSelectorProperty =
+            DependencyProperty.Register("CellTemplateSelector", typeof(DataTemplateSelector), typeof(DynamicTableGrid), new PropertyMetadata(null));
+
+
+        /// <summary>
+        /// CellEditingTemplateSelector
+        /// </summary>
+        public DataTemplateSelector CellEditingTemplateSelector
+        {
+            get { return (DataTemplateSelector)GetValue(CellEditingTemplateSelectorProperty); }
+            set { SetValue(CellEditingTemplateSelectorProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CellEditingTemplateSelector.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CellEditingTemplateSelectorProperty =
+            DependencyProperty.Register("CellEditingTemplateSelector", typeof(DataTemplateSelector), typeof(DynamicTableGrid), new PropertyMetadata(null));
+
+        #endregion
 
         public DynamicTableGrid()
         {
@@ -97,6 +157,10 @@ namespace Toolkit.WPF.Controls
             column.Binding = new Binding(propertyName);
             column.IsReadOnly = isReadOnly;
             column.Header     = definition;
+            column.CellTemplate = CellTemplate;
+            column.CellEditingTemplate = CellEditingTemplate;
+            column.CellTemplateSelector = CellTemplateSelector;
+            column.CellEditingTemplateSelector = CellEditingTemplateSelector;
             return column;
         }
 

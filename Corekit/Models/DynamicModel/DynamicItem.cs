@@ -182,7 +182,7 @@ namespace Corekit.Models
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var property = sender as IDynamicProperty;
-            PropertyChanged.Invoke(this, new PropertyChangedEventArgs(property.Definition.Name));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property.Definition.Name));
         }
 
         public new event PropertyChangedEventHandler PropertyChanged = null;

@@ -155,10 +155,6 @@ namespace Toolkit.WPF.Controls
                             v.Height = editingElement.Height;
                             return;
 
-                        case Control v:
-                            v.Focus();
-                            return;
-
                         default:
                             FindVisualChildren(VisualTreeHelper.GetChild(dp, 0));
                             return;
