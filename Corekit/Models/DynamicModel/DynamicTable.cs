@@ -12,7 +12,7 @@ namespace Corekit.Models
     /// <summary>
     /// DynamicTable
     /// </summary>
-    public class DynamicTable<T> : TypedColletion<DynamicItem>, IDynamicTable<DynamicItem, T>
+    public class DynamicTable<T> : TypedCollection<DynamicItem>, IDynamicTable<DynamicItem, T>
     {
         /// <summary>
         /// 名前

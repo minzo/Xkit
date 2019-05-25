@@ -22,7 +22,7 @@
                 <CheckBox IsChecked="{Binding Value}" />
             </DataTemplate>
             <DataTemplate DataType="{x:Type system:String}">
-                <TextBlock Text="{Binding Value}" />
+                <TextBlock Text="{Binding Value}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
             </DataTemplate>
             <DataTemplate DataType="{x:Type system:Int32}">
                 <TextBlock Text="{Binding Value}" />
@@ -66,6 +66,11 @@
         </tkitwpf:DynamicPropertyTemplateSelector>
     </Window.Resources>
 
+    <ItemsControl ItemsSource="">
+        
+    </ItemsControl>
+        
+    
     <StackPanel>
         <StackPanel Orientation="Horizontal">
             <Button Content="+" Width="20" Command="{Binding AddCommand}"/>
@@ -74,6 +79,20 @@
             ItemsSource="{Binding Items}" 
             CellTemplateSelector="{StaticResource CellSelector}"
             CellEditingTemplateSelector="{StaticResource CellEditingSelector}"
-            />
+            RowDetailsVisibilityMode="VisibleWhenSelected">
+            <tkitwpf:DynamicTableGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <TabControl>
+                        <TabItem Header="基本">
+                            <DockPanel>
+                                <Border DockPanel.Dock="Left" Background="Red">
+                                    <TextBlock Text="{Binding Name}" />
+                                </Border>
+                            </DockPanel>
+                        </TabItem>
+                    </TabControl>
+                </DataTemplate>
+            </tkitwpf:DynamicTableGrid.RowDetailsTemplate>
+        </tkitwpf:DynamicTableGrid>
     </StackPanel>
 </Window>

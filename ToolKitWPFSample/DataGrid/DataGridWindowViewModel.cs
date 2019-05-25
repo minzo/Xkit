@@ -22,7 +22,9 @@ namespace Toolkit.WPF.Sample
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public TypedColletion<DynamicItem> Items { get; } = new TypedColletion<DynamicItem>();
+        public TypedCollection<DynamicItem> Items { get; } = new TypedCollection<DynamicItem>();
+
+        public ObservableCollection<TypedCollection<DynamicItem>>
 
         public ICommand AddCommand { get; }
 
@@ -32,6 +34,8 @@ namespace Toolkit.WPF.Sample
                 new DynamicPropertyDefinition<string>(){ Name = "Name" },
                 new DynamicPropertyDefinition<Vector3>(){ Name = "Pos" },
             });
+
+            Items.Add(new DynamicItem(definition));
 
             AddCommand = new DelegateCommand(_ => {
                 Items.Add(new DynamicItem(definition));

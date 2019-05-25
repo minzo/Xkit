@@ -175,7 +175,10 @@ namespace Toolkit.WPF.Controls
             return children.Any();
         }
 
-        internal int  GetIndent(object item)
+        /// <summary>
+        /// インデントを取得します
+        /// </summary>
+        internal int GetIndent(object item)
         {
             levelOfTreeDepth.TryGetValue(item, out int result);
             return result;
