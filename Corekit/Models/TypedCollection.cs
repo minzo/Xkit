@@ -13,6 +13,12 @@ namespace Corekit.Models
     /// </summary>
     public class TypedCollection<T> : ObservableCollection<T>, ITypedList where T : ICustomTypeDescriptor
     {
+        public TypedCollection() : base() { }
+
+        public TypedCollection(IEnumerable<T> collection) : base(collection) { }
+
+        public TypedCollection(List<T> list) : base(list) { }
+
         public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)
         {
             return this.FirstOrDefault()?.GetProperties();
