@@ -144,6 +144,7 @@ namespace Toolkit.WPF.Sample
         internal class Property<TValue> : IDynamicProperty
         {
             private IDictionary<string, TValue> _OwnerTableValue;
+            private IDictionary<string, TValue> _ParentTableValue;
 
             /// <summary>
             /// 定義
@@ -160,6 +161,10 @@ namespace Toolkit.WPF.Sample
             /// </summary>
             public bool IsReadOnly => Owner?.Definition?.IsReadOnly == true || Definition.IsReadOnly == true;
 
+            /// <summary>
+            /// 継承しているか
+            /// </summary>
+            public bool IsInheriting => !_OwnerTableValue.ContainsKey($"{Owner.Definition.Name}___{Definition.Name}");
 
             /// <summary>
             /// 値
@@ -168,14 +173,26 @@ namespace Toolkit.WPF.Sample
             {
                 get
                 {
-                    _OwnerTableValue.TryGetValue($"{Owner.Definition.Name}___{Definition.Name}", out TValue value);
+                    TValue value;
+
+                    if ( _OwnerTableValue.TryGetValue($"{Owner.Definition.Name}___{Definition.Name}", out value) )
+                    {
+                        return value;
+                    }
+                    else if( _ParentTableValue?.TryGetValue($"{Owner.Definition.Name}___{Definition.Name}", out value) == true)
+                    {
+                        return value;
+                    }
+
                     return value;
                 }
                 set
                 {
                     PropertyChanging?.Invoke(this, _changingEventArgs);
+                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(IsInheriting)));
                     _OwnerTableValue[$"{Owner.Definition.Name}___{Definition.Name}"] = value;
                     PropertyChanged?.Invoke(this, _changedEventArgs);
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsInheriting)));
                 }
             }
 

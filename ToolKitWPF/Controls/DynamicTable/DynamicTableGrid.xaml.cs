@@ -147,21 +147,27 @@ namespace Toolkit.WPF.Controls
 
         private void OnAutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            var descriptor = e.PropertyDescriptor as DynamicPropertyDescriptor;
-            e.Column = GenerateColumn(e.PropertyName, descriptor.IsReadOnly, descriptor.Definition);
+            if( e.PropertyDescriptor is DynamicPropertyDescriptor descriptor)
+            {
+                e.Column = GenerateColumn(e.PropertyName, descriptor.IsReadOnly, descriptor.Definition);
+            }
         }
 
         private DataGridColumn GenerateColumn(string propertyName, bool isReadOnly, IDynamicPropertyDefinition definition)
         {
-            var column = Resources["BindingColumn"] as DataGridBindingColumn;
-            column.Binding = new Binding(propertyName);
-            column.IsReadOnly = isReadOnly;
-            column.Header     = definition;
-            column.CellTemplate = CellTemplate;
-            column.CellEditingTemplate = CellEditingTemplate;
-            column.CellTemplateSelector = CellTemplateSelector;
-            column.CellEditingTemplateSelector = CellEditingTemplateSelector;
-            return column;
+            if( TryFindResource("BindingColumn") is DataGridBindingColumn column)
+            {
+                column.Binding = new Binding(propertyName);
+                column.IsReadOnly = isReadOnly;
+                column.Header = definition;
+                column.CellTemplate = CellTemplate ?? column.CellTemplate;
+                column.CellEditingTemplate = CellEditingTemplate ?? column.CellEditingTemplate;
+                column.CellTemplateSelector = CellTemplateSelector ?? column.CellTemplateSelector;
+                column.CellEditingTemplateSelector = CellEditingTemplateSelector ?? column.CellEditingTemplateSelector;
+                return column;
+            }
+
+            return null;
         }
 
         private void OnBeginningEdit(object sender, DataGridBeginningEditEventArgs e)

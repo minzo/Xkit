@@ -5,11 +5,98 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Toolkit.WPF.Sample"
         xmlns:tkit="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
+        xmlns:converters="clr-namespace:Toolkit.WPF.Converters;assembly=Toolkit.WPF"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="DynamicTableWindow" Height="450" Width="800">
     <Window.DataContext>
         <local:DynamicTableWindowViewModel />
     </Window.DataContext>
+
+    <Window.Resources>
+
+        <converters:BoolNot x:Key="BoolNot" />
+
+        <Style x:Key="BorderStyle" TargetType="{x:Type Border}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Value}" Value="True">
+                    <Setter Property="Background" Value="#50ff661a" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="CheckBoxStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="IsEnabled" Value="{Binding IsReadOnly, Converter={StaticResource BoolNot}}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Opacity" Value="1.0" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsInheriting}" Value="true">
+                    <Setter Property="Opacity" Value="0.3" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="TextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="IsEnabled" Value="{Binding IsReadOnly, Converter={StaticResource BoolNot}}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsInheriting}" Value="true">
+                    <Setter Property="Opacity" Value="0.1" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="TextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="IsEnabled" Value="{Binding IsReadOnly, Converter={StaticResource BoolNot}}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+
+        <tkit:DynamicPropertyTemplateSelector x:Key="CellTemplateSelector_">
+            <DataTemplate DataType="{x:Type system:Int32}">
+                <TextBlock Text="{Binding Value}" Style="{StaticResource TextBlockStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Single}">
+                <TextBlock Text="{Binding Value, StringFormat={}{0:0.00######}}" Style="{StaticResource TextBlockStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Double}">
+                <TextBlock Text="{Binding Value, StringFormat={}{0:0.00######}}" Style="{StaticResource TextBlockStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:String}">
+                <TextBlock Text="{Binding Value}" Style="{StaticResource TextBlockStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Boolean}">
+                <Border Style="{StaticResource BorderStyle}">
+                    <CheckBox IsChecked="{Binding Value}" Style="{StaticResource CheckBoxStyle}" />
+                </Border>
+            </DataTemplate>
+        </tkit:DynamicPropertyTemplateSelector>
+
+        <tkit:DynamicPropertyTemplateSelector x:Key="CellEditingTemplateSelector_">
+            <DataTemplate DataType="{x:Type system:Int32}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBoxStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Single}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBoxStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Double}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBoxStyle}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:String}">
+                <TextBox Text="{Binding Value}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Boolean}">
+                <Border Style="{StaticResource BorderStyle}">
+                    <CheckBox IsChecked="{Binding Value}" Style="{StaticResource CheckBoxStyle}" />
+                </Border>
+            </DataTemplate>
+        </tkit:DynamicPropertyTemplateSelector>
+
+    </Window.Resources>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100" />
@@ -35,7 +122,9 @@
 
         <tkit:DynamicTableGrid     
             Grid.Column="3"
-            ItemsSource="{Binding Table}"/>
-
+            ItemsSource="{Binding Table}"
+            CellTemplateSelector="{StaticResource CellTemplateSelector_}"            
+            CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector_}"
+            />
     </Grid>
 </Window>
