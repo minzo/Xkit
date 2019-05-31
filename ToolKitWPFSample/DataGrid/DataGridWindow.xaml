@@ -16,8 +16,8 @@
 
     <!-- Resources -->
     <Window.Resources>
-        <!--  -->
-        <tkitwpf:DynamicPropertyTemplateSelector x:Key="CellSelector">
+        <!-- CellTemplateSelector -->
+        <tkitwpf:DynamicPropertyTemplateSelector x:Key="_CellSelector">
             <DataTemplate DataType="{x:Type system:Boolean}">
                 <CheckBox IsChecked="{Binding Value}" />
             </DataTemplate>
@@ -40,8 +40,8 @@
                 <tkitwpf:VectorViewer DataContext="{Binding Value}" />
             </DataTemplate>
         </tkitwpf:DynamicPropertyTemplateSelector>
-        <!--  -->
-        <tkitwpf:DynamicPropertyTemplateSelector x:Key="CellEditingSelector">
+        <!-- CellEditingTemplateSelectror -->
+        <tkitwpf:DynamicPropertyTemplateSelector x:Key="_CellEditingSelector">
             <DataTemplate DataType="{x:Type system:Boolean}">
                 <CheckBox IsChecked="{Binding Value}" />
             </DataTemplate>
@@ -64,35 +64,25 @@
                 <tkitwpf:VectorEditor DataContext="{Binding Value}" />
             </DataTemplate>
         </tkitwpf:DynamicPropertyTemplateSelector>
+
+        <DataTemplate x:Key="Item">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="+" Width="20" Command="{Binding AddCommand}"/>
+                </StackPanel>
+                <tkitwpf:DynamicTableGrid
+                    ItemsSource="{Binding}"
+                    CellTemplateSelector="{StaticResource _CellSelector}"
+                    CellEditingTemplateSelector="{StaticResource _CellEditingSelector}"
+                    RowDetailsVisibilityMode="Visible">
+                </tkitwpf:DynamicTableGrid>
+            </StackPanel>
+        </DataTemplate>
     </Window.Resources>
 
-    <ItemsControl ItemsSource="">
-        
-    </ItemsControl>
-        
-    
-    <StackPanel>
-        <StackPanel Orientation="Horizontal">
-            <Button Content="+" Width="20" Command="{Binding AddCommand}"/>
-        </StackPanel>
-        <tkitwpf:DynamicTableGrid 
-            ItemsSource="{Binding Items}" 
-            CellTemplateSelector="{StaticResource CellSelector}"
-            CellEditingTemplateSelector="{StaticResource CellEditingSelector}"
-            RowDetailsVisibilityMode="VisibleWhenSelected">
-            <tkitwpf:DynamicTableGrid.RowDetailsTemplate>
-                <DataTemplate>
-                    <TabControl>
-                        <TabItem Header="基本">
-                            <DockPanel>
-                                <Border DockPanel.Dock="Left" Background="Red">
-                                    <TextBlock Text="{Binding Name}" />
-                                </Border>
-                            </DockPanel>
-                        </TabItem>
-                    </TabControl>
-                </DataTemplate>
-            </tkitwpf:DynamicTableGrid.RowDetailsTemplate>
-        </tkitwpf:DynamicTableGrid>
-    </StackPanel>
+    <ItemsControl
+        tkitwpf:DynamicTableGrid.IsSharedSizeScope="True"
+        ItemsSource="{Binding ItemsCollection}" 
+        ItemTemplate="{StaticResource Item}" />
+
 </Window>

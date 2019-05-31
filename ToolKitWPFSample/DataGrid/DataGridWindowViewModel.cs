@@ -18,13 +18,35 @@ namespace Toolkit.WPF.Sample
         public float Z { get; set; }
     }
 
+    public class ControllerItemViewModel : System.Dynamic.DynamicObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string Name { get; set; }
+
+        public string FilePath { get; set; }
+
+        public Task<bool> LoadAsync(string filePath)
+        {
+            return Task<bool>.Run(() =>
+            {
+                Model = System.IO.File.ReadAllBytes(filePath);
+                return true;
+            });
+        }
+
+        public object Model { get; set; }
+
+        public object ViewModel { get; set; }
+    }
+
     public class DataGridWindowViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
         public TypedCollection<DynamicItem> Items { get; } = new TypedCollection<DynamicItem>();
 
-        public ObservableCollection<TypedCollection<DynamicItem>>
+        public ObservableCollection<ObservableCollection<ControllerItemViewModel>> ItemsCollection { get; } = new ObservableCollection<ObservableCollection<ControllerItemViewModel>>();
 
         public ICommand AddCommand { get; }
 
@@ -35,11 +57,18 @@ namespace Toolkit.WPF.Sample
                 new DynamicPropertyDefinition<Vector3>(){ Name = "Pos" },
             });
 
-            Items.Add(new DynamicItem(definition));
+            var items = new [] {
+                new ControllerItemViewModel(),
+                new ControllerItemViewModel(),
+                new ControllerItemViewModel(),
+                new ControllerItemViewModel(),
+            };
 
-            AddCommand = new DelegateCommand(_ => {
-                Items.Add(new DynamicItem(definition));
-            });
+            ItemsCollection.Add(new ObservableCollection<ControllerItemViewModel>(items));
+            ItemsCollection.Add(new ObservableCollection<ControllerItemViewModel>(items));
+            ItemsCollection.Add(new ObservableCollection<ControllerItemViewModel>(items));
+            ItemsCollection.Add(new ObservableCollection<ControllerItemViewModel>(items));
+            ItemsCollection.Add(new ObservableCollection<ControllerItemViewModel>(items));
         }
     }
 }
