@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Toolkit.WPF.Sample"
         xmlns:tkitwpf="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
+        xmlns:collection="clr-namespace:System.Collections;assembly=mscorlib"
         mc:Ignorable="d"
         Title="DataGridWindow" Height="450" Width="800">
 
@@ -36,6 +37,13 @@
             <DataTemplate DataType="{x:Type system:Double}">
                 <TextBlock Text="{Binding Value}" />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type collection:ICollection}">
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Run Text="要素数" />
+                    <Run Text="{Binding Value.Count, Mode=OneWay}" />
+                    <Run Text="個" />
+                </TextBlock>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type local:Vector3}">
                 <tkitwpf:VectorViewer DataContext="{Binding Value}" />
             </DataTemplate>
@@ -62,6 +70,24 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type local:Vector3}">
                 <tkitwpf:VectorEditor DataContext="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type collection:ICollection}">
+                <Grid>
+                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Run Text="要素数" />
+                        <Run Text="{Binding Value.Count, Mode=OneWay}" />
+                        <Run Text="個" />
+                    </TextBlock>
+                    <Popup IsOpen="True">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="追加" />
+                                <Button Content="削除" />
+                            </StackPanel>
+                            <DataGrid ItemsSource="{Binding Value}" />
+                        </StackPanel>
+                    </Popup>
+                </Grid>
             </DataTemplate>
         </tkitwpf:DynamicPropertyTemplateSelector>
 

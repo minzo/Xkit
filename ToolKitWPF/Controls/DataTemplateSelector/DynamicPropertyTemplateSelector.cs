@@ -20,7 +20,7 @@ namespace Toolkit.WPF.Controls
             if (item == null) return null;
             var prop = item as IDynamicProperty;
             var type = prop.Definition.ValueType;
-            var template = Templates.FirstOrDefault(i => type == i.DataType as Type);
+            var template = Templates.FirstOrDefault(i => (i.DataType as Type).IsAssignableFrom(type));
             return template ?? base.SelectTemplate(item, container);
         }
     }

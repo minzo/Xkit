@@ -46,7 +46,7 @@ namespace Toolkit.WPF.Sample
 
         public TypedCollection<DynamicItem> Items { get; } = new TypedCollection<DynamicItem>();
 
-        public ObservableCollection<ObservableCollection<ControllerItemViewModel>> ItemsCollection { get; } = new ObservableCollection<ObservableCollection<ControllerItemViewModel>>();
+        public ObservableCollection<TypedCollection<DynamicItem>> ItemsCollection { get; } = new ObservableCollection<TypedCollection<DynamicItem>>();
 
         public ICommand AddCommand { get; }
 
@@ -57,18 +57,34 @@ namespace Toolkit.WPF.Sample
                 new DynamicPropertyDefinition<Vector3>(){ Name = "Pos" },
             });
 
+            var definition2 = new DynamicItemDefinition(new IDynamicPropertyDefinition[] {
+                new DynamicPropertyDefinition<string>(){ Name = "Name" },
+                new DynamicPropertyDefinition<Vector3>(){ Name = "Size" },
+                new DynamicPropertyDefinition<List<string>>(){ Name = "List" },
+            });
+
             var items = new [] {
-                new ControllerItemViewModel(),
-                new ControllerItemViewModel(),
-                new ControllerItemViewModel(),
-                new ControllerItemViewModel(),
+                new DynamicItem(definition),
+                new DynamicItem(definition),
+                new DynamicItem(definition),
             };
 
-            ItemsCollection.Add(new ObservableCollection<ControllerItemViewModel>(items));
-            ItemsCollection.Add(new ObservableCollection<ControllerItemViewModel>(items));
-            ItemsCollection.Add(new ObservableCollection<ControllerItemViewModel>(items));
-            ItemsCollection.Add(new ObservableCollection<ControllerItemViewModel>(items));
-            ItemsCollection.Add(new ObservableCollection<ControllerItemViewModel>(items));
+            var items2 = new[] {
+                new DynamicItem(definition2),
+                new DynamicItem(definition2),
+                new DynamicItem(definition2),
+            };
+
+            (items2[0].GetPropertyValue("List") as List<string>).Add("hoge");
+            (items2[0].GetPropertyValue("List") as List<string>).Add("hoge");
+            (items2[0].GetPropertyValue("List") as List<string>).Add("hoge");
+            (items2[0].GetPropertyValue("List") as List<string>).Add("hoge");
+
+            ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
+            ItemsCollection.Add(new TypedCollection<DynamicItem>(items2));
+            ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
+            ItemsCollection.Add(new TypedCollection<DynamicItem>(items2));
+            ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
         }
     }
 }

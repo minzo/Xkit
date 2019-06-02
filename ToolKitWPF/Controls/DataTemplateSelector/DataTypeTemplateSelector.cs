@@ -18,7 +18,7 @@ namespace Toolkit.WPF.Controls
         {
             if (item == null) return null;
             var type = item.GetType();
-            var template = Templates.FirstOrDefault(i => type.IsSubclassOf(i.DataType as Type));
+            var template = Templates.FirstOrDefault(i => (i.DataType as Type).IsAssignableFrom(type));
             return template ?? base.SelectTemplate(item, container);
         }
     }
