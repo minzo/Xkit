@@ -54,6 +54,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\BindingProxy.cs" />
     <Compile Include="Controls\ColorSelectComboBox.xaml.cs">
       <DependentUpon>ColorSelectComboBox.xaml</DependentUpon>
     </Compile>
@@ -90,6 +91,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="Controls\SingleSelectorScope.cs" />
     <Compile Include="Controls\TreeGrid.xaml.cs">
       <DependentUpon>TreeGrid.xaml</DependentUpon>
     </Compile>

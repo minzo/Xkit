@@ -21,7 +21,7 @@
         <DataTemplate>
             <StackPanel MaxWidth="80" DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}">
                 <TextBlock Text="{Binding Definition.Name}" FontWeight="UltraBold" />
-                <TextBlock Text="{Binding Definition.DisplayName}" />
+                <!--<TextBlock Text="{Binding Definition.DisplayName}" />-->
             </StackPanel>
         </DataTemplate>
     </DataGrid.RowHeaderTemplate>
@@ -37,7 +37,7 @@
         <DataTemplate x:Key="ColumnHeaderTemplate">
             <StackPanel Width="80">
                 <TextBlock Text="{Binding Name}" FontWeight="UltraBold" />
-                <TextBlock Text="{Binding DisplayName}" />
+                <!--<TextBlock Text="{Binding DisplayName}" />-->
             </StackPanel>
         </DataTemplate>
 

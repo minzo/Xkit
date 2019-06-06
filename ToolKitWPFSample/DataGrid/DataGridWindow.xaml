@@ -90,25 +90,28 @@
                 </Grid>
             </DataTemplate>
         </tkitwpf:DynamicPropertyTemplateSelector>
-
+        <!-- DataGrid -->
         <DataTemplate x:Key="Item">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <Button Content="+" Width="20" Command="{Binding AddCommand}"/>
+                    <Button Content="+" Width="20" />
                 </StackPanel>
                 <tkitwpf:DynamicTableGrid
+                    tkitwpf:SingleSelectorScope.IsSingleSelectorControl="true"
                     ItemsSource="{Binding}"
                     CellTemplateSelector="{StaticResource _CellSelector}"
                     CellEditingTemplateSelector="{StaticResource _CellEditingSelector}"
-                    RowDetailsVisibilityMode="Visible">
-                </tkitwpf:DynamicTableGrid>
+                    RowDetailsVisibilityMode="Visible" />
             </StackPanel>
         </DataTemplate>
     </Window.Resources>
 
-    <ItemsControl
-        tkitwpf:DynamicTableGrid.IsSharedSizeScope="True"
-        ItemsSource="{Binding ItemsCollection}" 
-        ItemTemplate="{StaticResource Item}" />
-
+    <ScrollViewer>
+        <ItemsControl
+            tkitwpf:DynamicTableGrid.IsSharedSizeScope="True"
+            tkitwpf:SingleSelectorScope.IsSingleSelectorScope="True"
+            ItemsSource="{Binding ItemsCollection}"       
+            ItemTemplate="{StaticResource Item}" />
+    </ScrollViewer>
+    
 </Window>

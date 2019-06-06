@@ -214,6 +214,7 @@ namespace Toolkit.WPF.Sample
                 Definition = definition;
                 Owner = owner;
                 _OwnerTableValue = ownerTableValue;
+                _ParentTableValue = ownerTableValue;
             }
 
             public event PropertyChangingEventHandler PropertyChanging;

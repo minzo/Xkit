@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Toolkit.WPF.Sample.ToolSystem.Models
 {
-    public struct AssetItem : IDynamicItem, ICustomTypeDescriptor
+    public class AssetItem : IDynamicItem, ICustomTypeDescriptor
     {
         static readonly IDynamicItemDefinition definition;
         static readonly List<IDynamicPropertyDefinition> definitions;
@@ -28,7 +28,6 @@ namespace Toolkit.WPF.Sample.ToolSystem.Models
         {
             public static int Index { get; }
             public static string Name { get; }
-
             static Cache()
             {
                 Name = nameof(T);
@@ -46,6 +45,11 @@ namespace Toolkit.WPF.Sample.ToolSystem.Models
         // CLR isInherited<struct DynamicProperty> ならセーフ？
 
         public IDynamicItemDefinition Definition => definition;
+
+        public AssetItem()
+        {
+            properties = definition.Select(i => i.Create(this)).ToArray();
+        }
 
         #region ICustomTypeDescriptor
 

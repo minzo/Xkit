@@ -3,17 +3,14 @@ using Corekit.Models;
 using System;
 using System.Collections;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using Toolkit.WPF.Models;
 
 namespace Toolkit.WPF.Controls
 {
@@ -226,7 +223,7 @@ namespace Toolkit.WPF.Controls
             return null;
         }
 
-        System.Collections.Generic.IEnumerable<DependencyObject> EnumerateParent(DependencyObject dp)
+        private static System.Collections.Generic.IEnumerable<DependencyObject> EnumerateParent(DependencyObject dp)
         {
             while ((dp = VisualTreeHelper.GetParent(dp)) != null)
             {
@@ -234,7 +231,7 @@ namespace Toolkit.WPF.Controls
             }
         }
 
-        System.Collections.Generic.IEnumerable<DependencyObject> EnumerateChildren(DependencyObject dp)
+        private static System.Collections.Generic.IEnumerable<DependencyObject> EnumerateChildren(DependencyObject dp)
         {
             for(int i=0, count = VisualTreeHelper.GetChildrenCount(dp); i < count; i++)
             {

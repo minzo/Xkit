@@ -54,11 +54,13 @@ namespace Toolkit.WPF.Sample
         {
             var definition = new DynamicItemDefinition(new IDynamicPropertyDefinition[] {
                 new DynamicPropertyDefinition<string>(){ Name = "Name" },
+                new DynamicPropertyDefinition<string>(){ Name = "Path" },
                 new DynamicPropertyDefinition<Vector3>(){ Name = "Pos" },
             });
 
             var definition2 = new DynamicItemDefinition(new IDynamicPropertyDefinition[] {
                 new DynamicPropertyDefinition<string>(){ Name = "Name" },
+                new DynamicPropertyDefinition<string>(){ Name = "Path" },
                 new DynamicPropertyDefinition<Vector3>(){ Name = "Size" },
                 new DynamicPropertyDefinition<List<string>>(){ Name = "List" },
             });
