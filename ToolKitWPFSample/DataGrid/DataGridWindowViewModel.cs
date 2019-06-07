@@ -11,6 +11,7 @@ using Toolkit.WPF.Models;
 
 namespace Toolkit.WPF.Sample
 {
+    [System.Diagnostics.DebuggerDisplay("(X, Y, Z)")]
     public struct Vector3
     {
         public float X { get; set; }

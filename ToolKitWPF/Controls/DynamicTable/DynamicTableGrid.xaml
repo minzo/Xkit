@@ -109,7 +109,6 @@
         </local:DynamicPropertyTemplateSelector>
 
         <local:DataGridBindingColumn x:Key="BindingColumn" x:Shared="False"
-                                     ClipboardContentBinding="{Binding Value}"
                                      HeaderTemplate="{StaticResource ColumnHeaderTemplate}"
                                      CellTemplateSelector="{StaticResource CellTemplateSelector}"
                                      CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}" />
