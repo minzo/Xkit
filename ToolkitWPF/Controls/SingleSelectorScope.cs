@@ -10,6 +10,9 @@ using System.Windows.Media;
 
 namespace Toolkit.WPF.Controls
 {
+    /// <summary>
+    /// 　単一選択スコープ
+    /// </summary>
     public class SingleSelectorScope
     {
         #region IsSingleSelectorScope
@@ -64,7 +67,7 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
-        #region SingleSelectorControls
+        #region SingleSelectorControlList
 
         private static List<DependencyObject> GetSingleSelectorControlList(DependencyObject obj)
         {
@@ -112,7 +115,14 @@ namespace Toolkit.WPF.Controls
 
             switch (child)
             {
+                case DataGrid v:
+                    v.SelectedCellsChanged += OnSelectedCellsChanged;
+                    v.SelectionChanged += OnSelectionChanged;
+                    break;
                 case MultiSelector v:
+                    v.SelectionChanged += OnSelectionChanged;
+                    break;
+                case ListBox v:
                     v.SelectionChanged += OnSelectionChanged;
                     break;
             }
@@ -128,7 +138,14 @@ namespace Toolkit.WPF.Controls
 
             switch (child)
             {
+                case DataGrid v:
+                    v.SelectedCellsChanged -= OnSelectedCellsChanged;
+                    v.SelectionChanged -= OnSelectionChanged;
+                    break;
                 case MultiSelector v:
+                    v.SelectionChanged -= OnSelectionChanged;
+                    break;
+                case ListBox v:
                     v.SelectionChanged -= OnSelectionChanged;
                     break;
             }
@@ -139,27 +156,51 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private static void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var root = GetScopeRoot(sender as DependencyObject);
+            if(e.AddedItems.Count >= 0)
+            {
+                // UnSelectAll() されて選択が解除された時にも呼ばれるので選択行の追加があるときのみ処理する
+                UnselectAllImpl(sender as DependencyObject);
+            }
+        }
+
+        /// <summary>
+        /// 選択状態の変更
+        /// </summary>
+        private static void OnSelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            if(e.AddedCells.Count >= 0)
+            {
+                // UnselectAllCells() されて選択が解除された時にも呼ばれるので選択行の追加があるときのみ処理する
+                UnselectAllImpl(sender as DependencyObject);
+            }
+        }
+
+        /// <summary>
+        /// 選択解除処理
+        /// </summary>
+        private static void UnselectAllImpl(DependencyObject dp)
+        {
+            var root = GetScopeRoot(dp);
             if (root != null)
             {
-                var children = GetSingleSelectorControlList(root).Where(i => i != sender);
+                var children = GetSingleSelectorControlList(root).Where(i => i != dp);
 
                 foreach (var child in children.OfType<DataGrid>().Where(i => i.SelectionUnit != DataGridSelectionUnit.FullRow))
                 {
-                    child.SelectedCells.Clear();
                     child.UnselectAllCells();
+                    child.SelectedCells.Clear();
                 }
 
                 foreach (var child in children.OfType<MultiSelector>())
                 {
-                    child.SelectedItems.Clear();
                     child.UnselectAll();
+                    child.SelectedItems.Clear();
                 }
 
                 foreach (var child in children.OfType<ListBox>())
                 {
-                    child.SelectedItems.Clear();
                     child.UnselectAll();
+                    child.SelectedItems.Clear();
                 }
             }
         }
