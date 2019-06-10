@@ -14,7 +14,6 @@
           BorderBrush="#F0F0F0"
           HorizontalGridLinesBrush="#CECECE"          
           VerticalGridLinesBrush="#CECECE"
-          RenderTransformOrigin="0 0"
           mc:Ignorable="d"
           d:DesignHeight="450" d:DesignWidth="800">
     <DataGrid.RowHeaderTemplate>
@@ -33,6 +32,24 @@
     <DataGrid.Resources>
         
         <converters:BoolNot x:Key="BoolNot" />
+
+        <Style TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource {x:Type DataGridRow}}">
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Red" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
+            <Setter Property="Background" Value="Transparent" />
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Foreground" Value="Black" />
+                    <Setter Property="Background" Value="Transparent" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
 
         <DataTemplate x:Key="ColumnHeaderTemplate">
             <StackPanel Width="80">
@@ -67,7 +84,7 @@
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
 
-
+        
         <local:DynamicPropertyTemplateSelector x:Key="CellTemplateSelector">
             <DataTemplate DataType="{x:Type system:Int32}">
                 <TextBlock Text="{Binding Value}" Style="{StaticResource TextBlockStyle}" />

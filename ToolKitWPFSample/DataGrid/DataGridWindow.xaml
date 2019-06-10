@@ -72,20 +72,21 @@
                 <tkitwpf:VectorEditor DataContext="{Binding Value}" />
             </DataTemplate>
             <DataTemplate DataType="{x:Type collection:ICollection}">
-                <Grid>
+                <Grid x:Name="PopupHost">
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">
                         <Run Text="要素数" />
                         <Run Text="{Binding Value.Count, Mode=OneWay}" />
                         <Run Text="個" />
                     </TextBlock>
-                    <Popup IsOpen="True">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
+                    <Popup IsOpen="True" Width="240" PlacementTarget="{Binding ElementName=PopupHost}">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
                                 <Button Content="追加" />
-                                <Button Content="削除" />
+                                <Button Content="削除" Margin="4 0 0 0"/>
                             </StackPanel>
-                            <DataGrid ItemsSource="{Binding Value}" />
-                        </StackPanel>
+                            <ListBox
+                                ItemsSource="{Binding Value}"  />
+                        </DockPanel>
                     </Popup>
                 </Grid>
             </DataTemplate>

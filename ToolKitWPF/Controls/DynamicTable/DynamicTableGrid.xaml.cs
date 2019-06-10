@@ -214,7 +214,7 @@ namespace Toolkit.WPF.Controls
             if( TryFindResource("BindingColumn") is DataGridBindingColumn column)
             {
                 column.Binding = new Binding(propertyName);
-                column.ClipboardContentBinding = new Binding($"{propertyName}.Value");
+                column.ClipboardContentBinding = new Binding(propertyName);
                 column.IsReadOnly = isReadOnly;
                 column.Header = definition;
                 column.CellTemplate = CellTemplate ?? column.CellTemplate;
