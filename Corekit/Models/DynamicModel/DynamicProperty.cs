@@ -64,6 +64,11 @@ namespace Corekit.Models
             value_ = (T)Definition.GetDefaultValue();
         }
 
+        /// <summary>
+        /// ToString
+        /// </summary>
+        public override string ToString() => Value.ToString();
+
         public event PropertyChangingEventHandler PropertyChanging;
         public event PropertyChangedEventHandler PropertyChanged;
 
