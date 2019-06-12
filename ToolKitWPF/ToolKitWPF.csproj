@@ -61,6 +61,7 @@
     <Compile Include="Controls\DataGridBindingColumn.cs" />
     <Compile Include="Controls\DataTemplateSelector\DataTypeTemplateSelector.cs" />
     <Compile Include="Controls\DataTemplateSelector\DynamicPropertyTemplateSelector.cs" />
+    <Compile Include="Controls\TableGrid\TableGrid.cs" />
     <Compile Include="Controls\DynamicTable\DynamicTableGrid.xaml.cs">
       <DependentUpon>DynamicTableGrid.xaml</DependentUpon>
     </Compile>
@@ -137,6 +138,10 @@
     <Page Include="Controls\VectorControl\VectorViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TableGrid\TableGrid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>

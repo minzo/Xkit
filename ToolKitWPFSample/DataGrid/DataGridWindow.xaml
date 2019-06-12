@@ -97,7 +97,7 @@
                 <StackPanel Orientation="Horizontal">
                     <Button Content="+" Width="20" />
                 </StackPanel>
-                <tkitwpf:DynamicTableGrid
+                <tkitwpf:TableGrid
                     tkitwpf:SingleSelectorScope.IsSingleSelectorControl="true"
                     ItemsSource="{Binding}"
                     CellTemplateSelector="{StaticResource _CellSelector}"
