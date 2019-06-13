@@ -97,7 +97,7 @@
                 <StackPanel Orientation="Horizontal">
                     <Button Content="+" Width="20" />
                 </StackPanel>
-                <tkitwpf:TableGrid
+                <tkitwpf:DynamicTableGrid
                     tkitwpf:SingleSelectorScope.IsSingleSelectorControl="true"
                     ItemsSource="{Binding}"
                     CellTemplateSelector="{StaticResource _CellSelector}"
@@ -110,8 +110,9 @@
     <ScrollViewer>
         <ItemsControl
             tkitwpf:DynamicTableGrid.IsSharedSizeScope="True"
+            tkitwpf:TableGrid.IsSharedSizeScope="True"
             tkitwpf:SingleSelectorScope.IsSingleSelectorScope="True"
-            ItemsSource="{Binding ItemsCollection}"       
+            ItemsSource="{Binding ItemsCollection}"
             ItemTemplate="{StaticResource Item}" />
     </ScrollViewer>
     

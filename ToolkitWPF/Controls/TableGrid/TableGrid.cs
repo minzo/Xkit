@@ -40,8 +40,7 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
-
-        #region SharedSizeScope
+        #region IsSharedSizeScope
 
         public static bool GetIsSharedSizeScope(DependencyObject obj)
         {
@@ -58,7 +57,6 @@ namespace Toolkit.WPF.Controls
             DependencyProperty.RegisterAttached("IsSharedSizeScope", typeof(bool), typeof(TableGrid), new PropertyMetadata(false));
 
         #endregion
-
 
         #region セル選択時のハイライト
 
@@ -271,7 +269,7 @@ namespace Toolkit.WPF.Controls
             return null;
         }
 
-        private static System.Collections.Generic.IEnumerable<DependencyObject> EnumerateParent(DependencyObject dp)
+        private static IEnumerable<DependencyObject> EnumerateParent(DependencyObject dp)
         {
             while ((dp = VisualTreeHelper.GetParent(dp)) != null)
             {
@@ -279,7 +277,7 @@ namespace Toolkit.WPF.Controls
             }
         }
 
-        private static System.Collections.Generic.IEnumerable<DependencyObject> EnumerateChildren(DependencyObject dp)
+        private static IEnumerable<DependencyObject> EnumerateChildren(DependencyObject dp)
         {
             for (int i = 0, count = VisualTreeHelper.GetChildrenCount(dp); i < count; i++)
             {

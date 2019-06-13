@@ -3,6 +3,7 @@ using Corekit.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
@@ -20,26 +21,7 @@ namespace Toolkit.WPF.Controls
     /// </summary>
     public partial class DynamicTableGrid : DataGrid
     {
-        #region　選択セル
-
-        private static bool GetIsSelectedContainsCellsAny(DependencyObject obj)
-        {
-            return (bool)obj.GetValue(IsSelectedContainsCellsAnyProperty);
-        }
-
-        public static void SetIsSelectedContainsCellsAny(DependencyObject obj, bool value)
-        {
-            obj.SetValue(IsSelectedContainsCellsAnyProperty, value);
-        }
-
-        // Using a DependencyProperty as the backing store for IsSelectedContainsCellAny.  This enables animation, styling, binding, etc...
-        private static readonly DependencyProperty IsSelectedContainsCellsAnyProperty =
-            DependencyProperty.RegisterAttached("IsSelectedContainsCellsAny", typeof(bool), typeof(DynamicTableGrid), new PropertyMetadata(false));
-
-        #endregion
-
-
-        #region SharedSizeScope
+        #region 列幅同期スコープ
 
         public static bool GetIsSharedSizeScope(DependencyObject obj)
         {
@@ -71,6 +53,40 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for IsEnableRowHighlightOnCellSelected.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty IsEnableRowHighlightOnCellSelectedProperty =
             DependencyProperty.Register("IsEnableRowHighlightOnCellSelected", typeof(bool), typeof(DynamicTableGrid), new PropertyMetadata(false));
+
+        /// <summary>
+        /// 行に属すセルが1つ以上選択されているかどうか
+        /// </summary>
+        private static bool GetIsSelectedContainsCellsAny(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(IsSelectedContainsCellsAnyProperty);
+        }
+
+        /// <summary>
+        /// 行に属すセルが1つ以上選択されているかどうか
+        /// </summary>
+        public static void SetIsSelectedContainsCellsAny(DependencyObject obj, bool value)
+        {
+            obj.SetValue(IsSelectedContainsCellsAnyProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for IsSelectedContainsCellAny.  This enables animation, styling, binding, etc...
+        private static readonly DependencyProperty IsSelectedContainsCellsAnyProperty =
+            DependencyProperty.RegisterAttached("IsSelectedContainsCellsAny", typeof(bool), typeof(DynamicTableGrid), new PropertyMetadata(false));
+
+        #endregion
+
+        #region
+
+        public IEnumerable<DataGridCellInfo> SelectedCellInfos
+        {
+            get { return (IEnumerable<DataGridCellInfo>)GetValue(SelectedCellInfosProperty); }
+            set { SetValue(SelectedCellInfosProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for SelectedCellInfos.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty SelectedCellInfosProperty =
+            DependencyProperty.Register("SelectedCellInfos", typeof(IEnumerable<DataGridCellInfo>), typeof(DynamicTableGrid), new PropertyMetadata(new ObservableCollection<DataGridCellInfo>()));
 
         #endregion
 
@@ -160,7 +176,6 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
-
         public DynamicTableGrid()
         {
             InitializeComponent();
@@ -240,8 +255,9 @@ namespace Toolkit.WPF.Controls
         {
             if ( e.PropertyDescriptor is DynamicPropertyDescriptor descriptor)
             {
-                e.Column = GenerateColumn(e.PropertyName, descriptor.IsReadOnly, descriptor.Definition);
+                e.Column = GenerateColumn(e.PropertyName, descriptor.IsReadOnly, descriptor.Definition) ?? e.Column;
             }
+
             SetPropertyName(e.Column, e.PropertyName);
         }
 
