@@ -18,7 +18,7 @@ namespace Toolkit.WPF.Controls
         #region IsSingleSelectorScope
 
         private static bool GetIsSingleSelectorScope(DependencyObject obj)
-        {           
+        {
             return (bool)obj.GetValue(IsSingleSelectorScopeProperty);
         }
 
@@ -47,10 +47,10 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for IsSingleSelectorControl.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty IsSingleSelectorControlProperty =
-            DependencyProperty.RegisterAttached("IsSingleSelectorControl", typeof(bool), typeof(SingleSelectorScope), new PropertyMetadata(false, (d,e)=>
+            DependencyProperty.RegisterAttached("IsSingleSelectorControl", typeof(bool), typeof(SingleSelectorScope), new PropertyMetadata(false, (d, e) =>
             {
                 var root = EnumerateParent(d).FirstOrDefault(i => GetIsSingleSelectorScope(i));
-                if(root == null)
+                if (root == null)
                 {
                     return;
                 }
@@ -72,7 +72,7 @@ namespace Toolkit.WPF.Controls
         private static List<DependencyObject> GetSingleSelectorControlList(DependencyObject obj)
         {
             var list = (List<DependencyObject>)obj.GetValue(SingleSelectorControlListProperty);
-            if(list == null)
+            if (list == null)
             {
                 list = new List<DependencyObject>();
                 obj.SetValue(SingleSelectorControlListProperty, list);
@@ -86,13 +86,19 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
-        #region ScopeRoot
+        #region ScopeRoot 単一選択スコープのルート
 
+        /// <summary>
+        /// 単一選択スコープのルートを取得
+        /// </summary>
         private static DependencyObject GetScopeRoot(DependencyObject obj)
         {
             return (DependencyObject)obj.GetValue(ScopeRootProperty);
         }
 
+        /// <summary>
+        /// 単一選択スコープのルートを設定
+        /// </summary>
         private static void SetScopeRoot(DependencyObject obj, DependencyObject value)
         {
             obj.SetValue(ScopeRootProperty, value);
@@ -100,9 +106,32 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for ScopeRootControl.  This enables animation, styling, binding, etc...
         private static readonly DependencyProperty ScopeRootProperty =
-            DependencyProperty.RegisterAttached("ScopeRoot", typeof(DependencyObject), typeof(SingleSelectorScope), new PropertyMetadata(null)); 
+            DependencyProperty.RegisterAttached("ScopeRoot", typeof(DependencyObject), typeof(SingleSelectorScope), new PropertyMetadata(null));
 
         #endregion
+
+
+
+
+        public static IEnumerable<object> GetSelectedInfos(DependencyObject obj)
+        {
+            return (IEnumerable<object>)obj.GetValue(SelectedInfosProperty);
+        }
+
+        public static void SetSelectedInfos(DependencyObject obj, IEnumerable<object> value)
+        {
+            obj.SetValue(SelectedInfosProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for SelectedInfos.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty SelectedInfosProperty =
+            DependencyProperty.RegisterAttached("SelectedInfos", typeof(IEnumerable<object>), typeof(SingleSelectorScope), new PropertyMetadata(null, (d, e) => 
+            {
+
+
+            }));
+
+
 
 
         /// <summary>
@@ -156,7 +185,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private static void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(e.AddedItems.Count >= 0)
+            if(e.AddedItems.Count > 0)
             {
                 // UnSelectAll() されて選択が解除された時にも呼ばれるので選択行の追加があるときのみ処理する
                 UnselectAllImpl(sender as DependencyObject);
@@ -168,7 +197,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private static void OnSelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
-            if(e.AddedCells.Count >= 0)
+            if(e.AddedCells.Count > 0)
             {
                 // UnselectAllCells() されて選択が解除された時にも呼ばれるので選択行の追加があるときのみ処理する
                 UnselectAllImpl(sender as DependencyObject);
@@ -185,22 +214,29 @@ namespace Toolkit.WPF.Controls
             {
                 var children = GetSingleSelectorControlList(root).Where(i => i != dp);
 
-                foreach (var child in children.OfType<DataGrid>().Where(i => i.SelectionUnit != DataGridSelectionUnit.FullRow))
+                if(dp is DataGrid dg)
                 {
-                    child.UnselectAllCells();
-                    child.SelectedCells.Clear();
-                }
+                    var ch = children.OfType<DataGrid>().Where(i => i.SelectionUnit != DataGridSelectionUnit.FullRow);
 
-                foreach (var child in children.OfType<MultiSelector>())
-                {
-                    child.UnselectAll();
-                    child.SelectedItems.Clear();
+                    foreach (var child in ch)
+                    {
+                        child.UnselectAllCells();
+                        //                    child.SelectedCells.Clear();
+                    }
                 }
-
-                foreach (var child in children.OfType<ListBox>())
+                else
                 {
-                    child.UnselectAll();
-                    child.SelectedItems.Clear();
+                    foreach (var child in children.OfType<MultiSelector>())
+                    {
+                        child.UnselectAll();
+                        child.SelectedItems.Clear();
+                    }
+
+                    foreach (var child in children.OfType<ListBox>())
+                    {
+                        child.UnselectAll();
+                        child.SelectedItems.Clear();
+                    }
                 }
             }
         }
