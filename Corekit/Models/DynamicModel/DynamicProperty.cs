@@ -35,7 +35,7 @@ namespace Corekit.Models
         public T Value {
             get { return value_; }
             set {
-                if( !value_.Equals( value ) )
+                if (!value_?.Equals(value) ?? value != null)
                 {
                     PropertyChanging?.Invoke(this, _changingEventArgs);
                     value_ = value;
