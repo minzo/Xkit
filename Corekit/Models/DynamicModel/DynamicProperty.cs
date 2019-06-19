@@ -28,7 +28,6 @@ namespace Corekit.Models
         /// </summary>
         public bool IsReadOnly => Owner?.Definition?.IsReadOnly == true || Definition.IsReadOnly == true;
 
-
         /// <summary>
         /// 値
         /// </summary>

@@ -309,7 +309,7 @@ namespace Toolkit.WPF.Controls
                 SetIsSelectedContainsCellsAny(row, false);
             }
 
-            if(IsEnableRowHighlightOnCellSelected)
+            if (IsEnableRowHighlightOnCellSelected)
             {
                 foreach (var cell in e.AddedCells)
                 {

@@ -17,7 +17,11 @@ namespace Toolkit.WPF.Controls
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
-            if (item == null) return null;
+            if (item == null)
+            {
+                return Templates.LastOrDefault();
+            }
+
             var type = (item as IDynamicProperty)?.Definition.ValueType ?? item.GetType();
             var template = Templates.FirstOrDefault(i => (i.DataType as Type).IsAssignableFrom(type));
             return template ?? base.SelectTemplate(item, container);

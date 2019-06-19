@@ -90,9 +90,13 @@ namespace Toolkit.WPF.Controls
             {
                 ContentTemplate = template,
                 ContentTemplateSelector = selector,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
             };
 
             cell.VerticalContentAlignment = VerticalAlignment.Stretch;
+            cell.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+            cell.VerticalAlignment = VerticalAlignment.Stretch;
             cell.HorizontalAlignment = HorizontalAlignment.Stretch;
 
             if (Binding != null)

@@ -77,8 +77,7 @@
 
         <Style x:Key="TextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
             <Setter Property="IsEnabled" Value="{Binding IsReadOnly, Converter={StaticResource BoolNot}}" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Center" />
         </Style>
 
         <Style x:Key="TextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
@@ -119,7 +118,7 @@
                 <TextBox Text="{Binding Value}" Style="{StaticResource TextBoxStyle}" />
             </DataTemplate>
             <DataTemplate DataType="{x:Type system:String}">
-                <TextBox Text="{Binding Value}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                <TextBox Text="{Binding Value}" />
             </DataTemplate>
             <DataTemplate DataType="{x:Type system:Boolean}">
                 <Border>
