@@ -1,0 +1,30 @@
+﻿<Window x:Class="Toolkit.WPF.Sample.LoggerConsoleWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Toolkit.WPF.Sample"
+        xmlns:tkitwpf="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
+        mc:Ignorable="d"
+        Title="LoggerConsoleWindow" Height="450" Width="800">
+    <Window.DataContext>
+        <local:LoggerConsoleWindowViewModel />
+    </Window.DataContext>
+
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+F" Command="ApplicationCommands.Find" />
+    </Window.InputBindings>
+
+    <DockPanel>
+        <StatusBar DockPanel.Dock="Top" Height="30" Margin="0 0 0 4">
+            <StatusBar.BitmapEffect>
+                <DropShadowBitmapEffect Direction="270" ShadowDepth="1" Softness="0.5" Color="Gray" />
+            </StatusBar.BitmapEffect>
+            <Button Content="ログを生成" Command="{Binding AddLogCommand}" />
+        </StatusBar>
+
+        <tkitwpf:ExpanderLoggerConsole DockPanel.Dock="Bottom" />
+
+        <tkitwpf:LoggerConsolePanel />
+    </DockPanel>
+</Window>
