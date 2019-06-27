@@ -13,19 +13,9 @@ namespace Corekit
     public class JobManager : IDisposable
     {
         /// <summary>
-        /// 現在アクティブなタスクの数
-        /// </summary>
-        public int ActiveTaskCount => this._ActiveTaskCount;
-
-        /// <summary>
-        /// Queueの数
-        /// </summary>
-        public int QueueCount => this._JobQueue.Count;
-
-        /// <summary>
         /// 実行中か
         /// </summary>
-        public bool IsRunning => this.QueueCount > 0 || this.ActiveTaskCount > 0;
+        public bool IsRunning => this._JobQueue.Count > 0 || this._ActiveTaskCount > 0;
 
         /// <summary>
         /// コンストラクタ
