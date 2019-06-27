@@ -16,6 +16,19 @@ using System.Windows.Media;
 
 namespace Toolkit.WPF.Controls
 {
+    public struct SelectedCellInfo
+    {
+        public object Item { get; }
+
+        public string PropertyName { get; }
+
+        public SelectedCellInfo(object item, string propertyName)
+        {
+            Item = item;
+            PropertyName = propertyName;
+        }
+    }
+
     /// <summary>
     /// DynamicTableGrid.xaml の相互作用ロジック
     /// </summary>
@@ -317,6 +330,11 @@ namespace Toolkit.WPF.Controls
                     SetIsSelectedContainsCellsAny(row, true);
                 }
             }
+
+            var cellInfos = SelectedCells
+                .Select(i => new SelectedCellInfo(i.Item, GetPropertyName(i.Column)))
+                .ToList();
+            SetCurrentValue(DynamicTableGrid.SelectedCellInfosProperty, cellInfos);
         }
 
         private void OnBeginningEdit(object sender, DataGridBeginningEditEventArgs e)
