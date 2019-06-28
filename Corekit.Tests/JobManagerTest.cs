@@ -71,6 +71,5 @@ namespace Corekit.Tests
 
         private readonly Random random = new Random(100);
         private readonly int millisec = 1000;
-        private JobManager jobManager;
     }
 }

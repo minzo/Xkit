@@ -151,7 +151,6 @@
         <ItemsControl
             tkitwpf:DynamicTableGrid.IsSharedSizeScope="True"
             tkitwpf:SingleSelectorScope.IsSingleSelectorScope="True"
-            tkitwpf:TableGrid.IsSharedSizeScope="True"
             ItemsSource="{Binding ItemsCollection}"
             ItemTemplate="{StaticResource Item}" />
     </ScrollViewer>
