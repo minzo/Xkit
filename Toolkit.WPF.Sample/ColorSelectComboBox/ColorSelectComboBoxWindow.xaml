@@ -6,8 +6,27 @@
         xmlns:tkit="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
         mc:Ignorable="d"
         Title="ColorSelectComboBoxWindow" Height="450" Width="800">
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <TextBlock Text="ColorSelectComboBox" />
-        <tkit:ColorSelectComboBox Width="200" Height="20" Margin="8 0 0 0" SelectedIndex="0" />
+    <StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="ColorSelectComboBox1" />
+            <tkit:ColorSelectComboBox Width="200" Height="20" Margin="8 0 0 0" SelectedIndex="0" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="ColorSelectComboBox2" />
+            <tkit:ColorPicker Width="200" Height="20" Margin="8 0 0 0" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="ColorSelectComboBox3" />
+            <ComboBox Width="200" Height="20" Margin="8 0 0 0" >
+                <ComboBoxItem Content="HOGE1" />
+                <ComboBoxItem Content="HOGE2" />
+                <ComboBoxItem Content="HOGE3" />
+                <ComboBoxItem Content="HOGE4" />
+            </ComboBox>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Stretch">
+            <TextBlock Text="ColorSelectComboBox3" />
+            <tkit:ColorEditor Width="200" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+        </StackPanel>
     </StackPanel>
 </Window>

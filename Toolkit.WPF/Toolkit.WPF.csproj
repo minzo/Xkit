@@ -55,7 +55,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controls\BindingProxy.cs" />
-    <Compile Include="Controls\ColorSelectComboBox.xaml.cs">
+    <Compile Include="Controls\ColorControl\ColorEditor.xaml.cs">
+      <DependentUpon>ColorEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ColorControl\ColorPicker.xaml.cs">
+      <DependentUpon>ColorPicker.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ColorControl\ColorSelectComboBox.xaml.cs">
       <DependentUpon>ColorSelectComboBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\DataGridBindingColumn.cs" />
@@ -72,9 +78,6 @@
     <Compile Include="Controls\IconToggleButton.xaml.cs">
       <DependentUpon>IconToggleButton.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\InterEditCell.xaml.cs">
-      <DependentUpon>InterEditCell.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\Logger\ExpanderLoggerConsole.xaml.cs">
       <DependentUpon>ExpanderLoggerConsole.xaml</DependentUpon>
     </Compile>
@@ -84,7 +87,11 @@
     <Compile Include="Controls\Logger\LoggerConsolePanel.xaml.cs">
       <DependentUpon>LoggerConsolePanel.xaml</DependentUpon>
     </Compile>
-    <Page Include="Controls\InterEditCell.xaml">
+    <Page Include="Controls\ColorControl\ColorEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ColorControl\ColorPicker.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -151,7 +158,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Controls\ColorSelectComboBox.xaml">
+    <Page Include="Controls\ColorControl\ColorSelectComboBox.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>

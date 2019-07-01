@@ -12,13 +12,14 @@
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         </Style>
     </ComboBox.Style>
-
+    
     <ComboBox.ItemsPanel>
         <ItemsPanelTemplate>
-            <WrapPanel ItemWidth="{Binding ItemWidth, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
-                       ItemHeight="{Binding ItemHeight, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
-                       MaxWidth="{Binding ItemMaxWidth, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
-                       IsItemsHost="True" />
+            <WrapPanel
+                ItemWidth="{Binding ItemWidth, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
+                ItemHeight="{Binding ItemHeight, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"                    
+                MaxWidth="{Binding ItemMaxWidth, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
+                IsItemsHost="True" />
         </ItemsPanelTemplate>
     </ComboBox.ItemsPanel>
     <ComboBox.ItemContainerStyle>
