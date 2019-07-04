@@ -58,5 +58,13 @@ namespace Corekit
             }
             return -1;
         }
+
+        /// <summary>
+        /// 列挙する
+        /// </summary>
+        public static IEnumerable<T> AsEnumerable<T>(this T item)
+        {
+            yield return item;
+        }
     }
 }
