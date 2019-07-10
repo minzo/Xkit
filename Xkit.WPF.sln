@@ -9,11 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolkit", "Toolkit\Toolkit.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolkit.WPF", "Toolkit.WPF\Toolkit.WPF.csproj", "{FD46BA66-88FD-4CD4-8E0D-D25A8C349D75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolkitWPFSample", "Toolkit.WPF.Sample\Toolkit.WPF.Sample.csproj", "{B1C835BD-64B3-4CA1-8B01-C61B65830E4F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolkit.WPF.Sample", "Toolkit.WPF.Sample\Toolkit.WPF.Sample.csproj", "{B1C835BD-64B3-4CA1-8B01-C61B65830E4F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CorekitSample", "Corekit.Sample\Corekit.Sample.csproj", "{F2B2C8CA-4441-443D-A278-EC4FC91A262B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Corekit.Sample", "Corekit.Sample\Corekit.Sample.csproj", "{F2B2C8CA-4441-443D-A278-EC4FC91A262B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Corekit.Tests", "Corekit.Tests\Corekit.Tests.csproj", "{FB98A495-2803-4779-B579-8ABB0F1528E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolkit.WPF.Editor", "Toolkit.WPF.Editor\Toolkit.WPF.Editor.csproj", "{2ED5C150-6F34-4D39-8C10-D3A17B3F48F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{FB98A495-2803-4779-B579-8ABB0F1528E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB98A495-2803-4779-B579-8ABB0F1528E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB98A495-2803-4779-B579-8ABB0F1528E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2ED5C150-6F34-4D39-8C10-D3A17B3F48F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2ED5C150-6F34-4D39-8C10-D3A17B3F48F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2ED5C150-6F34-4D39-8C10-D3A17B3F48F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2ED5C150-6F34-4D39-8C10-D3A17B3F48F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -34,7 +34,17 @@ namespace Corekit.Models
         /// <summary>
         /// DynamicPropertyから値を取得する
         /// </summary>
+        T GetPropertyValue<T>(string propertyName);
+
+        /// <summary>
+        /// DynamicPropertyから値を取得する
+        /// </summary>
         object GetPropertyValue(int index);
+
+        /// <summary>
+        /// DynamicPropertyから値を取得する
+        /// </summary>
+        T GetPropertyValue<T>(int index);
 
         /// <summary>
         /// DynamicPropertyに値を設定する
@@ -44,6 +54,16 @@ namespace Corekit.Models
         /// <summary>
         /// DynamicPropertyに値を設定する
         /// </summary>
+        void SetPropertyValue<T>(string propertyName, T value);
+
+        /// <summary>
+        /// DynamicPropertyに値を設定する
+        /// </summary>
         void SetPropertyValue(int index, object value);
+
+        /// <summary>
+        /// DynamicPropertyに値を設定する
+        /// </summary>
+        void SetPropertyValue<T>(int index, T value);
     }
 }

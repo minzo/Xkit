@@ -23,7 +23,7 @@
             </Style>
         </StackPanel.Resources>
         
-        <Border BorderThickness="1" BorderBrush="Black"
+        <Border BorderThickness="1" BorderBrush="Gray" CornerRadius="2"
                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                 MinWidth="24"
                 Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"

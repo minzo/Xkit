@@ -10,10 +10,7 @@ using System.Threading.Tasks;
 
 namespace Corekit.Models
 {
-    /// <summary>
-    /// アイテム定義
-    /// </summary>
-    public interface IDynamicItemDefinition : IEnumerable<IDynamicPropertyDefinition>, INotifyCollectionChanged, INotifyPropertyChanged
+    public interface IItem : INotifyCollectionChanged, INotifyPropertyChanged
     {
         /// <summary>
         /// プロパティ定義の名前
@@ -34,6 +31,13 @@ namespace Corekit.Models
         /// 移動が可能か
         /// </summary>
         bool IsMovable { get; }
+    }
+
+    /// <summary>
+    /// アイテム定義
+    /// </summary>
+    public interface IDynamicItemDefinition : IEnumerable<IDynamicPropertyDefinition>, IItem
+    {
     }
 
 

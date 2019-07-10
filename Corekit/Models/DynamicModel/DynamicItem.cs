@@ -4,7 +4,6 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Corekit.Models
 {
@@ -82,9 +81,25 @@ namespace Corekit.Models
         /// <summary>
         /// 値を取得する
         /// </summary>
+        public T GetPropertyValue<T>(string propertyName)
+        {
+            return (T)GetProperty(propertyName)?.GetValue();
+        }
+
+        /// <summary>
+        /// 値を取得する
+        /// </summary>
         public object GetPropertyValue(int index)
         {
             return Value[index]?.GetValue();
+        }
+
+        /// <summary>
+        /// 値を取得する
+        /// </summary>
+        public T GetPropertyValue<T>(int index)
+        {
+            return (T)Value[index]?.GetValue();
         }
 
         /// <summary>
@@ -98,10 +113,27 @@ namespace Corekit.Models
         /// <summary>
         /// 値を設定する
         /// </summary>
+        public void SetPropertyValue<T>(string propertyName, T value)
+        {
+            Value.FirstOrDefault(i => i.Definition.Name == propertyName)?.SetValue(value);
+        }
+
+        /// <summary>
+        /// 値を設定する
+        /// </summary>
         public void SetPropertyValue(int index, object value)
         {
             Value[index]?.SetValue(value);
         }
+
+        /// <summary>
+        /// 値を設定する
+        /// </summary>
+        public void SetPropertyValue<T>(int index, T value)
+        {
+            Value[index]?.SetValue(value);
+        }
+
 
         #endregion
 

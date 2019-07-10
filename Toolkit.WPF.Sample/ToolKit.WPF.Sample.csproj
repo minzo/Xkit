@@ -107,8 +107,6 @@
       <DependentUpon>LoggerConsoleWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
-    <Compile Include="ToolSystem\Models\AssetItem.cs" />
-    <Compile Include="ToolSystem\Models\AssetItemPropertyDefinitions.cs" />
     <Compile Include="TreeGrid\TreeGridWindowViewModel.cs" />
     <Compile Include="TreeGrid\TreeGridWindow.xaml.cs">
       <DependentUpon>TreeGridWindow.xaml</DependentUpon>

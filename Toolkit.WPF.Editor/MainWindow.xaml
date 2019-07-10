@@ -1,0 +1,22 @@
+﻿<Window x:Class="Tookit.WPF.Editor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tookit.WPF.Editor"
+        xmlns:vm="clr-namespace:Tookit.WPF.Editor.ViewModels"
+        xmlns:tkit="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <d:DesignInstance>
+        <vm:MainWindowViewModel />
+    </d:DesignInstance>
+    <DockPanel>
+        <StatusBar DockPanel.Dock="Top" />
+        <StatusBar DockPanel.Dock="Bottom"/>
+        <ListBox DockPanel.Dock="Left" MinWidth="140" ItemsSource="{Binding ViewModels}" DisplayMemberPath="Title" IsSynchronizedWithCurrentItem="True" />
+        <!--<ContentPresenter Content="{Binding Path=ViewModels/ViewModels}" />-->
+        <DataGrid ItemsSource="{Binding Path=ViewModels/ViewModels}" />
+        <!--<tkit:DynamicTableGrid ItemsSource="{Binding Path=ViewModels/ViewModels}" />-->
+    </DockPanel>
+</Window>
