@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Corekit
+namespace Corekit.Extensions
 {
     public static class TypeExtensions
     {

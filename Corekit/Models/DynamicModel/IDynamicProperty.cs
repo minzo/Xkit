@@ -37,12 +37,4 @@ namespace Corekit.Models
         /// </summary>
         void SetValue(object value);
     }
-
-    /// <summary>
-    /// DynamicProperty<T>のインターフェース
-    /// </summary>
-    public interface IDynamicProperty<T> : IDynamicProperty
-    {
-        T Value { get; set; } 
-    }
 }

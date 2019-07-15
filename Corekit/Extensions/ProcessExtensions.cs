@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Corekit
+namespace Corekit.Extensions
 {
     /// <summary>
     /// プロセス拡張

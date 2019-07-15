@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 
-namespace Corekit
+namespace Corekit.Extensions
 {
     public static class LinqExtensions
     {

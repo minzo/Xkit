@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Corekit
+namespace Corekit.Extensions
 {
     public static class MathExtensions
     {
