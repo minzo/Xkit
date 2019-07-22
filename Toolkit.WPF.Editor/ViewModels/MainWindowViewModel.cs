@@ -33,8 +33,8 @@ namespace Tookit.WPF.Editor.ViewModels
         {
             this._Config = config;
             this.ViewModels = new ObservableCollection<object>();
-            this.ViewModels.Add(new ModelDefinitionViewModel<Material>("マテリアル", this._Config.MaterialCollection));
-            this.ViewModels.Add(new ModelDefinitionViewModel<SubMaterial>("サブマテリアル", this._Config.SubMaterialCollection));
+            this.ViewModels.Add(new ModelDefinitionViewModel("マテリアル", this._Config.MaterialCollection));
+            this.ViewModels.Add(new ModelDefinitionViewModel("サブマテリアル", this._Config.SubMaterialCollection));
         }
 
         private Config _Config;

@@ -43,25 +43,8 @@
             </Style.Triggers>
         </Style>
 
-        <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
-            <Setter Property="IsEnabled" Value="{Binding IsReadOnly, Converter={StaticResource BoolNot}}" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-        </Style>
-
-        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
-            <Setter Property="IsEnabled" Value="{Binding IsReadOnly, Converter={StaticResource BoolNot}}" />
-            <Setter Property="TextAlignment" Value="Center" />
-            <Setter Property="Background" Value="Red" />
-        </Style>
-
-        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
-            <Setter Property="IsEnabled" Value="{Binding IsReadOnly, Converter={StaticResource BoolNot}}" />
-            <Setter Property="TextAlignment" Value="Center" />
-        </Style>
-
         <!-- CellTemplateSelector -->
-        <tkitwpf:DynamicPropertyTemplateSelector x:Key="_CellSelector">
+        <tkitwpf:DynamicPropertyTemplateSelector x:Key="CellSelector">
             <DataTemplate DataType="{x:Type system:Int32}">
                 <TextBlock Text="{Binding Value}" />
             </DataTemplate>
@@ -90,7 +73,7 @@
         </tkitwpf:DynamicPropertyTemplateSelector>
 
         <!-- CellEditingTemplateSelectror -->
-        <tkitwpf:DynamicPropertyTemplateSelector x:Key="_CellEditingSelector">
+        <tkitwpf:DynamicPropertyTemplateSelector x:Key="CellEditingSelector">
             <DataTemplate DataType="{x:Type system:Int32}">
                 <TextBox Text="{Binding Value}" />
             </DataTemplate>
@@ -139,9 +122,10 @@
                     <Button Content="+" Width="20" />
                 </StackPanel>
                 <tkitwpf:DynamicTableGrid
-                    tkitwpf:SingleSelectorScope.IsSingleSelectorControl="true"
                     ItemsSource="{Binding}"
-                    RowDetailsVisibilityMode="Visible"
+                    tkitwpf:SingleSelectorScope.IsSingleSelectorControl="true"
+                    CellTemplateSelector="{StaticResource CellSelector}"
+                    CellEditingTemplateSelector="{StaticResource CellEditingSelector}" 
                     />
             </StackPanel>
         </DataTemplate>

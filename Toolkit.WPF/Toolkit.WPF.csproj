@@ -67,10 +67,8 @@
     <Compile Include="Controls\DataGridBindingColumn.cs" />
     <Compile Include="Controls\DataTemplateSelector\DataTypeTemplateSelector.cs" />
     <Compile Include="Controls\DataTemplateSelector\DynamicPropertyTemplateSelector.cs" />
+    <Compile Include="Controls\DynamicTableGrid\DynamicTableGrid.cs" />
     <Compile Include="Controls\RegexValidationRule.cs" />
-    <Compile Include="Controls\DynamicTable\DynamicTableGrid.xaml.cs">
-      <DependentUpon>DynamicTableGrid.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\FilterTextBox.xaml.cs">
       <DependentUpon>FilterTextBox.xaml</DependentUpon>
     </Compile>
@@ -92,6 +90,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ColorControl\ColorPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\DynamicTableGrid\DynamicTableGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -146,6 +148,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Corekit\Corekit.csproj">
@@ -159,10 +165,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Controls\ColorControl\ColorSelectComboBox.xaml">
-      <SubType>Designer</SubType>
-      <Generator>XamlIntelliSenseFileGenerator</Generator>
-    </Page>
-    <Page Include="Controls\DynamicTable\DynamicTableGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>

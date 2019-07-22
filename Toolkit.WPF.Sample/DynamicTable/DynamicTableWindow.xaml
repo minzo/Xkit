@@ -55,7 +55,7 @@
         </Style>
 
 
-        <tkit:DynamicPropertyTemplateSelector x:Key="CellTemplateSelector_">
+        <tkit:DynamicPropertyTemplateSelector x:Key="CellTemplateSelector">
             <DataTemplate DataType="{x:Type system:Int32}">
                 <TextBlock Text="{Binding Value}" Style="{StaticResource TextBlockStyle}" />
             </DataTemplate>
@@ -75,7 +75,7 @@
             </DataTemplate>
         </tkit:DynamicPropertyTemplateSelector>
 
-        <tkit:DynamicPropertyTemplateSelector x:Key="CellEditingTemplateSelector_">
+        <tkit:DynamicPropertyTemplateSelector x:Key="CellEditingTemplateSelector">
             <DataTemplate DataType="{x:Type system:Int32}">
                 <TextBox Text="{Binding Value}" Style="{StaticResource TextBoxStyle}" />
             </DataTemplate>
@@ -120,11 +120,9 @@
             <ListBox DisplayMemberPath="Name" ItemsSource="{Binding B_Modules}" />
         </DockPanel>
 
-        <tkit:DynamicTableGrid     
+        <tkit:DynamicTableGrid
             Grid.Column="3"
             ItemsSource="{Binding Table}"
-            CellTemplateSelector="{StaticResource CellTemplateSelector_}"            
-            CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector_}"
             />
     </Grid>
 </Window>

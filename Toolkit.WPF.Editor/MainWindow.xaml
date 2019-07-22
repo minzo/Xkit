@@ -11,12 +11,39 @@
     <d:DesignInstance>
         <vm:MainWindowViewModel />
     </d:DesignInstance>
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Views/Selector.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style TargetType="{x:Type StatusBar}" BasedOn="{StaticResource {x:Type StatusBar}}">
+                <Setter Property="Background" Value="{x:Static SystemColors.ControlLightLightBrush}" />
+            </Style>
+
+        </ResourceDictionary>
+    </Window.Resources>
+    
     <DockPanel>
-        <StatusBar DockPanel.Dock="Top" />
-        <StatusBar DockPanel.Dock="Bottom"/>
-        <ListBox DockPanel.Dock="Left" MinWidth="140" ItemsSource="{Binding ViewModels}" DisplayMemberPath="Title" IsSynchronizedWithCurrentItem="True" />
-        <!--<ContentPresenter Content="{Binding Path=ViewModels/ViewModels}" />-->
-        <DataGrid ItemsSource="{Binding Path=ViewModels/ViewModels}" />
-        <!--<tkit:DynamicTableGrid ItemsSource="{Binding Path=ViewModels/ViewModels}" />-->
+        <StatusBar DockPanel.Dock="Top" Margin="0 0 0 4">
+            <StatusBar.Effect>
+                <DropShadowEffect Direction="270" ShadowDepth="1" BlurRadius="4" Opacity="0.7" Color="Gray" />
+            </StatusBar.Effect>
+            <Button Content="保存" />
+        </StatusBar>
+
+        <StatusBar DockPanel.Dock="Bottom" Margin="0 4 0 0">
+            <StatusBar.Effect>
+                <DropShadowEffect Direction="90" ShadowDepth="1" BlurRadius="4" Opacity="0.7" Color="Gray" />
+            </StatusBar.Effect>
+            <TextBlock Text="ステータスメッセージ" />
+        </StatusBar>
+
+        <ContentPresenter Content="{Binding}" Margin="0 4">
+            <ContentPresenter.Effect>
+                <DropShadowEffect Direction="0" ShadowDepth="1" BlurRadius="4" Opacity="0.7" Color="Gray" />
+            </ContentPresenter.Effect>
+        </ContentPresenter>
     </DockPanel>
 </Window>
