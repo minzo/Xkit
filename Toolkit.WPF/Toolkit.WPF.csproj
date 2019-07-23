@@ -64,9 +64,11 @@
     <Compile Include="Controls\ColorControl\ColorSelectComboBox.xaml.cs">
       <DependentUpon>ColorSelectComboBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\DataGridBindingColumn.cs" />
+    <Compile Include="Controls\DynamicTableGrid\DataGridBindingColumn.cs" />
     <Compile Include="Controls\DataTemplateSelector\DataTypeTemplateSelector.cs" />
     <Compile Include="Controls\DataTemplateSelector\DynamicPropertyTemplateSelector.cs" />
+    <Compile Include="Controls\DynamicTableGrid\DataGridComboBox.cs" />
+    <Compile Include="Controls\DynamicTableGrid\DataGridTreeColumn.cs" />
     <Compile Include="Controls\DynamicTableGrid\DynamicTableGrid.cs" />
     <Compile Include="Controls\RegexValidationRule.cs" />
     <Compile Include="Controls\FilterTextBox.xaml.cs">

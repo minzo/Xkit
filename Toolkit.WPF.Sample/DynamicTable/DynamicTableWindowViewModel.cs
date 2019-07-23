@@ -1,4 +1,5 @@
 ﻿using Corekit;
+using Corekit.Extensions;
 using Corekit.Models;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,9 @@ using System.Windows.Input;
 
 namespace Toolkit.WPF.Sample
 {
+    /// <summary>
+    /// DynamicTableWindowViewModel
+    /// </summary>
     internal class DynamicTableWindowViewModel
     {
         public class Module : IDynamicTableFrame
@@ -25,22 +29,52 @@ namespace Toolkit.WPF.Sample
 
             public bool IsMovable => true;
 
+#pragma warning disable CS0067
             public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
         }
 
         public ObservableCollection<Module> A_Modules { get; } = new ObservableCollection<Module>(Enumerable.Range(0, 5).Select(i => new Module() { Name = $"A_Module{i}" }));
 
         public ObservableCollection<Module> B_Modules { get; } = new ObservableCollection<Module>(Enumerable.Range(0, 5).Select(i => new Module() { Name = $"B_Module{i}" }));
 
-        public DynamicTableViewModel<bool> Table { get; }
+        public DynamicTableViewModel<DynamicTableViewModel<bool>> Table { get; }
 
+        /// <summary>
+        /// 行追加
+        /// </summary>
         public ICommand AddRowCommand { get; }
 
+        /// <summary>
+        /// 列追加
+        /// </summary>
         public ICommand AddColCommand { get; }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public DynamicTableWindowViewModel()
         {
-            Table = new DynamicTableViewModel<bool>(A_Modules, B_Modules);
+            Table = new DynamicTableViewModel<DynamicTableViewModel<bool>>(A_Modules, B_Modules);
+            var cols = Table.Definition.Cols;
+            var rows = Table.Definition.Rows;
+            var rowIndex = 0;
+            var colIndex = 0;
+
+            foreach (var col in cols)
+            {
+                rowIndex = 0;
+                foreach (var row in rows)
+                {
+                    this.Table.SetPropertyValue(row.Name, col.Name, new DynamicTableViewModel<bool>(rows, cols) {
+                        RowIndex = rowIndex,
+                        ColIndex = colIndex
+                    });
+                    rowIndex++;
+                }
+                colIndex++;
+            }
+
 
             AddRowCommand = new DelegateCommand(_ => {
                 A_Modules.Add(new Module() { Name = $"A_Module{A_Modules.Count}" });
@@ -58,6 +92,16 @@ namespace Toolkit.WPF.Sample
     internal class DynamicTableViewModel<T> : DynamicTable<T>
     {
         /// <summary>
+        /// 行番号
+        /// </summary>
+        public int RowIndex { get; set; } = 0;
+
+        /// <summary>
+        /// 列番号
+        /// </summary>
+        public int ColIndex { get; set; } = 0;
+
+        /// <summary>
         /// プロパティ定義
         /// </summary>
         internal class PropertyDefiniton<TValue> : IDynamicPropertyDefinition
@@ -65,12 +109,12 @@ namespace Toolkit.WPF.Sample
             /// <summary>
             /// プロパティ定義の名前
             /// </summary>
-            public string Name { get => name; set => SetProperty(ref name, value); }
+            public string Name { get => this._Name; set => this.SetProperty(ref this._Name, value); }
 
             /// <summary>
             /// 読み取り専用（編集不可能か）
             /// </summary>
-            public bool? IsReadOnly { get => isReadOnly; set => SetProperty(ref isReadOnly, value); }
+            public bool? IsReadOnly { get => this._IsReadOnly; set => this.SetProperty(ref this._IsReadOnly, value); }
 
             /// <summary>
             /// 型
@@ -112,30 +156,15 @@ namespace Toolkit.WPF.Sample
                 return new Property<TValue>(this, owner, _OwnerTableValue);
             }
 
-            public event PropertyChangingEventHandler PropertyChanging;
-            public event PropertyChangedEventHandler PropertyChanged;
-
             private IDictionary<string, TValue> _OwnerTableValue;
 
-            private string name = null;
-            private bool? isReadOnly = null;
+            private string _Name = null;
+            private bool? _IsReadOnly = null;
 
-#pragma warning disable CS0693 
-            /// <summary>
-            /// プロパティ設定
-            /// </summary>
-            private bool SetProperty<TValue>(ref TValue field, TValue value, [CallerMemberName] string propertyName = null)
-            {
-                if (!Equals(field, value))
-                {
-                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
-                    field = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-                    return true;
-                }
-                return false;
-            }
-#pragma warning restore CS0693
+#pragma warning disable CS0067
+            public event PropertyChangingEventHandler PropertyChanging;
+            public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
         }
 
         /// <summary>
@@ -228,7 +257,8 @@ namespace Toolkit.WPF.Sample
         /// コンストラクタ
         /// rowsとcolsに同じインスタンスが入ると対角の値を同期します
         /// </summary>
-        public DynamicTableViewModel(IEnumerable<IDynamicTableFrame> rows, IEnumerable<IDynamicTableFrame> cols) : base(rows, cols)
+        public DynamicTableViewModel(IEnumerable<IDynamicTableFrame> rows, IEnumerable<IDynamicTableFrame> cols)
+            : base(rows, cols)
         {
         }
 

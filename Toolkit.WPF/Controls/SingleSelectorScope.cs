@@ -221,7 +221,7 @@ namespace Toolkit.WPF.Controls
                     foreach (var child in ch)
                     {
                         child.UnselectAllCells();
-                        //                    child.SelectedCells.Clear();
+                        child.SelectedCells.Clear();
                     }
                 }
                 else

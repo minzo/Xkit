@@ -13,6 +13,9 @@ using System.Windows.Media;
 
 namespace Toolkit.WPF.Controls
 {
+    /// <summary>
+    /// DynamicTableGrid
+    /// </summary>
     public class DynamicTableGrid : DataGrid
     {
         public struct SelectedInfo
@@ -236,11 +239,17 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnBeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
-            // DynamicTableを表示するためのViewなので依存する
-            var item = e.Row.Item as IDynamicItem;
-            var column = e.Column.GetCellContent(item) as ContentPresenter;
-            var cell = column.Content as IDynamicProperty;
-            e.Cancel = cell?.IsReadOnly ?? true;
+            var content = e.Column.GetCellContent(e.Row.Item);
+            switch (e.Column)
+            {
+                case DataGridBindingColumn v:
+                    var presenter = content as ContentPresenter;
+                    var cell = presenter?.Content as IDynamicProperty;
+                    e.Cancel = cell?.IsReadOnly ?? true;
+                    break;
+                default:
+                    break;
+            }
         }
 
         /// <summary>

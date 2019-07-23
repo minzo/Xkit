@@ -32,7 +32,7 @@ namespace Corekit.Models
         /// </summary>
         public DynamicItem(IDynamicItemDefinition definition) : this()
         {
-            Attach(definition);
+            this.Attach(definition);
         }
 
         /// <summary>
@@ -40,15 +40,15 @@ namespace Corekit.Models
         /// </summary>
         public DynamicItem Attach(IDynamicItemDefinition definition)
         {
-            if(isAttached)
+            if(_IsAttached)
             {
                 throw new InvalidOperationException("DynamicItem Definition Already Attached");
             }
 
-            Definition = definition;
-            Definition.CollectionChanged += OnDefinitionChanged;
-            Definition.ForEach(i => AddProperty(i.Create(this)));
-            isAttached = true;
+            this.Definition = definition;
+            this.Definition.CollectionChanged += OnDefinitionChanged;
+            this.Definition.ForEach(i => AddProperty(i.Create(this)));
+            this._IsAttached = true;
             return this;
         }
 
@@ -59,7 +59,7 @@ namespace Corekit.Models
         /// </summary>
         public IDynamicProperty GetProperty(string propertyName)
         {
-            return Value.FirstOrDefault(i => i.Definition.Name == propertyName);
+            return this.Value.FirstOrDefault(i => i.Definition.Name == propertyName);
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Corekit.Models
         /// </summary>
         public IDynamicProperty GetProperty(int index)
         {
-            return Value[index];
+            return this.Value[index];
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace Corekit.Models
         /// </summary>
         public object GetPropertyValue(string propertyName)
         {
-            return GetProperty(propertyName)?.GetValue();
+            return this.GetProperty(propertyName)?.GetValue();
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace Corekit.Models
         /// </summary>
         public T GetPropertyValue<T>(string propertyName)
         {
-            return (T)GetProperty(propertyName)?.GetValue();
+            return (T)this.GetProperty(propertyName)?.GetValue();
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace Corekit.Models
         /// </summary>
         public object GetPropertyValue(int index)
         {
-            return Value[index]?.GetValue();
+            return this.Value[index]?.GetValue();
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Corekit.Models
         /// </summary>
         public T GetPropertyValue<T>(int index)
         {
-            return (T)Value[index]?.GetValue();
+            return (T)this.Value[index]?.GetValue();
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Corekit.Models
         /// </summary>
         public void SetPropertyValue(string propertyName, object value)
         {
-            Value.FirstOrDefault(i => i.Definition.Name == propertyName)?.SetValue(value);
+            this.Value.FirstOrDefault(i => i.Definition.Name == propertyName)?.SetValue(value);
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace Corekit.Models
         /// </summary>
         public void SetPropertyValue<T>(string propertyName, T value)
         {
-            Value.FirstOrDefault(i => i.Definition.Name == propertyName)?.SetValue(value);
+            this.Value.FirstOrDefault(i => i.Definition.Name == propertyName)?.SetValue(value);
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace Corekit.Models
         /// </summary>
         public void SetPropertyValue(int index, object value)
         {
-            Value[index]?.SetValue(value);
+            this.Value[index]?.SetValue(value);
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace Corekit.Models
         /// </summary>
         public void SetPropertyValue<T>(int index, T value)
         {
-            Value[index]?.SetValue(value);
+            this.Value[index]?.SetValue(value);
         }
 
 
@@ -196,18 +196,18 @@ namespace Corekit.Models
             {
                 e.OldItems?
                     .Cast<IDynamicPropertyDefinition>()
-                    .ForEach(i => MoveProperty(i.Name, e.NewStartingIndex));
+                    .ForEach(i => this.MoveProperty(i.Name, e.NewStartingIndex));
             }
             else
             {
                 e.OldItems?
                     .Cast<IDynamicPropertyDefinition>()
-                    .ForEach(i => RemoveProperty(i.Name));
+                    .ForEach(i => this.RemoveProperty(i.Name));
 
                 int insertIndex = e.NewStartingIndex;
                 e.NewItems?
                     .Cast<IDynamicPropertyDefinition>()
-                    .ForEach(i => InsertProperty(insertIndex++, i.Create(this)));
+                    .ForEach(i => this.InsertProperty(insertIndex++, i.Create(this)));
             }
         }
 
@@ -231,18 +231,18 @@ namespace Corekit.Models
         public PropertyDescriptor GetDefaultProperty() => null;
         public object GetEditor(Type editorBaseType) => null;
         public EventDescriptorCollection GetEvents() => EventDescriptorCollection.Empty;
-        public EventDescriptorCollection GetEvents(Attribute[] attributes) => GetEvents();
+        public EventDescriptorCollection GetEvents(Attribute[] attributes) => this.GetEvents();
         public PropertyDescriptorCollection GetProperties()
         {
             var descriptors = Value.Select(i => new DynamicPropertyDescriptor(i)).ToArray();
             return new PropertyDescriptorCollection(descriptors);
         }
-        public PropertyDescriptorCollection GetProperties(Attribute[] attributes) => GetProperties();
+        public PropertyDescriptorCollection GetProperties(Attribute[] attributes) => this.GetProperties();
         public object GetPropertyOwner(PropertyDescriptor pd) => this;
 
         #endregion
 
-        private bool isAttached = false;
+        private bool _IsAttached = false;
 
         private static IDynamicPropertyDefinition definition__ = new DynamicPropertyDefinition<DynamicPropertyCollection>()
         {

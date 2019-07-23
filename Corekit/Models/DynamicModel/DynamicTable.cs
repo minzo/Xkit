@@ -14,6 +14,12 @@ namespace Corekit.Models
     public class DynamicTable<T> : TypedCollection<DynamicItem>, IDynamicTable<DynamicItem, T>
     {
         /// <summary>
+        /// テーブル定義
+        /// </summary>
+        public DynamicTableDefinition Definition { get; private set; }
+
+
+        /// <summary>
         /// 名前
         /// </summary>
         public string Name { get; set; }
@@ -30,7 +36,7 @@ namespace Corekit.Models
         /// </summary>
         public DynamicTable(DynamicTableDefinition definition)
         {
-            Attach(definition);
+            this.Attach(definition);
         }
 
         /// <summary>
@@ -39,7 +45,7 @@ namespace Corekit.Models
         /// </summary>
         public DynamicTable(IEnumerable<IDynamicTableFrame> rows, IEnumerable<IDynamicTableFrame> cols)
         {
-            Attach(new DynamicTableDefinition() { Rows = rows, Cols = cols });
+            this.Attach(new DynamicTableDefinition() { Rows = rows, Cols = cols });
         }
 
         /// <summary>
@@ -47,18 +53,18 @@ namespace Corekit.Models
         /// </summary>
         public DynamicTable<T> Attach(DynamicTableDefinition definition)
         {
-            if(isAttached)
+            if (this._IsAttached)
             {
                 throw new InvalidOperationException("DynamicTable Definition Already Attached");
             }
 
-            properties = new ObservableCollection<IDynamicPropertyDefinition>(definition.Cols.Select(i => CreateDefinition(i)));
+            this._Properties = new ObservableCollection<IDynamicPropertyDefinition>(definition.Cols.Select(i => this.CreateDefinition(i)));
 
-            properties.CollectionChanged += OnPropertyDefinitionsChanged;
+            this._Properties.CollectionChanged += this.OnPropertyDefinitionsChanged;
 
             foreach (var row in definition.Rows)
             {
-                AddItem(CreateDynamicItem(row));
+                this.AddItem(this.CreateDynamicItem(row));
             }
 
             if (definition.Cols is INotifyCollectionChanged cols)
@@ -71,8 +77,8 @@ namespace Corekit.Models
                 rows.CollectionChanged += OnRowsCollectionChanged;
             }
 
-            this.isAttached = true;
-            this.definition = definition;
+            this.Definition = definition;
+            this._IsAttached = true;
 
             return this;
         }
@@ -130,7 +136,7 @@ namespace Corekit.Models
         /// </summary>
         private void OnPropertyDefinitionsChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            PropertyDefinitionsChanged?.Invoke(this, e);
+            this.PropertyDefinitionsChanged?.Invoke(this, e);
         }
 
         /// プロパティ定義数変更通知
@@ -163,7 +169,7 @@ namespace Corekit.Models
         /// </summary>
         private DynamicItem CreateDynamicItem(IDynamicTableFrame row)
         {
-            var item = new DynamicItem(new DynamicItemDefinition(properties)
+            var item = new DynamicItem(new DynamicItemDefinition(_Properties)
             {
                 Name        = row.Name,
                 IsReadOnly  = row.IsReadOnly,
@@ -179,7 +185,7 @@ namespace Corekit.Models
         /// </summary>
         private void AddItem(DynamicItem item)
         {
-            InsertItem(-1, item);
+            this.InsertItem(-1, item);
         }
 
         /// <summary>
@@ -187,12 +193,12 @@ namespace Corekit.Models
         /// </summary>
         private new void InsertItem(int index, DynamicItem item)
         {
-            item.PropertyChanged += OnPropertyChanged;
+            item.PropertyChanged += this.OnPropertyChanged;
 
             if (index < 0)
-                Add(item);
+                this.Add(item);
             else
-                Insert(index, item);
+                this.Insert(index, item);
         }
 
         /// <summary>
@@ -203,8 +209,8 @@ namespace Corekit.Models
             var item = this.FirstOrDefault(i => i.Definition.Name == rowName);
             if (item != null)
             {
-                Remove(item);
-                item.PropertyChanged -= OnPropertyChanged;
+                this.Remove(item);
+                item.PropertyChanged -= this.OnPropertyChanged;
             }
         }
 
@@ -213,7 +219,7 @@ namespace Corekit.Models
         /// </summary>
         private void MoveItem(string rowName, int newIndex)
         {
-            MoveItem(this.IndexOf(i => i.Definition.Name == rowName), newIndex);
+            this.MoveItem(this.IndexOf(i => i.Definition.Name == rowName), newIndex);
         }
 
         #endregion
@@ -237,7 +243,7 @@ namespace Corekit.Models
         /// </summary>
         private void AddDefinition(IDynamicPropertyDefinition definition)
         {
-            properties.Add(definition);
+            this._Properties.Add(definition);
         }
 
         /// <summary>
@@ -245,7 +251,7 @@ namespace Corekit.Models
         /// </summary>
         private void InsertDefinition(int index, IDynamicPropertyDefinition definition)
         {
-            properties.Insert(index, definition);
+            this._Properties.Insert(index, definition);
         }
 
         /// <summary>
@@ -253,7 +259,7 @@ namespace Corekit.Models
         /// </summary>
         private void RemoveDefinition(string name)
         {
-            properties.Remove(properties.FirstOrDefault(i => i.Name == name));
+            this._Properties.Remove(_Properties.FirstOrDefault(i => i.Name == name));
         }
 
         /// <summary>
@@ -261,7 +267,7 @@ namespace Corekit.Models
         /// </summary>
         private void MoveDefinition(string propertyName, int newIndex)
         {
-            MoveDefinition(this.IndexOf(i => i.Definition.Name == propertyName), newIndex);
+            this.MoveDefinition(this.IndexOf(i => i.Definition.Name == propertyName), newIndex);
         }
 
         /// <summary>
@@ -269,7 +275,7 @@ namespace Corekit.Models
         /// </summary>
         private void MoveDefinition(int oldIndex, int newIndex)
         {
-            properties.Move(oldIndex, newIndex);
+            this._Properties.Move(oldIndex, newIndex);
         }
 
         #endregion
@@ -282,7 +288,7 @@ namespace Corekit.Models
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             // 対角の値を同期する
-            if (definition.Rows == definition.Cols)
+            if (this.Definition.Rows == this.Definition.Cols)
             {
                 var item = sender as DynamicItem;
                 this.FirstOrDefault(i => i.Definition.Name == e.PropertyName)?
@@ -292,10 +298,8 @@ namespace Corekit.Models
 
         #endregion
 
-        private ObservableCollection<IDynamicPropertyDefinition> properties;
+        private ObservableCollection<IDynamicPropertyDefinition> _Properties;
 
-        private DynamicTableDefinition definition = null;
-
-        private bool isAttached = false;
+        private bool _IsAttached = false;
     }
 }

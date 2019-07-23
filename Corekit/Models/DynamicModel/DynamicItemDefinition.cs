@@ -99,7 +99,7 @@ namespace Corekit.Models
         /// </summary>
         public void Add(IDynamicPropertyDefinition definition)
         {
-            collection.Add(definition);
+            this.collection.Add(definition);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Corekit.Models
         /// </summary>
         public void Remove(IDynamicPropertyDefinition definition)
         {
-            collection.Remove(definition);
+            this.collection.Remove(definition);
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace Corekit.Models
         /// </summary>
         public IEnumerator<IDynamicPropertyDefinition> GetEnumerator()
         {
-            return collection.GetEnumerator();
+            return this.collection.GetEnumerator();
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace Corekit.Models
         /// </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return collection.GetEnumerator();
+            return this.collection.GetEnumerator();
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Corekit.Models
             e.OldItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => i.PropertyChanged -= OnPropertyChanged);
             e.NewItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => i.PropertyChanged += OnPropertyChanged);
 
-            CollectionChanged?.Invoke(this, e);
+            this.CollectionChanged?.Invoke(this, e);
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace Corekit.Models
         /// </summary>
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            PropertyChanged?.Invoke(this, e);
+            this.PropertyChanged?.Invoke(this, e);
         }
         
         private ObservableCollection<IDynamicPropertyDefinition> collection;

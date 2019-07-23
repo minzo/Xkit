@@ -47,12 +47,12 @@ namespace Corekit.Models
         /// <summary>
         /// プロパティ定義の名前
         /// </summary>
-        public string Name { get => name; set => SetProperty(ref name, value); }
+        public string Name { get => this._Name; set => SetProperty(ref this._Name, value); }
 
         /// <summary>
         /// 読み取り専用（編集不可能か）
         /// </summary>
-        public bool? IsReadOnly { get => isReadOnly; set => SetProperty(ref isReadOnly, value); }
+        public bool? IsReadOnly { get => this._IsReadOnly; set => SetProperty(ref this._IsReadOnly, value); }
 
         /// <summary>
         /// 型
@@ -88,8 +88,8 @@ namespace Corekit.Models
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private string name = null;
-        private bool? isReadOnly = null;
+        private string _Name = null;
+        private bool? _IsReadOnly = null;
 
 
         /// <summary>
@@ -99,9 +99,9 @@ namespace Corekit.Models
         {
             if (!Equals(field, value))
             {
-                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
+                this.PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
                 field = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
                 return true;
             }
             return false;

@@ -26,19 +26,19 @@ namespace Corekit.Models
         /// <summary>
         /// 読み取り専用か (Ownerの状態も考慮して最終的な状態を返します)
         /// </summary>
-        public bool IsReadOnly => Owner?.Definition?.IsReadOnly == true || Definition.IsReadOnly == true;
+        public bool IsReadOnly => this.Owner?.Definition?.IsReadOnly == true || this.Definition.IsReadOnly == true;
 
         /// <summary>
         /// 値
         /// </summary>
         public T Value {
-            get { return value_; }
+            get { return _value; }
             set {
-                if (!Equals(value_, value))
+                if (!Equals(_value, value))
                 {
-                    PropertyChanging?.Invoke(this, _changingEventArgs);
-                    value_ = value;
-                    PropertyChanged?.Invoke(this, _changedEventArgs);
+                    this.PropertyChanging?.Invoke(this, _changingEventArgs);
+                    _value = value;
+                    this.PropertyChanged?.Invoke(this, _changedEventArgs);
                 }
             }
         }
@@ -46,12 +46,12 @@ namespace Corekit.Models
         /// <summary>
         /// 値を取得する
         /// </summary>
-        public object GetValue() => Value;
+        public object GetValue() => this.Value;
 
         /// <summary>
         /// 値を設定する
         /// </summary>
-        public void SetValue(object value) => Value = (T)value;
+        public void SetValue(object value) => this.Value = (T)value;
 
         /// <summary>
         /// コンストラクタ
@@ -60,7 +60,7 @@ namespace Corekit.Models
         {
             Definition = definition;
             Owner = owner;
-            value_ = (T)Definition.GetDefaultValue();
+            _value = (T)Definition.GetDefaultValue();
         }
 
         /// <summary>
@@ -68,11 +68,11 @@ namespace Corekit.Models
         /// </summary>
         public override string ToString() => Value.ToString();
 
-        private T value_;
+        private T _value;
 
         public event PropertyChangingEventHandler PropertyChanging;
         public event PropertyChangedEventHandler PropertyChanged;
-        private static PropertyChangingEventArgs _changingEventArgs = new PropertyChangingEventArgs(nameof(Value));
-        private static PropertyChangedEventArgs _changedEventArgs = new PropertyChangedEventArgs(nameof(Value));
+        private static readonly PropertyChangingEventArgs _changingEventArgs = new PropertyChangingEventArgs(nameof(Value));
+        private static readonly PropertyChangedEventArgs _changedEventArgs = new PropertyChangedEventArgs(nameof(Value));
     }
 }

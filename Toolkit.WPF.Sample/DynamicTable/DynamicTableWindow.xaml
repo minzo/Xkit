@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Toolkit.WPF.Sample"
+        xmlns:ckit="clr-namespace:Corekit.Models;assembly=Corekit"
         xmlns:tkit="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
         xmlns:converters="clr-namespace:Toolkit.WPF.Converters;assembly=Toolkit.WPF"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
@@ -73,6 +74,34 @@
                     <CheckBox IsChecked="{Binding Value}" Style="{StaticResource CheckBoxStyle}" />
                 </Border>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type ckit:IDynamicTable}">
+                <tkit:DynamicTableGrid
+                    ItemsSource="{Binding Value}"
+                    HorizontalScrollBarVisibility="Hidden"
+                    VerticalScrollBarVisibility="Hidden">
+                    <tkit:DynamicTableGrid.Style>
+                        <Style TargetType="{x:Type tkit:DynamicTableGrid}" BasedOn="{StaticResource {x:Type tkit:DynamicTableGrid}}">
+                            <Setter Property="MinRowHeight" Value="24" />
+                            <Setter Property="HeadersVisibility" Value="None" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Value.RowIndex}" Value="0">
+                                    <Setter Property="HeadersVisibility" Value="Column" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Value.ColIndex}" Value="0">
+                                    <Setter Property="HeadersVisibility" Value="Row" />
+                                </DataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Value.RowIndex}" Value="0" />
+                                        <Condition Binding="{Binding Value.ColIndex}" Value="0" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="HeadersVisibility" Value="All" />
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </tkit:DynamicTableGrid.Style>
+                </tkit:DynamicTableGrid>
+            </DataTemplate>
         </tkit:DynamicPropertyTemplateSelector>
 
         <tkit:DynamicPropertyTemplateSelector x:Key="CellEditingTemplateSelector">
@@ -122,7 +151,10 @@
 
         <tkit:DynamicTableGrid
             Grid.Column="3"
+            tkit:DynamicTableGrid.IsSharedSizeScope="True"
             ItemsSource="{Binding Table}"
+            CellTemplateSelector="{StaticResource CellTemplateSelector}"
+            CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}"
             />
     </Grid>
 </Window>

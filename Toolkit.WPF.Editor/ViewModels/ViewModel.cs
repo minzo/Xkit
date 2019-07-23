@@ -65,6 +65,7 @@ namespace Tookit.WPF.Editor.ViewModels
 
         #endregion
 
+#pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
         public event PropertyChangedEventHandler ModelPropertyChanged;
     }
@@ -149,6 +150,7 @@ namespace Tookit.WPF.Editor.ViewModels
 
         #endregion
 
+#pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
         public event PropertyChangedEventHandler ModelPropertyChanged;
     }

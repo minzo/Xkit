@@ -184,15 +184,15 @@ namespace Toolkit.WPF.Controls
             {
                 if(e.Key == Key.Escape)
                 {
-                    DataGridOwner?.CancelEdit();
+                    this.DataGridOwner?.CancelEdit();
                     e.Handled = true;
                 }
             }
             else if(!Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
-                if(IsBeginEditCharacter(e.Key) || IsBeginEditCharacter(e.ImeProcessedKey))
+                if (this.IsBeginEditCharacter(e.Key) || this.IsBeginEditCharacter(e.ImeProcessedKey))
                 {
-                    DataGridOwner?.BeginEdit();
+                    this.DataGridOwner?.BeginEdit();
 
                     // ReferenceSource の DataGridTextBoxColumn を参考にした
                     //
@@ -203,13 +203,13 @@ namespace Toolkit.WPF.Controls
                     // recorded in the TextBox. Hence the call to synchronously drain
                     // the Dispatcher queue.
                     //
-                    Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Background);
+                    this.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Background);
                 }
             }
 
             if (e.Key == Key.Space)
             {
-                e.Handled = CheckBoxEditAssist(cell);
+                e.Handled = this.CheckBoxEditAssist(cell);
             }
         }
 
@@ -220,7 +220,6 @@ namespace Toolkit.WPF.Controls
         {
             e.Handled = CheckBoxEditAssist(sender as DataGridCell);
         }
-
 
         /// <summary>
         /// チェックボックス入力補助
@@ -246,8 +245,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private T FindVisualChildren<T>(DependencyObject dp) where T : FrameworkElement
         {
-            var elements = Enumerable
-                .Range(0, VisualTreeHelper.GetChildrenCount(dp))
+            var elements = Enumerable.Range(0, VisualTreeHelper.GetChildrenCount(dp))
                 .Select(i => VisualTreeHelper.GetChild(dp, i));
 
             foreach(var element in elements)
@@ -257,7 +255,7 @@ namespace Toolkit.WPF.Controls
                     case T v:
                         return v;
                     case FrameworkElement v:
-                        return FindVisualChildren<T>(v);
+                        return this.FindVisualChildren<T>(v);
                     default:
                         break;
                 }

@@ -19,11 +19,11 @@ namespace Toolkit.WPF.Controls
         {
             if (item == null)
             {
-                return Templates.LastOrDefault();
+                return this.Templates.LastOrDefault();
             }
 
             var type = (item as IDynamicProperty)?.Definition.ValueType ?? item.GetType();
-            var template = Templates.FirstOrDefault(i => (i.DataType as Type).IsAssignableFrom(type));
+            var template = this.Templates.FirstOrDefault(i => (i.DataType as Type).IsAssignableFrom(type));
             return template ?? base.SelectTemplate(item, container);
         }
     }
