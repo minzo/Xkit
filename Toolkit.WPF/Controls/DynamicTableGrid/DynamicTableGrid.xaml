@@ -81,11 +81,11 @@
         </DataTemplate>
     </local:DynamicPropertyTemplateSelector>
 
+    <!-- DataGridCell -->
     <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
         <Style.Triggers>
-            <DataTrigger Binding="{Binding Path=(local:DynamicTableGrid.IsSelectedContainsCellsAny), RelativeSource={RelativeSource Self}}" Value="True">
+            <DataTrigger Binding="{Binding Path=(local:DynamicTableGrid.IsSelectedCellContains), RelativeSource={RelativeSource Self}}" Value="True">
                 <Setter Property="Background" Value="{x:Static SystemColors.InactiveSelectionHighlightBrush}" />
-                <!--<Setter Property="Foreground" Value="{x:Static SystemColors.HighlightBrush}" />-->
             </DataTrigger>
             <Trigger Property="IsSelected" Value="True">
                 <Setter Property="Background" Value="{x:Static SystemColors.HighlightBrush}" />
@@ -104,7 +104,7 @@
     <Style TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource {x:Type DataGridRow}}">
         <Setter Property="HeaderTemplate" Value="{StaticResource RowHeaderTemplate}" />
         <Style.Triggers>
-            <DataTrigger Binding="{Binding Path=(local:DynamicTableGrid.IsSelectedContainsCellsAny), RelativeSource={RelativeSource Self}}" Value="True">
+            <DataTrigger Binding="{Binding Path=(local:DynamicTableGrid.IsSelectedCellContains), RelativeSource={RelativeSource Self}}" Value="True">
                 <Setter Property="Background" Value="{x:Static SystemColors.InactiveSelectionHighlightBrush}" />
             </DataTrigger>
         </Style.Triggers>
@@ -116,15 +116,6 @@
             <TextBlock Text="{Binding Name}" />
         </StackPanel>
     </DataTemplate>
-
-    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
-        <Setter Property="Content" Value="{Binding Name}" />
-        <Style.Triggers>
-            <DataTrigger Binding="{Binding Path=(local:DynamicTableGrid.IsSelectedContainsCellsAny), RelativeSource={RelativeSource Self}}" Value="True">
-                <Setter Property="Background" Value="Red" />
-            </DataTrigger>
-        </Style.Triggers>
-    </Style>
 
     <!-- Binding Column -->
     <local:DataGridBindingColumn x:Key="BindingColumn" x:Shared="False"

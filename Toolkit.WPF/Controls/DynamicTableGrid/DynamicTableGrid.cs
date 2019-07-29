@@ -265,7 +265,7 @@ namespace Toolkit.WPF.Controls
                      .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault());
                 foreach (var cell in cells)
                 {
-                    SetIsSelectedContainsCellsAny(cell, false);
+                    SetIsSelectedCellContains(cell, false);
                 }
             }
 
@@ -275,13 +275,13 @@ namespace Toolkit.WPF.Controls
                 foreach (var cell in e.RemovedCells)
                 {
                     var row = this.ItemContainerGenerator.ContainerFromItem(cell.Item);
-                    SetIsSelectedContainsCellsAny(row, false);
+                    SetIsSelectedCellContains(row, false);
                 }
 
                 foreach (var cell in e.AddedCells)
                 {
                     var row = this.ItemContainerGenerator.ContainerFromItem(cell.Item);
-                    SetIsSelectedContainsCellsAny(row, true);
+                    SetIsSelectedCellContains(row, true);
                 }
             }
 
@@ -295,7 +295,7 @@ namespace Toolkit.WPF.Controls
 
                 foreach (var cell in cells)
                 {
-                    SetIsSelectedContainsCellsAny(cell, true);
+                    SetIsSelectedCellContains(cell, true);
                 }
             }
 
@@ -343,34 +343,23 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
-        #region 行に属するセルが1つ以上選択されているか
+        #region 選択されている行または列に属しているか
 
-        /// <summary>
-        /// 行に属すセルが1つ以上選択されているかどうか
-        /// </summary>
-        private static bool GetIsSelectedContainsCellsAny(DependencyObject obj)
+        public static bool GetIsSelectedCellContains(DependencyObject obj)
         {
-            return (bool)obj.GetValue(IsSelectedContainsCellsAnyProperty);
+            return (bool)obj.GetValue(IsSelectedCellContainsProperty);
         }
 
-        /// <summary>
-        /// 行に属すセルが1つ以上選択されているかどうか
-        /// </summary>
-        private static void SetIsSelectedContainsCellsAny(DependencyObject obj, bool value)
+        public static void SetIsSelectedCellContains(DependencyObject obj, bool value)
         {
-            obj.SetValue(IsSelectedContainsCellsAnyProperty, value);
+            obj.SetValue(IsSelectedCellContainsProperty, value);
         }
 
-        // Using a DependencyProperty as the backing store for IsSelectedContainsCellAny.  This enables animation, styling, binding, etc...
-        private static readonly DependencyProperty IsSelectedContainsCellsAnyProperty =
-            DependencyProperty.RegisterAttached("IsSelectedContainsCellsAny", typeof(bool), typeof(DynamicTableGrid), new PropertyMetadata(false));
+        // Using a DependencyProperty as the backing store for IsSelectedCellContains.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty IsSelectedCellContainsProperty =
+            DependencyProperty.RegisterAttached("IsSelectedCellContains", typeof(bool), typeof(DynamicTableGrid), new PropertyMetadata(false));
 
         #endregion
-
-        #region 属する列が選択状態か
-
-        #endregion
-
 
         #region スケール変更操作
 
