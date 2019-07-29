@@ -375,7 +375,7 @@ namespace Toolkit.WPF.Controls
         {
             if (Keyboard.Modifiers == ModifierKeys.Control)
             {
-                ChangeScale(e.Delta > 0 ? 0.2 : -0.2, false);
+                this.ChangeScale(e.Delta > 0 ? 0.2 : -0.2, false);
             }
         }
 
@@ -387,7 +387,7 @@ namespace Toolkit.WPF.Controls
             bool isResetScale = Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.D0;
             if (isResetScale)
             {
-                ChangeScale(0.0, true);
+                this.ChangeScale(0.0, true);
             }
         }
 
@@ -396,7 +396,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void ChangeScale(double rate, bool isReset)
         {
-            if (LayoutTransform is ScaleTransform transform)
+            if (this.LayoutTransform is ScaleTransform transform)
             {
                 if (isReset)
                 {
