@@ -84,8 +84,7 @@ namespace Toolkit.WPF.Controls
 
         public bool EnableRowHighlighting { get; set; }
 
-        public bool EnableColumnHighlighing { get; set; }
-
+        public bool EnableColumnHighlighting { get; set; }
 
         #endregion
 
@@ -224,10 +223,11 @@ namespace Toolkit.WPF.Controls
             {
                 column.Binding = new Binding(propertyName);
                 column.ClipboardContentBinding = new Binding(propertyName);
+                column.SortMemberPath = propertyName;
                 column.IsReadOnly = isReadOnly;
                 column.Header = definition;
-                column.CellTemplateSelector = CellTemplateSelector ?? column.CellTemplateSelector;
-                column.CellEditingTemplateSelector = CellEditingTemplateSelector ?? column.CellEditingTemplateSelector;
+                column.CellTemplateSelector = this.CellTemplateSelector ?? column.CellTemplateSelector;
+                column.CellEditingTemplateSelector = this.CellEditingTemplateSelector ?? column.CellEditingTemplateSelector;
                 return column;
             }
 
@@ -257,14 +257,27 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnSelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
-            foreach (var cell in e.RemovedCells)
+            // ハイライト情報のリセット
             {
-                var row = ItemContainerGenerator.ContainerFromItem(cell.Item);
-                SetIsSelectedContainsCellsAny(row, false);
+                var columns = e.RemovedCells.Select(i => i.Column).Distinct();
+                var cells = (this.ItemsSource as IEnumerable<object>)
+                     .SelectMany(i => columns.Select(x => x.GetCellContent(i)))
+                     .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault());
+                foreach (var cell in cells)
+                {
+                    SetIsSelectedContainsCellsAny(cell, false);
+                }
             }
 
-            if (EnableRowHighlighting)
+            // 行ハイライト
+            if (this.EnableRowHighlighting)
             {
+                foreach (var cell in e.RemovedCells)
+                {
+                    var row = this.ItemContainerGenerator.ContainerFromItem(cell.Item);
+                    SetIsSelectedContainsCellsAny(row, false);
+                }
+
                 foreach (var cell in e.AddedCells)
                 {
                     var row = this.ItemContainerGenerator.ContainerFromItem(cell.Item);
@@ -272,11 +285,26 @@ namespace Toolkit.WPF.Controls
                 }
             }
 
+            // 列ハイライト
+            if (this.EnableColumnHighlighting)
+            {
+                var columns = e.AddedCells.Select(i => i.Column).Distinct();
+                var cells = (this.ItemsSource as IEnumerable<object>)
+                    .SelectMany(i => columns.Select(x => x.GetCellContent(i)))
+                    .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault());
+
+                foreach (var cell in cells)
+                {
+                    SetIsSelectedContainsCellsAny(cell, true);
+                }
+            }
+
+            // セル選択情報の更新
             var cellInfos = SelectedCells
                 .Select(i => new SelectedInfo(i.Item, GetPropertyName(i.Column)))
                 .ToList();
 
-            SetCurrentValue(DynamicTableGrid.SelectedInfosProperty, cellInfos);
+            this.SetCurrentValue(DynamicTableGrid.SelectedInfosProperty, cellInfos);
         }
 
         #region コピー / ペースト
@@ -338,6 +366,11 @@ namespace Toolkit.WPF.Controls
             DependencyProperty.RegisterAttached("IsSelectedContainsCellsAny", typeof(bool), typeof(DynamicTableGrid), new PropertyMetadata(false));
 
         #endregion
+
+        #region 属する列が選択状態か
+
+        #endregion
+
 
         #region スケール変更操作
 

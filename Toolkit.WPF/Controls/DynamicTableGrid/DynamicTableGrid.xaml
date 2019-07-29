@@ -4,32 +4,10 @@
                     xmlns:system="clr-namespace:System;assembly=mscorlib"
                     xmlns:converters="clr-namespace:Toolkit.WPF.Converters">
 
+    <!-- Converter -->
     <converters:BoolNot x:Key="BoolNot" />
 
-    <DataTemplate x:Key="RowHeaderTemplate" DataType="{x:Type DataGridRowHeader}">
-        <StackPanel MaxWidth="80" DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}">
-            <TextBlock Text="{Binding Definition.Name}" />
-        </StackPanel>
-    </DataTemplate>
-
-    <DataTemplate x:Key="ColumnHeaderTemplate">
-        <StackPanel Width="80">
-            <TextBlock Text="{Binding Name}" />
-        </StackPanel>
-    </DataTemplate>
-
-    <Style TargetType="{x:Type local:DynamicTableGrid}" BasedOn="{StaticResource {x:Type DataGrid}}">
-        <Setter Property="CanUserAddRows" Value="False" />
-        <Setter Property="CanUserDeleteRows" Value="False" />
-        <Setter Property="CanUserResizeRows" Value="False" />
-        <Setter Property="CanUserSortColumns" Value="False" />
-        <Setter Property="SelectionUnit" Value="CellOrRowHeader" />
-        <Setter Property="BorderBrush" Value="#F0F0F0" />
-        <Setter Property="HorizontalGridLinesBrush" Value="#CECECE" />
-        <Setter Property="VerticalGridLinesBrush" Value="#CECECE" />
-        <Setter Property="RowHeaderTemplate" Value="{StaticResource RowHeaderTemplate}" />
-    </Style>
-
+    <!-- Style -->
     <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
         <Setter Property="IsEnabled" Value="{Binding IsReadOnly, Converter={StaticResource BoolNot}}" />
         <Setter Property="VerticalAlignment" Value="Center" />
@@ -53,7 +31,7 @@
         <Setter Property="VerticalContentAlignment" Value="Stretch" />
     </Style>
 
-    <Style x:Key="BorderStyle" TargetType="{x:Type Border}">
+    <Style TargetType="{x:Type Border}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding Value}" Value="True">
                 <Setter Property="Background" Value="#50ff661a" />
@@ -61,6 +39,7 @@
         </Style.Triggers>
     </Style>
 
+    <!-- CellTemplateSelector -->
     <local:DynamicPropertyTemplateSelector x:Key="CellTemplateSelector">
         <DataTemplate DataType="{x:Type system:Int32}">
             <TextBlock Text="{Binding Value}" />
@@ -75,12 +54,13 @@
             <TextBlock Text="{Binding Value}" />
         </DataTemplate>
         <DataTemplate DataType="{x:Type system:Boolean}">
-            <Border Style="{StaticResource BorderStyle}">
+            <Border>
                 <CheckBox IsChecked="{Binding Value}"  />
             </Border>
         </DataTemplate>
     </local:DynamicPropertyTemplateSelector>
 
+    <!-- CellEditingTemplateSelector -->
     <local:DynamicPropertyTemplateSelector x:Key="CellEditingTemplateSelector">
         <DataTemplate DataType="{x:Type system:Int32}">
             <TextBox Text="{Binding Value}" />
@@ -101,9 +81,67 @@
         </DataTemplate>
     </local:DynamicPropertyTemplateSelector>
 
+    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=(local:DynamicTableGrid.IsSelectedContainsCellsAny), RelativeSource={RelativeSource Self}}" Value="True">
+                <Setter Property="Background" Value="{x:Static SystemColors.InactiveSelectionHighlightBrush}" />
+                <!--<Setter Property="Foreground" Value="{x:Static SystemColors.HighlightBrush}" />-->
+            </DataTrigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{x:Static SystemColors.HighlightBrush}" />
+                <Setter Property="Foreground" Value="{x:Static SystemColors.HighlightTextBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
+    <!-- RowHeaderTemplate -->
+    <DataTemplate x:Key="RowHeaderTemplate" DataType="{x:Type DataGridRowHeader}">
+        <StackPanel MaxWidth="80" DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}">
+            <TextBlock Text="{Binding Definition.Name}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <Style TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource {x:Type DataGridRow}}">
+        <Setter Property="HeaderTemplate" Value="{StaticResource RowHeaderTemplate}" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=(local:DynamicTableGrid.IsSelectedContainsCellsAny), RelativeSource={RelativeSource Self}}" Value="True">
+                <Setter Property="Background" Value="{x:Static SystemColors.InactiveSelectionHighlightBrush}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ColumnHeaderTemplate -->
+    <DataTemplate x:Key="ColumnHeaderTemplate">
+        <StackPanel Width="80">
+            <TextBlock Text="{Binding Name}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+        <Setter Property="Content" Value="{Binding Name}" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=(local:DynamicTableGrid.IsSelectedContainsCellsAny), RelativeSource={RelativeSource Self}}" Value="True">
+                <Setter Property="Background" Value="Red" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Binding Column -->
     <local:DataGridBindingColumn x:Key="BindingColumn" x:Shared="False"
                                  HeaderTemplate="{StaticResource ColumnHeaderTemplate}"
                                  CellTemplateSelector="{StaticResource CellTemplateSelector}"
                                  CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}" />
+
+    <!-- DynamicTableGrid -->
+    <Style TargetType="{x:Type local:DynamicTableGrid}" BasedOn="{StaticResource {x:Type DataGrid}}">
+        <Setter Property="CanUserAddRows" Value="False" />
+        <Setter Property="CanUserDeleteRows" Value="False" />
+        <Setter Property="CanUserResizeRows" Value="False" />
+        <Setter Property="CanUserSortColumns" Value="False" />
+        <Setter Property="SelectionUnit" Value="CellOrRowHeader" />
+        <Setter Property="BorderBrush" Value="#F0F0F0" />
+        <Setter Property="HorizontalGridLinesBrush" Value="#CECECE" />
+        <Setter Property="VerticalGridLinesBrush" Value="#CECECE" />
+    </Style>
 
 </ResourceDictionary>

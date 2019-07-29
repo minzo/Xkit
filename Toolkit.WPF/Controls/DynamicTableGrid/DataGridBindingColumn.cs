@@ -84,7 +84,7 @@ namespace Toolkit.WPF.Controls
             DataTemplate template = null;
             DataTemplateSelector selector = null;
 
-            ChooseCellTemplateAndSelector(isEditing, out template, out selector);
+            this.ChooseCellTemplateAndSelector(isEditing, out template, out selector);
 
             var contentPresenter = new ContentPresenter()
             {
@@ -99,17 +99,17 @@ namespace Toolkit.WPF.Controls
             cell.VerticalAlignment = VerticalAlignment.Stretch;
             cell.HorizontalAlignment = HorizontalAlignment.Stretch;
 
-            if (Binding != null)
+            if (this.Binding != null)
             {
                 BindingOperations.SetBinding(contentPresenter, ContentPresenter.ContentProperty, Binding);
-                cell.PreviewKeyDown += OnPreviewKeyDown;
-                cell.PreviewMouseLeftButtonDown += OnPrevMouseLeftButtonDown;
+                cell.PreviewKeyDown += this.OnPreviewKeyDown;
+                cell.PreviewMouseLeftButtonDown += this.OnPrevMouseLeftButtonDown;
             }
             else
             {
                 BindingOperations.ClearBinding(contentPresenter, ContentPresenter.ContentProperty);
-                cell.PreviewKeyDown -= OnPreviewKeyDown;
-                cell.PreviewMouseLeftButtonDown -= OnPrevMouseLeftButtonDown;
+                cell.PreviewKeyDown -= this.OnPreviewKeyDown;
+                cell.PreviewMouseLeftButtonDown -= this.OnPrevMouseLeftButtonDown;
             }
 
             return contentPresenter;
@@ -227,7 +227,9 @@ namespace Toolkit.WPF.Controls
         private bool CheckBoxEditAssist(DataGridCell cell)
         {
             if (cell == null || cell.IsReadOnly || !cell.IsSelected)
+            {
                 return false;
+            }
 
             var checkBox = FindVisualChildren<CheckBox>(cell);
             if (checkBox?.IsEnabled ?? false)

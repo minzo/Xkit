@@ -126,6 +126,8 @@
                     tkitwpf:SingleSelectorScope.IsSingleSelectorControl="true"
                     CellTemplateSelector="{StaticResource CellSelector}"
                     CellEditingTemplateSelector="{StaticResource CellEditingSelector}" 
+                    EnableRowHighlighting="True"
+                    EnableColumnHighlighting="True"
                     />
             </StackPanel>
         </DataTemplate>
