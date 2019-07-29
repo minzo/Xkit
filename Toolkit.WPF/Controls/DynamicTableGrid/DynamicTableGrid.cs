@@ -262,8 +262,10 @@ namespace Toolkit.WPF.Controls
                 var columns = e.RemovedCells.Select(i => i.Column).Distinct();
                 var cells = (this.ItemsSource as IEnumerable<object>)
                      .SelectMany(i => columns.Select(x => x.GetCellContent(i)))
+                     .Where(i => i != null)
                      .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
                      .Where(i => i != null);
+
                 foreach (var cell in cells)
                 {
                     SetIsSelectedCellContains(cell, false);
@@ -292,8 +294,9 @@ namespace Toolkit.WPF.Controls
                 var columns = e.AddedCells.Select(i => i.Column).Distinct();
                 var cells = (this.ItemsSource as IEnumerable<object>)
                     .SelectMany(i => columns.Select(x => x.GetCellContent(i)))
+                    .Where(i => i != null)
                     .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
-                     .Where(i => i != null);
+                    .Where(i => i != null);
 
                 foreach (var cell in cells)
                 {

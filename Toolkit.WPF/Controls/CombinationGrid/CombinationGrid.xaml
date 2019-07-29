@@ -1,0 +1,20 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Toolkit.WPF.Controls">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="../DynamicTableGrid/DynamicTableGrid.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <!-- Binding Column -->
+    <!--<local:DataGridBindingColumn x:Key="BindingColumn" x:Shared="False"
+                                 HeaderTemplate="{StaticResource ColumnHeaderTemplate}"
+                                 CellTemplateSelector="{StaticResource CellTemplateSelector}"
+                                 CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}" />-->
+
+    <!-- CombinationGrid -->
+    <Style TargetType="{x:Type local:CombinationGrid}" BasedOn="{StaticResource {x:Type local:DynamicTableGrid}}">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    
+</ResourceDictionary>

@@ -149,9 +149,9 @@
             <ListBox DisplayMemberPath="Name" ItemsSource="{Binding B_Modules}" />
         </DockPanel>
 
-        <tkit:DynamicTableGrid
+        <tkit:CombinationGrid
             Grid.Column="3"
-            tkit:DynamicTableGrid.IsSharedSizeScope="True"
+            tkit:CombinationGrid.IsSharedSizeScope="True"
             ItemsSource="{Binding Table}"
             CellTemplateSelector="{StaticResource CellTemplateSelector}"
             CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}"

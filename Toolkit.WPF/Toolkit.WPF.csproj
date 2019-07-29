@@ -64,6 +64,7 @@
     <Compile Include="Controls\ColorControl\ColorSelectComboBox.xaml.cs">
       <DependentUpon>ColorSelectComboBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\CombinationGrid\CombinationGrid.cs" />
     <Compile Include="Controls\DynamicTableGrid\DataGridBindingColumn.cs" />
     <Compile Include="Controls\DataTemplateSelector\DataTypeTemplateSelector.cs" />
     <Compile Include="Controls\DataTemplateSelector\DynamicPropertyTemplateSelector.cs" />
@@ -92,6 +93,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ColorControl\ColorPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\CombinationGrid\CombinationGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
