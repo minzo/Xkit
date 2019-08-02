@@ -137,6 +137,7 @@
             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
                 <Button Content="+" Width="20" Command="{Binding AddRowCommand}"/>
                 <Button Content="-" Width="20" />
+                <Button Content="M" Width="20" Command="{Binding MoveCommand}" />
             </StackPanel>
             <ListBox DisplayMemberPath="Name" ItemsSource="{Binding A_Modules}" />
         </DockPanel>

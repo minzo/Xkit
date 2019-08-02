@@ -51,6 +51,11 @@ namespace Toolkit.WPF.Sample
         public ICommand AddColCommand { get; }
 
         /// <summary>
+        /// 移動
+        /// </summary>
+        public ICommand MoveCommand { get; }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         public DynamicTableWindowViewModel()
@@ -83,6 +88,11 @@ namespace Toolkit.WPF.Sample
             AddColCommand = new DelegateCommand(_ => {
                 B_Modules.Add(new Module() { Name = $"B_Module{B_Modules.Count}"});
             });
+
+            this.MoveCommand = new DelegateCommand(_ => {
+                B_Modules.Move(0, 2);
+            });
+
         }
     }
 

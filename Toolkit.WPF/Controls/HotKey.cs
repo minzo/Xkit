@@ -1,16 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Runtime.InteropServices;
+//using System.Text;
+//using System.Threading.Tasks;
 //using System.Windows.Forms;
 
 //namespace Toolkit.WPF.Controls
 //{
-//    class HotKey
+//    /// <summary>
+//    /// HotKeyクラスの初期化時に指定する修飾キー
+//    /// </summary>
+//    public enum MOD_KEY : int
 //    {
-//        enum MOD_KEY : int
+//        ALT = 0x0001,
+//        CONTROL = 0x0002,
+//        SHIFT = 0x0004,
+//    }
+
+//    public class HotKey : IDisposable
+//    {
+//        enum Modifier : int
 //        {
 //            MOD_ALT = 0x0001,
 //            MOD_CONTROL = 0x0002,
@@ -20,22 +30,26 @@ using System.Threading.Tasks;
 //        }
 
 //        [DllImport("user32.dll")]
-//        extern static int RegisterHotKey(IntPtr HWnd, int ID, MOD_KEY MOD_KEY, Keys KEY);
+//        extern static int RegisterHotKey(IntPtr HWnd, int ID, Modifier modifier, Keys KEY);
 
 //        [DllImport("user32.dll")]
 //        extern static int UnregisterHotKey(IntPtr HWnd, int ID);
+
+//        public void Dispose()
+//        {
+//        }
 //    }
 
 //    /// <summary>
 //    /// グローバルホットキーを登録するクラス。
 //    /// 使用後は必ずDisposeすること。
 //    /// </summary>
-//    public class HotKey : IDisposable
+//    public class HotKeySystem : IDisposable
 //    {
 //        HotKeyForm form;
 //        /// <summary>
-//            /// ホットキーが押されると発生する。
-//            /// </summary>
+//        /// ホットキーが押されると発生する。
+//        /// </summary>
 //        public event EventHandler HotKeyPush;
 
 //        /// <summary>
@@ -106,15 +120,5 @@ using System.Threading.Tasks;
 //                base.Dispose(disposing);
 //            }
 //        }
-//    }
-
-//    /// <summary>
-//    /// HotKeyクラスの初期化時に指定する修飾キー
-//    /// </summary>
-//    public enum MOD_KEY : int
-//    {
-//        ALT = 0x0001,
-//        CONTROL = 0x0002,
-//        SHIFT = 0x0004,
 //    }
 //}

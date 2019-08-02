@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Media;
 using Toolkit.WPF.Models;
 
 namespace Toolkit.WPF.Sample
@@ -17,6 +18,13 @@ namespace Toolkit.WPF.Sample
         public float X { get; set; }
         public float Y { get; set; }
         public float Z { get; set; }
+    }
+
+    public enum Mode
+    {
+        First,
+        Second,
+        Third
     }
 
     public class ControllerItemViewModel : System.Dynamic.DynamicObject, INotifyPropertyChanged
@@ -57,12 +65,15 @@ namespace Toolkit.WPF.Sample
                 new DynamicPropertyDefinition<string>(){ Name = "Name" },
                 new DynamicPropertyDefinition<string>(){ Name = "Path" },
                 new DynamicPropertyDefinition<Vector3>(){ Name = "Pos" },
+                new DynamicPropertyDefinition<bool>(){ Name = "ON" },
+                new DynamicPropertyDefinition<Mode>(){ Name = "Mode" },
             });
 
             var definition2 = new DynamicItemDefinition(new IDynamicPropertyDefinition[] {
                 new DynamicPropertyDefinition<string>(){ Name = "Name" },
                 new DynamicPropertyDefinition<string>(){ Name = "Path" },
                 new DynamicPropertyDefinition<Vector3>(){ Name = "Size" },
+                new DynamicPropertyDefinition<Color>(){ Name = "DisplayColor" },
                 new DynamicPropertyDefinition<List<string>>(){ Name = "List" },
             });
 
@@ -80,11 +91,12 @@ namespace Toolkit.WPF.Sample
 
             items[0].SetPropertyValue("Name", "FUGO");
 
+            (items2[0].GetPropertyValue("List") as List<string>).Add("hoge");
+            (items2[0].GetPropertyValue("List") as List<string>).Add("hoge");
+            (items2[0].GetPropertyValue("List") as List<string>).Add("hoge");
+            (items2[0].GetPropertyValue("List") as List<string>).Add("hoge");
 
-            (items2[0].GetPropertyValue("List") as List<string>).Add("hoge");
-            (items2[0].GetPropertyValue("List") as List<string>).Add("hoge");
-            (items2[0].GetPropertyValue("List") as List<string>).Add("hoge");
-            (items2[0].GetPropertyValue("List") as List<string>).Add("hoge");
+            items2[0].SetPropertyValue("DisplayColor", Colors.Orange);
 
             ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
             ItemsCollection.Add(new TypedCollection<DynamicItem>(items2));

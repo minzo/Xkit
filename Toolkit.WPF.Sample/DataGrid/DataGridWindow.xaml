@@ -62,6 +62,15 @@
                     <CheckBox IsChecked="{Binding Value}"  />
                 </Border>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type Color}">
+                <Border 
+                    Background="{Binding Value, Converter={StaticResource ColorToBrush}}" 
+                    ToolTip="{Binding Value}" 
+                    Margin="4"
+                    BorderBrush="Silver"
+                    BorderThickness="1"
+                    CornerRadius="2" />
+            </DataTemplate>
             <DataTemplate DataType="{x:Type collection:ICollection}">
                 <TextBlock TextAlignment="Center">
                     <Run Text="要素数" /><Run Text="{Binding Value.Count, Mode=OneWay}" /><Run Text="個" />
@@ -69,6 +78,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type local:Vector3}">
                 <tkitwpf:VectorViewer DataContext="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type local:Mode}">
+                <TextBlock Text="{Binding Value}" />
             </DataTemplate>
         </tkitwpf:DynamicPropertyTemplateSelector>
 
@@ -93,6 +105,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type local:Vector3}">
                 <tkitwpf:VectorEditor DataContext="{Binding Value}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type local:Mode}">
+                <tkitwpf:DataGridComboBox SelectedIndex="{Binding Value}" />
             </DataTemplate>
             <DataTemplate DataType="{x:Type collection:ICollection}">
                 <Grid x:Name="PopupHost">
