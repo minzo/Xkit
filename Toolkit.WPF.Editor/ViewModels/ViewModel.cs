@@ -68,6 +68,7 @@ namespace Tookit.WPF.Editor.ViewModels
 #pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
         public event PropertyChangedEventHandler ModelPropertyChanged;
+#pragma warning restore CS0067
     }
 
     /// <summary>
@@ -153,6 +154,7 @@ namespace Tookit.WPF.Editor.ViewModels
 #pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
         public event PropertyChangedEventHandler ModelPropertyChanged;
+#pragma warning restore CS0067
     }
 
     /// <summary>

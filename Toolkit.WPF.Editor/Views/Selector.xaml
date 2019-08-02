@@ -36,8 +36,11 @@
                 <Expander Header="情報" DockPanel.Dock="Bottom" Background="Red">
                     <TextBlock Text="{Binding ViewModels.Count}" />
                 </Expander>
-
-                <tkitwpf:DynamicTableGrid ItemsSource="{Binding ViewModels}" IsSynchronizedWithCurrentItem="True"/>
+                <tkitwpf:DynamicTableGrid 
+                    ItemsSource="{Binding ViewModels}"
+                    EnableRowHighlighting="True"
+                    EnableColumnHighlighting="True"
+                    IsSynchronizedWithCurrentItem="True"/>
             </DockPanel>
 
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Background="Transparent" />
@@ -61,7 +64,6 @@
         </Grid>
     </DataTemplate>
 
-    
     <DataTemplate DataType="{x:Type Color}">
         <Border BorderBrush="DarkGray" Background="{Binding}" />
     </DataTemplate>
