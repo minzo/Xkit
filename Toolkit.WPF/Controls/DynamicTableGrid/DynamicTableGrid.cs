@@ -298,12 +298,12 @@ namespace Toolkit.WPF.Controls
                 }
             }
 
-            // 列ハイライト
-            if (this.EnableColumnHighlighting)
+            // 列ハイライト（行が選択されていないときのみ）
+            if (this.EnableColumnHighlighting && this.SelectedItems.Count == 0)
             {
-                var columns = e.AddedCells.Select(i => i.Column).Distinct();
+                var columns = this.SelectedCells.Select(i => i.Column).Distinct();
                 var cells = (this.ItemsSource as IEnumerable<object>)
-                    .SelectMany(i => columns.Select(x => x.GetCellContent(i)))
+                    .SelectMany(i => columns.Select(x => x?.GetCellContent(i)))
                     .Where(i => i != null)
                     .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
                     .Where(i => i != null);
