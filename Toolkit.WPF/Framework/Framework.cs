@@ -3,21 +3,44 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Markup;
 
-namespace Tookit.WPF.Editor.Framework
+namespace Toolkit.WPF
 {
     /// <summary>
-    /// Framework
+    /// Framwork
     /// </summary>
-    public class Framework<TWindow> where TWindow : System.Windows.Window, new()
+    public class Framework
     {
         /// <summary>
         /// 実行
         /// </summary>
-        public int Run(object dataContext)
+        public int Run<TApp>() 
+            where TApp : Application, IComponentConnector, new()
         {
-            var app = new App();
+            var app = UnhandledExceptionSubscriber(new TApp());
+            (app as IComponentConnector).InitializeComponent();
+            return app.Run();
+        }
 
+        /// <summary>
+        /// 実行
+        /// </summary>
+        public int Run<TApp, TWindow>(object dataContext)
+            where TApp : Application, IComponentConnector, new()
+            where TWindow : Window, new()
+        {
+            var app = UnhandledExceptionSubscriber(new TApp());
+            (app as IComponentConnector).InitializeComponent();
+            return app.Run(new TWindow() { DataContext = dataContext });
+        }
+
+        /// <summary>
+        /// UnhandledExceptionSubscriber
+        /// </summary>
+        private static Application UnhandledExceptionSubscriber(Application app)
+        {
             if (!System.Diagnostics.Debugger.IsAttached)
             {
                 AppDomain.CurrentDomain.UnhandledException += (s, e) => OnUnhandledException(s, e.ExceptionObject as Exception);
@@ -31,11 +54,7 @@ namespace Tookit.WPF.Editor.Framework
                     OnUnhandledException(s, e.Exception);
                 };
             }
-
-            var window = new TWindow() { DataContext = dataContext };
-
-            app.InitializeComponent();
-            return app.Run(window);
+            return app;
         }
 
         /// <summary>
@@ -59,4 +78,5 @@ namespace Tookit.WPF.Editor.Framework
             Environment.Exit(1);
         }
     }
+
 }

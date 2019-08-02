@@ -15,44 +15,7 @@ namespace Toolkit.WPF.Sample
         [System.Diagnostics.DebuggerNonUserCode]
         public static int Main(string[] args)
         {
-            int exitCode = 0;
-            var app = new Toolkit.WPF.Sample.App();
-
-            if (!System.Diagnostics.Debugger.IsAttached)
-            {
-                AppDomain.CurrentDomain.UnhandledException += (s, e) => OnUnhandledException(s, e.ExceptionObject as Exception);
-                app.DispatcherUnhandledException += (s, e) =>
-                {
-                    if (e.Exception is System.Runtime.InteropServices.COMException comException)
-                    {
-                        e.Handled = comException.ErrorCode == -2147221040;
-                        return;
-                    }
-                    OnUnhandledException(s, e.Exception);
-                };
-            }
-
-            app.InitializeComponent();
-            exitCode = app.Run();
-            return exitCode;
-        }
-
-        static void OnUnhandledException(object sender, Exception ex)
-        {
-            string ExceptionFormat(Exception e)
-            {
-                var builer = new StringBuilder();
-                while (e != null)
-                {
-                    builer.AppendLine(e.Message);
-                    builer.AppendLine(e.StackTrace);
-                    e = e.InnerException;
-                }
-                return builer.ToString();
-            }
-
-            Console.Error.WriteLine(ExceptionFormat(ex));
-            Environment.Exit(1);
+            return new Framework().Run<App>();
         }
     }
 }
