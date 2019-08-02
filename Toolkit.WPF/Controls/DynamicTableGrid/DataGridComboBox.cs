@@ -12,11 +12,39 @@ namespace Toolkit.WPF.Controls
     /// <summary>
     /// DataGrid用のComboBox
     /// </summary>
-    internal class DataGridComboBox : ComboBox
+    public class DataGridComboBox : ComboBox
     {
-        protected override void OnPreviewKeyDown(KeyEventArgs e)
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public DataGridComboBox()
         {
-            base.OnPreviewKeyDown(e);
+            this.Loaded += this.OnLoaded;
+            this.PreviewKeyDown += this.OnPreviewKeyDown;
+        }
+
+        /// <summary>
+        /// OnLoaded
+        /// </summary>
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            this.IsDropDownOpen = true;
+        }
+
+        /// <summary>
+        /// OnPreviewKeyDown
+        /// </summary>
+        private void OnPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                this.IsDropDownOpen = false;
+            }
+            else if (e.Key == Key.Enter)
+            {
+                var ev = new KeyEventArgs(e.KeyboardDevice, e.InputSource, e.Timestamp, Key.Enter);
+                InputManager.Current.ProcessInput(ev);
+            }
         }
     }
 }

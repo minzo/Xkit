@@ -54,6 +54,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\Adorners\GhostAdoner.cs" />
     <Compile Include="Controls\BindingProxy.cs" />
     <Compile Include="Controls\ColorControl\ColorEditor.xaml.cs">
       <DependentUpon>ColorEditor.xaml</DependentUpon>
@@ -200,8 +201,6 @@
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Controls\Adorners\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
