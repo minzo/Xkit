@@ -21,7 +21,15 @@ namespace Tookit.WPF.Editor.Framework
             if (!System.Diagnostics.Debugger.IsAttached)
             {
                 AppDomain.CurrentDomain.UnhandledException += (s, e) => OnUnhandledException(s, e.ExceptionObject as Exception);
-                app.DispatcherUnhandledException += (s, e) => OnUnhandledException(s, e.Exception);
+                app.DispatcherUnhandledException += (s, e) =>
+                {
+                    if (e.Exception is System.Runtime.InteropServices.COMException comException)
+                    {
+                        e.Handled = comException.ErrorCode == -2147221040;
+                        return;
+                    }
+                    OnUnhandledException(s, e.Exception);
+                };
             }
 
             var window = new TWindow() { DataContext = dataContext };

@@ -335,9 +335,9 @@ namespace Toolkit.WPF.Controls
                 .GroupBy(i => i.Item);
 
             var csv = string.Join("\n", items.Select(i => string.Join(",", i.Select(x => x.Value))));
-            var txt = string.Join("\n", items.Select(i => string.Join("\t", i.Select(x => x.Value))));
-
             Clipboard.SetText(csv, TextDataFormat.CommaSeparatedValue);
+
+            var txt = string.Join("\n", items.Select(i => string.Join("\t", i.Select(x => x.Value))));
             Clipboard.SetText(txt, TextDataFormat.Text);
         }
 
@@ -355,7 +355,13 @@ namespace Toolkit.WPF.Controls
             var txt = Clipboard.GetText(TextDataFormat.Text);
             if (!string.IsNullOrEmpty(txt))
             {
-
+                var lines = txt.Split(new[] { "\n", Environment.NewLine }, StringSplitOptions.None);
+                foreach (var line in lines)
+                {
+                    foreach (var cell in line.Split('\t'))
+                    {
+                    }
+                }
             }
         }
 
