@@ -155,20 +155,24 @@ namespace Toolkit.WPF.Controls
         {
             if (e.Action == NotifyCollectionChangedAction.Move)
             {
-                throw new NotImplementedException("定義の移動は未実装です");
+                e.OldItems?
+                    .Cast<IDynamicPropertyDefinition>()
+                    .ForEach(i => this.Columns.Move(e.OldStartingIndex, e.NewStartingIndex));
             }
             else
             {
                 e.OldItems?
                     .Cast<IDynamicPropertyDefinition>()
                     .Select(i => i.Name)
-                    .ForEach(i => Columns.Remove(Columns.FirstOrDefault(c => GetPropertyName(c) == i)));
+                    .Select(i => this.Columns.FirstOrDefault(c => GetPropertyName(c) == i))
+                    .Where(i => i != null)
+                    .ForEach(i => this.Columns.Remove(i));
 
                 int index = e.NewStartingIndex;
                 e.NewItems?
                     .Cast<IDynamicPropertyDefinition>()
-                    .Select(i => GenerateColumn(i.Name, i.IsReadOnly ?? false, i))
-                    .ForEach(i => Columns.Insert(index++, i));
+                    .Select(i => this.GenerateColumn(i.Name, i.IsReadOnly ?? false, i))
+                    .ForEach(i => this.Columns.Insert(index++, i));
             }
         }
 
@@ -319,7 +323,16 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnCopy()
         {
+            var columns = this.Columns.ToDictionary(i => GetPropertyName(i), i => i);
+            var items = this.SelectedInfos
+                .Select(i => (Item: i.Item, Value: columns[i.PropertyName].OnCopyingCellClipboardContent(i.Item)))
+                .GroupBy(i => i.Item);
 
+            var csv = string.Join("\n", items.Select(i => string.Join(",", i.Select(x => x.Value))));
+            var txt = string.Join("\n", items.Select(i => string.Join("\t", i.Select(x => x.Value))));
+
+            Clipboard.SetText(csv, TextDataFormat.CommaSeparatedValue);
+            Clipboard.SetText(txt, TextDataFormat.Text);
         }
 
         /// <summary>
@@ -327,7 +340,17 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnPaste()
         {
+            var csv = Clipboard.GetText(TextDataFormat.CommaSeparatedValue);
+            if (!string.IsNullOrEmpty(csv))
+            {
 
+            }
+
+            var txt = Clipboard.GetText(TextDataFormat.Text);
+            if (!string.IsNullOrEmpty(txt))
+            {
+
+            }
         }
 
         #endregion

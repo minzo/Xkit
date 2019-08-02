@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Toolkit.WPF.Controls"
                     xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:collection="clr-namespace:System.Collections;assembly=mscorlib"
                     xmlns:converters="clr-namespace:Toolkit.WPF.Converters">
 
     <!-- Converter -->
@@ -58,6 +59,11 @@
                 <CheckBox IsChecked="{Binding Value}"  />
             </Border>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type collection:ICollection}">
+            <TextBlock TextAlignment="Center">
+                    <Run Text="要素数" /><Run Text="{Binding Value.Count, Mode=OneWay}" /><Run Text="個" />
+            </TextBlock>
+        </DataTemplate>
     </local:DynamicPropertyTemplateSelector>
 
     <!-- CellEditingTemplateSelector -->
@@ -94,13 +100,7 @@
         </Style.Triggers>
     </Style>
     
-    <!-- RowHeaderTemplate -->
-    <DataTemplate x:Key="RowHeaderTemplate" DataType="{x:Type DataGridRowHeader}">
-        <StackPanel MaxWidth="80" DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}">
-            <TextBlock Text="{Binding Definition.Name}" />
-        </StackPanel>
-    </DataTemplate>
-
+    <!-- DataGridRowStyle -->
     <Style TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource {x:Type DataGridRow}}">
         <Setter Property="HeaderTemplate" Value="{StaticResource RowHeaderTemplate}" />
         <Style.Triggers>
@@ -123,6 +123,13 @@
                                  CellTemplateSelector="{StaticResource CellTemplateSelector}"
                                  CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}" />
 
+    <!-- DataGridRowHeaderTemplate -->
+    <DataTemplate x:Key="RowHeaderTemplate" DataType="{x:Type DataGridRowHeader}">
+        <StackPanel MaxWidth="80" DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}">
+            <TextBlock Text="{Binding Definition.Name}" />
+        </StackPanel>
+    </DataTemplate>
+
     <!-- DynamicTableGrid -->
     <Style TargetType="{x:Type local:DynamicTableGrid}" BasedOn="{StaticResource {x:Type DataGrid}}">
         <Setter Property="CanUserAddRows" Value="False" />
@@ -133,6 +140,7 @@
         <Setter Property="BorderBrush" Value="#F0F0F0" />
         <Setter Property="HorizontalGridLinesBrush" Value="#CECECE" />
         <Setter Property="VerticalGridLinesBrush" Value="#CECECE" />
+        <Setter Property="RowHeaderTemplate" Value="{StaticResource RowHeaderTemplate}" />
     </Style>
 
 </ResourceDictionary>

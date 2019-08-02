@@ -18,7 +18,6 @@ namespace Corekit.Models
         /// </summary>
         public DynamicTableDefinition Definition { get; private set; }
 
-
         /// <summary>
         /// 名前
         /// </summary>
@@ -69,12 +68,12 @@ namespace Corekit.Models
 
             if (definition.Cols is INotifyCollectionChanged cols)
             {
-                cols.CollectionChanged += OnColsCollectionChanged;
+                cols.CollectionChanged += this.OnColsCollectionChanged;
             }
 
             if (definition.Rows is INotifyCollectionChanged rows)
             {
-                rows.CollectionChanged += OnRowsCollectionChanged;
+                rows.CollectionChanged += this.OnRowsCollectionChanged;
             }
 
             this.Definition = definition;
@@ -92,18 +91,18 @@ namespace Corekit.Models
             {
                 e.OldItems?
                     .Cast<IDynamicTableFrame>()
-                    .ForEach(i => MoveItem(i.Name, e.NewStartingIndex));
+                    .ForEach(i => this.MoveItem(i.Name, e.NewStartingIndex));
             }
             else
             {
                 e.OldItems?
                     .Cast<IDynamicTableFrame>()
-                    .ForEach(i => RemoveItem(i.Name));
+                    .ForEach(i => this.RemoveItem(i.Name));
 
                 int index = e.NewStartingIndex;
                 e.NewItems?
                     .Cast<IDynamicTableFrame>()
-                    .ForEach(i => InsertItem(index++, CreateDynamicItem(i)));
+                    .ForEach(i => this.InsertItem(index++, CreateDynamicItem(i)));
             }
         }
 
@@ -116,18 +115,18 @@ namespace Corekit.Models
             {
                 e.OldItems?
                     .Cast<IDynamicTableFrame>()
-                    .ForEach(i => MoveDefinition(i.Name, e.OldStartingIndex));
+                    .ForEach(i => this.MoveDefinition(i.Name, e.OldStartingIndex));
             }
             else
             {
                 e.OldItems?
                     .Cast<IDynamicTableFrame>()
-                    .ForEach(i => RemoveDefinition(i.Name));
+                    .ForEach(i => this.RemoveDefinition(i.Name));
 
                 int index = e.NewStartingIndex;
                 e.NewItems?
                     .Cast<IDynamicTableFrame>()
-                    .ForEach(i => InsertDefinition(index++, CreateDefinition(i)));
+                    .ForEach(i => this.InsertDefinition(index++, this.CreateDefinition(i)));
             }
         }
 
@@ -196,9 +195,13 @@ namespace Corekit.Models
             item.PropertyChanged += this.OnPropertyChanged;
 
             if (index < 0)
+            {
                 this.Add(item);
+            }
             else
+            {
                 this.Insert(index, item);
+            }
         }
 
         /// <summary>
@@ -259,7 +262,7 @@ namespace Corekit.Models
         /// </summary>
         private void RemoveDefinition(string name)
         {
-            this._Properties.Remove(_Properties.FirstOrDefault(i => i.Name == name));
+            this._Properties.Remove(this._Properties.FirstOrDefault(i => i.Name == name));
         }
 
         /// <summary>
@@ -267,7 +270,7 @@ namespace Corekit.Models
         /// </summary>
         private void MoveDefinition(string propertyName, int newIndex)
         {
-            this.MoveDefinition(this.IndexOf(i => i.Definition.Name == propertyName), newIndex);
+            this.MoveDefinition(this._Properties.IndexOf(i => i.Name == propertyName), newIndex);
         }
 
         /// <summary>

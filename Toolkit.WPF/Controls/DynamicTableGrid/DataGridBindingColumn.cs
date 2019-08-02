@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -11,6 +9,9 @@ using System.Windows.Media;
 
 namespace Toolkit.WPF.Controls
 {
+    /// <summary>
+    /// DataGridBindingColumn
+    /// </summary>
     public class DataGridBindingColumn : DataGridBoundColumn
     {
         #region template
@@ -66,12 +67,12 @@ namespace Toolkit.WPF.Controls
 
         protected override FrameworkElement GenerateEditingElement(DataGridCell cell, object dataItem)
         {
-            return LoadTemplateContent(cell, dataItem, true);
+            return this.LoadTemplateContent(cell, dataItem, true);
         }
 
         protected override FrameworkElement GenerateElement(DataGridCell cell, object dataItem)
         {
-            return LoadTemplateContent(cell, dataItem, false);
+            return this.LoadTemplateContent(cell, dataItem, false);
         }
 
         #endregion
@@ -162,12 +163,9 @@ namespace Toolkit.WPF.Controls
                 }
             }
 
-
-            var presenter = editingElement as ContentPresenter;
-
-            if ( presenter?.Content != null)
+            if ((editingElement as ContentPresenter)?.Content != null)
             {
-                FindVisualChildren(presenter);
+                FindVisualChildren(editingElement);
             }
 
             return base.PrepareCellForEdit(editingElement, editingEventArgs);
@@ -180,15 +178,15 @@ namespace Toolkit.WPF.Controls
         {
             var cell = sender as DataGridCell;
 
-            if( cell.IsEditing )
+            if (cell.IsEditing)
             {
-                if(e.Key == Key.Escape)
+                if (e.Key == Key.Escape)
                 {
                     this.DataGridOwner?.CancelEdit();
                     e.Handled = true;
                 }
             }
-            else if(!Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            else if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
                 if (this.IsBeginEditCharacter(e.Key) || this.IsBeginEditCharacter(e.ImeProcessedKey))
                 {
@@ -218,7 +216,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnPrevMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            e.Handled = CheckBoxEditAssist(sender as DataGridCell);
+            e.Handled = this.CheckBoxEditAssist(sender as DataGridCell);
         }
 
         /// <summary>
@@ -231,7 +229,7 @@ namespace Toolkit.WPF.Controls
                 return false;
             }
 
-            var checkBox = FindVisualChildren<CheckBox>(cell);
+            var checkBox = this.FindVisualChildren<CheckBox>(cell);
             if (checkBox?.IsEnabled ?? false)
             {
                 checkBox.IsChecked = !checkBox.IsChecked;
@@ -275,22 +273,6 @@ namespace Toolkit.WPF.Controls
             var isNumber = (key >= Key.D0 && key <= Key.D9) || (key >= Key.NumPad0 && key <= Key.NumPad9);
             var isSpecial = key == Key.F2 || key == Key.Space || key == Key.Enter;
             return isCharacter || isNumber || isSpecial;
-        }
-
-        /// <summary>
-        /// コピー
-        /// </summary>
-        public override object OnCopyingCellClipboardContent(object item)
-        {
-            return base.OnCopyingCellClipboardContent(item);
-        }
-
-        /// <summary>
-        /// ペースト
-        /// </summary>
-        public override void OnPastingCellClipboardContent(object item, object cellContent)
-        {
-            base.OnPastingCellClipboardContent(item, cellContent);
         }
     }
 }
