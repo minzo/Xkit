@@ -9,28 +9,32 @@ namespace Corekit.Models
 {
     public class DynamicPropertyDescriptor : PropertyDescriptor
     {
-        private IDynamicProperty property;
+        private IDynamicProperty _Property;
 
-        public IDynamicPropertyDefinition Definition => property.Definition;
+        public IDynamicPropertyDefinition Definition => _Property.Definition;
 
         public DynamicPropertyDescriptor(IDynamicProperty property) : base(property.Definition.Name, null)
         {
-            this.property = property;
+            this._Property = property;
         }
 
         public override Type ComponentType => typeof(IDynamicItem);
 
-        public override bool IsReadOnly => property.IsReadOnly;
+        public override bool IsReadOnly => this._Property.IsReadOnly;
 
         public override Type PropertyType => typeof(IDynamicProperty);
 
-        public override bool CanResetValue(object component) => false;
+        public override bool CanResetValue(object component) => true;
 
-        public override object GetValue(object component) => (component as IDynamicItem)?.GetProperty(Name);
+        public override object GetValue(object component) => (component as IDynamicItem)?.GetProperty(this.Name);
 
-        public override void SetValue(object component, object value) => (component as IDynamicItem)?.SetPropertyValue(Name, value);
+        public override void SetValue(object component, object value) => (component as IDynamicItem)?.SetPropertyValue(this.Name, value);
 
-        public override void ResetValue(object component) => (component as IDynamicItem)?.SetPropertyValue( Name, null );
+        public override void ResetValue(object component)
+        {
+            System.Diagnostics.Debugger.Break();
+            this.SetValue(component, this.Definition.GetDefaultValue());
+        }
 
         public override bool ShouldSerializeValue(object component) => false;
     }

@@ -464,16 +464,9 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private static IEnumerable<DependencyObject> EnumerateChildren(DependencyObject dp)
         {
-            for (int i = 0, count = VisualTreeHelper.GetChildrenCount(dp); i < count; i++)
-            {
-                var child = VisualTreeHelper.GetChild(dp, i);
-                yield return child;
-
-                foreach (var grandchild in EnumerateChildren(child))
-                {
-                    yield return grandchild;
-                }
-            }
+            var count = VisualTreeHelper.GetChildrenCount(dp);
+            var children = Enumerable.Range(0, count).Select(i => VisualTreeHelper.GetChild(dp, i));
+            return children.Concat(children.SelectMany(i => EnumerateChildren(i)));
         }
     }
 }

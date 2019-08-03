@@ -31,7 +31,7 @@ namespace Toolkit.WPF.Controls
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             this.IsDropDownOpen = true;
-            this._OwnerDataGrid = EnumerateParent(this).OfType<DataGrid>().FirstOrDefault();
+            this._DataGridOwner = EnumerateParent(this).OfType<DataGrid>().FirstOrDefault();
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnDropDownClosed(object sender, EventArgs e)
         {
-            this._OwnerDataGrid?.CommitEdit(DataGridEditingUnit.Cell, true);
+            this._DataGridOwner?.CommitEdit(DataGridEditingUnit.Cell, true);
         }
 
         /// <summary>
@@ -69,6 +69,6 @@ namespace Toolkit.WPF.Controls
             }
         }
 
-        private DataGrid _OwnerDataGrid;
+        private DataGrid _DataGridOwner;
     }
 }

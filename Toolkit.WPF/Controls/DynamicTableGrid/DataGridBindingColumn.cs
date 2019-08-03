@@ -102,7 +102,7 @@ namespace Toolkit.WPF.Controls
 
             if (this.Binding != null)
             {
-                BindingOperations.SetBinding(contentPresenter, ContentPresenter.ContentProperty, Binding);
+                BindingOperations.SetBinding(contentPresenter, ContentPresenter.ContentProperty, this.Binding);
                 cell.PreviewKeyDown += this.OnPreviewKeyDown;
                 cell.PreviewMouseLeftButtonDown += this.OnPrevMouseLeftButtonDown;
             }
@@ -138,34 +138,28 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         protected override object PrepareCellForEdit(FrameworkElement editingElement, RoutedEventArgs editingEventArgs)
         {
-            void FindVisualChildren(DependencyObject dp)
+            if ((editingElement as ContentPresenter)?.Content != null)
             {
-                if (VisualTreeHelper.GetChildrenCount(dp) > 0)
+                foreach (var child in EnumerateChildren(editingElement))
                 {
-                    switch (dp)
+                    switch (child)
                     {
                         case TextBox v:
                             v.Focus();
                             v.SelectAll();
                             v.Height = editingElement.Height;
-                            return;
+                            break;
 
                         case ComboBox v:
                             v.Focus();
                             v.IsDropDownOpen = true;
                             v.Height = editingElement.Height;
-                            return;
+                            break;
 
                         default:
-                            FindVisualChildren(VisualTreeHelper.GetChild(dp, 0));
-                            return;
+                            break;
                     }
                 }
-            }
-
-            if ((editingElement as ContentPresenter)?.Content != null)
-            {
-                FindVisualChildren(editingElement);
             }
 
             return base.PrepareCellForEdit(editingElement, editingEventArgs);
@@ -209,6 +203,9 @@ namespace Toolkit.WPF.Controls
             {
                 e.Handled = this.CheckBoxEditAssist(cell);
             }
+            else if (e.Key == Key.Delete)
+            {
+            }
         }
 
         /// <summary>
@@ -229,7 +226,7 @@ namespace Toolkit.WPF.Controls
                 return false;
             }
 
-            var checkBox = this.FindVisualChildren<CheckBox>(cell);
+            var checkBox = EnumerateChildren(cell).OfType<CheckBox>().FirstOrDefault();
             if (checkBox?.IsEnabled ?? false)
             {
                 checkBox.IsChecked = !checkBox.IsChecked;
@@ -239,31 +236,6 @@ namespace Toolkit.WPF.Controls
             return false;
         }
 
-
-        /// <summary>
-        /// VisualChildren から型に一致する要素を探索
-        /// </summary>
-        private T FindVisualChildren<T>(DependencyObject dp) where T : FrameworkElement
-        {
-            var elements = Enumerable.Range(0, VisualTreeHelper.GetChildrenCount(dp))
-                .Select(i => VisualTreeHelper.GetChild(dp, i));
-
-            foreach(var element in elements)
-            {
-                switch (element)
-                {
-                    case T v:
-                        return v;
-                    case FrameworkElement v:
-                        return this.FindVisualChildren<T>(v);
-                    default:
-                        break;
-                }
-            }
-
-            return null;
-        }
-
         /// <summary>
         /// セル編集開始キー判定
         /// </summary>
@@ -271,8 +243,18 @@ namespace Toolkit.WPF.Controls
         {
             var isCharacter = key >= Key.A && key <= Key.Z;
             var isNumber = (key >= Key.D0 && key <= Key.D9) || (key >= Key.NumPad0 && key <= Key.NumPad9);
-            var isSpecial = key == Key.F2 || key == Key.Space || key == Key.Enter;
+            var isSpecial = key == Key.F2 || key == Key.Space;
             return isCharacter || isNumber || isSpecial;
+        }
+
+        /// <summary>
+        /// VisualChildrenを列挙する
+        /// </summary>
+        private static IEnumerable<DependencyObject> EnumerateChildren(DependencyObject dp)
+        {
+            var count = VisualTreeHelper.GetChildrenCount(dp);
+            var children = Enumerable.Range(0, count).Select(i => VisualTreeHelper.GetChild(dp, i));
+            return children.Concat(children.SelectMany(i => EnumerateChildren(i)));
         }
     }
 }

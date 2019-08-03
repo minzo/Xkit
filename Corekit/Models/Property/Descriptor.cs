@@ -32,7 +32,7 @@ namespace Corekit.Models
             this.Description = this.PropertyDefinition.Name;
         }
 
-        public override bool CanResetValue(object component) => false;
+        public override bool CanResetValue(object component) => true;
 
         public override object GetValue(object component) => (component as Property).GetValue<object>();
 

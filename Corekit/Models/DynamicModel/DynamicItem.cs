@@ -228,8 +228,8 @@ namespace Corekit.Models
         public string GetComponentName() => definition__.Name;
         public TypeConverter GetConverter() => null;
         public EventDescriptor GetDefaultEvent() => null;
-        public PropertyDescriptor GetDefaultProperty() => null;
-        public object GetEditor(Type editorBaseType) => null;
+        public PropertyDescriptor GetDefaultProperty() => TypeDescriptor.GetDefaultProperty(this);
+        public object GetEditor(Type editorBaseType) => TypeDescriptor.GetEditor(this, editorBaseType);
         public EventDescriptorCollection GetEvents() => EventDescriptorCollection.Empty;
         public EventDescriptorCollection GetEvents(Attribute[] attributes) => this.GetEvents();
         public PropertyDescriptorCollection GetProperties()
