@@ -112,7 +112,14 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    
+
+    <!-- DataGridRowHeaderTemplate -->
+    <DataTemplate x:Key="RowHeaderTemplate">
+        <StackPanel MaxWidth="80" DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}">
+            <TextBlock Text="{Binding Definition.Name}" />
+        </StackPanel>
+    </DataTemplate>
+
     <!-- DataGridRowStyle -->
     <Style TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource {x:Type DataGridRow}}">
         <Setter Property="HeaderTemplate" Value="{StaticResource RowHeaderTemplate}" />
@@ -136,13 +143,6 @@
                                  CellTemplateSelector="{StaticResource CellTemplateSelector}"
                                  CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}" />
 
-    <!-- DataGridRowHeaderTemplate -->
-    <DataTemplate x:Key="RowHeaderTemplate" DataType="{x:Type DataGridRowHeader}">
-        <StackPanel MaxWidth="80" DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}">
-            <TextBlock Text="{Binding Definition.Name}" />
-        </StackPanel>
-    </DataTemplate>
-
     <!-- DynamicTableGrid -->
     <Style TargetType="{x:Type local:DynamicTableGrid}" BasedOn="{StaticResource {x:Type DataGrid}}">
         <Setter Property="CanUserAddRows" Value="False" />
@@ -153,7 +153,6 @@
         <Setter Property="BorderBrush" Value="#F0F0F0" />
         <Setter Property="HorizontalGridLinesBrush" Value="#CECECE" />
         <Setter Property="VerticalGridLinesBrush" Value="#CECECE" />
-        <Setter Property="RowHeaderTemplate" Value="{StaticResource RowHeaderTemplate}" />
     </Style>
 
 </ResourceDictionary>
