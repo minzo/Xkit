@@ -63,6 +63,8 @@ namespace Tookit.WPF.Editor.ViewModels
 
         public object GetPropertyOwner(PropertyDescriptor pd) => this._Model;
 
+        public PropertyDescriptorCollection Properties => this.GetProperties();
+
         #endregion
 
 #pragma warning disable CS0067
