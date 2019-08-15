@@ -29,8 +29,6 @@ namespace Toolkit.WPF.Sample
 
     public class ControllerItemViewModel : System.Dynamic.DynamicObject, INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public string Name { get; set; }
 
         public string FilePath { get; set; }
@@ -47,12 +45,14 @@ namespace Toolkit.WPF.Sample
         public object Model { get; set; }
 
         public object ViewModel { get; set; }
+
+#pragma warning disable CS0067
+        public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
     }
 
     public class DataGridWindowViewModel : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public TypedCollection<DynamicItem> Items { get; } = new TypedCollection<DynamicItem>();
 
         public ObservableCollection<TypedCollection<DynamicItem>> ItemsCollection { get; } = new ObservableCollection<TypedCollection<DynamicItem>>();
@@ -104,5 +104,9 @@ namespace Toolkit.WPF.Sample
             ItemsCollection.Add(new TypedCollection<DynamicItem>(items2));
             ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
         }
+
+#pragma warning disable CS0067
+        public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
     }
 }

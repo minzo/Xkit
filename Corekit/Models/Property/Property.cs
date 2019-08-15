@@ -99,7 +99,7 @@ namespace Corekit.Models
         /// <summary>
         /// 継承元
         /// </summary>
-        public Property InheritSource { get; }
+        public Property InheritSource => this._InheritSource;
 
         /// <summary>
         /// 継承中か
