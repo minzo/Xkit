@@ -100,7 +100,7 @@ namespace Toolkit.WPF.Controls
         }
 
         public static readonly DependencyProperty SelectedInfosProperty =
-            DependencyProperty.Register("SelectedInfos", typeof(IEnumerable<SelectedInfo>), typeof(DynamicTableGrid), new PropertyMetadata(new List<SelectedInfo>()));
+            DependencyProperty.Register("SelectedInfos", typeof(IEnumerable<SelectedInfo>), typeof(DynamicTableGrid), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
