@@ -10,34 +10,43 @@ namespace Corekit.Extensions
 {
     public static class NotifyExtensions
     {
-        public static bool SetProperty<T>(this INotifyPropertyChanged self, T property, T value, [CallerMemberName] string propertyName = null)
+        /// <summary>
+        /// プロパティをセットしてプロパティ変更通知を送る
+        /// </summary>
+        public static bool SetProperty<T>(this INotifyPropertyChanged self, T property, T value, string propertyName)
         {
-        //    bool isChanged = property?.Equals(value) ?? value != null;
+            if (Equals(property, value))
+            {
+                return false;
+            }
 
-        //    var type = self.GetType();
-        //    var current = type.GetFieldInfo(name)?.GetValue(instance)
-        //               ?? type.GetPropertyInfo(name)?.GetValue(instance);
+            self.GetType()
+                .GetPropertyInfo(propertyName)
+                ?.SetValue(self, value);
+            InvokePropertyChanged(self, propertyName);
 
-        //    if (Equals(current, value)) return false;
+            return true;
+        }
 
-        //    NotifyPropertyChanging(notifyPropertyName);
+        /// <summary>
+        /// プロパティをセットしてプロパティ変更通知を送る
+        /// </summary>
+        public static bool SetProperty<T>(this INotifyPropertyChanged self, string propertyName, T value)
+        {
+            var info = self.GetType().GetPropertyInfo(propertyName);
+            if (info == null)
+            {
+                return false;
+            }
 
-        //    using (var trans = UndoStack.BeginTransaction(UndoStack))
-        //    {
-        //        trans.Add(new UndoableSetProperty<T>(instance, name, value));
-        //    }
+            var current = info.GetValue(self);
+            if (Equals(current, value))
+            {
+                return false;
+            }
 
-        //    ValidateProperty(value, notifyPropertyName);
-
-        //    NotifyPropertyChanged(notifyPropertyName);
-
-        //    return true;
-
-        //    if (isChanged)
-        //    {
-        //        field = value;
-        //        InvokePropertyChanged(self, propertyName);
-        //    }
+            info.SetValue(self, value);
+            InvokePropertyChanged(self, propertyName);
             return true;
         }
 
@@ -62,10 +71,21 @@ namespace Corekit.Extensions
         /// </summary>
         private static void InvokePropertyChanged(object sender, string propertyName)
         {
-            var args = new PropertyChangingEventArgs(propertyName);
-            PropertyChangedHandler.RaiseMethod?.Invoke(sender, new object[] { sender, args });
-        }
+            var handler = sender.GetType()
+                .GetFieldInfo(nameof(INotifyPropertyChanged.PropertyChanged))
+                .GetValue(sender) as MulticastDelegate;
 
-        private static EventInfo PropertyChangedHandler = typeof(INotifyPropertyChanged).GetEvent(nameof(INotifyPropertyChanged.PropertyChanged));
+            if (handler == null)
+            {
+                return;
+            }
+
+            var args = new PropertyChangedEventArgs(propertyName);
+
+            foreach (var invocation in handler.GetInvocationList())
+            {
+                invocation.Method.Invoke(invocation.Target, new object[] { sender, args });
+            }
+        }
     }
 }
