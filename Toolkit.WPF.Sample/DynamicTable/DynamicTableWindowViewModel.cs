@@ -136,7 +136,7 @@ namespace Toolkit.WPF.Sample
             /// </summary>
             public PropertyDefiniton(IDictionary<string, TValue> ownerTableValue)
             {
-                _OwnerTableValue = ownerTableValue;
+                this._OwnerTableValue = ownerTableValue;
             }
 
             /// <summary>

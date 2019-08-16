@@ -40,14 +40,14 @@ namespace Corekit.Models
         /// </summary>
         public DynamicItem Attach(IDynamicItemDefinition definition)
         {
-            if(_IsAttached)
+            if(this._IsAttached)
             {
                 throw new InvalidOperationException("DynamicItem Definition Already Attached");
             }
 
             this.Definition = definition;
-            this.Definition.CollectionChanged += OnDefinitionChanged;
-            this.Definition.ForEach(i => AddProperty(i.Create(this)));
+            this.Definition.CollectionChanged += this.OnDefinitionChanged;
+            this.Definition.ForEach(i => this.AddProperty(i.Create(this)));
             this._IsAttached = true;
             return this;
         }
@@ -144,7 +144,7 @@ namespace Corekit.Models
         /// </summary>
         private void AddProperty(IDynamicProperty property)
         {
-            InsertProperty(-1, property);
+            this.InsertProperty(-1, property);
         }
 
         /// <summary>
@@ -155,9 +155,9 @@ namespace Corekit.Models
             property.PropertyChanged += OnPropertyChanged;
 
             if (index < 0)
-                Value.Add(property);
+                this.Value.Add(property);
             else
-                Value.Insert(index, property);
+                this.Value.Insert(index, property);
         }
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace Corekit.Models
             var property = Value.FirstOrDefault(i => i.Definition.Name == propertyName);
             if (property != null)
             {
-                Value.Remove(property);
+                this.Value.Remove(property);
                 property.PropertyChanged -= OnPropertyChanged;
             }
         }
@@ -181,8 +181,8 @@ namespace Corekit.Models
             var property = Value.FirstOrDefault(i => i.Definition.Name == propertyName);
             if (property != null)
             {
-                Value.Remove(property);
-                Value.Insert(newIndex, property);
+                this.Value.Remove(property);
+                this.Value.Insert(newIndex, property);
             }
         }
 
@@ -234,7 +234,7 @@ namespace Corekit.Models
         public EventDescriptorCollection GetEvents(Attribute[] attributes) => this.GetEvents();
         public PropertyDescriptorCollection GetProperties()
         {
-            var descriptors = Value.Select(i => new DynamicPropertyDescriptor(i)).ToArray();
+            var descriptors = this.Value.Select(i => new DynamicPropertyDescriptor(i)).ToArray();
             return new PropertyDescriptorCollection(descriptors);
         }
         public PropertyDescriptorCollection GetProperties(Attribute[] attributes) => this.GetProperties();

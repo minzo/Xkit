@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -33,7 +32,6 @@ namespace Corekit.Models
         /// </summary>
         bool IsMovable { get; }
     }
-
 
     /// <summary>
     /// DynamicTableの定義
