@@ -66,5 +66,13 @@ namespace Corekit.Extensions
         {
             yield return item;
         }
+
+        /// <summary>
+        /// ObservableCollectionにする
+        /// </summary>
+        public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> collection)
+        {
+            return new ObservableCollection<T>(collection);
+        }
     }
 }
