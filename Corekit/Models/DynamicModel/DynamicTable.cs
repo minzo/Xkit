@@ -102,7 +102,7 @@ namespace Corekit.Models
                 int index = e.NewStartingIndex;
                 e.NewItems?
                     .Cast<IDynamicTableFrame>()
-                    .ForEach(i => this.InsertItem(index++, CreateDynamicItem(i)));
+                    .ForEach(i => this.InsertItem(index++, this.CreateDynamicItem(i)));
             }
         }
 
@@ -164,19 +164,25 @@ namespace Corekit.Models
         #region add remove rows
 
         /// <summary>
+        /// 行の定義を生成する
+        /// </summary>
+        protected virtual IDynamicItemDefinition CreateItemDefinition(IDynamicTableFrame row)
+        {
+            return new DynamicItemDefinition(_Properties)
+            {
+                Name = row.Name,
+                IsReadOnly = row.IsReadOnly,
+                IsMovable = row.IsMovable,
+                IsDeletable = row.IsDeletable,
+            };
+        }
+
+        /// <summary>
         /// 行を生成する
         /// </summary>
         private DynamicItem CreateDynamicItem(IDynamicTableFrame row)
         {
-            var item = new DynamicItem(new DynamicItemDefinition(_Properties)
-            {
-                Name        = row.Name,
-                IsReadOnly  = row.IsReadOnly,
-                IsMovable   = row.IsMovable,
-                IsDeletable = row.IsDeletable,
-            });
-
-            return item;
+            return new DynamicItem(this.CreateItemDefinition(row));
         }
 
         /// <summary>
