@@ -7,6 +7,19 @@
              xmlns:tkit="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <!-- DataGridRowStyle -->
+        <Style TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource {x:Type DataGridRow}}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsReadOnly, RelativeSource={RelativeSource Self}}" Value="True">
+                    <Setter Property="Background" Value="Silver" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.ColumnDefinitions >
             <ColumnDefinition />
@@ -15,7 +28,7 @@
         
         <tkit:DynamicTableGrid
             Grid.Column="0"
-            HeadersVisibility="None"
+            HeadersVisibility="All"
             ItemsSource="{Binding TableVM}"
             />
         

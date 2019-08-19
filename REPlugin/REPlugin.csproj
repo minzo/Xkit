@@ -56,7 +56,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Models\Config.cs" />
+    <Compile Include="Models\Inter.cs" />
     <Compile Include="Models\RuntimeProperty.cs" />
+    <Compile Include="Models\System.cs" />
     <Compile Include="ViewModels\DynamicTableViewModel.cs" />
     <Compile Include="ViewModels\RuntimePropertyViewModel.cs" />
     <Compile Include="Views\REEditorPanel.xaml.cs">

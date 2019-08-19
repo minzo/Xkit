@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace REPlugin.Models
 {
     /// <summary>
-    /// 　コンフィグ
+    /// コンフィグ
     /// </summary>
     public class Config
     {

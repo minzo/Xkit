@@ -14,13 +14,13 @@
         </Grid.ColumnDefinitions>
     
         <DockPanel Grid.Column="0">
-            <ListBox DockPanel.Dock="Left" />
-            <DataGrid ItemsSource="{Binding SourceDefinitionVM.Elements}" />
+            <ListBox DockPanel.Dock="Left" ItemsSource="{Binding SourceDefinitionVMs}" DisplayMemberPath="Name" />
+            <DataGrid ItemsSource="{Binding SourceDefinitionVMs/Elements}" />
         </DockPanel>
 
         <DockPanel Grid.Column="1">
-            <ListBox DockPanel.Dock="Left" />
-            <DataGrid ItemsSource="{Binding TargetDefinitionVM.Elements}" />
+            <ListBox DockPanel.Dock="Left" ItemsSource="{Binding TargetDefinitionVMs}" DisplayMemberPath="Name" />
+            <DataGrid ItemsSource="{Binding TargetDefinitionVMs/Elements}" />
         </DockPanel>
     </Grid>
     

@@ -39,4 +39,22 @@ namespace REPlugin.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
 #pragma warning restore CS0067
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class TableFrame : IDynamicTableFrame
+    {
+        public string Name { get; set; }
+
+        public bool? IsReadOnly => true;
+
+        public bool IsDeletable => false;
+
+        public bool IsMovable => false;
+
+#pragma warning disable CS0067
+        public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
+    }
 }

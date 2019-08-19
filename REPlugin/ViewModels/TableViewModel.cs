@@ -24,35 +24,35 @@ namespace REPlugin.ViewModels
         /// <summary>
         /// 発生元
         /// </summary>
-        public ObservableCollection<TableFrameViewModel> Sources { get; private set; }
+        public ObservableCollection<IDynamicTableFrame> Sources { get; private set; }
 
         /// <summary>
         /// 列ヘッダーを表示する行
         /// </summary>
-        public IEnumerable<TableFrameViewModel> ColumnHeaderRow => this.TargetDefinitionVM.AsEnumerable()
-            .Select(i => new TableFrameViewModel() { Name = "プロパティ" });
+        public IEnumerable<IDynamicTableFrame> ColumnHeaderRow => this.TargetDefinitionVMs
+            .Select(i => new TableFrame() { Name = i.Name });
 
         /// <summary>
         /// 発生先
         /// </summary>
-        public ObservableCollection<TableFrameViewModel> Targets { get; private set; }
+        public ObservableCollection<IDynamicTableFrame> Targets { get; private set; }
 
         /// <summary>
         /// 行ヘッダーを表示する列
         /// </summary>
-        public IEnumerable<TableFrameViewModel> RowHeaderColumn => this.SourceDefinitionVM.AsEnumerable()
-            .Select(i => new TableFrameViewModel() { Name = "プロパティ" });
+        public IEnumerable<IDynamicTableFrame> RowHeaderColumn => this.SourceDefinitionVMs
+            .Select(i => new TableFrame() { Name = i.Name });
 
 
         /// <summary>
         /// プロパティ
         /// </summary>
-        public RuntimePropertyViewModel SourceDefinitionVM { get; }
+        public ObservableCollection<RuntimePropertyViewModel> SourceDefinitionVMs { get; }
 
         /// <summary>
         /// プロパティ
         /// </summary>
-        public RuntimePropertyViewModel TargetDefinitionVM { get; }
+        public ObservableCollection<RuntimePropertyViewModel> TargetDefinitionVMs { get; }
 
         /// <summary>
         /// テーブル
@@ -85,11 +85,22 @@ namespace REPlugin.ViewModels
                 "StoneMarble",
             });
 
-            this.SourceDefinitionVM = new RuntimePropertyViewModel(property);
-            this.SourceDefinitionVM.PropertyChanged += (s, e) => this.RebuildTableVM();
+            var size = new RuntimeProperty();
+            size.SetElements("Size", new[] { "Large", "Normal", "Small" });
 
-            this.TargetDefinitionVM = new RuntimePropertyViewModel(property);
-            this.TargetDefinitionVM.PropertyChanged += (s, e) => this.RebuildTableVM();
+            var properties = new[] { property, size };
+
+            this.SourceDefinitionVMs = properties
+                .Select(i => new RuntimePropertyViewModel(i))
+                .ToObservableCollection();
+            this.SourceDefinitionVMs
+                .ForEach(i => i.PropertyChanged += (s, e) => this.RebuildTableVM());
+
+            this.TargetDefinitionVMs = properties
+                .Select(i => new RuntimePropertyViewModel(i))
+                .ToObservableCollection();
+            this.TargetDefinitionVMs
+                .ForEach(i => i.PropertyChanged += (s, e) => this.RebuildTableVM());
 
             this.RebuildTableVM();
         }
@@ -99,18 +110,22 @@ namespace REPlugin.ViewModels
         /// </summary>
         private void RebuildTableVM()
         {
-            this.Sources = this.ColumnHeaderRow
-                .Concat(this.SourceDefinitionVM.Elements
+            var sources = this.SourceDefinitionVMs.SelectMany(i => i.Elements)
                 .GroupBy(i => i.Dest)
                 .Select(i => i.First())
-                .Select(i => new TableFrameViewModel() { Name = i.Dest, Property = i.Elemenet }))
+                .Select(i => new TableFrameViewModel() { Name = i.Dest, Property = i.Elemenet });
+
+            var targets = this.TargetDefinitionVMs.SelectMany(i => i.Elements)
+                .GroupBy(i => i.Dest)
+                .Select(i => i.First())
+                .Select(i => new TableFrameViewModel() { Name = i.Dest, Property = i.Elemenet });
+
+            this.Sources = this.ColumnHeaderRow
+                .Concat(sources)
                 .ToObservableCollection();
 
             this.Targets = this.RowHeaderColumn
-                .Concat(this.TargetDefinitionVM.Elements
-                .GroupBy(i => i.Dest)
-                .Select(i => i.First())
-                .Select(i => new TableFrameViewModel() { Name = i.Dest, Property = i.Elemenet }))
+                .Concat(targets)
                 .ToObservableCollection();
 
             this.SetProperty(nameof(this.TableVM), new DynamicTableViewModel<string>());
