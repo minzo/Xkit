@@ -57,8 +57,9 @@ namespace Corekit.Models
                 throw new InvalidOperationException("DynamicTable Definition Already Attached");
             }
 
-            this._Properties = new ObservableCollection<IDynamicPropertyDefinition>(definition.Cols.Select(i => this.CreateDefinition(i)));
+            this.Definition = definition;
 
+            this._Properties = new ObservableCollection<IDynamicPropertyDefinition>(definition.Cols.Select(i => this.CreateDefinition(i)));
             this._Properties.CollectionChanged += this.OnPropertyDefinitionsChanged;
 
             foreach (var row in definition.Rows)
@@ -76,7 +77,6 @@ namespace Corekit.Models
                 rows.CollectionChanged += this.OnRowsCollectionChanged;
             }
 
-            this.Definition = definition;
             this._IsAttached = true;
 
             return this;
@@ -168,7 +168,7 @@ namespace Corekit.Models
         /// </summary>
         protected virtual IDynamicItemDefinition CreateItemDefinition(IDynamicTableFrame row)
         {
-            return new DynamicItemDefinition(_Properties)
+            return new DynamicItemDefinition(this._Properties)
             {
                 Name = row.Name,
                 IsReadOnly = row.IsReadOnly,
