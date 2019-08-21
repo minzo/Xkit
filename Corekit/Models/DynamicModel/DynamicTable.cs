@@ -28,12 +28,15 @@ namespace Corekit.Models
         /// </summary>
         public DynamicTable()
         {
+            this._Properties = new ObservableCollection<IDynamicPropertyDefinition>();
+            this._Properties.CollectionChanged += this.OnPropertyDefinitionsChanged;
         }
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public DynamicTable(DynamicTableDefinition definition)
+        public DynamicTable(DynamicTableDefinition definition) 
+            : this()
         {
             this.Attach(definition);
         }
@@ -43,8 +46,8 @@ namespace Corekit.Models
         /// rowsとcolsに同じインスタンスが入ると対角の値を同期します
         /// </summary>
         public DynamicTable(IEnumerable<IDynamicTableFrame> rows, IEnumerable<IDynamicTableFrame> cols)
+            : this(new DynamicTableDefinition() { Rows = rows, Cols = cols })
         {
-            this.Attach(new DynamicTableDefinition() { Rows = rows, Cols = cols });
         }
 
         /// <summary>
@@ -59,19 +62,25 @@ namespace Corekit.Models
 
             this.Definition = definition;
 
-            this._Properties = new ObservableCollection<IDynamicPropertyDefinition>(definition.Cols.Select(i => this.CreateDefinition(i)));
-            this._Properties.CollectionChanged += this.OnPropertyDefinitionsChanged;
+            // 列を追加
+            foreach (var col in definition.Cols)
+            {
+                this.AddDefinition(this.CreateDefinition(col));
+            }
 
+            // 行を追加
             foreach (var row in definition.Rows)
             {
                 this.AddItem(this.CreateDynamicItem(row));
             }
 
+            // 列定義追従
             if (definition.Cols is INotifyCollectionChanged cols)
             {
                 cols.CollectionChanged += this.OnColsCollectionChanged;
             }
 
+            // 行定義追従
             if (definition.Rows is INotifyCollectionChanged rows)
             {
                 rows.CollectionChanged += this.OnRowsCollectionChanged;
