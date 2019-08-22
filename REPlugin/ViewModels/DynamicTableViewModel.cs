@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Collections;
+using System.Collections.Specialized;
+using System.Collections.ObjectModel;
 
 namespace REPlugin.ViewModels
 {
@@ -14,11 +17,12 @@ namespace REPlugin.ViewModels
     internal class DynamicTableViewModel<T> : DynamicTable<T>
         where T : class
     {
+        #region Cell
+
         /// <summary>
         /// プロパティ定義
         /// </summary>
         internal class PropertyDefiniton<TValue> : IDynamicPropertyDefinition
-            where TValue : class
         {
             /// <summary>
             /// プロパティ定義の名前
@@ -83,8 +87,7 @@ namespace REPlugin.ViewModels
         /// <summary>
         /// プロパティ
         /// </summary>
-        internal class Property<TValue> : IDynamicProperty where TValue 
-            : class
+        internal class Property<TValue> : IDynamicProperty
         {
             /// <summary>
             /// 定義
@@ -113,22 +116,6 @@ namespace REPlugin.ViewModels
             {
                 get
                 {
-                    bool isRowHeaderColumn = this.Definition.Name == "プロパティ";
-                    bool isColumnHeaderRow = this.Owner.Definition.Name == "プロパティ";
-
-                    if( isRowHeaderColumn && isColumnHeaderRow)
-                    {
-                        return (string.Empty as TValue) ?? default(TValue);
-                    }
-                    else if (isRowHeaderColumn)
-                    {
-                        return (this.Owner.Definition.Name as TValue) ?? default(TValue);
-                    }
-                    else if (isColumnHeaderRow)
-                    {
-                        return (this.Definition.Name as TValue) ?? default(TValue);
-                    }
-
                     TValue value;
                     if (this._OwnerTableValue.TryGetValue($"{this.Owner.Definition.Name}___{this.Definition.Name}", out value))
                     {
@@ -181,10 +168,28 @@ namespace REPlugin.ViewModels
 #pragma warning restore CS0067
         }
 
+        #endregion
+
+        #region Header
+
+        /// <summary>
+        /// ヘッダー行定義
+        /// </summary>
+        internal class HeaderRowDefinition : DynamicItemDefinition
+        {
+            /// <summary>
+            /// コンストラクタ
+            /// </summary>
+            public HeaderRowDefinition(IEnumerable<IDynamicPropertyDefinition> collection)
+                : base( collection )
+            {
+            }
+        }
+
         /// <summary>
         /// ヘッダープロパティ定義
         /// </summary>
-        internal class HeaderDefinition : IDynamicPropertyDefinition
+        internal class HeaderColDefinition : IDynamicPropertyDefinition
         {
             /// <summary>
             /// プロパティ定義の名前
@@ -250,7 +255,10 @@ namespace REPlugin.ViewModels
             /// <summary>
             /// 値
             /// </summary>
-            public object Value { get => (this.Definition as HeaderDefinition).Value; set => (this.Definition as HeaderDefinition).Value = value as string; }
+            public object Value {
+                get => (this.Definition as HeaderColDefinition).Value;
+                set => (this.Definition as HeaderColDefinition).Value = value as string;
+            }
 
             /// <summary>
             /// コンストラクタ
@@ -276,6 +284,8 @@ namespace REPlugin.ViewModels
             public event PropertyChangedEventHandler PropertyChanged;
 #pragma warning restore CS0067
         }
+
+        #endregion
 
         /// <summary>
         /// コンストラクタ
@@ -307,17 +317,22 @@ namespace REPlugin.ViewModels
         /// </summary>
         protected override IDynamicItemDefinition CreateItemDefinition(IDynamicTableFrame row)
         {
-            var definition = base.CreateItemDefinition(row) as DynamicItemDefinition;
-
             if ( row is TableFrame)
             {
-                definition.Name = row.Name;
-                definition.IsReadOnly = row.IsReadOnly;
-                definition.IsMovable = row.IsMovable;
-                definition.IsDeletable = row.IsDeletable;
+                var definition = this.Definition.Cols.Select(col => new HeaderColDefinition() { Name = col.Name, Value = col.Name });
+                var properties = new ObservableCollection<IDynamicPropertyDefinition>(definition);
+                return new HeaderRowDefinition(properties)
+                {
+                    Name = row.Name,
+                    IsReadOnly = row.IsReadOnly,
+                    IsMovable = row.IsMovable,
+                    IsDeletable = row.IsDeletable,
+                };
             }
 
-            return definition;
+            var item = base.CreateItemDefinition(row);
+
+            return item;
         }
 
         /// <summary>
@@ -327,11 +342,13 @@ namespace REPlugin.ViewModels
         {
             if( col is TableFrame)
             {
-                return new HeaderDefinition() { Name = col.Name, Value = col.Name };
+                return new HeaderColDefinition() { Name = col.Name, Value = col.Name };
             }
 
             return new PropertyDefiniton<T>(this._Value) { Name = col.Name };
         }
+
+        //----------------------------------------------------------------------
 
         private IDictionary<string, T> _Value = new Dictionary<string, T>();
     }

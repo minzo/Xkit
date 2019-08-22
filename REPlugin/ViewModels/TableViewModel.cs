@@ -27,22 +27,9 @@ namespace REPlugin.ViewModels
         public ObservableCollection<IDynamicTableFrame> Sources { get; private set; }
 
         /// <summary>
-        /// 列ヘッダーを表示する行
-        /// </summary>
-        public IEnumerable<IDynamicTableFrame> ColumnHeaderRow => this.TargetDefinitionVMs
-            .Select(i => new TableFrame() { Name = i.Name });
-
-        /// <summary>
         /// 発生先
         /// </summary>
         public ObservableCollection<IDynamicTableFrame> Targets { get; private set; }
-
-        /// <summary>
-        /// 行ヘッダーを表示する列
-        /// </summary>
-        public IEnumerable<IDynamicTableFrame> RowHeaderColumn => this.SourceDefinitionVMs
-            .Select(i => new TableFrame() { Name = i.Name });
-
 
         /// <summary>
         /// プロパティ
@@ -88,7 +75,10 @@ namespace REPlugin.ViewModels
             var size = new RuntimeProperty();
             size.SetElements("Size", new[] { "Large", "Normal", "Small" });
 
-            var properties = new[] { property, size };
+            var abc = new RuntimeProperty();
+            abc.SetElements("ABC", new[] { "A", "B", "C" });
+
+            var properties = new[] { property, size, abc };
 
             this.SourceDefinitionVMs = properties
                 .Select(i => new RuntimePropertyViewModel(i))
@@ -120,17 +110,45 @@ namespace REPlugin.ViewModels
                 .Select(i => i.First())
                 .Select(i => new TableFrameViewModel() { Name = i.Dest, Property = i.Elemenet });
 
-            this.Sources = this.ColumnHeaderRow
-                .Concat(sources)
-                .ToObservableCollection();
+            var columnHeaderRows = this.TargetDefinitionVMs
+                .Select(i => new TableFrame() { Name = i.Name, })
+                .Cast<IDynamicTableFrame>();
 
-            this.Targets = this.RowHeaderColumn
-                .Concat(targets)
-                .ToObservableCollection();
+            var rowHeaderColumns = this.SourceDefinitionVMs            
+                .Select(i => new TableFrame() { Name = i.Name, })
+                .Cast<IDynamicTableFrame>();
+
+            this.Sources = columnHeaderRows.Concat(sources).ToObservableCollection();
+            this.Targets = rowHeaderColumns.Concat(targets).ToObservableCollection();
+
+            var list = new List<string>();
+            Combination(SourceDefinitionVMs, 0, string.Empty, ref list);
 
             this.SetProperty(nameof(this.TableVM), new DynamicTableViewModel<string>());
             this.TableVM.SetCells(this.Cells);
-            this.TableVM.Attach(new DynamicTableDefinition() { Rows = this.Sources, Cols = this.Targets });
+            this.TableVM.Attach(new DynamicTableDefinition() {
+                Rows = this.Sources,
+                Cols = this.Targets
+            });
+        }
+
+        void Combination(ObservableCollection<RuntimePropertyViewModel> definitions, int index, string hoge, ref List<string> list)
+        {
+            if (index >= definitions.Count)
+            {
+                list.Add(hoge);
+                return;
+            }
+
+            foreach (var element in definitions[index].Elements)
+            {
+                Combination(definitions, index + 1, hoge + element.Elemenet, ref list);
+            }
+        }
+
+        void Elemention(ObservableCollection<RuntimePropertyViewModel> definitions, int index)
+        {
+
         }
 
         private readonly Config _Owner;
