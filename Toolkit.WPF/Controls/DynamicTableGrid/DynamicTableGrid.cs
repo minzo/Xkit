@@ -265,7 +265,7 @@ namespace Toolkit.WPF.Controls
             {
                 var columns = e.RemovedCells.Select(i => i.Column).Distinct();
                 var cells = (this.ItemsSource as IEnumerable<object>)
-                     .SelectMany(i => columns.Select(x => x?.GetCellContent(i)))
+                     ?.SelectMany(i => columns.Select(x => x?.GetCellContent(i)))
                      .Where(i => i != null)
                      .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
                      .Where(i => i != null);
@@ -303,7 +303,7 @@ namespace Toolkit.WPF.Controls
             {
                 var columns = this.SelectedCells.Select(i => i.Column).Distinct();
                 var cells = (this.ItemsSource as IEnumerable<object>)
-                    .SelectMany(i => columns.Select(x => x?.GetCellContent(i)))
+                    ?.SelectMany(i => columns.Select(x => x?.GetCellContent(i)))
                     .Where(i => i != null)
                     .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
                     .Where(i => i != null);
