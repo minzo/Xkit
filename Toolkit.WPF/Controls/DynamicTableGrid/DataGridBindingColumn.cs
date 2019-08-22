@@ -182,8 +182,8 @@ namespace Toolkit.WPF.Controls
             }
             else if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
-                // 読み取り専用のセルに対してBeginEditしないようにする
-                if( cell.IsReadOnly ||this.IsReadOnly)
+                // 読み取り専用のセルや列に対してBeginEditしないようにする
+                if (cell.IsReadOnly || this.IsReadOnly)
                 {
                     return;
                 }

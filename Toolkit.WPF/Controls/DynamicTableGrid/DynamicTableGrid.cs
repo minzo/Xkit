@@ -264,16 +264,12 @@ namespace Toolkit.WPF.Controls
             // ハイライト情報のリセット
             {
                 var columns = e.RemovedCells.Select(i => i.Column).Distinct();
-                var cells = (this.ItemsSource as IEnumerable<object>)
+                (this.ItemsSource as IEnumerable<object>)
                      ?.SelectMany(i => columns.Select(x => x?.GetCellContent(i)))
                      .Where(i => i != null)
                      .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
-                     .Where(i => i != null);
-
-                foreach (var cell in cells)
-                {
-                    SetIsSelectedCellContains(cell, false);
-                }
+                     .Where(i => i != null)
+                     .ForEach(i => SetIsSelectedCellContains(i, false));
             }
 
             // 行ハイライト
@@ -302,16 +298,12 @@ namespace Toolkit.WPF.Controls
             if (this.EnableColumnHighlighting && this.SelectedItems.Count == 0)
             {
                 var columns = this.SelectedCells.Select(i => i.Column).Distinct();
-                var cells = (this.ItemsSource as IEnumerable<object>)
+                (this.ItemsSource as IEnumerable<object>)
                     ?.SelectMany(i => columns.Select(x => x?.GetCellContent(i)))
                     .Where(i => i != null)
                     .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
-                    .Where(i => i != null);
-
-                foreach (var cell in cells)
-                {
-                    SetIsSelectedCellContains(cell, true);
-                }
+                    .Where(i => i != null)
+                    .ForEach(i => SetIsSelectedCellContains(i, true));
             }
 
             // セル選択情報の更新
