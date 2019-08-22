@@ -182,6 +182,12 @@ namespace Toolkit.WPF.Controls
             }
             else if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
+                // 読み取り専用のセルに対してBeginEditしないようにする
+                if( cell.IsReadOnly ||this.IsReadOnly)
+                {
+                    return;
+                }
+
                 if (this.IsBeginEditCharacter(e.Key) || this.IsBeginEditCharacter(e.ImeProcessedKey))
                 {
                     this.DataGridOwner?.BeginEdit();
