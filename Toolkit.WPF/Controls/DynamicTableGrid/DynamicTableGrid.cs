@@ -226,8 +226,8 @@ namespace Toolkit.WPF.Controls
             if (this.TryFindResource("BindingColumn") is DataGridBindingColumn column)
             {
                 column.Binding = new Binding(propertyName);
-                column.ClipboardContentBinding = new Binding(propertyName);
-                column.SortMemberPath = propertyName;
+                column.ClipboardContentBinding = new Binding($"{propertyName}.Value") { Mode = BindingMode.TwoWay };
+                column.SortMemberPath = $"{propertyName}.Value";
                 column.IsReadOnly = isReadOnly;
                 column.Header = definition;
                 column.CellTemplateSelector = this.CellTemplateSelector ?? column.CellTemplateSelector;
@@ -307,7 +307,7 @@ namespace Toolkit.WPF.Controls
             }
 
             // セル選択情報の更新
-            var cellInfos = SelectedCells
+            var cellInfos = this.SelectedCells
                 .Select(i => new SelectedInfo(i.Item, GetPropertyName(i.Column)))
                 .ToList();
 
@@ -326,10 +326,10 @@ namespace Toolkit.WPF.Controls
                 .Select(i => (Item: i.Item, Value: columns[i.PropertyName].OnCopyingCellClipboardContent(i.Item)))
                 .GroupBy(i => i.Item);
 
-            var csv = string.Join("\n", items.Select(i => string.Join(",", i.Select(x => x.Value))));
+            var csv = string.Join("\n", items.Select(i => string.Join(",", i.Select(x => x.Value.ToString()))));
             Clipboard.SetText(csv, TextDataFormat.CommaSeparatedValue);
 
-            var txt = string.Join("\n", items.Select(i => string.Join("\t", i.Select(x => x.Value))));
+            var txt = string.Join("\n", items.Select(i => string.Join("\t", i.Select(x => x.Value.ToString()))));
             Clipboard.SetText(txt, TextDataFormat.Text);
         }
 
@@ -338,20 +338,43 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnPaste()
         {
+            var items = this.SelectedInfos
+                .Select(i => (Item: i.Item as IDynamicItem, Index: this.Columns.IndexOf(c => GetPropertyName(c) == i.PropertyName)))
+                .GroupBy(i => i.Item)
+                .Select(i => i.First())
+                .Where(i => i.Item != null)
+                .ToList();
+
             var csv = Clipboard.GetText(TextDataFormat.CommaSeparatedValue);
             if (!string.IsNullOrEmpty(csv))
             {
-
+                var lines = csv.Split(new[] { "\n", Environment.NewLine }, StringSplitOptions.None);
+                for (var i = 0; i < items.Count; i++)
+                {
+                    var values = lines[i].Split(',');
+                    for (var v = items[i].Index; v < values.Length; v++)
+                    {
+                        if (v < items[i].Item.Definition.Count())
+                        {
+                            items[i].Item.SetPropertyValue(v + items[i].Index, values[v]);
+                        }
+                    }
+                }
             }
 
             var txt = Clipboard.GetText(TextDataFormat.Text);
             if (!string.IsNullOrEmpty(txt))
             {
                 var lines = txt.Split(new[] { "\n", Environment.NewLine }, StringSplitOptions.None);
-                foreach (var line in lines)
+                for (var i = 0; i < items.Count; i++)
                 {
-                    foreach (var cell in line.Split('\t'))
+                    var values = lines[i].Split('\t');
+                    for (var v = 0; v < values.Length; v++)
                     {
+                        if (v < items[i].Item.Definition.Count())
+                        {
+                            items[i].Item.SetPropertyValue(v + items[i].Index, values[v]);
+                        }
                     }
                 }
             }
