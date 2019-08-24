@@ -45,8 +45,12 @@ namespace Corekit.Models
                 throw new InvalidOperationException("DynamicItem Definition Already Attached");
             }
 
+            if (definition is INotifyCollectionChanged _definition)
+            {
+                _definition.CollectionChanged += this.OnDefinitionChanged;
+            }
+
             this.Definition = definition;
-            this.Definition.CollectionChanged += this.OnDefinitionChanged;
             this.Definition.ForEach(i => this.AddProperty(i.Create(this)));
             this._IsAttached = true;
             return this;

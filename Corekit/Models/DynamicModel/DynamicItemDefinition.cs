@@ -12,7 +12,7 @@ namespace Corekit.Models
     /// <summary>
     /// アイテム定義
     /// </summary>
-    public interface IDynamicItemDefinition : IEnumerable<IDynamicPropertyDefinition>, INotifyCollectionChanged, INotifyPropertyChanged
+    public interface IDynamicItemDefinition : IEnumerable<IDynamicPropertyDefinition>
     {
         /// <summary>
         /// プロパティ定義の名前
@@ -39,18 +39,8 @@ namespace Corekit.Models
     /// <summary>
     /// アイテム定義
     /// </summary>
-    public class DynamicItemDefinition : IDynamicItemDefinition
+    public class DynamicItemDefinition : IDynamicItemDefinition, INotifyCollectionChanged, INotifyPropertyChanged
     {
-        /// <summary>
-        /// プロパティ変更通知
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged = null;
-
-        /// <summary>
-        /// コレクション変更通知
-        /// </summary>
-        public event NotifyCollectionChangedEventHandler CollectionChanged = null;
-
         /// <summary>
         /// アイテム定義の名前
         /// </summary>
@@ -142,5 +132,19 @@ namespace Corekit.Models
         }
         
         private ObservableCollection<IDynamicPropertyDefinition> collection;
+
+        #region Event
+
+        /// <summary>
+        /// プロパティ変更通知
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// コレクション変更通知
+        /// </summary>
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+        #endregion
     }
 }
