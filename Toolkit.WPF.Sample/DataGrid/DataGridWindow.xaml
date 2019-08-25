@@ -59,7 +59,7 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type system:Boolean}">
                 <Border Style="{StaticResource BorderStyle}">
-                    <CheckBox IsChecked="{Binding Value}"  />
+                    <CheckBox IsChecked="{Binding Value}" Style="{StaticResource CheckBox}" />
                 </Border>
             </DataTemplate>
             <DataTemplate DataType="{x:Type Color}">

@@ -251,7 +251,8 @@ namespace Toolkit.WPF.Controls
             var isNumber = (key >= Key.D0 && key <= Key.D9) || (key >= Key.NumPad0 && key <= Key.NumPad9);
             var isSpecial = key == Key.F2 || key == Key.Space;
             var isOem = (key >= Key.Oem1 && key <= Key.OemBackslash);
-            return isCharacter || isNumber || isSpecial || isOem;
+            var isBack = key == Key.Back;
+            return isCharacter || isNumber || isSpecial || isBack || isOem;
         }
 
         /// <summary>
