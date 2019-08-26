@@ -77,5 +77,25 @@ namespace Corekit.Extensions
         {
             return new ObservableCollection<T>(collection);
         }
+
+        /// <summary>
+        /// ObservableCollectionにする
+        /// </summary>
+        public static ObservableCollection<TResult> ToObservableCollection<T, TResult>(this IEnumerable<T> collection, Func<T, TResult> predicate)
+        {
+            var items = new ObservableCollection<TResult>(collection.Select(i => predicate(i)));
+            if (collection is INotifyCollectionChanged notify)
+            {
+                notify.CollectionChanged += (s, e) =>
+                {
+                    int removeIndex = e.OldStartingIndex;
+                    e.OldItems?.Cast<T>().ForEach(i => items.RemoveAt(removeIndex));
+
+                    int insertIndex = e.NewStartingIndex;
+                    e.NewItems?.Cast<T>().ForEach(i => items.Insert(insertIndex++, predicate(i)));
+                };
+            }
+            return items;
+        }
     }
 }
