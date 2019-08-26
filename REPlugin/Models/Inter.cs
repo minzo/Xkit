@@ -6,9 +6,24 @@ using System.Threading.Tasks;
 
 namespace REPlugin.Models
 {
-    internal class Inter
+    public class Inter
     {
+        public Inter()
+        {
+            this._Dictionary = new Dictionary<string, object>();
+        }
+
         public Inter GetProperty(string path)
+        {
+            return null;
+        }
+
+        public Inter TryGetProperty(string path)
+        {
+            return null;
+        }
+
+        public IEnumerable<Inter> GetValidValueAsList(string path = null)
         {
             return null;
         }
@@ -21,5 +36,17 @@ namespace REPlugin.Models
         {
             return null;
         }
+
+        public Inter AddArrayElement()
+        {
+            return null;
+        }
+
+        public Inter AddDicionaryElement(string key)
+        {
+            return null;
+        }
+
+        private Dictionary<string, object> _Dictionary;
     }
 }
