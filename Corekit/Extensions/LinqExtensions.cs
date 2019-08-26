@@ -30,9 +30,10 @@ namespace Corekit.Extensions
         {
             if (action != null)
             {
-                var enumerator = collection.GetEnumerator();
-                while (enumerator.MoveNext())
-                    action(enumerator.Current);
+                foreach (var item in collection)
+                {
+                    action(item);
+                }
             }
         }
 
@@ -53,7 +54,9 @@ namespace Corekit.Extensions
             foreach(var item in collection)
             {
                 if (predicate(item))
+                {
                     return index;
+                }
                 index++;
             }
             return -1;
