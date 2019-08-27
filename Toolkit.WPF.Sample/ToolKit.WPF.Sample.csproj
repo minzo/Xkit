@@ -85,13 +85,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="DataGrid\DataGridWindow.xaml.cs">
-      <DependentUpon>DataGridWindow.xaml</DependentUpon>
+    <Compile Include="DynamicTable\DynamicItemListWindow.xaml.cs">
+      <DependentUpon>DynamicItemListWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ColorSelectComboBox\ColorSelectComboBoxWindow.xaml.cs">
       <DependentUpon>ColorSelectComboBoxWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DataGrid\DataGridWindowViewModel.cs" />
+    <Compile Include="DynamicTable\DynamicItemListWindowViewModel.cs" />
     <Compile Include="DynamicTable\DynamicTableWindow.xaml.cs">
       <DependentUpon>DynamicTableWindow.xaml</DependentUpon>
     </Compile>
@@ -115,7 +115,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="DataGrid\DataGridWindow.xaml">
+    <Page Include="DynamicTable\DynamicItemListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

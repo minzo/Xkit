@@ -38,7 +38,7 @@ namespace Toolkit.WPF.Sample
 
         public ObservableCollection<Module> B_Modules { get; } = new ObservableCollection<Module>(Enumerable.Range(0, 5).Select(i => new Module() { Name = $"B_Module{i}" }));
 
-        public DynamicTableViewModel<DynamicTableViewModel<bool>> Table { get; }
+        public DynamicTableViewModel<bool> Table { get; }
 
         /// <summary>
         /// 行追加
@@ -60,26 +60,7 @@ namespace Toolkit.WPF.Sample
         /// </summary>
         public DynamicTableWindowViewModel()
         {
-            Table = new DynamicTableViewModel<DynamicTableViewModel<bool>>(A_Modules, B_Modules);
-            var cols = Table.Definition.Cols;
-            var rows = Table.Definition.Rows;
-            var rowIndex = 0;
-            var colIndex = 0;
-
-            foreach (var col in cols)
-            {
-                rowIndex = 0;
-                foreach (var row in rows)
-                {
-                    this.Table.SetPropertyValue(row.Name, col.Name, new DynamicTableViewModel<bool>(rows, cols) {
-                        RowIndex = rowIndex,
-                        ColIndex = colIndex
-                    });
-                    rowIndex++;
-                }
-                colIndex++;
-            }
-
+            Table = new DynamicTableViewModel<bool>(A_Modules, B_Modules);
 
             AddRowCommand = new DelegateCommand(_ => {
                 A_Modules.Add(new Module() { Name = $"A_Module{A_Modules.Count}" });

@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace Toolkit.WPF.Sample
 {
     /// <summary>
-    /// DataGridWindow.xaml の相互作用ロジック
+    /// DynamicItemListWindow.xaml の相互作用ロジック
     /// </summary>
-    public partial class DataGridWindow : Window
+    public partial class DynamicItemListWindow : Window
     {
-        public DataGridWindow()
+        public DynamicItemListWindow()
         {
             InitializeComponent();
         }

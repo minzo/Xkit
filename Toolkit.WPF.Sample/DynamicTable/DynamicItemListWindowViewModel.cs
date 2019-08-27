@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
-using Toolkit.WPF.Models;
 
 namespace Toolkit.WPF.Sample
 {
@@ -27,31 +26,7 @@ namespace Toolkit.WPF.Sample
         Third
     }
 
-    public class ControllerItemViewModel : System.Dynamic.DynamicObject, INotifyPropertyChanged
-    {
-        public string Name { get; set; }
-
-        public string FilePath { get; set; }
-
-        public Task<bool> LoadAsync(string filePath)
-        {
-            return Task<bool>.Run(() =>
-            {
-                Model = System.IO.File.ReadAllBytes(filePath);
-                return true;
-            });
-        }
-
-        public object Model { get; set; }
-
-        public object ViewModel { get; set; }
-
-#pragma warning disable CS0067
-        public event PropertyChangedEventHandler PropertyChanged;
-#pragma warning restore CS0067
-    }
-
-    public class DataGridWindowViewModel : INotifyPropertyChanged
+    public class DynamicItemListWindowViewModel : INotifyPropertyChanged
     {
         public TypedCollection<DynamicItem> Items { get; } = new TypedCollection<DynamicItem>();
 
@@ -59,7 +34,7 @@ namespace Toolkit.WPF.Sample
 
         public ICommand AddCommand { get; }
 
-        public DataGridWindowViewModel()
+        public DynamicItemListWindowViewModel()
         {
             var definition = new DynamicItemDefinition(new IDynamicPropertyDefinition[] {
                 new DynamicPropertyDefinition<string>(){ Name = "Name" },
