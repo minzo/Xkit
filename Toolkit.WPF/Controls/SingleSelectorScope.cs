@@ -110,9 +110,6 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
-
-
-
         public static IEnumerable<object> GetSelectedInfos(DependencyObject obj)
         {
             return (IEnumerable<object>)obj.GetValue(SelectedInfosProperty);
@@ -130,9 +127,6 @@ namespace Toolkit.WPF.Controls
 
 
             }));
-
-
-
 
         /// <summary>
         /// ScopeRootに登録する

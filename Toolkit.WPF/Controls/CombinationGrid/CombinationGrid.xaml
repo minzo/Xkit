@@ -6,12 +6,6 @@
         <ResourceDictionary Source="../DynamicTableGrid/DynamicTableGrid.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <!-- Binding Column -->
-    <!--<local:DataGridBindingColumn x:Key="BindingColumn" x:Shared="False"
-                                 HeaderTemplate="{StaticResource ColumnHeaderTemplate}"
-                                 CellTemplateSelector="{StaticResource CellTemplateSelector}"
-                                 CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}" />-->
-
     <!-- CombinationGrid -->
     <Style TargetType="{x:Type local:CombinationGrid}" BasedOn="{StaticResource {x:Type local:DynamicTableGrid}}">
         <Setter Property="BorderThickness" Value="0" />

@@ -140,7 +140,8 @@
                     ItemsSource="{Binding}"
                     tkitwpf:SingleSelectorScope.IsSingleSelectorControl="true"
                     CellTemplateSelector="{StaticResource CellSelector}"
-                    CellEditingTemplateSelector="{StaticResource CellEditingSelector}" 
+                    CellEditingTemplateSelector="{StaticResource CellEditingSelector}"
+                    RowHeaderWidth="80"
                     EnableRowHighlighting="True"
                     EnableColumnHighlighting="True"
                     />

@@ -10,7 +10,7 @@ namespace Corekit.Models
     /// <summary>
     /// DynamicProperty
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("{{Value}}")]
+    [System.Diagnostics.DebuggerDisplay("DynamicProperty{{Value}}")]
     public class DynamicProperty<T> : IDynamicProperty
     {
         /// <summary>
@@ -32,12 +32,12 @@ namespace Corekit.Models
         /// 値
         /// </summary>
         public T Value {
-            get { return _value; }
+            get { return this._Value; }
             set {
-                if (!Equals(_value, value))
+                if (!Equals(this._Value, value))
                 {
                     this.PropertyChanging?.Invoke(this, _changingEventArgs);
-                    _value = value;
+                    this._Value = value;
                     this.PropertyChanged?.Invoke(this, _changedEventArgs);
                 }
             }
@@ -60,7 +60,7 @@ namespace Corekit.Models
         {
             Definition = definition;
             Owner = owner;
-            _value = (T)Definition.GetDefaultValue();
+            _Value = (T)Definition.GetDefaultValue();
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Corekit.Models
         /// </summary>
         public override string ToString() => Value.ToString();
 
-        private T _value;
+        private T _Value;
 
         public event PropertyChangingEventHandler PropertyChanging;
         public event PropertyChangedEventHandler PropertyChanged;

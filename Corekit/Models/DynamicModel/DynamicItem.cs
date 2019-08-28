@@ -12,7 +12,7 @@ namespace Corekit.Models
     /// <summary>
     /// DynamicItem
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("{Definition.Name}")]
+    [System.Diagnostics.DebuggerDisplay("DynamicItem{{Definition.Name}}")]
     public class DynamicItem : DynamicProperty<DynamicPropertyCollection>, IDynamicItem, ICustomTypeDescriptor
     {
         /// <summary>
