@@ -71,6 +71,14 @@ namespace Corekit.Extensions
         }
 
         /// <summary>
+        /// 直積を列挙
+        /// </summary>
+        public static IEnumerable<T> CrossJoin<T,T1,T2>(this IEnumerable<T1> collection1, IEnumerable<T2> collection2, Func<T1,T2,T> predicate)
+        {
+            return collection1.SelectMany(t1 => collection2.Select(t2 => predicate(t1, t2)));
+        }
+
+        /// <summary>
         /// ObservableCollectionにする
         /// </summary>
         public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> collection)

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Text;
-using Corekit;
 
-namespace CorekitSample
+namespace Corekit.Sample
 {
     public class Program
     {
