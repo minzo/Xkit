@@ -32,16 +32,4 @@ namespace Corekit.Models
         /// </summary>
         bool IsMovable { get; }
     }
-
-    /// <summary>
-    /// DynamicTableの定義
-    /// </summary>
-    public class DynamicTableDefinition
-    {
-        public IEnumerable<IDynamicTableFrame> Rows { get; set; }
-
-        public IEnumerable<IDynamicTableFrame> Cols { get; set; }
-
-        public Action<IDynamicTableFrame, IDynamicTableFrame, IDynamicProperty> CellCreated { get; set; }
-    }
 }

@@ -54,76 +54,6 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
-
-
-        <tkit:DynamicPropertyTemplateSelector x:Key="CellTemplateSelector">
-            <DataTemplate DataType="{x:Type system:Int32}">
-                <TextBlock Text="{Binding Value}" Style="{StaticResource TextBlockStyle}" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:Single}">
-                <TextBlock Text="{Binding Value, StringFormat={}{0:0.00######}}" Style="{StaticResource TextBlockStyle}" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:Double}">
-                <TextBlock Text="{Binding Value, StringFormat={}{0:0.00######}}" Style="{StaticResource TextBlockStyle}" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:String}">
-                <TextBlock Text="{Binding Value}" Style="{StaticResource TextBlockStyle}" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:Boolean}">
-                <Border Style="{StaticResource BorderStyle}">
-                    <CheckBox IsChecked="{Binding Value}" Style="{StaticResource CheckBoxStyle}" />
-                </Border>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type ckit:IDynamicTable}">
-                <tkit:DynamicTableGrid
-                    ItemsSource="{Binding Value}"
-                    HorizontalScrollBarVisibility="Hidden"
-                    VerticalScrollBarVisibility="Hidden">
-                    <tkit:DynamicTableGrid.Style>
-                        <Style TargetType="{x:Type tkit:DynamicTableGrid}" BasedOn="{StaticResource {x:Type tkit:DynamicTableGrid}}">
-                            <Setter Property="MinRowHeight" Value="24" />
-                            <Setter Property="HeadersVisibility" Value="None" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Value.RowIndex}" Value="0">
-                                    <Setter Property="HeadersVisibility" Value="Column" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Value.ColIndex}" Value="0">
-                                    <Setter Property="HeadersVisibility" Value="Row" />
-                                </DataTrigger>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding Value.RowIndex}" Value="0" />
-                                        <Condition Binding="{Binding Value.ColIndex}" Value="0" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="HeadersVisibility" Value="All" />
-                                </MultiDataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </tkit:DynamicTableGrid.Style>
-                </tkit:DynamicTableGrid>
-            </DataTemplate>
-        </tkit:DynamicPropertyTemplateSelector>
-
-        <tkit:DynamicPropertyTemplateSelector x:Key="CellEditingTemplateSelector">
-            <DataTemplate DataType="{x:Type system:Int32}">
-                <TextBox Text="{Binding Value}" Style="{StaticResource TextBoxStyle}" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:Single}">
-                <TextBox Text="{Binding Value}" Style="{StaticResource TextBoxStyle}" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:Double}">
-                <TextBox Text="{Binding Value}" Style="{StaticResource TextBoxStyle}" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:String}">
-                <TextBox Text="{Binding Value}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type system:Boolean}">
-                <Border Style="{StaticResource BorderStyle}">
-                    <CheckBox IsChecked="{Binding Value}" Style="{StaticResource CheckBoxStyle}" />
-                </Border>
-            </DataTemplate>
-        </tkit:DynamicPropertyTemplateSelector>
-
     </Window.Resources>
     
     <Grid>
@@ -150,12 +80,10 @@
             <ListBox DisplayMemberPath="Name" ItemsSource="{Binding B_Modules}" />
         </DockPanel>
 
-        <tkit:CombinationGrid
+        <tkit:DynamicTableGrid
             Grid.Column="3"
             tkit:CombinationGrid.IsSharedSizeScope="True"
             ItemsSource="{Binding Table}"
-            CellTemplateSelector="{StaticResource CellTemplateSelector}"
-            CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}"
             />
     </Grid>
 </Window>

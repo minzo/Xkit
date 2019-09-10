@@ -35,7 +35,6 @@ namespace Corekit.Models
         bool IsMovable { get; }
     }
 
-
     /// <summary>
     /// アイテム定義
     /// </summary>

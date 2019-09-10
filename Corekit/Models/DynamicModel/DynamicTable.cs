@@ -14,9 +14,14 @@ namespace Corekit.Models
     public class DynamicTable<T> : TypedCollection<DynamicItem>, IDynamicTable<DynamicItem, T>
     {
         /// <summary>
-        /// テーブル定義
+        /// 行定義
         /// </summary>
-        public DynamicTableDefinition Definition { get; private set; }
+        public IEnumerable<IDynamicTableFrame> Rows { get; private set; }
+
+        /// <summary>
+        /// 列定義
+        /// </summary>
+        public IEnumerable<IDynamicTableFrame> Cols { get; private set; }
 
         /// <summary>
         /// 名前
@@ -34,56 +39,49 @@ namespace Corekit.Models
 
         /// <summary>
         /// コンストラクタ
-        /// </summary>
-        public DynamicTable(DynamicTableDefinition definition) 
-            : this()
-        {
-            this.Attach(definition);
-        }
-
-        /// <summary>
-        /// コンストラクタ
         /// rowsとcolsに同じインスタンスが入ると対角の値を同期します
         /// </summary>
         public DynamicTable(IEnumerable<IDynamicTableFrame> rows, IEnumerable<IDynamicTableFrame> cols)
-            : this(new DynamicTableDefinition() { Rows = rows, Cols = cols })
+            : this()
         {
+            this.Attach(rows, cols);
         }
 
         /// <summary>
         /// 定義を適用する
         /// </summary>
-        public DynamicTable<T> Attach(DynamicTableDefinition definition)
+        public DynamicTable<T> Attach(IEnumerable<IDynamicTableFrame> rows, IEnumerable<IDynamicTableFrame> cols)
         {
             if (this._IsAttached)
             {
                 throw new InvalidOperationException("DynamicTable Definition Already Attached");
             }
 
-            this.Definition = definition;
+            this.Rows = rows;
+            this.Cols = cols;
 
             // 列を追加
-            foreach (var col in definition.Cols)
+            foreach (var col in this.Cols)
             {
                 this.AddDefinition(this.CreateDefinition(col));
             }
 
             // 行を追加
-            foreach (var row in definition.Rows)
+            foreach (var row in this.Rows)
             {
                 this.AddItem(this.CreateDynamicItem(row));
             }
 
             // 列定義追従
-            if (definition.Cols is INotifyCollectionChanged cols)
+            if (this.Cols is INotifyCollectionChanged _cols)
             {
-                cols.CollectionChanged += this.OnColsCollectionChanged;
+                _cols.CollectionChanged += this.OnColsCollectionChanged;
             }
 
             // 行定義追従
-            if (definition.Rows is INotifyCollectionChanged rows)
+            if (this.Rows is INotifyCollectionChanged _rows)
             {
-                rows.CollectionChanged += this.OnRowsCollectionChanged;
+                _rows.CollectionChanged += this.OnRowsCollectionChanged;
             }
 
             this._IsAttached = true;
@@ -306,7 +304,7 @@ namespace Corekit.Models
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             // 対角の値を同期する
-            if (this.Definition.Rows == this.Definition.Cols)
+            if (this.Rows == this.Cols)
             {
                 var item = sender as DynamicItem;
                 this.FirstOrDefault(i => i.Definition.Name == e.PropertyName)?
@@ -316,7 +314,7 @@ namespace Corekit.Models
 
         #endregion
 
-        private ObservableCollection<IDynamicPropertyDefinition> _Properties;
+        protected ObservableCollection<IDynamicPropertyDefinition> _Properties;
 
         private bool _IsAttached = false;
     }

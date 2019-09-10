@@ -9,18 +9,20 @@ namespace Corekit.Models
 {
     public class DynamicPropertyDescriptor : PropertyDescriptor
     {
-        private IDynamicProperty _Property;
+        public IDynamicPropertyDefinition Definition { get; }
 
-        public IDynamicPropertyDefinition Definition => _Property.Definition;
-
-        public DynamicPropertyDescriptor(IDynamicProperty property) : base(property.Definition.Name, null)
+        public DynamicPropertyDescriptor(IDynamicPropertyDefinition definition) : base(definition.Name, null)
         {
-            this._Property = property;
+            this.Definition = definition;
+        }
+
+        public DynamicPropertyDescriptor(IDynamicProperty property) : this(property.Definition)
+        {
         }
 
         public override Type ComponentType => typeof(IDynamicItem);
 
-        public override bool IsReadOnly => this._Property.IsReadOnly;
+        public override bool IsReadOnly => this.Definition.IsReadOnly == true;
 
         public override Type PropertyType => typeof(IDynamicProperty);
 
