@@ -23,8 +23,8 @@ namespace Toolkit.WPF.Sample
         public CombinationGridWindowViewModel()
         {
             var row = new Combination();
-            row.Definitions.Add("Mat", new List<string>() { "Soil", "Stone" });
-            row.Definitions.Add("Sub", new List<string>() { "Soft", "Hard" });
+            row.Definitions.Add("Mat", new List<string>() { "Body", "Stone", "Wood", "Metal" });
+            row.Definitions.Add("Sub", new List<string>() { "Small", "Middle", "Big" });
             var col = new Combination();
             col.Definitions.Add("Obj", new List<string>() { "Small", "Middle" });
             col.Definitions.Add("Mas", new List<string>() { "Light", "Normal", "Heavy" });

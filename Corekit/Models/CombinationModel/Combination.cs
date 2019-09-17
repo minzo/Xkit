@@ -15,21 +15,46 @@ namespace Corekit.Models
     {
         public Dictionary<string, IEnumerable<string>> Definitions { get; }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public Combination()
         {
             this.Definitions = new Dictionary<string, IEnumerable<string>>();
         }
 
+        #region IEnumerable
+
         public IEnumerator<CombinationTableFrame> GetEnumerator()
         {
-            return this.Definitions
-                .Select(i => i.Value)
-                .Aggregate((n, e) => n.CrossJoin(e, (x, y) => ))
-                .Select(i => new CombinationTableFrame() { Name = i })
+            var sources = this.Definitions.Select(i => i.Value.AsEnumerable()).ToList();
+            var combination = this.ResolveCombination(sources);
+            return combination
+                .Select(i => new CombinationTableFrame() { Name = string.Join("_", i), Elements = i.ToList() })
                 .GetEnumerator();
         }
-
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+        #endregion
+
+        private IEnumerable<IEnumerable<string>> ResolveCombination(List<IEnumerable<string>> sources)
+        {
+            using (var enumerator = sources.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                {
+                    return Enumerable.Empty<IEnumerable<string>>();
+                }
+
+                var result = enumerator.Current.Select(i => i.AsEnumerable());
+                while (enumerator.MoveNext())
+                {
+                    result = result.CrossJoin(enumerator.Current, (a, b) => a.Concat(b.AsEnumerable()));
+                }
+
+                return result;
+            }
+        }
     }
 
     /// <summary>
@@ -45,18 +70,22 @@ namespace Corekit.Models
 
         public bool IsMovable { get; set; }
 
+        public IReadOnlyList<string> Elements { get; set; }
+
+#pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
     }
 
     /// <summary>
     /// アイテム定義
     /// </summary>
-    public class CombinationItemDefinition : DynamicItemDefinition
+    internal class CombinationItemDefinition : DynamicItemDefinition
     {
         /// <summary>
         /// 要素
         /// </summary>
-        public IReadOnlyList<string> Elements { get; }
+        public IReadOnlyList<string> Elements { get; internal set; }
 
         /// <summary>
         /// コンストラクタ
@@ -70,11 +99,11 @@ namespace Corekit.Models
     /// <summary>
     /// プロパティ定義
     /// </summary>
-    public class CombinationPropertyDefinition<T> : DynamicPropertyDefinition<T>
+    internal class CombinationPropertyDefinition<T> : DynamicPropertyDefinition<T>
     {
         /// <summary>
         /// 要素
         /// </summary>
-        public IReadOnlyList<string> Elements { get; }
+        public IReadOnlyList<string> Elements { get; internal set; }
     }
 }

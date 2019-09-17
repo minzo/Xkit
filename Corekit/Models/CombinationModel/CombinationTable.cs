@@ -38,6 +38,7 @@ namespace Corekit.Models
                 IsReadOnly = row.IsReadOnly,
                 IsMovable = row.IsMovable,
                 IsDeletable = row.IsDeletable,
+                Elements = (row as CombinationTableFrame)?.Elements
             };
         }
 
@@ -49,7 +50,8 @@ namespace Corekit.Models
             return new CombinationPropertyDefinition<T>()
             {
                 Name = col.Name,
-                IsReadOnly = col.IsReadOnly
+                IsReadOnly = col.IsReadOnly,
+                Elements = (col as CombinationTableFrame)?.Elements,
             };
         }
     }

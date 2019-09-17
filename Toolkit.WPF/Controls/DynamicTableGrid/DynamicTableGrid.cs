@@ -104,6 +104,20 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
+        #region ColumnHeaderTemplate
+
+        public DataTemplate ColumnHeaderTemplate
+        {
+            get { return (DataTemplate)GetValue(ColumnHeaderTemplateProperty); }
+            set { SetValue(ColumnHeaderTemplateProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ColumnHeaderTemplate.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ColumnHeaderTemplateProperty =
+            DependencyProperty.Register("ColumnHeaderTemplate", typeof(DataTemplate), typeof(DynamicTableGrid), new PropertyMetadata(null));
+
+        #endregion
+
         /// <summary>
         /// 静的コンストラクタ
         /// </summary>
@@ -230,6 +244,7 @@ namespace Toolkit.WPF.Controls
                 column.SortMemberPath = $"{propertyName}.Value";
                 column.IsReadOnly = isReadOnly;
                 column.Header = definition;
+                column.HeaderTemplate = this.ColumnHeaderTemplate ?? column.HeaderTemplate;
                 column.CellTemplateSelector = this.CellTemplateSelector ?? column.CellTemplateSelector;
                 column.CellEditingTemplateSelector = this.CellEditingTemplateSelector ?? column.CellEditingTemplateSelector;
                 return column;

@@ -6,9 +6,28 @@
         <ResourceDictionary Source="../DynamicTableGrid/DynamicTableGrid.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <!-- ColumnHeaderTemplate -->
+    <DataTemplate x:Key="ColumnHeaderTemplate">
+        <ItemsControl ItemsSource="{Binding Elements}" />
+    </DataTemplate>
+
+    <!-- RowHeaderTemplate -->
+    <DataTemplate x:Key="CombinationRowHeaderTemplate">
+        <ItemsControl
+            DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}"
+            ItemsSource="{Binding Definition.Elements}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+    </DataTemplate>
+
     <!-- CombinationGrid -->
     <Style TargetType="{x:Type local:CombinationGrid}" BasedOn="{StaticResource {x:Type local:DynamicTableGrid}}">
-        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="ColumnHeaderTemplate" Value="{StaticResource ColumnHeaderTemplate}" />
+        <Setter Property="RowHeaderTemplate" Value="{StaticResource CombinationRowHeaderTemplate}" />
     </Style>
     
 </ResourceDictionary>

@@ -50,7 +50,11 @@ namespace Corekit.Extensions.Tests
                 .CrossJoin(xyz, (a, b) => $"{a}_{b}")
                 .SequenceEqual(result2);
 
-            Assert.IsTrue(isEqual1);
+            var sequence = numeric.Select(i => i.ToString().AsEnumerable())
+                .CrossJoin(abcd, (a, b) => a.Concat(b.AsEnumerable()))
+                .CrossJoin(xyz, (a, b) => a.Concat(b.AsEnumerable()));
+             
+            Assert.IsTrue(isEqual2);
         }
     }
 }
