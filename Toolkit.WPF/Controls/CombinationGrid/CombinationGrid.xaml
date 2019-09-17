@@ -18,7 +18,7 @@
             ItemsSource="{Binding Definition.Elements}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal"/>
+                    <UniformGrid IsItemsHost="True" MinWidth="70" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>
