@@ -13,6 +13,9 @@ namespace Corekit.Models
     /// </summary>
     public class Combination : IEnumerable<CombinationTableFrame>
     {
+        /// <summary>
+        /// 組み合わせる定義
+        /// </summary>
         public Dictionary<string, IEnumerable<string>> Definitions { get; }
 
         /// <summary>
@@ -33,6 +36,7 @@ namespace Corekit.Models
                 .Select(i => new CombinationTableFrame() { Name = string.Join("_", i), Elements = i.ToList() })
                 .GetEnumerator();
         }
+
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         #endregion
@@ -62,14 +66,29 @@ namespace Corekit.Models
     /// </summary>
     public class CombinationTableFrame : IDynamicTableFrame
     {
+        /// <summary>
+        /// プロパティ定義の名前
+        /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// 読み取り専用・編集不可能か（nullは未指定）
+        /// </summary>
         public bool? IsReadOnly { get; set; }
 
+        /// <summary>
+        /// 削除可能か
+        /// </summary>
         public bool IsDeletable { get; set; }
 
+        /// <summary>
+        /// 移動が可能か
+        /// </summary>
         public bool IsMovable { get; set; }
 
+        /// <summary>
+        /// 組み合わせ要素
+        /// </summary>
         public IReadOnlyList<string> Elements { get; set; }
 
 #pragma warning disable CS0067
@@ -79,6 +98,7 @@ namespace Corekit.Models
 
     /// <summary>
     /// アイテム定義
+    /// CombinationTable の行を生成する定義
     /// </summary>
     internal class CombinationItemDefinition : DynamicItemDefinition
     {
@@ -98,6 +118,7 @@ namespace Corekit.Models
 
     /// <summary>
     /// プロパティ定義
+    /// CombinationTable のプロパティを生成する定義
     /// </summary>
     internal class CombinationPropertyDefinition<T> : DynamicPropertyDefinition<T>
     {
