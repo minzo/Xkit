@@ -10,7 +10,6 @@
     <Window.DataContext>
         <local:CombinationGridWindowViewModel />
     </Window.DataContext>
-    <tkit:CombinationGrid 
-        ItemsSource="{Binding Table}"
-        />
+    <tkit:CombinationGrid
+        ItemsSource="{Binding Table}" />
 </Window>

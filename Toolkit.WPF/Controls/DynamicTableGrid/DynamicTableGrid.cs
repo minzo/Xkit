@@ -118,6 +118,26 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
+        #region CornerButtonTemplate
+
+        public DataTemplate CornerButtonTemplate
+        {
+            get { return (DataTemplate)GetValue(CornerButtonTemplateProperty); }
+            set { SetValue(CornerButtonTemplateProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CornerButtonTemplate.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CornerButtonTemplateProperty =
+            DependencyProperty.Register("CornerButtonTemplate", typeof(DataTemplate), typeof(DynamicTableGrid), new PropertyMetadata(null));
+
+        #endregion
+
+        /// <summary>
+        /// コーナーボタン
+        /// </summary>
+        public Button CornerButton { get; set; }
+
+
         /// <summary>
         /// 静的コンストラクタ
         /// </summary>
@@ -142,6 +162,20 @@ namespace Toolkit.WPF.Controls
 
             this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Copy, (s, e) => this.OnCopy(), (s, e) => e.CanExecute = true));
             this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Paste, (s, e) => this.OnPaste(), (s, e) => e.CanExecute = true));
+
+            this.Loaded += this.OnLoaded;
+        }
+
+        /// <summary>
+        /// OnLoaded
+        /// </summary>
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            this.CornerButton = EnumerateChildren(this).OfType<Button>().FirstOrDefault();
+            if (this.CornerButton != null)
+            {
+                this.CornerButton.ContentTemplate = this.CornerButtonTemplate ?? this.CornerButton.ContentTemplate;
+            }
         }
 
         /// <summary>
