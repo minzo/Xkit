@@ -146,6 +146,8 @@
         <Setter Property="CanUserDeleteRows" Value="False" />
         <Setter Property="CanUserResizeRows" Value="False" />
         <Setter Property="CanUserSortColumns" Value="False" />
+        <Setter Property="CanUserReorderColumns" Value="False" />
+        <Setter Property="CanUserResizeColumns" Value="True" />
         <Setter Property="SelectionUnit" Value="CellOrRowHeader" />
         <Setter Property="BorderBrush" Value="#F0F0F0" />
         <Setter Property="HorizontalGridLinesBrush" Value="#CECECE" />

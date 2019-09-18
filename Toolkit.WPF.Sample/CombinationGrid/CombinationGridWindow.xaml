@@ -11,5 +11,7 @@
         <local:CombinationGridWindowViewModel />
     </Window.DataContext>
     <tkit:CombinationGrid
+        EnableRowHighlighting="True"
+        EnableColumnHighlighting="True"
         ItemsSource="{Binding Table}" />
 </Window>

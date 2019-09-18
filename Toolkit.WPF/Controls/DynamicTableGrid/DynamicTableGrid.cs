@@ -18,19 +18,6 @@ namespace Toolkit.WPF.Controls
     /// </summary>
     public class DynamicTableGrid : DataGrid
     {
-        public struct SelectedInfo
-        {
-            public object Item { get; }
-
-            public string PropertyName { get; }
-
-            public SelectedInfo(object item, string propertyName)
-            {
-                Item = item;
-                PropertyName = propertyName;
-            }
-        }
-
         #region DataTemplateSelector
 
         /// <summary>
@@ -46,7 +33,6 @@ namespace Toolkit.WPF.Controls
         public static readonly DependencyProperty CellTemplateSelectorProperty =
             DependencyProperty.Register("CellTemplateSelector", typeof(DataTemplateSelector), typeof(DynamicTableGrid), new PropertyMetadata(null));
 
-
         /// <summary>
         /// CellEditingTemplateSelector
         /// </summary>
@@ -59,6 +45,36 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for CellEditingTemplateSelector.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty CellEditingTemplateSelectorProperty =
             DependencyProperty.Register("CellEditingTemplateSelector", typeof(DataTemplateSelector), typeof(DynamicTableGrid), new PropertyMetadata(null));
+
+        #endregion
+
+        #region ContentTemplate
+
+        /// <summary>
+        /// ColumnHeaderTemplate
+        /// </summary>
+        public DataTemplate ColumnHeaderTemplate
+        {
+            get { return (DataTemplate)GetValue(ColumnHeaderTemplateProperty); }
+            set { SetValue(ColumnHeaderTemplateProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ColumnHeaderTemplate.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ColumnHeaderTemplateProperty =
+            DependencyProperty.Register("ColumnHeaderTemplate", typeof(DataTemplate), typeof(DynamicTableGrid), new PropertyMetadata(null));
+
+        /// <summary>
+        /// CornerButtonTemplate
+        /// </summary>
+        public DataTemplate CornerButtonTemplate
+        {
+            get { return (DataTemplate)GetValue(CornerButtonTemplateProperty); }
+            set { SetValue(CornerButtonTemplateProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CornerButtonTemplate.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CornerButtonTemplateProperty =
+            DependencyProperty.Register("CornerButtonTemplate", typeof(DataTemplate), typeof(DynamicTableGrid), new PropertyMetadata(null));
 
         #endregion
 
@@ -91,6 +107,22 @@ namespace Toolkit.WPF.Controls
         #region 選択情報
 
         /// <summary>
+        /// 選択情報構造体
+        /// </summary>
+        public struct SelectedInfo
+        {
+            public object Item { get; }
+
+            public string PropertyName { get; }
+
+            public SelectedInfo(object item, string propertyName)
+            {
+                this.Item = item;
+                this.PropertyName = propertyName;
+            }
+        }
+
+        /// <summary>
         /// 選択情報
         /// </summary>
         public IEnumerable<SelectedInfo> SelectedInfos
@@ -104,39 +136,22 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
-        #region ColumnHeaderTemplate
-
-        public DataTemplate ColumnHeaderTemplate
-        {
-            get { return (DataTemplate)GetValue(ColumnHeaderTemplateProperty); }
-            set { SetValue(ColumnHeaderTemplateProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for ColumnHeaderTemplate.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty ColumnHeaderTemplateProperty =
-            DependencyProperty.Register("ColumnHeaderTemplate", typeof(DataTemplate), typeof(DynamicTableGrid), new PropertyMetadata(null));
-
-        #endregion
-
-        #region CornerButtonTemplate
-
-        public DataTemplate CornerButtonTemplate
-        {
-            get { return (DataTemplate)GetValue(CornerButtonTemplateProperty); }
-            set { SetValue(CornerButtonTemplateProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for CornerButtonTemplate.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty CornerButtonTemplateProperty =
-            DependencyProperty.Register("CornerButtonTemplate", typeof(DataTemplate), typeof(DynamicTableGrid), new PropertyMetadata(null));
-
-        #endregion
+        #region コーナーボタンコマンド
 
         /// <summary>
-        /// コーナーボタン
+        /// コーナーボタンのコマンド
         /// </summary>
-        public Button CornerButton { get; set; }
+        public ICommand CornerButtonCommand
+        {
+            get { return (ICommand)GetValue(CornerButtonCommandProperty); }
+            set { SetValue(CornerButtonCommandProperty, value); }
+        }
 
+        // Using a DependencyProperty as the backing store for CornerButtonCommand.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CornerButtonCommandProperty =
+            DependencyProperty.Register("CornerButtonCommand", typeof(ICommand), typeof(DynamicTableGrid), new PropertyMetadata(null));
+
+        #endregion
 
         /// <summary>
         /// 静的コンストラクタ
@@ -171,10 +186,10 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            this.CornerButton = EnumerateChildren(this).OfType<Button>().FirstOrDefault();
-            if (this.CornerButton != null)
+            var button = EnumerateChildren(this).OfType<Button>().FirstOrDefault();
+            if (button != null)
             {
-                this.CornerButton.ContentTemplate = this.CornerButtonTemplate ?? this.CornerButton.ContentTemplate;
+                button.SetCurrentValue(Button.CommandProperty, this.CornerButtonCommand);
             }
         }
 
