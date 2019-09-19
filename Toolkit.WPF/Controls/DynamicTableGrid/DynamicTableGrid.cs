@@ -326,48 +326,72 @@ namespace Toolkit.WPF.Controls
         private void OnSelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
             // ハイライト情報のリセット
+            if (this.EnableColumnHighlighting || this.EnableColumnHighlighting)
             {
-                var columns = e.RemovedCells.Select(i => i.Column).Distinct();
-                (this.ItemsSource as IEnumerable<object>)
-                     ?.SelectMany(i => columns.Select(x => x?.GetCellContent(i)))
-                     .Where(i => i != null)
-                     .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
-                     .Where(i => i != null)
-                     .ForEach(i => SetIsSelectedCellContains(i, false));
+                if (this.ItemsSource is IEnumerable<object> items)
+                {
+                    var columns = e.RemovedCells
+                        .Select(i => i.Column)
+                        .Distinct()
+                        .ToList();
+
+                    items
+                        .SelectMany(i => columns.Select(x => x.GetCellContent(i)))
+                        .Where(i => i != null)
+                        .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
+                        .Where(i => i != null)
+                        .ForEach(i => SetIsSelectedCellContains(i, false));
+                }
             }
 
             // 行ハイライト
             if (this.EnableRowHighlighting)
             {
-                foreach (var cell in e.RemovedCells)
-                {
-                    var row = this.ItemContainerGenerator.ContainerFromItem(cell.Item);
-                    if (row != null)
-                    {
-                        SetIsSelectedCellContains(row, false);
-                    }
-                }
+                e.RemovedCells
+                    .Select(i => i.Item)
+                    .Distinct()
+                    .Select(i => this.ItemContainerGenerator.ContainerFromItem(i))
+                    .ForEach(i => SetIsSelectedCellContains(i, false));
 
-                foreach (var cell in e.AddedCells)
-                {
-                    var row = this.ItemContainerGenerator.ContainerFromItem(cell.Item);
-                    if (row != null)
-                    {
-                        SetIsSelectedCellContains(row, true);
-                    }
-                }
+                this.SelectedCells
+                    .Select(i => i.Item)
+                    .Distinct()
+                    .Select(i => this.ItemContainerGenerator.ContainerFromItem(i))
+                    .ForEach(i => SetIsSelectedCellContains(i, true));
             }
 
             // 列ハイライト（行が選択されていないときのみ）
             if (this.EnableColumnHighlighting && this.SelectedItems.Count == 0)
             {
-                var columns = this.SelectedCells.Select(i => i.Column).Distinct();
-                (this.ItemsSource as IEnumerable<object>)
-                    ?.SelectMany(i => columns.Select(x => x?.GetCellContent(i)))
-                    .Where(i => i != null)
-                    .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
-                    .Where(i => i != null)
+                // 列ヘッダー
+                e.RemovedCells
+                    .Select(i => i.Column)
+                    .ForEach(i => SetIsSelectedCellContains(i, false));
+
+                this.SelectedCells
+                    .Select(i => i.Column)
                     .ForEach(i => SetIsSelectedCellContains(i, true));
+
+                EnumerateChildren(this)
+                    .OfType<System.Windows.Controls.Primitives.DataGridColumnHeader>()
+                    .Where(i => i.Column != null)
+                    .ForEach(i => SetIsSelectedCellContains(i, GetIsSelectedCellContains(i.Column)));
+
+                // 縦方向セル
+                if (this.ItemsSource is IEnumerable<object> items)
+                {
+                    var columns = this.SelectedCells
+                        .Select(i => i.Column)
+                        .Distinct()
+                        .ToList();
+
+                    items
+                        .SelectMany(i => columns.Select(x => x.GetCellContent(i)))
+                        .Where(i => i != null)
+                        .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
+                        .Where(i => i != null)
+                        .ForEach(i => SetIsSelectedCellContains(i, true));
+                }
             }
 
             // セル選択情報の更新
