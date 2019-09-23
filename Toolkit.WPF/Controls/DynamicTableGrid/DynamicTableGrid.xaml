@@ -163,7 +163,7 @@
               Height="17"
               IsEditable="True"
               BorderBrush="Silver"
-              Text="{Binding ZoomValue, StringFormat={}{0:p0}, UpdateSourceTrigger=LostFocus, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}"
+              Text="{Binding ZoomValue, StringFormat={}{0:f0}%, UpdateSourceTrigger=LostFocus, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}"
               FontSize="8">
         <ComboBoxItem Content="25" />
         <ComboBoxItem Content="50" />

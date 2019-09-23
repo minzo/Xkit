@@ -152,7 +152,7 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for ZoomValue.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ZoomValueProperty =
-            DependencyProperty.Register("ZoomValue", typeof(double), typeof(DynamicTableGrid), new PropertyMetadata(1.0, (d,e) => {
+            DependencyProperty.Register("ZoomValue", typeof(double), typeof(DynamicTableGrid), new PropertyMetadata(100.0, (d,e) => {
                 ((d as DynamicTableGrid).LayoutTransform as ScaleTransform).ScaleX = (double)e.NewValue * 0.01;
                 ((d as DynamicTableGrid).LayoutTransform as ScaleTransform).ScaleY = (double)e.NewValue * 0.01;
             }));
@@ -563,13 +563,15 @@ namespace Toolkit.WPF.Controls
             {
                 if (isReset)
                 {
-                    transform.ScaleX = 1.0;
-                    transform.ScaleY = 1.0;
+                    this.ZoomValue = 100;
+                    //transform.ScaleX = 1.0;
+                    //transform.ScaleY = 1.0;
                 }
                 else
                 {
-                    transform.ScaleX = Math.Min(Math.Max(transform.ScaleX + rate, 0.2), 4.0);
-                    transform.ScaleY = Math.Min(Math.Max(transform.ScaleY + rate, 0.2), 4.0);
+                    this.ZoomValue = Math.Min(Math.Max(this.ZoomValue + rate * 100, 20), 400);
+                    //transform.ScaleX = Math.Min(Math.Max(transform.ScaleX + rate, 0.2), 4.0);
+                    //transform.ScaleY = Math.Min(Math.Max(transform.ScaleY + rate, 0.2), 4.0);
                 }
             }
         }
