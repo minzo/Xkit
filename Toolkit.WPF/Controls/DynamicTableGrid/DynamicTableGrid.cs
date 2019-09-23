@@ -63,19 +63,6 @@ namespace Toolkit.WPF.Controls
         public static readonly DependencyProperty ColumnHeaderTemplateProperty =
             DependencyProperty.Register("ColumnHeaderTemplate", typeof(DataTemplate), typeof(DynamicTableGrid), new PropertyMetadata(null));
 
-        /// <summary>
-        /// CornerButtonTemplate
-        /// </summary>
-        public DataTemplate CornerButtonTemplate
-        {
-            get { return (DataTemplate)GetValue(CornerButtonTemplateProperty); }
-            set { SetValue(CornerButtonTemplateProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for CornerButtonTemplate.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty CornerButtonTemplateProperty =
-            DependencyProperty.Register("CornerButtonTemplate", typeof(DataTemplate), typeof(DynamicTableGrid), new PropertyMetadata(null));
-
         #endregion
 
         #region 列幅同期スコープ
@@ -153,6 +140,25 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
+        #region ズーム
+
+        public bool IsVisibleZoomValue { get; set; }
+
+        public double ZoomValue
+        {
+            get { return (double)GetValue(ZoomValueProperty); }
+            set { SetValue(ZoomValueProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ZoomValue.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ZoomValueProperty =
+            DependencyProperty.Register("ZoomValue", typeof(double), typeof(DynamicTableGrid), new PropertyMetadata(1.0, (d,e) => {
+                ((d as DynamicTableGrid).LayoutTransform as ScaleTransform).ScaleX = (double)e.NewValue * 0.01;
+                ((d as DynamicTableGrid).LayoutTransform as ScaleTransform).ScaleY = (double)e.NewValue * 0.01;
+            }));
+
+        #endregion
+
         /// <summary>
         /// 静的コンストラクタ
         /// </summary>
@@ -190,6 +196,24 @@ namespace Toolkit.WPF.Controls
             if (button != null)
             {
                 button.SetCurrentValue(Button.CommandProperty, this.CornerButtonCommand);
+            }
+
+            if (this.IsVisibleZoomValue)
+            {
+                var scroll = EnumerateChildren(this).OfType<ScrollViewer>().FirstOrDefault(i => i.Name == "DG_ScrollViewer");
+                if (scroll != null)
+                {
+                    var grid = EnumerateChildren(scroll)
+                        .OfType<System.Windows.Controls.Primitives.ScrollBar>()
+                        .FirstOrDefault(i => i.Name == "PART_HorizontalScrollBar").Parent as Grid;
+
+                    grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(100, GridUnitType.Auto) });
+
+                    if (this.TryFindResource("ZoomBox") is ComboBox comboBox)
+                    {
+                        grid.Children.Add(comboBox);
+                    }
+                }
             }
         }
 
@@ -357,6 +381,7 @@ namespace Toolkit.WPF.Controls
                     .Select(i => i.Item)
                     .Distinct()
                     .Select(i => this.ItemContainerGenerator.ContainerFromItem(i))
+                    .Where(i => i != null)
                     .ForEach(i => SetIsSelectedCellContains(i, true));
             }
 

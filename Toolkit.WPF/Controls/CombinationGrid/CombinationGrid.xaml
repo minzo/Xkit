@@ -14,6 +14,8 @@
     <!-- RowHeaderTemplate -->
     <DataTemplate x:Key="CombinationRowHeaderTemplate">
         <ItemsControl
+            HorizontalContentAlignment="Stretch"
+            VerticalAlignment="Stretch"
             Focusable="False"
             DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}"
             ItemsSource="{Binding Definition.Elements}">
@@ -25,18 +27,10 @@
         </ItemsControl>
     </DataTemplate>
 
-    <!-- Button -->
-    <DataTemplate x:Key="CornerButtonTemplate">
-        <Border Background="Red">
-            <TextBlock Text="HOGE" />
-        </Border>
-    </DataTemplate>
-    
     <!-- CombinationGrid -->
     <Style TargetType="{x:Type local:CombinationGrid}" BasedOn="{StaticResource {x:Type local:DynamicTableGrid}}">
         <Setter Property="ColumnHeaderTemplate" Value="{StaticResource ColumnHeaderTemplate}" />
         <Setter Property="RowHeaderTemplate" Value="{StaticResource CombinationRowHeaderTemplate}" />
-        <Setter Property="CornerButtonTemplate" Value="{StaticResource CornerButtonTemplate}" />
     </Style>
     
 </ResourceDictionary>
