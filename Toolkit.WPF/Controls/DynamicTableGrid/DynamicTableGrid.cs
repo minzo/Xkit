@@ -564,14 +564,10 @@ namespace Toolkit.WPF.Controls
                 if (isReset)
                 {
                     this.ZoomValue = 100;
-                    //transform.ScaleX = 1.0;
-                    //transform.ScaleY = 1.0;
                 }
                 else
                 {
                     this.ZoomValue = Math.Min(Math.Max(this.ZoomValue + rate * 100, 20), 400);
-                    //transform.ScaleX = Math.Min(Math.Max(transform.ScaleX + rate, 0.2), 4.0);
-                    //transform.ScaleY = Math.Min(Math.Max(transform.ScaleY + rate, 0.2), 4.0);
                 }
             }
         }
