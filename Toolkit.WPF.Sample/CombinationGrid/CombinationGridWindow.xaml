@@ -19,11 +19,41 @@
         <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
             <Setter Property="ContextMenu" Value="{StaticResource ContextMenu}" />
         </Style>
+
+        <tkit:DynamicPropertyTemplateSelector x:Key="CellTemplateSelector">
+            <DataTemplate DataType="{x:Type local:CombinationGridWindowViewModel+Cell}">
+                <TextBlock Text="{Binding Value.TriggerItems.Count}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </DataTemplate>
+        </tkit:DynamicPropertyTemplateSelector>
+
     </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <tkit:CombinationGrid
+            Grid.Row="0"
+            IsReadOnly="True"
+            EnableRowHighlighting="True"
+            EnableColumnHighlighting="True"
+            IsVisibleZoomValue="True"
+            SelectedInfos="{Binding SelectedInfos, Mode=OneWayToSource}"
+            ItemsSource="{Binding Table}"
+            CellTemplateSelector="{StaticResource CellTemplateSelector}"
+            />
+
+        <DockPanel Grid.Row="1">
+            <StatusBar DockPanel.Dock="Top" Margin="4" Background="White">
+                <Button Content="＋" Height="30" Width="30" />
+            </StatusBar>
+            <tkit:DynamicTableGrid
+                IsVisibleZoomValue="True"
+                ItemsSource="{Binding SelectedTriggers}"
+                />
+        </DockPanel>
+    </Grid>
         
-    <tkit:CombinationGrid
-        EnableRowHighlighting="True"
-        EnableColumnHighlighting="True"
-        IsVisibleZoomValue="True"
-        ItemsSource="{Binding Table}" />
 </Window>

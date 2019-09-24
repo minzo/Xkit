@@ -10,12 +10,72 @@ using System.Linq;
 
 namespace Toolkit.WPF.Sample
 {
-    internal class CombinationGridWindowViewModel
+    internal class CombinationGridWindowViewModel : INotifyPropertyChanged
     {
+        /// <summary>
+        /// トリガー
+        /// </summary>
+        internal class TriggerItem
+        {
+            public string Key { get; } = "Key";
+
+            public float Volume { get; }
+
+            public float Pitch { get; }
+
+            public float FadeIn { get; }
+        }
+
+        /// <summary>
+        /// セル
+        /// </summary>
+        internal class Cell
+        {
+            public IReadOnlyCollection<TriggerItem> TriggerItems { get; }
+
+            public Cell()
+            {
+                this.TriggerItems = new List<TriggerItem>()
+                {
+                    new TriggerItem()
+                };
+            }
+        }
+
         /// <summary>
         /// Table
         /// </summary>
-        public CombinationTable<string> Table { get; }
+        public CombinationTable<Cell> Table { get; }
+
+        /// <summary>
+        /// Cell
+        /// </summary>
+        public IEnumerable<Cell> SelectedCells { get; set; }
+
+        /// <summary>
+        /// Trigger
+        /// </summary>
+        public IEnumerable<TriggerItem> SelectedTriggers { get; set; }
+
+        /// <summary>
+        /// 選択情報
+        /// </summary>
+        public IEnumerable<Toolkit.WPF.Controls.DynamicTableGrid.SelectedInfo> SelectedInfos
+        {
+            set
+            {
+                var cells = value?
+                    .Select(i => (i.Item as IDynamicItem).GetPropertyValue<Cell>(i.PropertyName))
+                    .ToList();
+
+                var triggers = cells?
+                    .SelectMany(i => i.TriggerItems)
+                    .ToList();
+
+                this.SetProperty(nameof(this.SelectedCells), cells);
+                this.SetProperty(nameof(this.SelectedTriggers), triggers);
+            }
+        }
 
         /// <summary>
         /// コンストラクタ
@@ -29,7 +89,22 @@ namespace Toolkit.WPF.Sample
             col.Definitions.Add("Obj", new List<string>() { "Small", "Middle" });
             col.Definitions.Add("Mas", new List<string>() { "Light", "Normal", "Heavy" });
             col.Definitions.Add("Col", new List<string>() { "White", "Gray", "Black" });
-            this.Table = new CombinationTable<string>(row, col);
+            this.Table = new CombinationTable<Cell>(row, col);
+
+            this.Initialize();
         }
+
+        private void Initialize()
+        {
+            foreach (var row in this.Table)
+            {
+                foreach (var col in row.Value)
+                {
+                    this.Table.SetPropertyValue(row.Definition.Name, col.Definition.Name, new Cell());
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }
