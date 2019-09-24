@@ -21,7 +21,7 @@
             ItemsSource="{Binding Definition.Elements}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <UniformGrid IsItemsHost="True" MinWidth="70" />
+                    <UniformGrid IsItemsHost="True" MinWidth="70" Rows="1" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>
