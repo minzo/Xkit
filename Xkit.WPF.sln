@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Corekit.Tests", "Corekit.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolkit.WPF.Editor", "Toolkit.WPF.Editor\Toolkit.WPF.Editor.csproj", "{2ED5C150-6F34-4D39-8C10-D3A17B3F48F8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xkit.Plugins.Sample", "XKit.Plugins.Sample\Xkit.Plugins.Sample.csproj", "{D2688EC3-235D-421F-BBF8-451BFCE27CD5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{2ED5C150-6F34-4D39-8C10-D3A17B3F48F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2ED5C150-6F34-4D39-8C10-D3A17B3F48F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2ED5C150-6F34-4D39-8C10-D3A17B3F48F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2688EC3-235D-421F-BBF8-451BFCE27CD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2688EC3-235D-421F-BBF8-451BFCE27CD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2688EC3-235D-421F-BBF8-451BFCE27CD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2688EC3-235D-421F-BBF8-451BFCE27CD5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
