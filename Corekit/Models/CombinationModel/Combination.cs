@@ -97,10 +97,26 @@ namespace Corekit.Models
     }
 
     /// <summary>
+    /// 組み合わせアイテム・プロパティ定義
+    /// </summary>
+    public interface ICombinationDefinition
+    {
+        /// <summary>
+        /// 名前
+        /// </summary>
+        public string Name { get; }
+
+        /// <summary>
+        /// 要素
+        /// </summary>
+        public IReadOnlyList<string> Elements { get; }
+    }
+
+    /// <summary>
     /// アイテム定義
     /// CombinationTable の行を生成する定義
     /// </summary>
-    internal class CombinationItemDefinition : DynamicItemDefinition
+    internal class CombinationItemDefinition : DynamicItemDefinition, ICombinationDefinition
     {
         /// <summary>
         /// 要素
@@ -120,7 +136,7 @@ namespace Corekit.Models
     /// プロパティ定義
     /// CombinationTable のプロパティを生成する定義
     /// </summary>
-    internal class CombinationPropertyDefinition<T> : DynamicPropertyDefinition<T>
+    internal class CombinationPropertyDefinition<T> : DynamicPropertyDefinition<T>, ICombinationDefinition
     {
         /// <summary>
         /// 要素

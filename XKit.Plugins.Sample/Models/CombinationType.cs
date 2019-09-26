@@ -45,7 +45,8 @@ namespace Xkit.Plugins.Sample.Models
             {
                 foreach (var col in row.Value)
                 {
-                    this.Table.SetPropertyValue(row.Definition.Name, col.Definition.Name, new Cell());
+                    this.Table.SetPropertyValue(row.Definition.Name, col.Definition.Name, 
+                        new Cell(row.Definition as ICombinationDefinition, col.Definition as ICombinationDefinition));
                 }
             }
         }

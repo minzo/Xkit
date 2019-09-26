@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Corekit.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -9,14 +10,26 @@ namespace Xkit.Plugins.Sample.Models
 {
     public class Cell : INotifyPropertyChanged
     {
+        public ICombinationDefinition Sources { get; }
+
+        public ICombinationDefinition Targets { get; }
+
         public IReadOnlyCollection<EventTrigger> Triggers { get; }
 
         public Cell()
         {
-            var defaults = Enumerable.Repeat(0, 1)
-                .Select(i => new EventTrigger());
 
-            this.Triggers = new List<EventTrigger>(defaults);
+        }
+
+        public Cell(ICombinationDefinition source, ICombinationDefinition target)
+        {
+            this.Sources = source;
+            this.Targets = target;
+
+            var defaults = Enumerable.Repeat(0, 1)
+                .Select(i => new EventTrigger(this));
+
+            this.Triggers = new TypedCollection<EventTrigger>(defaults);
         }
 
 #pragma warning disable CS0067

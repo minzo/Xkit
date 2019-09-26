@@ -10,7 +10,7 @@ namespace Corekit.Models
     /// <summary>
     /// DynamicProperty
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("DynamicProperty{{Value}}")]
+    [System.Diagnostics.DebuggerDisplay("DynamicProperty{Value}")]
     public class DynamicProperty<T> : IDynamicProperty
     {
         /// <summary>

@@ -41,7 +41,11 @@ namespace Xkit.Plugins.Sample.ViewModels
                     .ToList();
 
                 this.SetProperty(nameof(this.SelectedCells), cells);
-                this.SetProperty(nameof(this.SelectedTriggers), triggers);
+
+                if (triggers != null)
+                {
+                    this.SetProperty(nameof(this.SelectedTriggers), new TypedCollection<EventTrigger>(triggers));
+                }
             }
         }
 
