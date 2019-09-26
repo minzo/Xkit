@@ -121,6 +121,11 @@ namespace Toolkit.WPF.Controls
         public static readonly DependencyProperty SelectedInfosProperty =
             DependencyProperty.Register("SelectedInfos", typeof(IEnumerable<SelectedInfo>), typeof(DynamicTableGrid), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
+        /// <summary>
+        /// 列選択有効か
+        /// </summary>
+        public bool EnableColumnSelection { get; set; }
+
         #endregion
 
         #region コーナーボタンコマンド
@@ -144,15 +149,15 @@ namespace Toolkit.WPF.Controls
 
         public bool IsVisibleZoomValue { get; set; }
 
-        public double ZoomValue
+        public double ZoomRate
         {
-            get { return (double)GetValue(ZoomValueProperty); }
-            set { SetValue(ZoomValueProperty, value); }
+            get { return (double)GetValue(ZoomRateProperty); }
+            set { SetValue(ZoomRateProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for ZoomValue.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty ZoomValueProperty =
-            DependencyProperty.Register("ZoomValue", typeof(double), typeof(DynamicTableGrid), new PropertyMetadata(100.0, (d,e) => {
+        public static readonly DependencyProperty ZoomRateProperty =
+            DependencyProperty.Register("ZoomRate", typeof(double), typeof(DynamicTableGrid), new PropertyMetadata(100.0, (d,e) => {
                 ((d as DynamicTableGrid).LayoutTransform as ScaleTransform).ScaleX = (double)e.NewValue * 0.01;
                 ((d as DynamicTableGrid).LayoutTransform as ScaleTransform).ScaleY = (double)e.NewValue * 0.01;
             }));
@@ -213,6 +218,14 @@ namespace Toolkit.WPF.Controls
                     {
                         grid.Children.Add(comboBox);
                     }
+                }
+            }
+
+            if (this.EnableColumnSelection)
+            {
+                foreach (var column in EnumerateChildren(this).OfType<System.Windows.Controls.Primitives.DataGridColumnHeader>())
+                {
+                    column.Click += this.OnColumnSelected;
                 }
             }
         }
@@ -320,6 +333,7 @@ namespace Toolkit.WPF.Controls
                 column.HeaderTemplate = this.ColumnHeaderTemplate ?? column.HeaderTemplate;
                 column.CellTemplateSelector = this.CellTemplateSelector ?? column.CellTemplateSelector;
                 column.CellEditingTemplateSelector = this.CellEditingTemplateSelector ?? column.CellEditingTemplateSelector;
+                column.CanUserSort = true; // ソート無効時でも列ヘッダーがマウスオーバーに反応してほしいのでtrueにする
                 return column;
             }
 
@@ -427,6 +441,17 @@ namespace Toolkit.WPF.Controls
             this.SetCurrentValue(DynamicTableGrid.SelectedInfosProperty, cellInfos);
         }
 
+        /// <summary>
+        /// 列選択字に呼ばれる
+        /// </summary>
+        private void OnColumnSelected(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Primitives.DataGridColumnHeader header)
+            {
+                this.SelectColumn(header.Column);
+            }
+        }
+
         #region コピー / ペースト
 
         /// <summary>
@@ -515,12 +540,12 @@ namespace Toolkit.WPF.Controls
 
         public static bool GetIsSelectedCellContains(DependencyObject obj)
         {
-            return (bool)obj.GetValue(IsSelectedCellContainsProperty);
+            return (bool)(obj?.GetValue(IsSelectedCellContainsProperty) ?? false);
         }
 
         public static void SetIsSelectedCellContains(DependencyObject obj, bool value)
         {
-            obj.SetValue(IsSelectedCellContainsProperty, value);
+            obj?.SetValue(IsSelectedCellContainsProperty, value);
         }
 
         // Using a DependencyProperty as the backing store for IsSelectedCellContains.  This enables animation, styling, binding, etc...
@@ -563,16 +588,28 @@ namespace Toolkit.WPF.Controls
             {
                 if (isReset)
                 {
-                    this.ZoomValue = 100;
+                    this.ZoomRate = 100;
                 }
                 else
                 {
-                    this.ZoomValue = Math.Min(Math.Max(this.ZoomValue + rate * 100, 20), 400);
+                    this.ZoomRate = Math.Min(Math.Max(this.ZoomRate + rate * 100, 20), 400);
                 }
             }
         }
 
         #endregion
+
+        private void SelectColumn(DataGridColumn column)
+        {
+            if (column != null)
+            {
+                this.SelectedCells.Clear();
+                foreach (var item in this.ItemsSource)
+                {
+                    this.SelectedCells.Add(new DataGridCellInfo(item, column));
+                }
+            }
+        }
 
         /// <summary>
         /// VisualParentを列挙する

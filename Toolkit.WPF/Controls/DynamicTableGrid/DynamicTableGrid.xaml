@@ -174,12 +174,14 @@
     </Style>
 
     <!-- ZoomBox -->
-    <ComboBox x:Key="ZoomBox" x:Shared="False" Grid.Column="2"
+    <ComboBox x:Key="ZoomBox"
+              x:Shared="False" 
+              Grid.Column="2"
               Width="50"
               Height="17"
               IsEditable="True"
               BorderBrush="Silver"
-              Text="{Binding ZoomValue, StringFormat={}{0:f0}%, UpdateSourceTrigger=LostFocus, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}"
+              Text="{Binding ZoomRate, StringFormat={}{0:f0}%, UpdateSourceTrigger=LostFocus, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}"
               FontSize="8">
         <ComboBoxItem Content="25" />
         <ComboBoxItem Content="50" />

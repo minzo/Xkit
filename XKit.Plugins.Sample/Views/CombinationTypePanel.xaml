@@ -35,8 +35,7 @@
             </StatusBar>
             <tkit:CombinationGrid
                 IsReadOnly="True"
-                EnableRowHighlighting="True"
-                EnableColumnHighlighting="True"
+                EnableColumnSelection="True"
                 IsVisibleZoomValue="True"
                 SelectedInfos="{Binding SelectedInfos, Mode=OneWayToSource}"
                 ItemsSource="{Binding Table}"
