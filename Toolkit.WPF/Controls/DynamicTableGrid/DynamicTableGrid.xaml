@@ -153,7 +153,7 @@
     </DataTemplate>
 
     <!-- Binding Column -->
-    <local:DataGridBindingColumn x:Key="BindingColumn" x:Shared="False"
+    <local:DataGridBindingColumn x:Key="BindingColumn" x:Shared="False"                                 
                                  HeaderTemplate="{StaticResource ColumnHeaderTemplate}"
                                  CellTemplateSelector="{StaticResource CellTemplateSelector}"
                                  CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}" />

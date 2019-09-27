@@ -371,6 +371,18 @@ namespace Toolkit.WPF.Controls
                 {
                     (info.Item as IDynamicItem)?.SetPropertyValue(GetPropertyName(info.Column), value);
                 }
+
+                //try
+                //{
+                //    var value = cell.Column.OnCopyingCellClipboardContent(cell.DataContext);
+                //    foreach (var info in this.SelectedCells)
+                //    {
+                //        info.Column.OnPastingCellClipboardContent(info.Item, value);
+                //    }
+                //}
+                //finally
+                //{
+                //}
             }
         }
 

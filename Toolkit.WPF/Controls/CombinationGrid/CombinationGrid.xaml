@@ -21,9 +21,14 @@
             ItemsSource="{Binding Definition.Elements}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <UniformGrid IsItemsHost="True" MinWidth="70" Rows="1" />
+                    <UniformGrid IsItemsHost="True" Rows="1" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemContainerStyle>
+                <Style TargetType="{x:Type ContentPresenter}">
+                    <Setter Property="Width" Value="40" />
+                </Style>
+            </ItemsControl.ItemContainerStyle>
         </ItemsControl>
     </DataTemplate>
 
