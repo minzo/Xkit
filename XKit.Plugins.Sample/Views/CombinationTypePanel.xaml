@@ -49,6 +49,7 @@
             <StatusBar DockPanel.Dock="Top" Margin="4" Background="White">
             </StatusBar>
             <tkit:DynamicTableGrid
+                EnableColumnSelection="True"
                 IsVisibleZoomValue="True"
                 ItemsSource="{Binding SelectedTriggers, Mode=OneWay}"
                 />

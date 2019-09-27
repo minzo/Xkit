@@ -171,6 +171,8 @@
         <Setter Property="HorizontalGridLinesBrush" Value="#CECECE" />
         <Setter Property="VerticalGridLinesBrush" Value="#CECECE" />
         <Setter Property="RowHeaderTemplate" Value="{StaticResource RowHeaderTemplate}" />
+        <Setter Property="EnableRowVirtualization" Value="True" />
+        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True" />
     </Style>
 
     <!-- ZoomBox -->

@@ -31,8 +31,9 @@ namespace Xkit.Plugins.Sample.Models
         public CombinationType()
         {
             this.Source = new Combination();
-            this.Source.Definitions.Add("Mat", new List<string>() { "Body", "Stone", "Wood", "Metal" });
-            this.Source.Definitions.Add("Sub", new List<string>() { "Small", "Middle", "Big" });
+            this.Source.Definitions.Add("Type", new List<string>() { "Land", "Drag", "Roll" });
+            this.Source.Definitions.Add("Size", new List<string>() { "Small", "Middle", "Big" });
+            this.Source.Definitions.Add("Mat", new List<string>() { "Body", "Stone", "Metal", "Wood", });
 
             this.Target = new Combination();
             this.Target.Definitions.Add("Obj", new List<string>() { "Small", "Middle" });
