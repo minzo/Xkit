@@ -26,10 +26,18 @@ namespace Xkit.Plugins.Sample.Models
             this.Sources = source;
             this.Targets = target;
 
-            var defaults = Enumerable.Repeat(0, 1)
+            var defaults = Enumerable.Repeat(0, 2)
                 .Select(i => new EventTrigger(this));
 
             this.Triggers = new TypedCollection<EventTrigger>(defaults);
+        }
+
+        public void Add()
+        { 
+        }
+
+        public void Remove()
+        {
         }
 
 #pragma warning disable CS0067

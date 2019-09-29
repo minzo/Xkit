@@ -30,10 +30,10 @@ namespace Corekit.Models
 
         public IEnumerator<CombinationTableFrame> GetEnumerator()
         {
-            var sources = this.Definitions.Select(i => i.Value.AsEnumerable()).ToList();
+            var sources = this.Definitions.Select(i => i.Value.Select(x => new KeyValuePair<string,string>(i.Key,x))).ToList();
             var combination = this.ResolveCombination(sources);
             return combination
-                .Select(i => new CombinationTableFrame() { Name = string.Join("_", i), Elements = i.ToList() })
+                .Select(i => new CombinationTableFrame() { Name = string.Join("_", i.Select(x => x.Value)), Elements = i.ToList() })
                 .GetEnumerator();
         }
 
@@ -41,13 +41,13 @@ namespace Corekit.Models
 
         #endregion
 
-        private IEnumerable<IEnumerable<string>> ResolveCombination(List<IEnumerable<string>> sources)
+        private IEnumerable<IEnumerable<KeyValuePair<string,string>>> ResolveCombination(List<IEnumerable<KeyValuePair<string,string>>> sources)
         {
             using (var enumerator = sources.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
                 {
-                    return Enumerable.Empty<IEnumerable<string>>();
+                    return Enumerable.Empty<IEnumerable<KeyValuePair<string,string>>>();
                 }
 
                 var result = enumerator.Current.Select(i => i.AsEnumerable());
@@ -89,7 +89,7 @@ namespace Corekit.Models
         /// <summary>
         /// 組み合わせ要素
         /// </summary>
-        public IReadOnlyList<string> Elements { get; set; }
+        public IReadOnlyList<KeyValuePair<string,string>> Elements { get; set; }
 
 #pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
@@ -109,7 +109,7 @@ namespace Corekit.Models
         /// <summary>
         /// 要素
         /// </summary>
-        public IReadOnlyList<string> Elements { get; }
+        public IReadOnlyList<KeyValuePair<string, string>> Elements { get; }
     }
 
     /// <summary>
@@ -121,7 +121,7 @@ namespace Corekit.Models
         /// <summary>
         /// 要素
         /// </summary>
-        public IReadOnlyList<string> Elements { get; internal set; }
+        public IReadOnlyList<KeyValuePair<string,string>> Elements { get; internal set; }
 
         /// <summary>
         /// コンストラクタ
@@ -141,6 +141,6 @@ namespace Corekit.Models
         /// <summary>
         /// 要素
         /// </summary>
-        public IReadOnlyList<string> Elements { get; internal set; }
+        public IReadOnlyList<KeyValuePair<string,string>> Elements { get; internal set; }
     }
 }
