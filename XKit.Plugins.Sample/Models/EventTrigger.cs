@@ -13,6 +13,8 @@ namespace Xkit.Plugins.Sample.Models
     /// </summary>
     public class EventTrigger : DynamicItem
     {
+        public new string Owner { get => this.GetPropertyValueImpl<string>(); set => this.SetPropertyValueImpl(value); }
+
         public string Key { get => this.GetPropertyValueImpl<string>(); set => this.SetPropertyValueImpl(value); }
 
         public int Variation { get => this.GetPropertyValueImpl<int>(); set => this.SetPropertyValueImpl(value); }
@@ -23,6 +25,7 @@ namespace Xkit.Plugins.Sample.Models
         public EventTrigger(Cell cell) 
             : base(new DynamicItemDefinition(_PropertyDefinitions) { Name = $"{cell.Sources.Name}_{cell.Targets.Name}" })
         {
+            this.Owner = $"{cell.Sources.Name}_{cell.Targets.Name}";
             this.Key = this.Definition.Name;
         }
 
@@ -48,6 +51,7 @@ namespace Xkit.Plugins.Sample.Models
         static EventTrigger()
         {
             _PropertyDefinitions = new IDynamicPropertyDefinition[] {
+                new DynamicPropertyDefinition<string>(){ Name = "Owner" },
                 new DynamicPropertyDefinition<string>(){ Name = "Key" },
                 new DynamicPropertyDefinition<float>(){ Name = "Volume" },
                 new DynamicPropertyDefinition<float>(){ Name = "Pitch" },

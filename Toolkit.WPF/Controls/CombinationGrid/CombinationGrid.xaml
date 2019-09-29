@@ -8,7 +8,11 @@
 
     <!-- ColumnHeaderTemplate -->
     <DataTemplate x:Key="ColumnHeaderTemplate">
-        <ItemsControl ItemsSource="{Binding Elements}" Focusable="False" />
+        <ItemsControl
+            Focusable="False"
+            ItemsSource="{Binding Elements}"
+            DisplayMemberPath="Value"
+            />
     </DataTemplate>
 
     <!-- RowHeaderTemplate -->
@@ -18,7 +22,8 @@
             VerticalAlignment="Stretch"
             Focusable="False"
             DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}"
-            ItemsSource="{Binding Definition.Elements}">
+            ItemsSource="{Binding Definition.Elements}"
+            DisplayMemberPath="Value">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid IsItemsHost="True" Rows="1" />

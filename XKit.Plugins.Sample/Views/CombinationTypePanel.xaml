@@ -37,17 +37,39 @@
                 IsReadOnly="True"
                 EnableColumnSelection="True"
                 IsVisibleZoomValue="True"
-                SelectedInfos="{Binding SelectedInfos, Mode=OneWayToSource}"
                 ItemsSource="{Binding Table}"
-                CellTemplateSelector="{StaticResource CellTemplateSelector}"
-                />
+                SelectedInfos="{Binding SelectedInfos, Mode=OneWayToSource}"
+                CellTemplateSelector="{StaticResource CellTemplateSelector}">
+                <tkit:CombinationGrid.RowHeaderTemplate>
+                    <DataTemplate>
+                        <ItemsControl
+                            HorizontalContentAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Focusable="False"
+                            DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}"
+                            ItemsSource="{Binding Definition.Elements}"
+                            DisplayMemberPath="Value">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid IsItemsHost="True" Rows="1" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="{x:Type ContentPresenter}">
+                                    <Setter Property="Width" Value="40" />
+                                    <Setter Property="ToolTip" Value="Speed>10" />
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+                        </ItemsControl>
+                    </DataTemplate>
+                </tkit:CombinationGrid.RowHeaderTemplate>
+            </tkit:CombinationGrid>
         </DockPanel>
 
         <GridSplitter Grid.Row="1" Height="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
 
         <DockPanel Grid.Row="2">
-            <StatusBar DockPanel.Dock="Top" Margin="4" Background="White">
-            </StatusBar>
+            <StatusBar DockPanel.Dock="Top" Margin="4" Background="White" />
             <tkit:DynamicTableGrid
                 EnableColumnSelection="True"
                 IsVisibleZoomValue="True"
