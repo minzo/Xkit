@@ -45,7 +45,7 @@ namespace Toolkit.WPF.Sample
         /// <summary>
         /// Table
         /// </summary>
-        public CombinationTable<Cell> Table { get; }
+        public CombinationTable<Cell,string,string> Table { get; }
 
         /// <summary>
         /// Cell
@@ -82,14 +82,14 @@ namespace Toolkit.WPF.Sample
         /// </summary>
         public CombinationGridWindowViewModel()
         {
-            var row = new Combination();
+            var row = new Combination<string>();
             row.Definitions.Add("Mat", new List<string>() { "Body", "Stone", "Wood", "Metal" });
             row.Definitions.Add("Sub", new List<string>() { "Small", "Middle", "Big" });
-            var col = new Combination();
+            var col = new Combination<string>();
             col.Definitions.Add("Obj", new List<string>() { "Small", "Middle" });
             col.Definitions.Add("Mas", new List<string>() { "Light", "Normal", "Heavy" });
             col.Definitions.Add("Col", new List<string>() { "White", "Gray", "Black" });
-            this.Table = new CombinationTable<Cell>(row, col);
+            this.Table = new CombinationTable<Cell,string,string>(row, col);
 
             this.Initialize();
         }

@@ -52,7 +52,7 @@ namespace Xkit.Plugins.Sample.ViewModels
         /// <summary>
         /// テーブル
         /// </summary>
-        public CombinationTable<Cell> Table => this._Model.Table;
+        public CombinationTable<Cell,string,string> Table => this._Model.Table;
 
         /// <summary>
         /// コンストラクタ

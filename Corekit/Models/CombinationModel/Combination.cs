@@ -11,29 +11,29 @@ namespace Corekit.Models
     /// <summary>
     /// 組み合わせ定義
     /// </summary>
-    public class Combination : IEnumerable<CombinationTableFrame>
+    public class Combination<T> : IEnumerable<CombinationTableFrame<T>>
     {
         /// <summary>
         /// 組み合わせる定義
         /// </summary>
-        public Dictionary<string, IEnumerable<string>> Definitions { get; }
+        public Dictionary<string, IEnumerable<T>> Definitions { get; }
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
         public Combination()
         {
-            this.Definitions = new Dictionary<string, IEnumerable<string>>();
+            this.Definitions = new Dictionary<string, IEnumerable<T>>();
         }
 
         #region IEnumerable
 
-        public IEnumerator<CombinationTableFrame> GetEnumerator()
+        public IEnumerator<CombinationTableFrame<T>> GetEnumerator()
         {
-            var sources = this.Definitions.Select(i => i.Value.Select(x => new KeyValuePair<string,string>(i.Key,x))).ToList();
+            var sources = this.Definitions.Select(i => i.Value.Select(x => new KeyValuePair<string,T>(i.Key,x))).ToList();
             var combination = this.ResolveCombination(sources);
             return combination
-                .Select(i => new CombinationTableFrame() { Name = string.Join("_", i.Select(x => x.Value)), Elements = i.ToList() })
+                .Select(i => new CombinationTableFrame<T>() { Name = string.Join("_", i.Select(x => x.Value)), Elements = i.ToList() })
                 .GetEnumerator();
         }
 
@@ -41,13 +41,13 @@ namespace Corekit.Models
 
         #endregion
 
-        private IEnumerable<IEnumerable<KeyValuePair<string,string>>> ResolveCombination(List<IEnumerable<KeyValuePair<string,string>>> sources)
+        private IEnumerable<IEnumerable<KeyValuePair<string,T>>> ResolveCombination(List<IEnumerable<KeyValuePair<string,T>>> sources)
         {
             using (var enumerator = sources.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
                 {
-                    return Enumerable.Empty<IEnumerable<KeyValuePair<string,string>>>();
+                    return Enumerable.Empty<IEnumerable<KeyValuePair<string,T>>>();
                 }
 
                 var result = enumerator.Current.Select(i => i.AsEnumerable());
@@ -64,7 +64,7 @@ namespace Corekit.Models
     /// <summary>
     /// 組み合わせテーブルフレーム
     /// </summary>
-    public class CombinationTableFrame : IDynamicTableFrame
+    public class CombinationTableFrame<T> : IDynamicTableFrame
     {
         /// <summary>
         /// プロパティ定義の名前
@@ -89,7 +89,7 @@ namespace Corekit.Models
         /// <summary>
         /// 組み合わせ要素
         /// </summary>
-        public IReadOnlyList<KeyValuePair<string,string>> Elements { get; set; }
+        public IReadOnlyList<KeyValuePair<string,T>> Elements { get; set; }
 
 #pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
@@ -105,23 +105,18 @@ namespace Corekit.Models
         /// 名前
         /// </summary>
         public string Name { get; }
-
-        /// <summary>
-        /// 要素
-        /// </summary>
-        public IReadOnlyList<KeyValuePair<string, string>> Elements { get; }
     }
 
     /// <summary>
     /// アイテム定義
     /// CombinationTable の行を生成する定義
     /// </summary>
-    internal class CombinationItemDefinition : DynamicItemDefinition, ICombinationDefinition
+    internal class CombinationItemDefinition<T> : DynamicItemDefinition, ICombinationDefinition
     {
         /// <summary>
         /// 要素
         /// </summary>
-        public IReadOnlyList<KeyValuePair<string,string>> Elements { get; internal set; }
+        public IReadOnlyList<KeyValuePair<string,T>> Elements { get; internal set; }
 
         /// <summary>
         /// コンストラクタ
@@ -136,11 +131,11 @@ namespace Corekit.Models
     /// プロパティ定義
     /// CombinationTable のプロパティを生成する定義
     /// </summary>
-    internal class CombinationPropertyDefinition<T> : DynamicPropertyDefinition<T>, ICombinationDefinition
+    internal class CombinationPropertyDefinition<T, TElement> : DynamicPropertyDefinition<T>, ICombinationDefinition
     {
         /// <summary>
         /// 要素
         /// </summary>
-        public IReadOnlyList<KeyValuePair<string,string>> Elements { get; internal set; }
+        public IReadOnlyList<KeyValuePair<string,TElement>> Elements { get; internal set; }
     }
 }

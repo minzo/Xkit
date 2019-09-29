@@ -13,34 +13,34 @@ namespace Xkit.Plugins.Sample.Models
         /// <summary>
         /// ソース
         /// </summary>
-        public Combination Source { get; }
+        public Combination<string> Source { get; }
 
         /// <summary>
         /// ターゲット
         /// </summary>
-        public Combination Target { get; }
+        public Combination<string> Target { get; }
 
         /// <summary>
         /// テーブル
         /// </summary>
-        public CombinationTable<Cell> Table { get; }
+        public CombinationTable<Cell,string,string> Table { get; }
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
         public CombinationType()
         {
-            this.Source = new Combination();
+            this.Source = new Combination<string>();
             this.Source.Definitions.Add("Type", new List<string>() { "Land", "Drag", "Roll" });
             this.Source.Definitions.Add("Size", new List<string>() { "Small", "Middle", "Big" });
             this.Source.Definitions.Add("Mat", new List<string>() { "Body", "Stone", "Metal", "Wood", });
 
-            this.Target = new Combination();
+            this.Target = new Combination<string>();
             this.Target.Definitions.Add("Obj", new List<string>() { "Small", "Middle" });
             this.Target.Definitions.Add("Mas", new List<string>() { "Light", "Normal", "Heavy" });
             this.Target.Definitions.Add("Col", new List<string>() { "White", "Gray", "Black" });
 
-            this.Table = new CombinationTable<Cell>(this.Source, this.Target);
+            this.Table = new CombinationTable<Cell,string,string>(this.Source, this.Target);
 
             foreach (var row in this.Table)
             {
