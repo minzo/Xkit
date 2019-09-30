@@ -148,13 +148,32 @@ namespace Toolkit.WPF.Controls
                             v.Focus();
                             v.SelectAll();
                             v.Height = editingElement.Height;
-                            break;
+
+                            // マウスクリックだったらTextBoxのキャレットの位置をマウス位置にする
+                            if (editingEventArgs is MouseButtonEventArgs mouseEventArgs)
+                            {
+                                var characterIndex = v.GetCharacterIndexFromPoint(Mouse.GetPosition(v), false);
+                                if (characterIndex >= 0)
+                                {
+                                    v.Select(characterIndex, 0);
+                                }
+                            }
+                            return v.Text;
 
                         case ComboBox v:
                             v.Focus();
                             v.IsDropDownOpen = true;
                             v.Height = editingElement.Height;
-                            break;
+
+                            if (BindingOperations.GetBinding(v, ComboBox.SelectedItemProperty) != null)
+                            {
+                                return v.SelectedItem;
+                            }
+                            else if (BindingOperations.GetBinding(v, ComboBox.SelectedValueProperty) != null)
+                            {
+                                return v.SelectedValue;
+                            }
+                            return v.Text;
 
                         default:
                             break;
@@ -163,6 +182,34 @@ namespace Toolkit.WPF.Controls
             }
 
             return base.PrepareCellForEdit(editingElement, editingEventArgs);
+        }
+
+        /// <summary>
+        /// セル編集破棄時処理
+        /// </summary>
+        protected override void CancelCellEdit(FrameworkElement editingElement, object uneditedValue)
+        {
+            if ((editingElement as ContentPresenter)?.Content != null)
+            {
+                foreach (var child in EnumerateChildren(editingElement))
+                {
+                    switch (child)
+                    {
+                        case TextBox v:
+                            v.Text = uneditedValue as string;
+                            break;
+
+                        case ComboBox v:
+                            v.SelectedItem = uneditedValue;
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            base.CancelCellEdit(editingElement, uneditedValue);
         }
 
         /// <summary>
