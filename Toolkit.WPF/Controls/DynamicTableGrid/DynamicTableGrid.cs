@@ -367,7 +367,7 @@ namespace Toolkit.WPF.Controls
             if (e.OriginalSource is DataGridCell cell)
             {
                 var value = (cell.DataContext as IDynamicItem)?.GetPropertyValue(GetPropertyName(cell.Column));
-                foreach (var info in this.SelectedCells)
+                foreach (var info in this.SelectedCells.Where(i => i.IsValid))
                 {
                     (info.Item as IDynamicItem)?.SetPropertyValue(GetPropertyName(info.Column), value);
                 }
@@ -397,6 +397,7 @@ namespace Toolkit.WPF.Controls
                 if (this.ItemsSource is IEnumerable<object> items)
                 {
                     var columns = e.RemovedCells
+                        .Where(i => i.IsValid)
                         .Select(i => i.Column)
                         .Distinct()
                         .ToList();
@@ -414,12 +415,14 @@ namespace Toolkit.WPF.Controls
             if (this.EnableRowHighlighting)
             {
                 e.RemovedCells
+                    .Where(i => i.IsValid)
                     .Select(i => i.Item)
                     .Distinct()
                     .Select(i => this.ItemContainerGenerator.ContainerFromItem(i))
                     .ForEach(i => SetIsSelectedCellContains(i, false));
 
                 this.SelectedCells
+                    .Where(i => i.IsValid)
                     .Select(i => i.Item)
                     .Distinct()
                     .Select(i => this.ItemContainerGenerator.ContainerFromItem(i))
@@ -432,10 +435,12 @@ namespace Toolkit.WPF.Controls
             {
                 // 列ヘッダー
                 e.RemovedCells
+                    .Where(i => i.IsValid)
                     .Select(i => i.Column)
                     .ForEach(i => SetIsSelectedCellContains(i, false));
 
                 this.SelectedCells
+                    .Where(i => i.IsValid)
                     .Select(i => i.Column)
                     .ForEach(i => SetIsSelectedCellContains(i, true));
 
@@ -448,6 +453,7 @@ namespace Toolkit.WPF.Controls
                 if (this.ItemsSource is IEnumerable<object> items)
                 {
                     var columns = this.SelectedCells
+                        .Where(i => i.IsValid)
                         .Select(i => i.Column)
                         .Distinct()
                         .ToList();
@@ -463,6 +469,7 @@ namespace Toolkit.WPF.Controls
 
             // セル選択情報の更新
             var cellInfos = this.SelectedCells
+                .Where(i => i.IsValid)
                 .Select(i => new SelectedInfo(i.Item, GetPropertyName(i.Column)))
                 .ToList();
 
@@ -518,7 +525,7 @@ namespace Toolkit.WPF.Controls
                 var lines = csv.Split(new[] { "\n", Environment.NewLine }, StringSplitOptions.None);
                 for (var i = 0; i < items.Count; i++)
                 {
-                    var values = lines[i].Split(',');
+                    var values = lines[i % lines.Length].Split(',');
                     for (var v = items[i].Index; v < values.Length; v++)
                     {
                         if (v < items[i].Item.Definition.Count())
@@ -535,7 +542,7 @@ namespace Toolkit.WPF.Controls
                 var lines = txt.Split(new[] { "\n", Environment.NewLine }, StringSplitOptions.None);
                 for (var i = 0; i < items.Count; i++)
                 {
-                    var values = lines[i].Split('\t');
+                    var values = lines[i % lines.Length].Split('\t');
                     for (var v = 0; v < values.Length; v++)
                     {
                         if (v < items[i].Item.Definition.Count())
