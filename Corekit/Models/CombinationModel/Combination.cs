@@ -26,14 +26,25 @@ namespace Corekit.Models
             this.Definitions = new Dictionary<string, IEnumerable<T>>();
         }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public Combination(Func<T, string> convertNameFunc)
+            : this()
+        {
+            this._ConvertNameFunc = convertNameFunc;
+        }
+
         #region IEnumerable
 
         public IEnumerator<CombinationTableFrame<T>> GetEnumerator()
         {
-            var sources = this.Definitions.Select(i => i.Value.Select(x => new KeyValuePair<string,T>(i.Key,x))).ToList();
-            var combination = this.ResolveCombination(sources);
-            return combination
-                .Select(i => new CombinationTableFrame<T>() { Name = string.Join("_", i.Select(x => x.Value)), Elements = i.ToList() })
+            var sources = this.Definitions
+                .Select(i => i.Value.Select(x => new KeyValuePair<string,T>(i.Key,x)))
+                .ToList();
+
+            return this.ResolveCombination(sources)
+                .Select(i => new CombinationTableFrame<T>() { Name = string.Join("_", i.Select(x => x.Value).Select(this._ConvertNameFunc)), Elements = i.ToList() })
                 .GetEnumerator();
         }
 
@@ -41,6 +52,9 @@ namespace Corekit.Models
 
         #endregion
 
+        /// <summary>
+        /// 組み合わせ生成
+        /// </summary>
         private IEnumerable<IEnumerable<KeyValuePair<string,T>>> ResolveCombination(List<IEnumerable<KeyValuePair<string,T>>> sources)
         {
             using (var enumerator = sources.GetEnumerator())
@@ -59,6 +73,8 @@ namespace Corekit.Models
                 return result;
             }
         }
+
+        private Func<T, string> _ConvertNameFunc = x => x.ToString();
     }
 
     /// <summary>
