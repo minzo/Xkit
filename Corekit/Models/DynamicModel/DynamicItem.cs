@@ -156,12 +156,16 @@ namespace Corekit.Models
         /// </summary>
         private void InsertProperty(int index, IDynamicProperty property)
         {
-            property.PropertyChanged += OnPropertyChanged;
+            property.PropertyChanged += this.OnPropertyChanged;
 
             if (index < 0)
+            {
                 this.Value.Add(property);
+            }
             else
+            {
                 this.Value.Insert(index, property);
+            }
         }
 
         /// <summary>
@@ -173,7 +177,7 @@ namespace Corekit.Models
             if (property != null)
             {
                 this.Value.Remove(property);
-                property.PropertyChanged -= OnPropertyChanged;
+                property.PropertyChanged -= this.OnPropertyChanged;
             }
         }
 
@@ -218,7 +222,7 @@ namespace Corekit.Models
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var property = sender as IDynamicProperty;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property.Definition.Name));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property.Definition.Name));
         }
 
         public new event PropertyChangedEventHandler PropertyChanged = null;
