@@ -6,6 +6,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using Toolkit.WPF;
 using Xkit.Plugins.Sample.Models;
 
 namespace Xkit.Plugins.Sample.ViewModels
@@ -60,7 +62,34 @@ namespace Xkit.Plugins.Sample.ViewModels
         public CombinationTypeViewModel(CombinationType model)
         {
             this._Model = model;
+
+            if (System.Windows.Data.CollectionViewSource.GetDefaultView(this.Table) is System.Windows.Data.ListCollectionView view)
+            {
+                var index = 0;
+
+                if( view.CanSort )
+                {
+                    Console.WriteLine(" ");
+                }
+
+                this.CornerButtonCommand = new DelegateCommand(_ => {
+                    index = (index + 1) % 2;
+
+                    view.CustomSort = new DelegateComparer<DynamicItem>((lha, rha) => {
+                        var lItem = lha.Definition as CombinationItemDefinition<string>;
+                        var rItem = rha.Definition as CombinationItemDefinition<string>;
+                        var lStr = lItem.Elements[index].Value;
+                        var rStr = rItem.Elements[index].Value;
+                        return string.Compare(lStr, rStr);
+                    });
+
+                    view.Refresh();
+                });
+            }
         }
+
+        public ICommand CornerButtonCommand { get; }
+
 
         private CombinationType _Model;
 

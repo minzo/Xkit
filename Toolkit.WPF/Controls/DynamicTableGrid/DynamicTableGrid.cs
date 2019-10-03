@@ -210,6 +210,23 @@ namespace Toolkit.WPF.Controls
             if (button != null)
             {
                 button.SetCurrentValue(Button.CommandProperty, this.CornerButtonCommand);
+                //if(button.Parent is Grid grid)
+                //{
+                //    var contentPresenter = new ContentPresenter();
+
+                //    BindingOperations.SetBinding(contentPresenter, ContentPresenter.WidthProperty, new Binding(nameof(CellsPanelHorizontalOffset)) {
+                //        RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(DataGrid), 1), 
+                //    });
+
+                //    BindingOperations.SetBinding(contentPresenter, ContentPresenter.VisibilityProperty, new Binding(nameof(HeadersVisibility)) {
+                //        RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(DataGrid), 1),
+                //        Converter = HeadersVisibilityConverter,
+                //        ConverterParameter = this.HeadersVisibility
+                //    });
+
+                //    grid.Children.Remove(button);
+                //    grid.Children.Insert(0, contentPresenter);
+                //}
             }
 
             if (this.IsVisibleZoomValue)

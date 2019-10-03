@@ -127,7 +127,7 @@ namespace Corekit.Models
     /// アイテム定義
     /// CombinationTable の行を生成する定義
     /// </summary>
-    internal class CombinationItemDefinition<T> : DynamicItemDefinition, ICombinationDefinition
+    public class CombinationItemDefinition<T> : DynamicItemDefinition, ICombinationDefinition
     {
         /// <summary>
         /// 要素
@@ -147,7 +147,7 @@ namespace Corekit.Models
     /// プロパティ定義
     /// CombinationTable のプロパティを生成する定義
     /// </summary>
-    internal class CombinationPropertyDefinition<T, TElement> : DynamicPropertyDefinition<T>, ICombinationDefinition
+    public class CombinationPropertyDefinition<T, TElement> : DynamicPropertyDefinition<T>, ICombinationDefinition
     {
         /// <summary>
         /// 要素
