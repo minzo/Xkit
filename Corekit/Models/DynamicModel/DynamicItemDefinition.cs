@@ -33,6 +33,11 @@ namespace Corekit.Models
         /// 移動が可能か
         /// </summary>
         bool IsMovable { get; }
+
+        /// <summary>
+        /// インデクサ
+        /// </summary>
+        IDynamicPropertyDefinition this[int index] { get; }
     }
 
     /// <summary>
@@ -59,6 +64,11 @@ namespace Corekit.Models
         /// 移動が可能か
         /// </summary>
         public bool IsMovable { get; set; }
+
+        /// <summary>
+        /// インデクサ
+        /// </summary>
+        public IDynamicPropertyDefinition this[int index] => this.collection[index];
 
         /// <summary>
         /// コンストラクタ
