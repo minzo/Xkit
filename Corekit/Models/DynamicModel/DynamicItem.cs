@@ -138,7 +138,6 @@ namespace Corekit.Models
             this.Value[index]?.SetValue(value);
         }
 
-
         #endregion
 
         #region add remove move property
