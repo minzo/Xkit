@@ -143,6 +143,7 @@
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=(local:DynamicTableGrid.IsSelectedCellContains), RelativeSource={RelativeSource Self}}" Value="True">
                 <Setter Property="Background" Value="{x:Static SystemColors.InactiveSelectionHighlightBrush}" />
+                <Setter Property="Padding" Value="5 4" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
