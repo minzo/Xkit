@@ -63,7 +63,7 @@ namespace Corekit.Extensions
         }
 
         /// <summary>
-        /// 列挙する
+        /// 列挙可能にする
         /// </summary>
         public static IEnumerable<T> AsEnumerable<T>(this T item)
         {
@@ -76,6 +76,22 @@ namespace Corekit.Extensions
         public static IEnumerable<T> CrossJoin<T,T1,T2>(this IEnumerable<T1> collection1, IEnumerable<T2> collection2, Func<T1,T2,T> predicate)
         {
             return collection1.SelectMany(t1 => collection2.Select(t2 => predicate(t1, t2)));
+        }
+
+        /// <summary>
+        /// 深さ優先探索
+        /// </summary>
+        public static IEnumerable<T> EnumerateTree<T>(this IEnumerable<T> items, Func<T, IEnumerable<T>> selector)
+        {
+            foreach (var item in items)
+            {
+                yield return item;
+
+                foreach (var child in selector(item).EnumerateTree(selector))
+                {
+                    yield return child;
+                }
+            }
         }
 
         /// <summary>
