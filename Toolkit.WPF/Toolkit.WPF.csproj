@@ -110,7 +110,6 @@
     </Page>
     <Compile Include="Controls\SingleSelectorScope.cs" />
     <Compile Include="Controls\TreeGrid\DataGridTreeColumn.cs" />
-    <Compile Include="Controls\TreeGrid\TreeGrid.cs" />
     <Compile Include="Controls\VectorControl\VectorEditor.xaml.cs">
       <DependentUpon>VectorEditor.xaml</DependentUpon>
     </Compile>
@@ -149,10 +148,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <Page Include="Controls\TreeGrid\DataGridTreeColumn.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\TreeGrid\TreeGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 using Toolkit.WPF;
 using Xkit.Plugins.Sample.Models;
@@ -63,33 +64,23 @@ namespace Xkit.Plugins.Sample.ViewModels
         {
             this._Model = model;
 
-            if (System.Windows.Data.CollectionViewSource.GetDefaultView(this.Table) is System.Windows.Data.ListCollectionView view)
-            {
-                var index = 0;
+            this._View = CollectionViewSource.GetDefaultView(this.Table) as ListCollectionView;
+            this._View.CustomSort = new DelegateComparer<DynamicItem>((lha, rha) => {
+                var lItem = lha.Definition as CombinationItemDefinition<string>;
+                var rItem = rha.Definition as CombinationItemDefinition<string>;
+                var lStr = lItem.Elements[1].Value;
+                var rStr = rItem.Elements[1].Value;
+                return string.Compare(lStr, rStr);
+            });
 
-                if( view.CanSort )
-                {
-                    Console.WriteLine(" ");
-                }
-
-                this.CornerButtonCommand = new DelegateCommand(_ => {
-                    index = (index + 1) % 2;
-
-                    view.CustomSort = new DelegateComparer<DynamicItem>((lha, rha) => {
-                        var lItem = lha.Definition as CombinationItemDefinition<string>;
-                        var rItem = rha.Definition as CombinationItemDefinition<string>;
-                        var lStr = lItem.Elements[index].Value;
-                        var rStr = rItem.Elements[index].Value;
-                        return string.Compare(lStr, rStr);
-                    });
-
-                    view.Refresh();
-                });
-            }
+            this.CornerButtonCommand = new DelegateCommand(_ => this._View.Refresh());
         }
 
         public ICommand CornerButtonCommand { get; }
 
+        public System.Collections.IComparer Comparer { get; }
+
+        ListCollectionView _View { get; }
 
         private CombinationType _Model;
 
