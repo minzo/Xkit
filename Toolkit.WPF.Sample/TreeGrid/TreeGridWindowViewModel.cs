@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Corekit.Extensions;
 
 namespace Toolkit.WPF.Sample
 {
@@ -39,13 +40,16 @@ namespace Toolkit.WPF.Sample
         static public List<TreeGridItem> items { get; set; } = new List<TreeGridItem>()
         {
             new TreeGridItem() { Name = "Parent0", Children = new List<TreeGridItem>() {
-                new TreeGridItem() { Name = "Children00" },
+                new TreeGridItem() { Name = "Children00", Children = new List<TreeGridItem>() {
+                    new TreeGridItem() { Name = "GroundChildren00" },
+                    new TreeGridItem() { Name = "GroundChildren01" },
+                }},
                 new TreeGridItem() { Name = "Children01" }
             } },
             new TreeGridItem() { Name = "Parent1" },
             new TreeGridItem() { Name = "Parent2" },
         };
 
-        public ObservableCollection<TreeGridItem> Items { get; } = new ObservableCollection<TreeGridItem>( items.SelectMany(i => i.Children.Prepend(i)) );
+        public ObservableCollection<TreeGridItem> Items { get; } = new ObservableCollection<TreeGridItem>(items.EnumerateTree(i => i.Children));
     }
 }

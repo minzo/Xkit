@@ -70,7 +70,6 @@
     <Compile Include="Controls\DataTemplateSelector\DataTypeTemplateSelector.cs" />
     <Compile Include="Controls\DataTemplateSelector\DynamicPropertyTemplateSelector.cs" />
     <Compile Include="Controls\DynamicTableGrid\DataGridComboBox.cs" />
-    <Compile Include="Controls\DynamicTableGrid\DataGridTreeColumn.cs" />
     <Compile Include="Controls\DynamicTableGrid\DynamicTableGrid.cs" />
     <Compile Include="Controls\RegexValidationRule.cs" />
     <Compile Include="Controls\FilterTextBox.xaml.cs">
@@ -110,9 +109,8 @@
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="Controls\SingleSelectorScope.cs" />
-    <Compile Include="Controls\TreeGrid.xaml.cs">
-      <DependentUpon>TreeGrid.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="Controls\TreeGrid\DataGridTreeColumn.cs" />
+    <Compile Include="Controls\TreeGrid\TreeGrid.cs" />
     <Compile Include="Controls\VectorControl\VectorEditor.xaml.cs">
       <DependentUpon>VectorEditor.xaml</DependentUpon>
     </Compile>
@@ -150,6 +148,14 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Page Include="Controls\TreeGrid\DataGridTreeColumn.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TreeGrid\TreeGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\VectorControl\VectorEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -195,10 +201,6 @@
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
     <Page Include="Controls\Logger\LoggerConsolePanel.xaml">
-      <SubType>Designer</SubType>
-      <Generator>XamlIntelliSenseFileGenerator</Generator>
-    </Page>
-    <Page Include="Controls\TreeGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>

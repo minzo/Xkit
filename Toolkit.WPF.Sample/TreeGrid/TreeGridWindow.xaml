@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="TreeGridWindow" Height="450" Width="800">
     <Window.Resources>
-        <Style x:Key="ToggleButtonStyle1" TargetType="{x:Type ToggleButton}">
+        <Style x:Key="ToggleButtonStyle" TargetType="{x:Type ToggleButton}">
             <Setter Property="FocusVisualStyle">
                 <Setter.Value>
                     <Style>
@@ -66,7 +66,6 @@
         <local:TreeGridWindowViewModel />
     </Window.DataContext>
 
-
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -84,17 +83,28 @@
             </TreeViewItem>
             <TreeViewItem>
                 <TreeViewItem.Header>
-                    <ToggleButton Width="30" Height="30" Style="{DynamicResource ToggleButtonStyle1}"/>
+                    <ToggleButton Width="30" Height="30" Style="{DynamicResource ToggleButtonStyle}"/>
                 </TreeViewItem.Header>
             </TreeViewItem>
         </TreeView>
 
         <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
 
-        <tkitwpf:TreeGrid Grid.Column="2"
-                          ItemsSource="{Binding Items}"
-                          IsExpandedPropertyPath="IsExpanded"
-                          ChildrenPropertyPath="Children"
-                          DisplayMemberPath="PropertyPath" />
+        <DataGrid 
+            Grid.Column="2" 
+            CanUserAddRows="False"
+            CanUserDeleteRows="False"
+            ItemsSource="{Binding Items}">
+            <DataGrid.Columns>
+                <tkitwpf:DataGridTreeColumn 
+                    IsReadOnly="True"
+                    Header="Tree"
+                    Icon="&#xE8E1;"
+                    Binding="{Binding Name}"
+                    ExpandedPropertyPath="IsExpanded"
+                    ChildrenPropertyPath="Children"
+                    />
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>
