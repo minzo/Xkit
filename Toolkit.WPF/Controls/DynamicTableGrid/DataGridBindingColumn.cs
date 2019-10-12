@@ -14,7 +14,7 @@ namespace Toolkit.WPF.Controls
     /// </summary>
     public class DataGridBindingColumn : DataGridBoundColumn
     {
-        #region template
+        #region Template
 
         public DataTemplate CellTemplate
         {
@@ -26,8 +26,6 @@ namespace Toolkit.WPF.Controls
         public static readonly DependencyProperty CellTemplateProperty =
             DependencyProperty.Register("CellTemplate", typeof(DataTemplate), typeof(DataGridBindingColumn), new PropertyMetadata(null));
 
-
-
         public DataTemplateSelector CellTemplateSelector
         {
             get { return (DataTemplateSelector)GetValue(CellTemplateSelectorProperty); }
@@ -38,8 +36,6 @@ namespace Toolkit.WPF.Controls
         public static readonly DependencyProperty CellTemplateSelectorProperty =
             DependencyProperty.Register("CellTemplateSelector", typeof(DataTemplateSelector), typeof(DataGridBindingColumn), new PropertyMetadata(null));
 
-
-
         public DataTemplate CellEditingTemplate
         {
             get { return (DataTemplate)GetValue(CellEditingTemplateProperty); }
@@ -49,7 +45,6 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for CellEditingTemplate.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty CellEditingTemplateProperty =
             DependencyProperty.Register("CellEditingTemplate", typeof(DataTemplate), typeof(DataGridBindingColumn), new PropertyMetadata(null));
-
 
         public DataTemplateSelector CellEditingTemplateSelector
         {
