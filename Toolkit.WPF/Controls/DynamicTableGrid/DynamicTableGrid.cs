@@ -193,6 +193,10 @@ namespace Toolkit.WPF.Controls
             this.PreviewMouseWheel += this.OnPreviewMouseWheel;
             this.KeyDown += this.OnKeyDown;
 
+            this.PreviewMouseDown += this.DragStart;
+            this.PreviewMouseMove += this.DragMove;
+            this.PreviewMouseUp += this.DragEnd;
+
             this.LayoutTransform = new ScaleTransform();
 
             this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Copy, (s, e) => this.OnCopy(), (s, e) => e.CanExecute = true));
@@ -411,21 +415,19 @@ namespace Toolkit.WPF.Controls
             // ハイライト情報のリセット
             if (this.EnableColumnHighlighting || this.EnableColumnHighlighting)
             {
-                if (this.ItemsSource is IEnumerable<object> items)
-                {
-                    var columns = e.RemovedCells
-                        .Where(i => i.IsValid)
-                        .Select(i => i.Column)
-                        .Distinct()
-                        .ToList();
+                var columns = e.RemovedCells
+                    .Where(i => i.IsValid)
+                    .Select(i => i.Column)
+                    .Distinct()
+                    .ToList();
 
-                    items
-                        .SelectMany(i => columns.Select(x => x.GetCellContent(i)))
-                        .Where(i => i != null)
-                        .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
-                        .Where(i => i != null)
-                        .ForEach(i => SetIsSelectedCellContains(i, false));
-                }
+                this.ItemsSource
+                    .OfType<object>()
+                    .SelectMany(i => columns.Select(x => x.GetCellContent(i)))
+                    .Where(i => i != null)
+                    .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
+                    .Where(i => i != null)
+                    .ForEach(i => SetIsSelectedCellContains(i, false));
             }
 
             // 行ハイライト
@@ -467,21 +469,19 @@ namespace Toolkit.WPF.Controls
                     .ForEach(i => SetIsSelectedCellContains(i, GetIsSelectedCellContains(i.Column)));
 
                 // 縦方向セル
-                if (this.ItemsSource is IEnumerable<object> items)
-                {
-                    var columns = this.SelectedCells
-                        .Where(i => i.IsValid)
-                        .Select(i => i.Column)
-                        .Distinct()
-                        .ToList();
+                var columns = this.SelectedCells
+                    .Where(i => i.IsValid)
+                    .Select(i => i.Column)
+                    .Distinct()
+                    .ToList();
 
-                    items
-                        .SelectMany(i => columns.Select(x => x.GetCellContent(i)))
-                        .Where(i => i != null)
-                        .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
-                        .Where(i => i != null)
-                        .ForEach(i => SetIsSelectedCellContains(i, true));
-                }
+                this.ItemsSource
+                    .OfType<object>()
+                    .SelectMany(i => columns.Select(x => x.GetCellContent(i)))
+                    .Where(i => i != null)
+                    .Select(i => EnumerateParent(i).OfType<DataGridCell>().FirstOrDefault())
+                    .Where(i => i != null)
+                    .ForEach(i => SetIsSelectedCellContains(i, true));
             }
 
             // セル選択情報の更新
@@ -504,6 +504,56 @@ namespace Toolkit.WPF.Controls
                 e.Handled = true;
             }
         }
+
+        #region 行ドラッグ & ドロップ
+
+        private void DragStart(object sender, MouseEventArgs e)
+        {
+            if (this.InputHitTest(e.GetPosition(this)) is FrameworkElement element)
+            {
+                this._DragElement = element;
+                this._DragStartPosition = e.GetPosition(this);
+            }
+        }
+
+        private void DragMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton != MouseButtonState.Pressed)
+            {
+                return;
+            }
+
+            if (this._DragElement == null)
+            {
+                return;
+            }
+
+            var position = e.GetPosition(this);
+
+            bool isDragStart 
+                 = Math.Abs(position.X - this._DragStartPosition.X) >= SystemParameters.MinimumHorizontalDragDistance 
+                || Math.Abs(position.Y - this._DragStartPosition.Y) >= SystemParameters.MinimumVerticalDragDistance;
+
+            if (isDragStart)
+            {
+                using (this._Adorner = new Adorners.GhostAdorner(this, this._DragElement, position, new Point(0, 0)))
+                {
+                    DragDrop.DoDragDrop(this, this._DragElement, DragDropEffects.Copy);
+                    this._DragElement = null;
+                }
+            }
+        }
+
+        private void DragEnd(object sender, MouseEventArgs e)
+        {
+            this._DragElement = null;
+        }
+
+        private FrameworkElement _DragElement;
+        private Point _DragStartPosition;
+        private Adorners.GhostAdorner _Adorner;
+
+        #endregion
 
         #region コピー / ペースト
 
@@ -585,7 +635,8 @@ namespace Toolkit.WPF.Controls
             obj.SetValue(PropertyNameProperty, value);
         }
 
-        private static readonly DependencyProperty PropertyNameProperty = DependencyProperty.RegisterAttached("PropertyName", typeof(string), typeof(DynamicTableGrid), new PropertyMetadata(null));
+        private static readonly DependencyProperty PropertyNameProperty = 
+            DependencyProperty.RegisterAttached("PropertyName", typeof(string), typeof(DynamicTableGrid), new PropertyMetadata(null));
 
         #endregion
 
@@ -657,13 +708,10 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void SelectColumn(DataGridColumn column)
         {
-            if (column != null)
+            this.SelectedCells.Clear();
+            foreach (var item in this.ItemsSource)
             {
-                this.SelectedCells.Clear();
-                foreach (var item in this.ItemsSource)
-                {
-                    this.SelectedCells.Add(new DataGridCellInfo(item, column));
-                }
+                this.SelectedCells.Add(new DataGridCellInfo(item, column));
             }
         }
 

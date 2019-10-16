@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Documents;
@@ -13,20 +14,31 @@ namespace Toolkit.WPF.Controls.Adorners
     /// </summary>
     internal class GhostAdorner : Adorner, IDisposable
     {
-        public Point CurrentPoint { get; set; }
+        /// <summary>
+        /// 表示オフセット
+        /// </summary>
         public Point Offset { get; }
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public GhostAdorner(Visual visual, UIElement adornedElement, Point point, Point offset)
+        public GhostAdorner(UIElement element, UIElement adornedElement, Point point, Point offset)
             : base(adornedElement)
         {
-            this._AdornerLayer = AdornerLayer.GetAdornerLayer(visual);
+            this._ParentElement = element;
+            this._ParentElement.QueryContinueDrag += this.OnQueryContinueDrag;
+            this._AdornerLayer = AdornerLayer.GetAdornerLayer(this._ParentElement);
             this._AdornerLayer?.Add(this);
             this._Brush = new VisualBrush(adornedElement) { Opacity = Opacity };
-            this.CurrentPoint = point;
+            this._CurrentPoint = point;
             this.Offset = offset;
+        }
+
+        private void OnQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
+        {
+            var position = GetNowPosition(sender as UIElement);
+            this._CurrentPoint = new Point(position.X, position.Y);
+            this._AdornerLayer.Update(this.AdornedElement);
         }
 
         /// <summary>
@@ -36,8 +48,9 @@ namespace Toolkit.WPF.Controls.Adorners
         {
             if (!this._IsDisposed)
             {
+                this._ParentElement.QueryContinueDrag -= this.OnQueryContinueDrag;
                 this._AdornerLayer?.Remove(this);
-                this._IsDisposed = false;
+                this._IsDisposed = true;
             }
         }
 
@@ -46,14 +59,43 @@ namespace Toolkit.WPF.Controls.Adorners
         /// </summary>
         protected override void OnRender(DrawingContext drawingContext)
         {
-            var point = new Point(this.CurrentPoint.X + this.Offset.X, this.CurrentPoint.Y + this.Offset.Y);
+            var point = new Point(this._CurrentPoint.X + this.Offset.X, this._CurrentPoint.Y + this.Offset.Y);
             var rect = new Rect(point, this.AdornedElement.RenderSize);
             drawingContext.DrawRectangle(this._Brush, null, rect);
         }
 
-        private readonly Rect _RenderSize;
+        private Point _CurrentPoint;
+
         private readonly Brush _Brush;
+        private readonly UIElement _ParentElement;
         private readonly AdornerLayer _AdornerLayer;
         private bool _IsDisposed;
+
+        #region CursorInfo
+
+        private struct POINT
+        {
+            public uint X;
+            public uint Y;
+        }
+
+        public static Point GetNowPosition(Visual v)
+        {
+            GetCursorPos(out var p);
+
+            var source = System.Windows.Interop.HwndSource.FromVisual(v) as System.Windows.Interop.HwndSource;
+            var hwnd = source.Handle;
+
+            ScreenToClient(hwnd, ref p);
+            return new Point(p.X, p.Y);
+        }
+
+        [DllImport("user32.dll")]
+        private static extern void GetCursorPos(out POINT pt);
+
+        [DllImport("user32.dll")]
+        private static extern int ScreenToClient(IntPtr hwnd, ref POINT pt);
+
+        #endregion
     }
 }
