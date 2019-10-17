@@ -48,6 +48,47 @@ namespace Toolkit.WPF.Sample
             } },
             new TreeGridItem() { Name = "Parent1" },
             new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent2" },
+            new TreeGridItem() { Name = "Parent0", Children = new List<TreeGridItem>() {
+                new TreeGridItem() { Name = "Children00", Children = new List<TreeGridItem>() {
+                    new TreeGridItem() { Name = "GroundChildren00" },
+                    new TreeGridItem() { Name = "GroundChildren01" },
+                }},
+                new TreeGridItem() { Name = "Children01" }
+            } },
+            new TreeGridItem() { Name = "Parent0", Children = new List<TreeGridItem>() {
+                new TreeGridItem() { Name = "Children00", Children = new List<TreeGridItem>() {
+                    new TreeGridItem() { Name = "GroundChildren00" },
+                    new TreeGridItem() { Name = "GroundChildren01" },
+                }},
+                new TreeGridItem() { Name = "Children01" }
+            } },
+            new TreeGridItem() { Name = "Parent0", Children = new List<TreeGridItem>() {
+                new TreeGridItem() { Name = "Children00", Children = new List<TreeGridItem>() {
+                    new TreeGridItem() { Name = "GroundChildren00" },
+                    new TreeGridItem() { Name = "GroundChildren01" },
+                }},
+                new TreeGridItem() { Name = "Children01" }
+            } },
+            new TreeGridItem() { Name = "Parent0", Children = new List<TreeGridItem>() {
+                new TreeGridItem() { Name = "Children00", Children = new List<TreeGridItem>() {
+                    new TreeGridItem() { Name = "GroundChildren00" },
+                    new TreeGridItem() { Name = "GroundChildren01" },
+                }},
+                new TreeGridItem() { Name = "Children01" }
+            } },
         };
 
         public ObservableCollection<TreeGridItem> Items { get; } = new ObservableCollection<TreeGridItem>(items.EnumerateTree(i => i.Children));

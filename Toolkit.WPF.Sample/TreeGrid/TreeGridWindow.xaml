@@ -68,7 +68,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
+            <ColumnDefinition Width="100"/>
             <ColumnDefinition Width="4" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
@@ -97,7 +97,6 @@
             ItemsSource="{Binding Items}">
             <DataGrid.Columns>
                 <tkitwpf:DataGridTreeColumn 
-                    IsReadOnly="True"
                     Header="Tree"
                     Icon="&#xE8E1;"
                     Binding="{Binding Name}"

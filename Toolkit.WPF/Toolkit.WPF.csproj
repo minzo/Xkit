@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controls\Adorners\GhostAdoner.cs" />
+    <Compile Include="Controls\Adorners\InsertionAdorner.cs" />
     <Compile Include="Controls\BindingProxy.cs" />
     <Compile Include="Controls\ColorControl\ColorEditor.xaml.cs">
       <DependentUpon>ColorEditor.xaml</DependentUpon>
@@ -109,7 +110,7 @@
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="Controls\SingleSelectorScope.cs" />
-    <Compile Include="Controls\TreeGrid\DataGridTreeColumn.cs" />
+    <Compile Include="Controls\DynamicTableGrid\DataGridTreeColumn.cs" />
     <Compile Include="Controls\VectorControl\VectorEditor.xaml.cs">
       <DependentUpon>VectorEditor.xaml</DependentUpon>
     </Compile>
@@ -147,7 +148,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <Page Include="Controls\TreeGrid\DataGridTreeColumn.xaml">
+    <Page Include="Controls\DynamicTableGrid\DataGridTreeColumn.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

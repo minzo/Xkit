@@ -30,14 +30,16 @@ namespace Toolkit.WPF.Controls.Adorners
             this._AdornerLayer = AdornerLayer.GetAdornerLayer(this._ParentElement);
             this._AdornerLayer?.Add(this);
             this._Brush = new VisualBrush(adornedElement) { Opacity = Opacity };
-            this._CurrentPoint = point;
+            this._CurrentPoint = GetNowPosition(element);
             this.Offset = offset;
         }
 
+        /// <summary>
+        /// ドラッグ中に呼ばれる
+        /// </summary>
         private void OnQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
         {
-            var position = GetNowPosition(sender as UIElement);
-            this._CurrentPoint = new Point(position.X, position.Y);
+            this._CurrentPoint = GetNowPosition(sender as UIElement);
             this._AdornerLayer.Update(this.AdornedElement);
         }
 
@@ -65,7 +67,6 @@ namespace Toolkit.WPF.Controls.Adorners
         }
 
         private Point _CurrentPoint;
-
         private readonly Brush _Brush;
         private readonly UIElement _ParentElement;
         private readonly AdornerLayer _AdornerLayer;
