@@ -178,7 +178,7 @@ namespace Toolkit.WPF.Controls
 
             // Grid
             grid.Margin = new Thickness(this.GetDepth(dataItem) * 12D, 0D, 0D, 0D);
-            
+
             // Expander
             expander.Visibility = this.HasChildren(dataItem) ? Visibility.Visible : Visibility.Hidden;
             expander.Checked += this.OnToggleChanged;
@@ -408,7 +408,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void Prepare()
         {
-            if (this._DataGrid != null)
+            if (this._DataGrid != null || this._DataGrid == this.DataGridOwner)
             {
                 return;
             }
@@ -428,13 +428,13 @@ namespace Toolkit.WPF.Controls
             this._DataGrid = this.DataGridOwner;
             this._DataGrid.DataContextChanged += this.OnDataContextChanged;
             this._DataGrid.Loaded += this.OnDataGridLoaded;
+            this._DataGrid.LoadingRow += this.OnDataGridRowLoading;
 
             var items = this._DataGrid.ItemsSource.OfType<object>();
             var type = items.FirstOrDefault()?.GetType();
             this._ExpandedPropertyInfo = type?.GetProperty(this.ExpandedPropertyPath);
             this._ChildrenPropertyInfo = type?.GetProperty(this.ChildrenPropertyPath);
 
-            // 深さ計算
             foreach (var item in items)
             {
                 this.UpdateTreeInfo(item, (bool)this._ExpandedPropertyInfo.GetValue(item));
@@ -453,6 +453,22 @@ namespace Toolkit.WPF.Controls
                 this._CollectionView.IsLiveFiltering = true;
                 this._CollectionView.LiveFilteringProperties.Add(this.ExpandedPropertyPath);
                 this._CollectionView.Filter = item => this.GetIsVisible(item);
+            }
+        }
+
+        /// <summary>
+        /// OnDataGridRowLoading
+        /// </summary>
+        private void OnDataGridRowLoading(object sender, DataGridRowEventArgs e)
+        {
+            // 仮想化でDataGridRowが再利用される際にMarginとExpanderのVisibilityをTreeInfoから再設定する
+            if (this.GetCellContent(e.Row) is Grid grid)
+            {
+                grid.Margin = new Thickness(this.GetDepth(e.Row.Item) * 12D, 0D, 0D, 0D);
+                if (grid.FindName("Expander") is ToggleButton expander)
+                {
+                    expander.Visibility = this.HasChildren(e.Row.Item) ? Visibility.Visible : Visibility.Hidden;
+                }
             }
         }
 
@@ -537,6 +553,14 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            // 削除された行のTreeInfoを辞書から削除
+            if (e.OldItems != null)
+            {
+                foreach (var item in e.OldItems)
+                {
+                    this._TreeInfo.Remove(item);
+                }
+            }
         }
 
         class TreeInfo
