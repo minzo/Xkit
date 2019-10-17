@@ -374,7 +374,7 @@ namespace Toolkit.WPF.Controls
 
         static DataGridTreeColumn()
         {
-            Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/TreeGrid/DataGridTreeColumn.xaml") };
+            Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/DynamicTableGrid/DataGridTreeColumn.xaml") };
         }
 
         private static ResourceDictionary Resource;
