@@ -62,12 +62,33 @@ namespace Toolkit.WPF.Controls
 
         protected override FrameworkElement GenerateEditingElement(DataGridCell cell, object dataItem)
         {
-            return this.LoadTemplateContent(cell, dataItem, true);
+            return this.OnGenerateElement(cell, dataItem);
         }
 
         protected override FrameworkElement GenerateElement(DataGridCell cell, object dataItem)
         {
-            return this.LoadTemplateContent(cell, dataItem, false);
+            return this.OnGenerateElement(cell, dataItem);
+        }
+
+        private FrameworkElement OnGenerateElement(DataGridCell cell, object dataItem)
+        {
+            cell.VerticalContentAlignment = VerticalAlignment.Stretch;
+            cell.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+            cell.VerticalAlignment = VerticalAlignment.Stretch;
+            cell.HorizontalAlignment = HorizontalAlignment.Stretch;
+
+            cell.PreviewKeyDown -= this.OnPreviewKeyDown;
+            cell.PreviewMouseLeftButtonDown -= this.OnPrevMouseLeftButtonDown;
+
+            if (this.Binding != null)
+            {
+                cell.PreviewKeyDown += this.OnPreviewKeyDown;
+                cell.PreviewMouseLeftButtonDown += this.OnPrevMouseLeftButtonDown;
+            }
+
+            this.ChooseCellTemplateAndSelector(cell.IsEditing, out DataTemplate template, out DataTemplateSelector selector);
+
+            return this.LoadTemplateContent(cell, dataItem, template, selector);
         }
 
         #endregion
@@ -75,13 +96,8 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// LoadTempalteContent
         /// </summary>
-        private FrameworkElement LoadTemplateContent(DataGridCell cell, object dataItem, bool isEditing)
+        protected virtual FrameworkElement LoadTemplateContent(DataGridCell cell, object dataItem, DataTemplate template, DataTemplateSelector selector)            
         {
-            DataTemplate template = null;
-            DataTemplateSelector selector = null;
-
-            this.ChooseCellTemplateAndSelector(isEditing, out template, out selector);
-
             var contentPresenter = new ContentPresenter()
             {
                 ContentTemplate = template,
@@ -90,23 +106,7 @@ namespace Toolkit.WPF.Controls
                 HorizontalAlignment = HorizontalAlignment.Stretch,
             };
 
-            cell.VerticalContentAlignment = VerticalAlignment.Stretch;
-            cell.HorizontalContentAlignment = HorizontalAlignment.Stretch;
-            cell.VerticalAlignment = VerticalAlignment.Stretch;
-            cell.HorizontalAlignment = HorizontalAlignment.Stretch;
-
-            if (this.Binding != null)
-            {
-                BindingOperations.SetBinding(contentPresenter, ContentPresenter.ContentProperty, this.Binding);
-                cell.PreviewKeyDown += this.OnPreviewKeyDown;
-                cell.PreviewMouseLeftButtonDown += this.OnPrevMouseLeftButtonDown;
-            }
-            else
-            {
-                BindingOperations.ClearBinding(contentPresenter, ContentPresenter.ContentProperty);
-                cell.PreviewKeyDown -= this.OnPreviewKeyDown;
-                cell.PreviewMouseLeftButtonDown -= this.OnPrevMouseLeftButtonDown;
-            }
+            TrySetBinding(contentPresenter, ContentPresenter.ContentProperty, this.Binding);
 
             return contentPresenter;
         }
@@ -114,7 +114,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// CellTemplateセレクタ
         /// </summary>
-        private void ChooseCellTemplateAndSelector(bool isEditing, out DataTemplate template, out DataTemplateSelector selector)
+        protected void ChooseCellTemplateAndSelector(bool isEditing, out DataTemplate template, out DataTemplateSelector selector)
         {
             if(isEditing)
             {
@@ -133,7 +133,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         protected override object PrepareCellForEdit(FrameworkElement editingElement, RoutedEventArgs editingEventArgs)
         {
-            if ((editingElement as ContentPresenter)?.Content != null)
+            if (editingElement  != null)
             {
                 foreach (var child in EnumerateChildren(editingElement))
                 {
@@ -295,6 +295,48 @@ namespace Toolkit.WPF.Controls
             var isOem = (key >= Key.Oem1 && key <= Key.OemBackslash);
             var isBack = key == Key.Back;
             return isCharacter || isNumber || isSpecial || isBack || isOem;
+        }
+
+        /// <summary>
+        /// TrySetBinding
+        /// </summary>
+        protected static bool TrySetBinding(DependencyObject dependencyObject, DependencyProperty dependencyProperty, string propertyPath, object dataContext = null)
+        {
+            if (dependencyObject == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(propertyPath))
+            {
+                BindingOperations.ClearBinding(dependencyObject, dependencyProperty);
+                return false;
+            }
+            else
+            {
+                BindingOperations.SetBinding(dependencyObject, dependencyProperty, new Binding(propertyPath)
+                {
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                });
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// TrySetBinding
+        /// </summary>
+        protected static bool TrySetBinding(DependencyObject dependencyObject, DependencyProperty dependencyProperty, BindingBase binding)
+        {
+            if (binding != null)
+            {
+                BindingOperations.SetBinding(dependencyObject, dependencyProperty, binding);
+                return true;
+            }
+            else
+            {
+                BindingOperations.ClearBinding(dependencyObject, dependencyProperty);
+                return false;
+            }
         }
 
         /// <summary>

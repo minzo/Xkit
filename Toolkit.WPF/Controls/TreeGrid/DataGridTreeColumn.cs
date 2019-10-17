@@ -16,52 +16,8 @@ namespace Toolkit.WPF.Controls
     /// <summary>
     /// DataGridTreeColumn
     /// </summary>
-    public class DataGridTreeColumn : DataGridBoundColumn
+    public class DataGridTreeColumn : DataGridBindingColumn
     {
-        #region Template
-
-        public DataTemplate CellTemplate
-        {
-            get { return (DataTemplate)GetValue(CellTemplateProperty); }
-            set { SetValue(CellTemplateProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for CellTemplate.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty CellTemplateProperty =
-            DependencyProperty.Register("CellTemplate", typeof(DataTemplate), typeof(DataGridBindingColumn), new PropertyMetadata(null));
-
-        public DataTemplateSelector CellTemplateSelector
-        {
-            get { return (DataTemplateSelector)GetValue(CellTemplateSelectorProperty); }
-            set { SetValue(CellTemplateSelectorProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for CellTemplateSelector.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty CellTemplateSelectorProperty =
-            DependencyProperty.Register("CellTemplateSelector", typeof(DataTemplateSelector), typeof(DataGridBindingColumn), new PropertyMetadata(null));
-
-        public DataTemplate CellEditingTemplate
-        {
-            get { return (DataTemplate)GetValue(CellEditingTemplateProperty); }
-            set { SetValue(CellEditingTemplateProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for CellEditingTemplate.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty CellEditingTemplateProperty =
-            DependencyProperty.Register("CellEditingTemplate", typeof(DataTemplate), typeof(DataGridBindingColumn), new PropertyMetadata(null));
-
-        public DataTemplateSelector CellEditingTemplateSelector
-        {
-            get { return (DataTemplateSelector)GetValue(CellEditingTemplateSelectorProperty); }
-            set { SetValue(CellEditingTemplateSelectorProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for CellEditingTemplateSelector.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty CellEditingTemplateSelectorProperty =
-            DependencyProperty.Register("CellEditingTemplateSelector", typeof(DataTemplateSelector), typeof(DataGridBindingColumn), new PropertyMetadata(null));
-
-        #endregion
-
         /// <summary>
         /// 子要素のプロパティパス
         /// </summary>
@@ -130,7 +86,7 @@ namespace Toolkit.WPF.Controls
             DependencyProperty.Register("IconTemplateSelector", typeof(DataTemplateSelector), typeof(DataGridTreeColumn), new PropertyMetadata(null));
 
         #endregion
-
+        
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -140,33 +96,17 @@ namespace Toolkit.WPF.Controls
             this._TreeInfo = new Dictionary<object,TreeInfo>();
         }
 
-        #region Generate Element
-
-        protected override FrameworkElement GenerateEditingElement(DataGridCell cell, object dataItem)
-        {
-            return this.LoadTemplateContent(cell, dataItem, true);
-        }
-
-        protected override FrameworkElement GenerateElement(DataGridCell cell, object dataItem)
-        {
-            return this.LoadTemplateContent(cell, dataItem, false);
-        }
-
-        #endregion
-
         /// <summary>
         /// LoadTempalteContent
         /// </summary>
-        private FrameworkElement LoadTemplateContent(DataGridCell cell, object dataItem, bool isEditing)
+        protected override FrameworkElement LoadTemplateContent(DataGridCell cell, object dataItem, DataTemplate template, DataTemplateSelector selector)
         {
             this.Prepare();
 
-            cell.VerticalContentAlignment = VerticalAlignment.Stretch;
-            cell.HorizontalContentAlignment = HorizontalAlignment.Stretch;
-            cell.VerticalAlignment = VerticalAlignment.Stretch;
-            cell.HorizontalAlignment = HorizontalAlignment.Stretch;
+            bool isUseDefaultTextBox = cell.IsEditing && template == null && selector == null;
+            var key = isUseDefaultTextBox ? "TextBoxCellEditingTemplate" : "CellTemplate";
 
-            if (!this.TryFindControl(isEditing, out FrameworkElement element))
+            if (!this.TryFindControl(key, out FrameworkElement element))
             {
                 return null;
             }
@@ -175,15 +115,16 @@ namespace Toolkit.WPF.Controls
             var expander = element.FindName("Expander") as ToggleButton;
             var iconPresenter = element.FindName("Icon") as ContentPresenter;
             var contentPresenter = element.FindName("Content") as ContentPresenter;
+            var textBox = element.FindName("TextBox") as TextBox;
 
             // Grid
-            grid.Margin = new Thickness(this.GetDepth(dataItem) * 12D, 0D, 0D, 0D);
+            grid.Margin = new Thickness(this.GetDepth(dataItem) * DepthMarginUnit, 0D, 0D, 0D);
 
             // Expander
             expander.Visibility = this.HasChildren(dataItem) ? Visibility.Visible : Visibility.Hidden;
             expander.Checked += this.OnToggleChanged;
             expander.Unchecked += this.OnToggleChanged;
-            this.TrySetBinding(expander, ToggleButton.IsCheckedProperty, this.ExpandedPropertyPath);
+            TrySetBinding(expander, ToggleButton.IsCheckedProperty, this.ExpandedPropertyPath);
 
             // Icon
             iconPresenter.Content = this.Icon;
@@ -191,19 +132,15 @@ namespace Toolkit.WPF.Controls
             iconPresenter.ContentTemplateSelector = this.IconTemplateSelector;
 
             // Content
-            this.ChooseCellTemplateAndSelector(isEditing, out DataTemplate template, out DataTemplateSelector selector);
-            contentPresenter.ContentTemplate = template;
-            contentPresenter.ContentTemplateSelector = selector;
-
-            if (this.TrySetBinding(contentPresenter, ContentPresenter.ContentProperty, this.Binding))
+            if (isUseDefaultTextBox)
             {
-                cell.PreviewKeyDown += this.OnPreviewKeyDown;
-                cell.PreviewMouseLeftButtonDown += this.OnPrevMouseLeftButtonDown;
+                TrySetBinding(textBox, TextBox.TextProperty, this.Binding);
             }
             else
             {
-                cell.PreviewKeyDown -= this.OnPreviewKeyDown;
-                cell.PreviewMouseLeftButtonDown -= this.OnPrevMouseLeftButtonDown;
+                contentPresenter.ContentTemplate = template;
+                contentPresenter.ContentTemplateSelector = selector;
+                TrySetBinding(contentPresenter, ContentPresenter.ContentProperty, this.Binding);
             }
 
             return element;
@@ -228,56 +165,11 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
-        /// TrySetBinding
-        /// </summary>
-        private bool TrySetBinding(DependencyObject dependencyObject, DependencyProperty dependencyProperty, string propertyPath, object dataContext = null)
-        {
-            if (dependencyObject == null)
-            {
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(propertyPath))
-            {
-                BindingOperations.ClearBinding(dependencyObject, dependencyProperty);
-                return false;
-            }
-            else
-            {
-                BindingOperations.SetBinding(dependencyObject, dependencyProperty, new Binding(propertyPath) { 
-                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged 
-                });
-                return true;
-            }
-        }
-
-        /// <summary>
-        /// TrySetBinding
-        /// </summary>
-        private bool TrySetBinding(DependencyObject dependencyObject, DependencyProperty dependencyProperty, BindingBase binding)
-        {
-            if (binding != null)
-            {
-                BindingOperations.SetBinding(dependencyObject, dependencyProperty, binding);
-                return true;
-            }
-            else
-            {
-                BindingOperations.ClearBinding(dependencyObject, dependencyProperty);
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Controlをリソースから探す
         /// </summary>
-        private bool TryFindControl(bool isEditing, out FrameworkElement element)
+        private bool TryFindControl(string templateKey, out FrameworkElement element)
         {
-            var key = isEditing
-                    ? @"DataGridTreeColumnCellEditingTemplate"
-                    : @"DataGridTreeColumnCellTemplate";
-
-            if (this._ResourceDictionary[key] is DataTemplate template)
+            if (this._ResourceDictionary[templateKey] is DataTemplate template)
             {
                 element = template.LoadContent() as FrameworkElement;
                 return true;
@@ -288,110 +180,10 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
-        /// CellTemplateセレクタ
-        /// </summary>
-        private void ChooseCellTemplateAndSelector(bool isEditing, out DataTemplate template, out DataTemplateSelector selector)
-        {
-            if (isEditing)
-            {
-                template = CellEditingTemplate;
-                selector = CellEditingTemplateSelector;
-            }
-            else
-            {
-                template = CellTemplate;
-                selector = CellTemplateSelector;
-            }
-        }
-
-        /// <summary>
         /// キー押下
         /// </summary>
         private void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            var cell = sender as DataGridCell;
-
-            if (cell.IsEditing)
-            {
-                if (e.Key == Key.Escape)
-                {
-                    this.DataGridOwner?.CancelEdit();
-                    e.Handled = true;
-                }
-            }
-            else if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-            {
-                // 読み取り専用のセルや列に対してBeginEditしないようにする
-                if (cell.IsReadOnly || this.IsReadOnly)
-                {
-                    return;
-                }
-
-                if (this.IsBeginEditCharacter(e.Key) || this.IsBeginEditCharacter(e.ImeProcessedKey))
-                {
-                    this.DataGridOwner?.BeginEdit();
-
-                    // ReferenceSource の DataGridTextBoxColumn を参考にした
-                    //
-                    // The TextEditor for the TextBox establishes contact with the IME
-                    // engine lazily at background priority. However in this case we
-                    // want to IME engine to know about the TextBox in earnest before
-                    // PostProcessing this input event. Only then will the IME key be
-                    // recorded in the TextBox. Hence the call to synchronously drain
-                    // the Dispatcher queue.
-                    //
-                    this.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Background);
-                }
-            }
-
-            if (e.Key == Key.Space)
-            {
-                e.Handled = this.CheckBoxEditAssist(cell);
-            }
-            else if (e.Key == Key.Delete)
-            {
-            }
-        }
-
-        /// <summary>
-        /// マウスクリック
-        /// </summary>
-        private void OnPrevMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            e.Handled = this.CheckBoxEditAssist(sender as DataGridCell);
-        }
-
-        /// <summary>
-        /// チェックボックス入力補助
-        /// </summary>
-        private bool CheckBoxEditAssist(DataGridCell cell)
-        {
-            if (cell == null || cell.IsReadOnly || !cell.IsSelected)
-            {
-                return false;
-            }
-
-            var checkBox = EnumerateChildren(cell).OfType<CheckBox>().FirstOrDefault();
-            if (checkBox?.IsEnabled ?? false)
-            {
-                checkBox.IsChecked = !checkBox.IsChecked;
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// セル編集開始キー判定
-        /// </summary>
-        private bool IsBeginEditCharacter(Key key)
-        {
-            var isCharacter = key >= Key.A && key <= Key.Z;
-            var isNumber = (key >= Key.D0 && key <= Key.D9) || (key >= Key.NumPad0 && key <= Key.NumPad9);
-            var isSpecial = key == Key.F2 || key == Key.Space;
-            var isOem = (key >= Key.Oem1 && key <= Key.OemBackslash);
-            var isBack = key == Key.Back;
-            return isCharacter || isNumber || isSpecial || isBack || isOem;
         }
 
         /// <summary>
@@ -464,7 +256,7 @@ namespace Toolkit.WPF.Controls
             // 仮想化でDataGridRowが再利用される際にMarginとExpanderのVisibilityをTreeInfoから再設定する
             if (this.GetCellContent(e.Row) is Grid grid)
             {
-                grid.Margin = new Thickness(this.GetDepth(e.Row.Item) * 12D, 0D, 0D, 0D);
+                grid.Margin = new Thickness(this.GetDepth(e.Row.Item) * DepthMarginUnit, 0D, 0D, 0D);
                 if (grid.FindName("Expander") is ToggleButton expander)
                 {
                     expander.Visibility = this.HasChildren(e.Row.Item) ? Visibility.Visible : Visibility.Hidden;
@@ -541,11 +333,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private bool HasChildren(object item)
         {
-            if( this._ChildrenPropertyInfo.GetValue(item) is IEnumerable<object> children)
-            {
-                return children.Any();
-            }
-            return false;
+            return (this._ChildrenPropertyInfo?.GetValue(item) as IEnumerable<object>)?.Any() ?? false;
         }
 
         /// <summary>
@@ -601,6 +389,6 @@ namespace Toolkit.WPF.Controls
             return children.Concat(children.SelectMany(i => EnumerateChildren(i)));
         }
 
-        private static IValueConverter _BoolToVisbility = new BooleanToVisibilityConverter();
+        private static readonly double DepthMarginUnit = 12D;
     }
 }

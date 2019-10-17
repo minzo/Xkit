@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Toolkit.WPF.Controls">
-
+    
     <!-- ExpanderToggleButton -->
     <Style TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
         <Setter Property="Width" Value="10" />
@@ -45,22 +45,22 @@
         </Setter>
     </Style>
 
-    <!-- DataGridTreeColumnCellTemplate -->
-    <DataTemplate x:Key="DataGridTreeColumnCellTemplate">
+    <!-- CellTemplate -->
+    <DataTemplate x:Key="CellTemplate">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <ToggleButton Name="Expander" Grid.Column="0" Style="{StaticResource {x:Type ToggleButton}}" />
             <ContentPresenter Name="Icon" Grid.Column="1" />
-            <ContentPresenter Name="Content" Grid.Column="2" Margin="2 0 0 0"/>
+            <ContentPresenter Name="Content" Grid.Column="2" Margin="4 0 0 0" />
         </Grid>
     </DataTemplate>
 
-    <!-- DataGridTreeColumnCellEditingTemplate -->
-    <DataTemplate x:Key="DataGridTreeColumnCellEditingTemplate">
+    <!-- TextBoxCellEditingTemplate -->
+    <DataTemplate x:Key="TextBoxCellEditingTemplate">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="20"/>
@@ -69,7 +69,15 @@
             </Grid.ColumnDefinitions>
             <ToggleButton Name="Expander" Grid.Column="0" Style="{StaticResource {x:Type ToggleButton}}" />
             <ContentPresenter Name="Icon" Grid.Column="1" />
-            <ContentPresenter Name="Content" Grid.Column="2" />
+            <TextBox 
+                Grid.Column="2"
+                Margin="4 0 0 0"
+                Name="TextBox"
+                TextAlignment="Left"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch" />
         </Grid>
     </DataTemplate>
 </ResourceDictionary>
