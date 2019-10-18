@@ -210,6 +210,13 @@ namespace Toolkit.WPF.Controls
                 return;
             }
 
+            if (this._DataGrid != null)
+            {
+                this._DataGrid.DataContextChanged -= this.OnDataContextChanged;
+                this._DataGrid.Loaded -= this.OnDataGridLoaded;
+                this._DataGrid.LoadingRow -= this.OnDataGridRowLoading;
+            }
+
             // Tree情報をクリア
             this._TreeInfo.Clear();
 
@@ -227,6 +234,7 @@ namespace Toolkit.WPF.Controls
             this._ExpandedPropertyInfo = type?.GetProperty(this.ExpandedPropertyPath);
             this._ChildrenPropertyInfo = type?.GetProperty(this.ChildrenPropertyPath);
 
+
             foreach (var item in items)
             {
                 this.UpdateTreeInfo(item, (bool)this._ExpandedPropertyInfo.GetValue(item));
@@ -234,18 +242,16 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
-        /// OnDataGridLoaded
+        /// OnDtaGridLoaded
         /// </summary>
         private void OnDataGridLoaded(object sender, RoutedEventArgs e)
         {
             if (CollectionViewSource.GetDefaultView(this.DataGridOwner.ItemsSource) is ICollectionView collection)
             {
                 collection.CollectionChanged += this.OnCollectionChanged;
-                this._CollectionView = collection as ListCollectionView;
-                this._CollectionView.IsLiveFiltering = true;
-                this._CollectionView.LiveFilteringProperties.Add(this.ExpandedPropertyPath);
-                this._CollectionView.Filter = item => this.GetIsVisible(item);
+                this._CollectionView = (ListCollectionView)collection;
             }
+            this.ApplyDefaultFilter();
         }
 
         /// <summary>
@@ -261,6 +267,20 @@ namespace Toolkit.WPF.Controls
                 {
                     expander.Visibility = this.HasChildren(e.Row.Item) ? Visibility.Visible : Visibility.Hidden;
                 }
+            }
+        }
+
+        /// <summary>
+        /// フィルタ状態にデフォルトを適用します
+        /// </summary>
+        public void ApplyDefaultFilter()
+        {
+            if (this._CollectionView != null)
+            {
+                this._CollectionView.IsLiveFiltering = true;
+                this._CollectionView.LiveFilteringProperties.Clear();
+                this._CollectionView.LiveFilteringProperties.Add(this.ExpandedPropertyPath);
+                this._CollectionView.Filter = item => this.GetIsVisible(item);
             }
         }
 
