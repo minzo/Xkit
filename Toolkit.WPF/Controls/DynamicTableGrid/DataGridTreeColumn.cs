@@ -234,7 +234,6 @@ namespace Toolkit.WPF.Controls
             this._ExpandedPropertyInfo = type?.GetProperty(this.ExpandedPropertyPath);
             this._ChildrenPropertyInfo = type?.GetProperty(this.ChildrenPropertyPath);
 
-
             foreach (var item in items)
             {
                 this.UpdateTreeInfo(item, (bool)this._ExpandedPropertyInfo.GetValue(item));
