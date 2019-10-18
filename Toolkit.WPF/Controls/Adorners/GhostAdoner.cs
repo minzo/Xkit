@@ -22,16 +22,26 @@ namespace Toolkit.WPF.Controls.Adorners
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public GhostAdorner(UIElement element, UIElement adornedElement, Point point, Point offset)
+        public GhostAdorner(UIElement adornedElement, UIElement element, Point offset)
             : base(adornedElement)
         {
-            this._ParentElement = element;
-            this._ParentElement.QueryContinueDrag += this.OnQueryContinueDrag;
-            this._AdornerLayer = AdornerLayer.GetAdornerLayer(this._ParentElement);
+            this._AdornedElement = adornedElement;
+            this._AdornedElement.DragEnter += this.OnDrag;
+            this._AdornedElement.DragOver += this.OnDrag;
+            this._AdornerLayer = AdornerLayer.GetAdornerLayer(this._AdornedElement);
             this._AdornerLayer?.Add(this);
-            this._Brush = new VisualBrush(adornedElement) { Opacity = Opacity };
-            this._CurrentPoint = GetNowPosition(element);
+            this._Brush = new VisualBrush(element) { Opacity = Opacity };
+            this._CurrentPoint = GetNowPosition(this._AdornedElement);
             this.Offset = offset;
+        }
+
+        /// <summary>
+        /// ドラッグ
+        /// </summary>
+        private void OnDrag(object sender, DragEventArgs e)
+        {
+            this._CurrentPoint = e.GetPosition(this._AdornedElement);
+            this._AdornerLayer.Update(this.AdornedElement);
         }
 
         /// <summary>
@@ -50,9 +60,10 @@ namespace Toolkit.WPF.Controls.Adorners
         {
             if (!this._IsDisposed)
             {
-                this._ParentElement.QueryContinueDrag -= this.OnQueryContinueDrag;
-                this._AdornerLayer?.Remove(this);
                 this._IsDisposed = true;
+                this._AdornerLayer?.Remove(this);
+                this._AdornedElement.DragEnter -= this.OnDrag;
+                this._AdornedElement.DragOver -= this.OnDrag;
             }
         }
 
@@ -68,7 +79,7 @@ namespace Toolkit.WPF.Controls.Adorners
 
         private Point _CurrentPoint;
         private readonly Brush _Brush;
-        private readonly UIElement _ParentElement;
+        private readonly UIElement _AdornedElement;
         private readonly AdornerLayer _AdornerLayer;
         private bool _IsDisposed;
 

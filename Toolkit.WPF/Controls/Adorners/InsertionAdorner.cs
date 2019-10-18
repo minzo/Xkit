@@ -13,6 +13,9 @@ namespace Toolkit.WPF.Controls.Adorners
     /// </summary>
     internal class InsertionAdorner : Adorner, IDisposable
     {
+
+        public bool EnableAddChildren { get; set; }
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
