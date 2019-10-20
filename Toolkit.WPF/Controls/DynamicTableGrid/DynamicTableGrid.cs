@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Controls.Primitives;
 
 namespace Toolkit.WPF.Controls
 {
@@ -509,9 +510,13 @@ namespace Toolkit.WPF.Controls
 
         private void DragStart(object sender, MouseEventArgs e)
         {
-            if (this.InputHitTest(e.GetPosition(this)) is FrameworkElement element)
+            var rowHeader = EnumerateParent(this.InputHitTest(e.GetPosition(this)) as FrameworkElement)
+                .OfType<DataGridRowHeader>()
+                .FirstOrDefault();
+
+            if (rowHeader?.IsRowSelected == true)
             {
-                this._DragElement = element;
+                this._DragElement = EnumerateParent(rowHeader).OfType<DataGridRow>().FirstOrDefault();
                 this._DragStartPosition = e.GetPosition(this);
             }
         }
