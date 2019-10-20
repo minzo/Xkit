@@ -541,7 +541,7 @@ namespace Toolkit.WPF.Controls
 
             if (isDragStart)
             {
-                using (this._Adorner = new Adorners.GhostAdorner(this, this._DragElement, new Point(0, 0)))
+                using (new Adorners.GhostAdorner(this, this._DragElement, new Point(0, 0)))
                 {
                     DragDrop.DoDragDrop(this, this._DragElement, DragDropEffects.Copy);
                     this._DragElement = null;
@@ -556,7 +556,6 @@ namespace Toolkit.WPF.Controls
 
         private FrameworkElement _DragElement;
         private Point _DragStartPosition;
-        private Adorners.GhostAdorner _Adorner;
 
         #endregion
 
