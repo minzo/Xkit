@@ -12,7 +12,7 @@ namespace Toolkit.WPF.Controls.Adorners
     /// <summary>
     /// Ghost を表示する Adorner
     /// </summary>
-    internal class GhostAdorner : Adorner, IDisposable
+    public class GhostAdorner : Adorner, IDisposable
     {
         /// <summary>
         /// 表示オフセット
@@ -28,11 +28,11 @@ namespace Toolkit.WPF.Controls.Adorners
             this.Opacity = 0.5;
             this.Offset = offset;
             this._Size = ghostElement.RenderSize;
-            this.AdornedElement.QueryContinueDrag += this.OnQueryContinueDrag;
             this._AdornerLayer = AdornerLayer.GetAdornerLayer(this.AdornedElement);
-            this._AdornerLayer?.Add(this);
+            this._AdornerLayer.Add(this);
             this._Brush = new VisualBrush(ghostElement) { Opacity = this.Opacity, Stretch = Stretch.Uniform };
             this._CurrentPoint = GetNowPosition(this.AdornedElement);
+            this.AdornedElement.QueryContinueDrag += this.OnQueryContinueDrag;
         }
 
         /// <summary>
