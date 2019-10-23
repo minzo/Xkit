@@ -121,6 +121,7 @@
     <Compile Include="Converters\ColorToBrush.cs" />
     <Compile Include="Converters\MathExpressionEvaluator.cs" />
     <Compile Include="Converters\ValueToAlpha.cs" />
+    <Compile Include="Extensions\VisualExtensions.cs" />
     <Compile Include="Framework\Framework.cs" />
     <Compile Include="Models\DelegateCommand.cs" />
     <Compile Include="Models\ObservableObject.cs" />
