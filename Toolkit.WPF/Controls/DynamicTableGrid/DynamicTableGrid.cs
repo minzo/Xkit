@@ -541,7 +541,7 @@ namespace Toolkit.WPF.Controls
 
             if (isDragStart)
             {
-                using (new Adorners.InsertionAdorner(this))
+                using (new Adorners.InsertionAdorner(this, typeof(DataGridRow)))
                 using (new Adorners.GhostAdorner(this, this._DragElement, new Point(0, 0)))
                 {
                     DragDrop.DoDragDrop(this, this._DragElement, DragDropEffects.Copy);

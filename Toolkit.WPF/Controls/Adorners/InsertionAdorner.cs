@@ -17,23 +17,38 @@ namespace Toolkit.WPF.Controls.Adorners
     /// </summary>
     public class InsertionAdorner : Adorner, IDisposable
     {
-        public bool EnableAddChildren { get; set; }
+        /// <summary>
+        /// 子への挿入を有効
+        /// </summary>
+        public bool EnableInsertChild { get; set; }
 
-        public Color Color { get; set; } = Colors.Red;
+        /// <summary>
+        /// 前に挿入するときの色
+        /// </summary>
+        public Color InsertPrevColor { get; set; } = Colors.SkyBlue;
+
+        /// <summary>
+        /// 後に挿入するときの色
+        /// </summary>
+        public Color InsertNextColor { get; set; } = Colors.LightPink;
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public InsertionAdorner(UIElement adornedElement)
+        public InsertionAdorner(UIElement adornedElement, Type targetFramworkElementType)
             : base(adornedElement)
         {
             this._AdornerLayer = AdornerLayer.GetAdornerLayer(this.AdornedElement);
             this._AdornerLayer.Add(this);
-            this._CurrentPoint = GetNowPosition(this.AdornedElement);
             this.AdornedElement.QueryContinueDrag += this.OnQueryContinueDrag;
 
-            this._Brush = new SolidColorBrush(Color);
-            this._Brush.Freeze();
+            this._InsertPrevBrush = new SolidColorBrush(this.InsertPrevColor);
+            this._InsertPrevBrush.Freeze();
+
+            this._InsertNextBrush = new SolidColorBrush(this.InsertNextColor);
+            this._InsertNextBrush.Freeze();
+
+            this._TargetFrameworkElementType = targetFramworkElementType;
         }
 
         /// <summary>
@@ -41,11 +56,38 @@ namespace Toolkit.WPF.Controls.Adorners
         /// </summary>
         private void OnQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
         {
-            this._CurrentPoint = GetNowPosition(sender as UIElement);
-            this._Element = (this.AdornedElement.InputHitTest(this._CurrentPoint) as FrameworkElement)
+            var currentPoint = GetNowPosition(sender as UIElement);
+            var targetElement = (this.AdornedElement.InputHitTest(currentPoint) as FrameworkElement)
                 ?.EnumerateParent()
-                ?.OfType<DataGridRow>()
-                ?.FirstOrDefault();
+                ?.OfType<FrameworkElement>()
+                ?.FirstOrDefault(i => i.GetType() == this._TargetFrameworkElementType);
+
+            if (targetElement != null)
+            {
+                var point = GetNowPosition(targetElement);
+                var width = targetElement.ActualWidth;
+                var height = targetElement.ActualHeight;
+
+                var leftTop = targetElement.TranslatePoint(new Point(0D, 0D), this.AdornedElement);
+                var rightBottom = targetElement.TranslatePoint(new Point(0D, height), this.AdornedElement);
+
+                const double insertArea = 7D;
+
+                if (point.Y <= leftTop.Y + insertArea)
+                {
+                    this._RenderRect = new Rect(leftTop.X, leftTop.Y, width, 2D);
+                    this._RenderBrush = this._InsertPrevBrush;
+                }
+                else if (point.Y >= rightBottom.Y - insertArea)
+                {
+                    this._RenderRect = new Rect(rightBottom.X, rightBottom.Y - 2D, width, 2D);
+                    this._RenderBrush = this._InsertNextBrush;
+                }
+                else
+                {
+                    // this._RenderRect = new Rect(leftTop.X, leftTop.Y, width, 2D);
+                }
+            }
 
             this._AdornerLayer.Update(this.AdornedElement);
         }
@@ -55,11 +97,7 @@ namespace Toolkit.WPF.Controls.Adorners
         /// </summary>
         protected override void OnRender(DrawingContext drawingContext)
         {
-            if (this._Element != null)
-            {
-                var point = this._Element.TranslatePoint(LeftTop, this.AdornedElement);
-                drawingContext.DrawRectangle(this._Brush, null, new Rect(point.X, point.Y, this._Element.ActualWidth, 2D));
-            }
+            drawingContext.DrawRectangle(this._RenderBrush, null, this._RenderRect);
         }
 
         /// <summary>
@@ -75,13 +113,24 @@ namespace Toolkit.WPF.Controls.Adorners
             }
         }
 
-        private Point _CurrentPoint;
-        private FrameworkElement _Element;
-        private readonly Brush _Brush;
+        /// <summary>
+        /// 挿入タイプ
+        /// </summary>
+        private enum InsertType
+        {
+            Invalid,    // 不正
+            InsertPrev, // 対象の前に挿入
+            InsertNext, // 対象の後に挿入
+            InsertChild // 対象の子として挿入
+        }
+
+        private Type _TargetFrameworkElementType;
+        private Rect _RenderRect;
+        private Brush _RenderBrush;
+        private readonly Brush _InsertPrevBrush;
+        private readonly Brush _InsertNextBrush;
         private readonly AdornerLayer _AdornerLayer;
         private bool _IsDisposed;
-
-        private static readonly Point LeftTop = new Point(0D, 0D);
 
         #region CursorInfo
 
