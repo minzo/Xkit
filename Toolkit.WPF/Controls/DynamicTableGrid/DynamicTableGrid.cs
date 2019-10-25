@@ -800,7 +800,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private static IEnumerable<DependencyObject> EnumerateParent(DependencyObject dp)
         {
-            while ((dp = VisualTreeHelper.GetParent(dp)) != null)
+            while (dp != null && (dp = VisualTreeHelper.GetParent(dp)) != null)
             {
                 yield return dp;
             }
