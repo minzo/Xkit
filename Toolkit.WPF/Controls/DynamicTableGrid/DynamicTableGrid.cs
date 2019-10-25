@@ -199,8 +199,14 @@ namespace Toolkit.WPF.Controls
 
         #region ズーム
 
+        /// <summary>
+        /// ズーム率の表示
+        /// </summary>
         public bool IsVisibleZoomValue { get; set; }
 
+        /// <summary>
+        /// ズーム率
+        /// </summary>
         public double ZoomRate
         {
             get { return (double)GetValue(ZoomRateProperty); }
@@ -431,25 +437,27 @@ namespace Toolkit.WPF.Controls
 
             if (e.OriginalSource is DataGridCell cell)
             {
-                var value = (cell.DataContext as IDynamicItem)?.GetPropertyValue(GetPropertyName(cell.Column));
-                foreach (var info in this.SelectedCells.Where(i => i.IsValid))
+                if (!this._IsExecuteCommitEditing)
                 {
-                    (info.Item as IDynamicItem)?.SetPropertyValue(GetPropertyName(info.Column), value);
-                }
+                    try
+                    {
+                        this._IsExecuteCommitEditing = true;
 
-                //try
-                //{
-                //    var value = cell.Column.OnCopyingCellClipboardContent(cell.DataContext);
-                //    foreach (var info in this.SelectedCells)
-                //    {
-                //        info.Column.OnPastingCellClipboardContent(info.Item, value);
-                //    }
-                //}
-                //finally
-                //{
-                //}
+                        var value = cell.Column.OnCopyingCellClipboardContent(cell.DataContext);
+                        foreach (var info in this.SelectedCells.Where(i => i.IsValid))
+                        {
+                            info.Column.OnPastingCellClipboardContent(info.Item, value);
+                        }
+                    }
+                    finally
+                    {
+                        this._IsExecuteCommitEditing = false;
+                    }
+                }
             }
         }
+
+        private bool _IsExecuteCommitEditing;
 
         /// <summary>
         /// 選択セル変更
