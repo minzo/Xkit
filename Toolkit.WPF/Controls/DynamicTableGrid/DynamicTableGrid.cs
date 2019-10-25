@@ -614,17 +614,20 @@ namespace Toolkit.WPF.Controls
                 .OfType<DataGridRowHeader>()
                 .FirstOrDefault();
 
-            var point = e.GetPosition(target);
-            var width = target.ActualWidth;
-            var height = target.ActualHeight;
-            var leftTop = target.TranslatePoint(new Point(0D, 0D), this);
-            var rightBottom = target.TranslatePoint(new Point(0D, height), this);
+            if (target != null)
+            {
+                var point = e.GetPosition(target);
+                var width = target.ActualWidth;
+                var height = target.ActualHeight;
+                var leftTop = target.TranslatePoint(new Point(0D, 0D), this);
+                var rightBottom = target.TranslatePoint(new Point(0D, height), this);
 
-            var insertType = (point.Y <= leftTop.Y + 7D) ? ReorderInfo.InsertType.InsertPrev
-                           : (point.Y >= rightBottom.Y - 7D) ? ReorderInfo.InsertType.InsertNext
-                           : ReorderInfo.InsertType.InsertChild;
+                var insertType = (point.Y <= leftTop.Y + 7D) ? ReorderInfo.InsertType.InsertPrev
+                               : (point.Y >= rightBottom.Y - 7D) ? ReorderInfo.InsertType.InsertNext
+                               : ReorderInfo.InsertType.InsertChild;
 
-            this.ReorderAction?.Invoke(new ReorderInfo(this._DragElement.DataContext, target.DataContext, insertType));
+                this.ReorderAction?.Invoke(new ReorderInfo(this._DragElement.DataContext, target.DataContext, insertType));
+            }
         }
 
         private FrameworkElement _DragElement;
