@@ -103,7 +103,7 @@ namespace Toolkit.WPF.Controls
 
             public string PropertyName { get; }
 
-            public SelectedInfo(object item, string propertyName)
+            internal SelectedInfo(object item, string propertyName)
             {
                 this.Item = item;
                 this.PropertyName = propertyName;
@@ -123,7 +123,7 @@ namespace Toolkit.WPF.Controls
             DependencyProperty.Register("SelectedInfos", typeof(IEnumerable<SelectedInfo>), typeof(DynamicTableGrid), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         /// <summary>
-        /// 列選択有効か
+        /// 列選択が有効か
         /// </summary>
         public bool EnableColumnSelection
         {
@@ -134,6 +134,49 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for EnableColumnSelection.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty EnableColumnSelectionProperty =
             DependencyProperty.Register("EnableColumnSelection", typeof(bool), typeof(DynamicTableGrid), new PropertyMetadata(false));
+
+        #endregion
+
+        #region 並び替え情報
+        
+        /// <summary>
+        /// 並べ替え情報
+        /// </summary>
+        public struct ReorderInfo
+        {
+            public enum InsertType
+            {
+                InsertPrev,
+                InsertNext,
+                InsertChild
+            }
+
+            public object Item { get; }
+
+            public object Target { get; }
+
+            public InsertType Type { get; }
+
+            public ReorderInfo(object item, object target, InsertType insertType)
+            {
+                this.Target = target;
+                this.Item = item;
+                this.Type = insertType;
+            }
+        }
+
+        /// <summary>
+        /// 並び替えられた際に実行するアクション
+        /// </summary>
+        public Action<ReorderInfo> ReorderAction
+        {
+            get { return (Action<ReorderInfo>)GetValue(ReorderActionProperty); }
+            set { SetValue(ReorderActionProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ReorderAction.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ReorderActionProperty =
+            DependencyProperty.Register("ReorderAction", typeof(Action<ReorderInfo>), typeof(DynamicTableGrid), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
@@ -194,16 +237,16 @@ namespace Toolkit.WPF.Controls
             this.PreviewMouseWheel += this.OnPreviewMouseWheel;
             this.KeyDown += this.OnKeyDown;
 
-            this.PreviewMouseDown += this.DragStart;
-            this.PreviewMouseMove += this.DragMove;
-            this.PreviewMouseUp += this.DragEnd;
+            this.PreviewMouseDown += this.TryDrag;
+            this.PreviewMouseMove += this.TryDrag;
+            this.PreviewMouseUp += this.DragCancel;
+            this.AllowDrop = true;
+            this.Drop += this.Droped;
 
             this.LayoutTransform = new ScaleTransform();
 
             this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Copy, (s, e) => this.OnCopy(), (s, e) => e.CanExecute = true));
             this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Paste, (s, e) => this.OnPaste(), (s, e) => e.CanExecute = true));
-
-            this.Loaded += this.OnLoaded;
         }
 
         /// <summary>
@@ -506,22 +549,12 @@ namespace Toolkit.WPF.Controls
             }
         }
 
-        #region 行ドラッグ & ドロップ
+        #region 行のドラッグ & ドロップによる並べ替え
 
-        private void DragStart(object sender, MouseEventArgs e)
-        {
-            var rowHeader = EnumerateParent(this.InputHitTest(e.GetPosition(this)) as FrameworkElement)
-                .OfType<DataGridRowHeader>()
-                .FirstOrDefault();
-
-            if (rowHeader?.IsRowSelected == true)
-            {
-                this._DragElement = EnumerateParent(rowHeader).OfType<DataGridRow>().FirstOrDefault();
-                this._DragStartPosition = e.GetPosition(this);
-            }
-        }
-
-        private void DragMove(object sender, MouseEventArgs e)
+        /// <summary>
+        /// ドラッグ
+        /// </summary>
+        private void TryDrag(object sender, MouseEventArgs e)
         {
             if (e.LeftButton != MouseButtonState.Pressed)
             {
@@ -530,11 +563,20 @@ namespace Toolkit.WPF.Controls
 
             if (this._DragElement == null)
             {
+                var rowHeader = EnumerateParent(this.InputHitTest(e.GetPosition(this)) as FrameworkElement)
+                    .OfType<DataGridRowHeader>()
+                    .FirstOrDefault();
+
+                if (rowHeader?.IsRowSelected == true)
+                {
+                    this._DragElement = EnumerateParent(rowHeader).OfType<DataGridRow>().FirstOrDefault();
+                    this._DragStartPosition = e.GetPosition(this);
+                }
+
                 return;
             }
 
             var position = e.GetPosition(this);
-
             bool isDragStart 
                  = Math.Abs(position.X - this._DragStartPosition.X) >= SystemParameters.MinimumHorizontalDragDistance 
                 || Math.Abs(position.Y - this._DragStartPosition.Y) >= SystemParameters.MinimumVerticalDragDistance;
@@ -544,15 +586,45 @@ namespace Toolkit.WPF.Controls
                 using (new Adorners.InsertionAdorner(this, typeof(DataGridRow)))
                 using (new Adorners.GhostAdorner(this, this._DragElement, new Point(0, 0)))
                 {
-                    DragDrop.DoDragDrop(this, this._DragElement, DragDropEffects.Copy);
+                    DragDrop.DoDragDrop(this, this._DragElement, DragDropEffects.All);
                     this._DragElement = null;
                 }
             }
         }
 
-        private void DragEnd(object sender, MouseEventArgs e)
+        /// <summary>
+        /// ドラッグ中断
+        /// </summary>
+        private void DragCancel(object sender, MouseEventArgs e)
         {
             this._DragElement = null;
+        }
+
+        /// <summary>
+        /// ドロップされた
+        /// </summary>
+        private void Droped(object sender, DragEventArgs e)
+        {
+            if (this._DragElement == null)
+            {
+                return;
+            }
+
+            var target = EnumerateParent(this.InputHitTest(e.GetPosition(this)) as FrameworkElement)
+                .OfType<DataGridRowHeader>()
+                .FirstOrDefault();
+
+            var point = e.GetPosition(target);
+            var width = target.ActualWidth;
+            var height = target.ActualHeight;
+            var leftTop = target.TranslatePoint(new Point(0D, 0D), this);
+            var rightBottom = target.TranslatePoint(new Point(0D, height), this);
+
+            var insertType = (point.Y <= leftTop.Y + 7D) ? ReorderInfo.InsertType.InsertPrev
+                           : (point.Y >= rightBottom.Y - 7D) ? ReorderInfo.InsertType.InsertNext
+                           : ReorderInfo.InsertType.InsertChild;
+
+            this.ReorderAction?.Invoke(new ReorderInfo(this._DragElement.DataContext, target.DataContext, insertType));
         }
 
         private FrameworkElement _DragElement;
