@@ -245,7 +245,6 @@ namespace Toolkit.WPF.Controls
 
             this.PreviewMouseDown += this.TryDrag;
             this.PreviewMouseMove += this.TryDrag;
-            this.PreviewMouseUp += this.DragCancel;
             this.AllowDrop = true;
             this.Drop += this.Droped;
 
@@ -566,6 +565,7 @@ namespace Toolkit.WPF.Controls
         {
             if (e.LeftButton != MouseButtonState.Pressed)
             {
+                this._DragElement = null;
                 return;
             }
 
@@ -601,15 +601,7 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
-        /// ドラッグ中断
-        /// </summary>
-        private void DragCancel(object sender, MouseEventArgs e)
-        {
-            this._DragElement = null;
-        }
-
-        /// <summary>
-        /// ドロップされた
+        /// ドロップ
         /// </summary>
         private void Droped(object sender, DragEventArgs e)
         {
