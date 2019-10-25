@@ -127,6 +127,7 @@
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=(local:DynamicTableGrid.IsSelectedCellContains), RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}}" Value="True">
                 <Setter Property="Background" Value="{x:Static SystemColors.InactiveSelectionHighlightBrush}" />
+                <Setter Property="Padding" Value="3" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
