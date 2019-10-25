@@ -71,6 +71,14 @@ namespace Corekit.Extensions
         }
 
         /// <summary>
+        /// Nullな場合はDefaultを返す
+        /// </summary>
+        public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> source)
+        {
+            return source ?? Enumerable.Empty<T>();
+        }
+
+        /// <summary>
         /// 直積を列挙
         /// </summary>
         public static IEnumerable<T> CrossJoin<T,T1,T2>(this IEnumerable<T1> collection1, IEnumerable<T2> collection2, Func<T1,T2,T> predicate)
