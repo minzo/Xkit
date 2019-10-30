@@ -231,12 +231,20 @@ namespace Toolkit.WPF.Controls
 
             var items = this._DataGrid.ItemsSource.OfType<object>();
             var type = items.FirstOrDefault()?.GetType();
-            this._ExpandedPropertyInfo = type?.GetProperty(this.ExpandedPropertyPath);
-            this._ChildrenPropertyInfo = type?.GetProperty(this.ChildrenPropertyPath);
+
+            if (!string.IsNullOrEmpty(this.ExpandedPropertyPath))
+            {
+                this._ExpandedPropertyInfo = type?.GetProperty(this.ExpandedPropertyPath);
+            }
+
+            if (!string.IsNullOrEmpty(this.ChildrenPropertyPath))
+            {
+                this._ChildrenPropertyInfo = type?.GetProperty(this.ChildrenPropertyPath);
+            }
 
             foreach (var item in items)
             {
-                this.UpdateTreeInfo(item, (bool)this._ExpandedPropertyInfo.GetValue(item));
+                this.UpdateTreeInfo(item, (bool?)this._ExpandedPropertyInfo?.GetValue(item) == true);
             }
         }
 
@@ -370,6 +378,9 @@ namespace Toolkit.WPF.Controls
             }
         }
 
+        /// <summary>
+        /// ツリー情報
+        /// </summary>
         class TreeInfo
         {
             public bool IsVisible => this.IsParentVisible && this.IsParentExpanded;
@@ -391,12 +402,16 @@ namespace Toolkit.WPF.Controls
         private DataGrid _DataGrid;
         private ResourceDictionary _ResourceDictionary;
 
+        /// <summary>
+        /// 静的コンストラクタ
+        /// </summary>
         static DataGridTreeColumn()
         {
             Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/DynamicTableGrid/DataGridTreeColumn.xaml") };
         }
 
         private static ResourceDictionary Resource;
+        private static readonly double DepthMarginUnit = 12D;
 
         /// <summary>
         /// VisualChildrenを列挙する
@@ -407,7 +422,5 @@ namespace Toolkit.WPF.Controls
             var children = Enumerable.Range(0, count).Select(i => VisualTreeHelper.GetChild(dp, i));
             return children.Concat(children.SelectMany(i => EnumerateChildren(i)));
         }
-
-        private static readonly double DepthMarginUnit = 12D;
     }
 }
