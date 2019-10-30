@@ -36,9 +36,9 @@ namespace Corekit.Models
             set {
                 if (!Equals(this._Value, value))
                 {
-                    this.PropertyChanging?.Invoke(this, _changingEventArgs);
+                    this.PropertyChanging?.Invoke(this, _ChangingEventArgs);
                     this._Value = value;
-                    this.PropertyChanged?.Invoke(this, _changedEventArgs);
+                    this.PropertyChanged?.Invoke(this, _ChangedEventArgs);
                 }
             }
         }
@@ -58,21 +58,21 @@ namespace Corekit.Models
         /// </summary>
         public DynamicProperty(IDynamicPropertyDefinition definition, IDynamicItem owner = null)
         {
-            Definition = definition;
-            Owner = owner;
-            _Value = (T)Definition.GetDefaultValue();
+            this.Definition = definition;
+            this.Owner = owner;
+            this._Value = (T)this.Definition.GetDefaultValue();
         }
 
         /// <summary>
         /// ToString
         /// </summary>
-        public override string ToString() => Value.ToString();
+        public override string ToString() => this.Value?.ToString();
 
         private T _Value;
 
         public event PropertyChangingEventHandler PropertyChanging;
         public event PropertyChangedEventHandler PropertyChanged;
-        private static readonly PropertyChangingEventArgs _changingEventArgs = new PropertyChangingEventArgs(nameof(Value));
-        private static readonly PropertyChangedEventArgs _changedEventArgs = new PropertyChangedEventArgs(nameof(Value));
+        private static readonly PropertyChangingEventArgs _ChangingEventArgs = new PropertyChangingEventArgs(nameof(Value));
+        private static readonly PropertyChangedEventArgs _ChangedEventArgs = new PropertyChangedEventArgs(nameof(Value));
     }
 }
