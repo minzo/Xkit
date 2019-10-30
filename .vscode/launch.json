@@ -1,26 +1,19 @@
 {
-    // IntelliSense を使用して利用可能な属性を学べます。
-    // 既存の属性の説明をホバーして表示します。
-    // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Launch (console)",
+            "name": "Launch CoreKit.Sample",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/CorekitSample/bin/Debug/netcoreapp2.0/CorekitSample.dll",
+            "preLaunchTask": "Build Corekit.Sample",
+            "program": "${workspaceFolder}/Corekit.Sample/bin/Debug/netcoreapp3.0/Corekit.Sample.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/CorekitSample",
+            "cwd": "${workspaceFolder}",
             "console": "internalConsole",
-            "stopAtEntry": false,
-            "internalConsoleOptions": "openOnSessionStart"
-        },
-        {
-            "name": ".NET Core Attach",
-            "type": "coreclr",
-            "request": "attach",
-            "processId": "${command:pickProcess}"
+            "stopAtEntry": false
         }
     ]
 }
