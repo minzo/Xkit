@@ -25,9 +25,9 @@ namespace Corekit
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public JobManager(int numOfConcurrentExectuions)
+        public JobManager(int numOfConcurrentExecutions)
         {
-            this._NumOfConcurrentExections = numOfConcurrentExectuions;
+            this._NumOfConcurrentExecutions = numOfConcurrentExecutions;
             this._JobQueue = new ConcurrentQueue<Action>();
             this._CancellationTokenSource = new CancellationTokenSource();
         }
@@ -62,7 +62,7 @@ namespace Corekit
         {
             while (this._CancellationTokenSource?.IsCancellationRequested == false)
             {
-                if (Interlocked.Increment(ref this._ActiveTaskCount) <= this._NumOfConcurrentExections)
+                if (Interlocked.Increment(ref this._ActiveTaskCount) <= this._NumOfConcurrentExecutions)
                 {
                     if (this._JobQueue.TryDequeue(out Action job))
                     {
@@ -94,7 +94,7 @@ namespace Corekit
         }
 
         private int _ActiveTaskCount = 0;
-        private readonly int _NumOfConcurrentExections;
+        private readonly int _NumOfConcurrentExecutions;
 
         private readonly ConcurrentQueue<Action> _JobQueue;
         private readonly CancellationTokenSource _CancellationTokenSource;
