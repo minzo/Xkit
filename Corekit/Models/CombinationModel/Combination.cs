@@ -120,7 +120,7 @@ namespace Corekit.Models
         /// <summary>
         /// 名前
         /// </summary>
-        public string Name { get; }
+        string Name { get; }
     }
 
     /// <summary>

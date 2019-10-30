@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.28729.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Corekit", "Corekit\Corekit.csproj", "{746DFADC-C397-4194-8515-7C75E9D68A15}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolkit", "Toolkit\Toolkit.csproj", "{CC49D8BA-6407-4059-8B45-7812B8615C8E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolkit.WPF", "Toolkit.WPF\Toolkit.WPF.csproj", "{FD46BA66-88FD-4CD4-8E0D-D25A8C349D75}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolkit.WPF.Sample", "Toolkit.WPF.Sample\Toolkit.WPF.Sample.csproj", "{B1C835BD-64B3-4CA1-8B01-C61B65830E4F}"
@@ -19,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolkit.WPF.Editor", "Toolk
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xkit.Plugins.Sample", "XKit.Plugins.Sample\Xkit.Plugins.Sample.csproj", "{D2688EC3-235D-421F-BBF8-451BFCE27CD5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreWPF", "NetCoreWPF\NetCoreWPF.csproj", "{16E1CC33-E3C6-44DE-BD16-9B4F18311746}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +29,6 @@ Global
 		{746DFADC-C397-4194-8515-7C75E9D68A15}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{746DFADC-C397-4194-8515-7C75E9D68A15}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{746DFADC-C397-4194-8515-7C75E9D68A15}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CC49D8BA-6407-4059-8B45-7812B8615C8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CC49D8BA-6407-4059-8B45-7812B8615C8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CC49D8BA-6407-4059-8B45-7812B8615C8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CC49D8BA-6407-4059-8B45-7812B8615C8E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FD46BA66-88FD-4CD4-8E0D-D25A8C349D75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FD46BA66-88FD-4CD4-8E0D-D25A8C349D75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD46BA66-88FD-4CD4-8E0D-D25A8C349D75}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -57,6 +53,10 @@ Global
 		{D2688EC3-235D-421F-BBF8-451BFCE27CD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2688EC3-235D-421F-BBF8-451BFCE27CD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2688EC3-235D-421F-BBF8-451BFCE27CD5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16E1CC33-E3C6-44DE-BD16-9B4F18311746}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16E1CC33-E3C6-44DE-BD16-9B4F18311746}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16E1CC33-E3C6-44DE-BD16-9B4F18311746}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16E1CC33-E3C6-44DE-BD16-9B4F18311746}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -211,10 +211,6 @@
       <Project>{fd46ba66-88fd-4cd4-8e0d-d25a8c349d75}</Project>
       <Name>Toolkit.WPF</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Toolkit\Toolkit.csproj">
-      <Project>{1c3076e3-cb94-4018-87d5-d3f504780284}</Project>
-      <Name>Toolkit</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.1">
