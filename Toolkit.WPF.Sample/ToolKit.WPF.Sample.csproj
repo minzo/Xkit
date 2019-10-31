@@ -96,6 +96,10 @@
       <DependentUpon>ColorSelectComboBoxWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="DynamicTable\DynamicItemListWindowViewModel.cs" />
+    <Compile Include="DynamicTable\DynamicTableItemsWindowViewModel.cs" />
+    <Compile Include="DynamicTable\DynamicTableItemsWindow.xaml.cs">
+      <DependentUpon>DynamicTableItemsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DynamicTable\DynamicTableWindow.xaml.cs">
       <DependentUpon>DynamicTableWindow.xaml</DependentUpon>
     </Compile>
@@ -124,6 +128,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="DynamicTable\DynamicItemListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DynamicTable\DynamicTableItemsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
