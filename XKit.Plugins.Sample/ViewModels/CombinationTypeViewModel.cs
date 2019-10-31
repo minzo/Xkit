@@ -80,7 +80,7 @@ namespace Xkit.Plugins.Sample.ViewModels
 
         public System.Collections.IComparer Comparer { get; }
 
-        ListCollectionView _View { get; }
+        private ListCollectionView _View { get; }
 
         private CombinationType _Model;
 

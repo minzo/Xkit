@@ -1,6 +1,7 @@
 ﻿using Corekit.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -18,6 +19,8 @@ namespace Xkit.Plugins.Sample.Models
         public string Key { get => this.GetPropertyValueImpl<string>(); set => this.SetPropertyValueImpl(value); }
 
         public int Variation { get => this.GetPropertyValueImpl<int>(); set => this.SetPropertyValueImpl(value); }
+
+        public ObservableCollection<EventTrigger> Children { get; } = new ObservableCollection<EventTrigger>();
 
         /// <summary>
         /// コンストラクタ

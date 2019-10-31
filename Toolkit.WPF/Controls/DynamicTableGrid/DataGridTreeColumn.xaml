@@ -36,7 +36,6 @@
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="BorderBrush" TargetName="border" Value="#FFADB2B5"/>
-                            <!--<Setter Property="Background" TargetName="border" Value="#FFF4F4F4"/>-->
                             <Setter Property="Foreground" Value="#FF838383"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -64,7 +63,7 @@
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="Autp"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <ToggleButton Name="Expander" Grid.Column="0" IsEnabled="False" Style="{StaticResource {x:Type ToggleButton}}" />

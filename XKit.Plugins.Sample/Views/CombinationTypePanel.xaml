@@ -73,8 +73,16 @@
             <StatusBar DockPanel.Dock="Top" Margin="4" Background="White" />
             <tkit:DynamicTableGrid
                 IsVisibleZoomValue="True"
-                ItemsSource="{Binding SelectedTriggers, Mode=OneWay}"
-                />
+                ItemsSource="{Binding SelectedTriggers, Mode=OneWay}">
+                <tkit:DynamicTableGrid.Columns>
+                    <tkit:DataGridTreeColumn
+                        Header="Key"
+                        Binding="{Binding Key.Value}"
+                        ChildrenPropertyPath="Children"
+                        />
+
+                </tkit:DynamicTableGrid.Columns>
+            </tkit:DynamicTableGrid>
         </DockPanel>
     </Grid>
 </UserControl>
