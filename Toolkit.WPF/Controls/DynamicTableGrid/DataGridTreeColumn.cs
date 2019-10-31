@@ -360,6 +360,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private bool HasChildren(object item)
         {
+            System.Diagnostics.Debug.Assert(item.GetType() == this._ChildrenPropertyInfo.ReflectedType, "CellEditing 状態で開閉はできません");
             return (this._ChildrenPropertyInfo?.GetValue(item) as IEnumerable<object>)?.Any() ?? false;
         }
 
