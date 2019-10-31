@@ -19,17 +19,11 @@ namespace Toolkit.WPF.Sample
         public string Name { get; set; }
 
         public bool IsExpanded {
-            get => isExpanded;
-            set {
-                if(isExpanded != value)
-                {
-                    isExpanded = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsExpanded)));
-                }
-            }
+            get => this._IsExpanded;
+            set => this.SetProperty(ref this._IsExpanded, value);
         }
 
-        private bool isExpanded = false;
+        private bool _IsExpanded = false;
 
         public event PropertyChangedEventHandler PropertyChanged;
     }
