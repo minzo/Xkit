@@ -64,7 +64,7 @@ namespace Toolkit.WPF.Controls.Adorners
 
             if (targetElement != null)
             {
-                var point = GetNowPosition(targetElement);
+                var point = GetNowPosition(this.AdornedElement);
                 var width = targetElement.ActualWidth;
                 var height = targetElement.ActualHeight;
 
@@ -85,7 +85,6 @@ namespace Toolkit.WPF.Controls.Adorners
                 }
                 else
                 {
-                    // this._RenderRect = new Rect(leftTop.X, leftTop.Y, width, 2D);
                 }
             }
 
@@ -140,22 +139,14 @@ namespace Toolkit.WPF.Controls.Adorners
             public uint Y;
         }
 
-        public static Point GetNowPosition(Visual v)
+        private static Point GetNowPosition(Visual v)
         {
             GetCursorPos(out var p);
-
-            var source = PresentationSource.FromVisual(v) as System.Windows.Interop.HwndSource;
-            var hwnd = source.Handle;
-
-            ScreenToClient(hwnd, ref p);
-            return new Point(p.X, p.Y);
+            return v.PointFromScreen(new Point(p.X, p.Y));
         }
 
         [DllImport("user32.dll")]
         private static extern void GetCursorPos(out POINT pt);
-
-        [DllImport("user32.dll")]
-        private static extern int ScreenToClient(IntPtr hwnd, ref POINT pt);
 
         #endregion
     }
