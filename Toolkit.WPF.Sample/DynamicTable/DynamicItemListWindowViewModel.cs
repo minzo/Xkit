@@ -30,7 +30,7 @@ namespace Toolkit.WPF.Sample
     {
         public TypedCollection<DynamicItem> Items { get; } = new TypedCollection<DynamicItem>();
 
-        public ObservableCollection<TypedCollection<DynamicItem>> ItemsCollection { get; } = new ObservableCollection<TypedCollection<DynamicItem>>();
+        public ObservableCollection<ObservableCollection<DynamicItem>> ItemsCollection { get; } = new ObservableCollection<ObservableCollection<DynamicItem>>();
 
         public ICommand AddCommand { get; }
 
@@ -74,11 +74,11 @@ namespace Toolkit.WPF.Sample
 
             items2[0].SetPropertyValue("DisplayColor", Colors.Orange);
 
-            ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
-            ItemsCollection.Add(new TypedCollection<DynamicItem>(items2));
-            ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
-            ItemsCollection.Add(new TypedCollection<DynamicItem>(items2));
-            ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
+            ItemsCollection.Add(new ObservableCollection<DynamicItem>(items));
+            ItemsCollection.Add(new ObservableCollection<DynamicItem>(items2));
+            ItemsCollection.Add(new ObservableCollection<DynamicItem>(items));
+            ItemsCollection.Add(new ObservableCollection<DynamicItem>(items2));
+            ItemsCollection.Add(new ObservableCollection<DynamicItem>(items));
         }
 
 #pragma warning disable CS0067

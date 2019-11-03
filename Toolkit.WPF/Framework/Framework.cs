@@ -16,23 +16,24 @@ namespace Toolkit.WPF
         /// <summary>
         /// 実行
         /// </summary>
-        public int Run<TApp>() 
-            where TApp : Application, IComponentConnector, new()
-        {
-            var app = UnhandledExceptionSubscriber(new TApp());
-            (app as IComponentConnector).InitializeComponent();
-            return app.Run();
-        }
-
-        /// <summary>
-        /// 実行
-        /// </summary>
-        public int Run<TApp, TWindow>(object dataContext)
+        public int Run<TApp, TWindow>(object dataContext = null)
             where TApp : Application, IComponentConnector, new()
             where TWindow : Window, new()
         {
             var app = UnhandledExceptionSubscriber(new TApp());
             (app as IComponentConnector).InitializeComponent();
+            return app.Run(new TWindow() { DataContext = dataContext });
+        }
+
+        /// <summary>
+        /// 実行
+        /// </summary>
+        public int Run<TWindow>(object dataContext, string resourcePath)
+            where TWindow : Window, new()
+        {
+            var app = UnhandledExceptionSubscriber(new Application());
+            var resourceLocator = new Uri(resourcePath, System.UriKind.Relative);
+            Application.LoadComponent(app, resourceLocator);
             return app.Run(new TWindow() { DataContext = dataContext });
         }
 

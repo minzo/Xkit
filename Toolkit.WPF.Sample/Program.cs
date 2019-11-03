@@ -12,10 +12,9 @@ namespace Toolkit.WPF.Sample
         /// Application Entry Point.
         /// </summary>
         [STAThread]
-        [System.Diagnostics.DebuggerNonUserCode]
         public static int Main(string[] args)
         {
-            return new Framework().Run<App>();
+            return new Framework().Run<App, MainWindow>(null);
         }
     }
 }
