@@ -206,7 +206,7 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
-        /// OnDtaGridItemsSourceChanged
+        /// OnDataGridItemsSourceChanged
         /// </summary>
         private void OnDataGridItemsSourceChanged(object sender, EventArgs e)
         {
