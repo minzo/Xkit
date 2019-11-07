@@ -8,7 +8,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Toolkit.WPF.Controls
@@ -86,14 +85,14 @@ namespace Toolkit.WPF.Controls
             DependencyProperty.Register("IconTemplateSelector", typeof(DataTemplateSelector), typeof(DataGridTreeColumn), new PropertyMetadata(null));
 
         #endregion
-        
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
         public DataGridTreeColumn()
         {
             this._ResourceDictionary = Resource;
-            this._TreeInfo = new Dictionary<object,TreeInfo>();
+            this._TreeInfo = new Dictionary<object, TreeInfo>();
         }
 
         /// <summary>
@@ -120,8 +119,10 @@ namespace Toolkit.WPF.Controls
 
             // Expander
             expander.Visibility = this.HasChildren(dataItem) ? Visibility.Visible : Visibility.Hidden;
+            expander.IsChecked = this.GetIsExpanded(dataItem);
             expander.Checked += this.OnToggleChanged;
             expander.Unchecked += this.OnToggleChanged;
+            expander.DataContext = dataItem;
             TrySetBinding(expander, ToggleButton.IsCheckedProperty, this.ExpandedPropertyPath);
 
             // Icon
@@ -191,7 +192,7 @@ namespace Toolkit.WPF.Controls
                     this._DataGrid.LoadingRow -= this.OnDataGridRowLoading;
                     DependencyPropertyDescriptor
                         .FromProperty(DataGrid.ItemsSourceProperty, typeof(DataGrid))
-                        .RemoveValueChanged(this._DataGrid, this.OnDataGridItemsSourceChanged);                    
+                        .RemoveValueChanged(this._DataGrid, this.OnDataGridItemsSourceChanged);
                 }
 
                 this._DataGrid = this.DataGridOwner;
