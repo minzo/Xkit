@@ -183,6 +183,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
         {
+            base.OnPropertyChanged(e);
+
             // DataGridにColumnが追加された後にDependencyPropertyが設定されることを利用して 
             // なるべく追加直後に DataGridOwner を取得する
             if (this.DataGridOwner != null && this._DataGrid != this.DataGridOwner)
