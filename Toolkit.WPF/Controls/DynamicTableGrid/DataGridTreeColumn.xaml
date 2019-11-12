@@ -58,7 +58,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <ToggleButton Name="Expander" Grid.Column="0" Style="{StaticResource {x:Type ToggleButton}}" />
-            <ContentPresenter Name="Icon" Grid.Column="1" VerticalAlignment="Center" Margin="0 0 4 0" />
+            <ContentPresenter Name="Icon" Grid.Column="1" Margin="0 0 4 0" />
             <ContentPresenter Name="Content" Grid.Column="2" />
         </Grid>
     </DataTemplate>
@@ -72,7 +72,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <ToggleButton Name="Expander" Grid.Column="0" IsEnabled="False" Style="{StaticResource {x:Type ToggleButton}}" />
-            <ContentPresenter Name="Icon" Grid.Column="1" VerticalAlignment="Center" Margin="0 0 4 0" />
+            <ContentPresenter Name="Icon" Grid.Column="1" Margin="0 0 4 0" />
             <TextBox 
                 Grid.Column="2"
                 Name="TextBox"
