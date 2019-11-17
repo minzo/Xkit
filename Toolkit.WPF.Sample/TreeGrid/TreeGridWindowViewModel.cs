@@ -12,19 +12,18 @@ namespace Toolkit.WPF.Sample
 {
     public class TreeGridItem : INotifyPropertyChanged
     {
+        public string Name { get; set; }
+     
         public List<TreeGridItem> Children { get; set; } = new List<TreeGridItem>();
 
-        public string PropertyPath { get; set; } = "Name";
+        public bool IsExpanded { get => this._IsExpanded; set => this.SetProperty(ref this._IsExpanded, value); }
 
-        public string Name { get; set; }
-
-        public bool IsExpanded {
-            get => this._IsExpanded;
-            set => this.SetProperty(ref this._IsExpanded, value);
+        public TreeGridItem(string name)
+        {
+            this.Name = name;
         }
 
         private bool _IsExpanded = false;
-
 
 #pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
@@ -32,62 +31,47 @@ namespace Toolkit.WPF.Sample
     }
 
 
-    public class TreeGridWindowViewModel
+    public class TreeGridWindowViewModel : INotifyPropertyChanged
     {
-        static public List<TreeGridItem> items { get; set; } = new List<TreeGridItem>()
-        {
-            new TreeGridItem() { Name = "Parent0", Children = new List<TreeGridItem>() {
-                new TreeGridItem() { Name = "Children00", Children = new List<TreeGridItem>() {
-                    new TreeGridItem() { Name = "GroundChildren00" },
-                    new TreeGridItem() { Name = "GroundChildren01" },
-                }},
-                new TreeGridItem() { Name = "Children01" }
-            } },
-            new TreeGridItem() { Name = "Parent1" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent2" },
-            new TreeGridItem() { Name = "Parent0", Children = new List<TreeGridItem>() {
-                new TreeGridItem() { Name = "Children00", Children = new List<TreeGridItem>() {
-                    new TreeGridItem() { Name = "GroundChildren00" },
-                    new TreeGridItem() { Name = "GroundChildren01" },
-                }},
-                new TreeGridItem() { Name = "Children01" }
-            } },
-            new TreeGridItem() { Name = "Parent0", Children = new List<TreeGridItem>() {
-                new TreeGridItem() { Name = "Children00", Children = new List<TreeGridItem>() {
-                    new TreeGridItem() { Name = "GroundChildren00" },
-                    new TreeGridItem() { Name = "GroundChildren01" },
-                }},
-                new TreeGridItem() { Name = "Children01" }
-            } },
-            new TreeGridItem() { Name = "Parent0", Children = new List<TreeGridItem>() {
-                new TreeGridItem() { Name = "Children00", Children = new List<TreeGridItem>() {
-                    new TreeGridItem() { Name = "GroundChildren00" },
-                    new TreeGridItem() { Name = "GroundChildren01" },
-                }},
-                new TreeGridItem() { Name = "Children01" }
-            } },
-            new TreeGridItem() { Name = "Parent0", Children = new List<TreeGridItem>() {
-                new TreeGridItem() { Name = "Children00", Children = new List<TreeGridItem>() {
-                    new TreeGridItem() { Name = "GroundChildren00" },
-                    new TreeGridItem() { Name = "GroundChildren01" },
-                }},
-                new TreeGridItem() { Name = "Children01" }
-            } },
-        };
+        public string FilterText { get => this._FilterText; set => this.SetProperty(ref this._FilterText, value); }
 
-        public ObservableCollection<TreeGridItem> Items { get; } = new ObservableCollection<TreeGridItem>(items.EnumerateTree(i => i.Children));
+        public ObservableCollection<TreeGridItem> Items { get; }
+
+        public ObservableCollection<TreeGridItem> TreeRootItems { get; }
+
+        public TreeGridWindowViewModel()
+        {
+            this.TreeRootItems = this.GenerateTree(2, 4).Children.ToObservableCollection();
+
+            this.Items = this.TreeRootItems
+                .EnumerateTree(i => i.Children)
+                .ToObservableCollection();
+
+            this._CollectionView = System.Windows.Data.CollectionViewSource.GetDefaultView(this.Items);
+            this._CollectionView.Filter = item => (item as TreeGridItem).Name.Contains(this._FilterText);
+        }
+
+        private TreeGridItem GenerateTree(int depth, int breadth)
+        {
+            if (depth > 0 && breadth > 0)
+            {
+                var children = Enumerable.Range(0, breadth)
+                    .Select(i => this.GenerateTree(depth - 1, breadth - 1))
+                    .ToList();
+
+                return new TreeGridItem($"Item_{depth}_{breadth}") { Children = children };
+            }
+
+            return new TreeGridItem($"Item_{depth}_{breadth}");
+        }
+
+
+        private ICollectionView _CollectionView;
+
+        private string _FilterText = string.Empty;
+
+#pragma warning disable CS0067
+        public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
     }
 }

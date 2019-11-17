@@ -9,56 +9,61 @@
         Title="TreeGridWindow" Height="450" Width="800">
     <Window.Resources>
         <DataTemplate x:Key="IconTemplate">
-            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8B7;" Width="16"/>
+            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8B7;" Width="16" VerticalAlignment="Center"/>
         </DataTemplate>
     </Window.Resources>
     <Window.DataContext>
         <local:TreeGridWindowViewModel />
     </Window.DataContext>
+    <DockPanel>
+        <StatusBar DockPanel.Dock="Top">
+            <tkitwpf:FilterTextBox 
+                MinWidth="100"
+                Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged, Delay=100}" WatermarkText="フィルタ" />
+        </StatusBar>
+        
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="4" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="4" />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="TreeView" Margin="4"/>
+                <TreeView
+                    ItemsSource="{Binding TreeRootItems}"
+                    IsTextSearchEnabled="False">
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                            <TextBlock Text="{Binding Name}" />
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                </TreeView>
+            </DockPanel>
 
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
 
-        <DockPanel>
-            <TextBlock DockPanel.Dock="Top" Text="TreeView" Margin="4"/>
-            <TreeView
-                ItemsSource="{Binding Items}"
-                IsTextSearchEnabled="False">
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                        <TextBlock Text="{Binding Name}" />
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-                <TreeView.ItemContainerStyle>
-                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
-                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                    </Style>
-                </TreeView.ItemContainerStyle>
-            </TreeView>
-        </DockPanel>
-
-        <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-
-        <DataGrid 
-            Grid.Column="2" 
-            CanUserAddRows="False"
-            CanUserDeleteRows="False"
-            ItemsSource="{Binding Items}">
-            <DataGrid.Columns>
-                <tkitwpf:DataGridTreeColumn 
-                    Header="Tree"
-                    Icon="&#xE8E1;"
-                    IconTemplate="{StaticResource IconTemplate}"
-                    Binding="{Binding Name}"
-                    ExpandedPropertyPath="IsExpanded"
-                    ChildrenPropertyPath="Children"
-                    />
-            </DataGrid.Columns>
-        </DataGrid>
-    </Grid>
+            <DataGrid 
+                Grid.Column="2" 
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                ItemsSource="{Binding Items}">
+                <DataGrid.Columns>
+                    <tkitwpf:DataGridTreeColumn 
+                        Header="Tree"
+                        IconTemplate="{StaticResource IconTemplate}"
+                        Binding="{Binding Name}"
+                        ExpandedPropertyPath="IsExpanded"
+                        ChildrenPropertyPath="Children"
+                        />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </DockPanel>
 </Window>
