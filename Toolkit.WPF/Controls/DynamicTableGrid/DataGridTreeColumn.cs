@@ -120,10 +120,9 @@ namespace Toolkit.WPF.Controls
             // Expander
             expander.Visibility = this.HasChildren(dataItem) ? Visibility.Visible : Visibility.Hidden;
             expander.IsChecked = this.GetIsExpanded(dataItem);
+            TrySetBinding(expander, ToggleButton.IsCheckedProperty, this.ExpandedPropertyPath);
             expander.Checked += this.OnToggleChanged;
             expander.Unchecked += this.OnToggleChanged;
-            expander.DataContext = dataItem;
-            TrySetBinding(expander, ToggleButton.IsCheckedProperty, this.ExpandedPropertyPath);
 
             // Icon
             iconPresenter.Content = this.Icon;
@@ -224,9 +223,16 @@ namespace Toolkit.WPF.Controls
             if (this.GetCellContent(e.Row) is Grid grid)
             {
                 grid.Margin = new Thickness(this.GetDepth(e.Row.Item) * DepthMarginUnit, 0D, 0D, 0D);
+                grid.DataContext = e.Row.Item;
                 if (grid.FindName("Expander") is ToggleButton expander)
                 {
                     expander.Visibility = this.HasChildren(e.Row.Item) ? Visibility.Visible : Visibility.Hidden;
+
+                    // ExpandedPropertyPath が指定されていないときは自分の情報から復元する
+                    if (this._ExpandedPropertyInfo == null)
+                    {
+                        expander.IsChecked = this.GetIsExpanded(e.Row.Item);
+                    }
                 }
             }
         }
