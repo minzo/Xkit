@@ -7,19 +7,27 @@
         xmlns:local="clr-namespace:Toolkit.WPF.Sample"
         mc:Ignorable="d"
         Title="TreeGridWindow" Height="450" Width="800">
+    <Window.DataContext>
+        <local:TreeGridWindowViewModel />
+    </Window.DataContext>
+
     <Window.Resources>
         <DataTemplate x:Key="IconTemplate">
             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8B7;" Width="16" VerticalAlignment="Center"/>
         </DataTemplate>
     </Window.Resources>
-    <Window.DataContext>
-        <local:TreeGridWindowViewModel />
-    </Window.DataContext>
+    
     <DockPanel>
+
         <StatusBar DockPanel.Dock="Top">
             <tkitwpf:FilterTextBox 
                 MinWidth="100"
                 Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged, Delay=100}" WatermarkText="フィルタ" />
+
+            <Button Content="すべて開く" Command="{x:Static tkitwpf:DataGridTreeColumn.ExpandAll}" CommandTarget="{Binding ElementName=DataGrid}" />
+            <Button Content="すべて閉じる" Command="{x:Static tkitwpf:DataGridTreeColumn.CloseAll}" CommandTarget="{Binding ElementName=DataGrid}" />
+            <Button Content="選択アイテム以下をすべて開く" Command="{x:Static tkitwpf:DataGridTreeColumn.ExpandSelectedItems}" CommandTarget="{Binding ElementName=DataGrid}" />
+            <Button Content="選択アイテム以下をすべて閉じる" Command="{x:Static tkitwpf:DataGridTreeColumn.CloseSelectedItems}" CommandTarget="{Binding ElementName=DataGrid}" />
         </StatusBar>
         
         <Grid>
@@ -49,17 +57,18 @@
 
             <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
 
-            <DataGrid 
+            <DataGrid
+                x:Name="DataGrid"
                 Grid.Column="2" 
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
+                SelectionUnit="CellOrRowHeader"
                 ItemsSource="{Binding Items}">
                 <DataGrid.Columns>
                     <tkitwpf:DataGridTreeColumn 
                         Header="Tree"
                         IconTemplate="{StaticResource IconTemplate}"
                         Binding="{Binding Name}"
-                        ExpandedPropertyPath="IsExpanded"
                         ChildrenPropertyPath="Children"
                         />
                 </DataGrid.Columns>

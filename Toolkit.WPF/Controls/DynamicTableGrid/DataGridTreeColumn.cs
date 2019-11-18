@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Toolkit.WPF.Controls
@@ -17,6 +18,28 @@ namespace Toolkit.WPF.Controls
     /// </summary>
     public class DataGridTreeColumn : DataGridBindingColumn
     {
+        /// <summary>
+        /// ツリーをすべて開く
+        /// このColumnを追加したDataGridのCommandBindingsに追加されます
+        /// </summary>
+        public static RoutedUICommand ExpandAll { get; } = new RoutedUICommand(nameof(ExpandAll), nameof(ExpandAll), typeof(DataGridTreeColumn));
+
+        /// <summary>
+        /// ツリーをすべて閉じる
+        /// このColumnを追加したDataGridのCommandBindingsに追加されます
+        /// </summary>
+        public static RoutedUICommand CloseAll { get; } = new RoutedUICommand(nameof(CloseAll), nameof(CloseAll), typeof(DataGridTreeColumn));
+
+        /// <summary>
+        /// 選択アイテム以下をすべて開く
+        /// </summary>
+        public static RoutedUICommand ExpandSelectedItems { get; } = new RoutedUICommand(nameof(ExpandSelectedItems), nameof(ExpandSelectedItems), typeof(DataGridTreeColumn));
+
+        /// <summary>
+        /// 選択アイテム以下をすべて閉じる
+        /// </summary>
+        public static RoutedUICommand CloseSelectedItems { get; } = new RoutedUICommand(nameof(CloseSelectedItems), nameof(ExpandSelectedItems), typeof(DataGridTreeColumn));
+
         /// <summary>
         /// 子要素のプロパティパス
         /// </summary>
@@ -95,6 +118,97 @@ namespace Toolkit.WPF.Controls
             this._TreeInfo = new Dictionary<object, TreeInfo>();
         }
 
+        #region Treeの開閉処理
+
+        /// <summary>
+        /// すべて開く
+        /// </summary>
+        private void ExpandAllImpl(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (this._DataGrid.ItemsSource != null)
+            {
+                foreach (var item in this._DataGrid.ItemsSource)
+                {
+                    this.UpdateTreeInfo(item, true);
+                    this._ExpandedPropertyInfo?.SetValue(item, true);
+                }
+                this.ApplyDefaultFilter();
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// すべて閉じる
+        /// </summary>
+        private void CloseAllImpl(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (this._DataGrid.ItemsSource != null)
+            {
+                foreach (var item in this._DataGrid.ItemsSource)
+                {
+                    this.UpdateTreeInfo(item, false);
+                    this._ExpandedPropertyInfo?.SetValue(item, false);
+                }
+                this.ApplyDefaultFilter();
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 選択アイテム以下をすべて開く
+        /// </summary>
+        private void ExpandSelectedItemsImpl(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (this._DataGrid.SelectedCells != null)
+            {
+                foreach (var item in this._DataGrid.SelectedCells.Select(i => i.Item).Distinct())
+                {
+                    this.UpdateTreeInfo(item, true);
+                    this.SetExpanded(item, true);
+                }
+                this.ApplyDefaultFilter();
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 選択アイテム以下をすべて閉じる
+        /// </summary>
+        private void CloseSelectedItemsImpl(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (this._DataGrid.SelectedCells != null)
+            {
+                foreach (var item in this._DataGrid.SelectedCells.Select(i => i.Item).Distinct())
+                {
+                    this.UpdateTreeInfo(item, false);
+                    this.SetExpanded(item, false);
+                }
+                this.ApplyDefaultFilter();
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 開閉状態を設定する
+        /// </summary>
+        private void SetExpanded(object item, bool isExpanded)
+        {
+            if( this._ExpandedPropertyInfo != null)
+            {
+                this._ExpandedPropertyInfo?.SetValue(item, isExpanded);
+
+                if (this._ChildrenPropertyInfo?.GetValue(item) is IEnumerable<object> children)
+                {
+                    foreach (var child in children)
+                    {
+                        this.SetExpanded(child, isExpanded);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
         /// <summary>
         /// LoadTempalteContent
         /// </summary>
@@ -103,10 +217,7 @@ namespace Toolkit.WPF.Controls
             bool isUseDefaultTextBox = cell.IsEditing && template == null && selector == null;
             var key = isUseDefaultTextBox ? "TextBoxCellEditingTemplate" : "CellTemplate";
 
-            if (!this.TryFindControl(key, out FrameworkElement element))
-            {
-                return null;
-            }
+            var element = (this._ResourceDictionary[key] as DataTemplate).LoadContent() as FrameworkElement;
 
             var grid = element as Grid;
             var expander = element.FindName("Expander") as ToggleButton;
@@ -163,21 +274,6 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
-        /// Controlをリソースから探す
-        /// </summary>
-        private bool TryFindControl(string templateKey, out FrameworkElement element)
-        {
-            if (this._ResourceDictionary[templateKey] is DataTemplate template)
-            {
-                element = template.LoadContent() as FrameworkElement;
-                return true;
-            }
-
-            element = null;
-            return false;
-        }
-
-        /// <summary>
         /// DependencyProperty変更通知
         /// </summary>
         protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
@@ -201,6 +297,11 @@ namespace Toolkit.WPF.Controls
                 DependencyPropertyDescriptor
                     .FromProperty(DataGrid.ItemsSourceProperty, typeof(DataGrid))
                     .AddValueChanged(this._DataGrid, this.OnDataGridItemsSourceChanged);
+
+                this._DataGrid.CommandBindings.Add(new CommandBinding(ExpandAll, this.ExpandAllImpl));
+                this._DataGrid.CommandBindings.Add(new CommandBinding(CloseAll, this.CloseAllImpl));
+                this._DataGrid.CommandBindings.Add(new CommandBinding(ExpandSelectedItems, this.ExpandSelectedItemsImpl, (s, e) => { e.CanExecute = this._DataGrid.SelectedCells.Count > 0; }));
+                this._DataGrid.CommandBindings.Add(new CommandBinding(CloseSelectedItems, this.CloseSelectedItemsImpl, (s, e) => { e.CanExecute = this._DataGrid.SelectedCells.Count > 0; }));
 
                 this.Prepare();
             }
@@ -294,7 +395,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// フィルタ状態にデフォルトを適用します
         /// </summary>
-        public void ApplyDefaultFilter()
+        private void ApplyDefaultFilter()
         {
             if (this._CollectionView != null)
             {

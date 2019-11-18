@@ -41,7 +41,7 @@ namespace Toolkit.WPF.Sample
 
         public TreeGridWindowViewModel()
         {
-            this.TreeRootItems = this.GenerateTree(2, 4).Children.ToObservableCollection();
+            this.TreeRootItems = this.GenerateTree(3, 4).Children.ToObservableCollection();
 
             this.Items = this.TreeRootItems
                 .EnumerateTree(i => i.Children)
