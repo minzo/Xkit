@@ -38,7 +38,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// 選択アイテム以下をすべて閉じる
         /// </summary>
-        public static RoutedUICommand CloseSelectedItems { get; } = new RoutedUICommand(nameof(CloseSelectedItems), nameof(ExpandSelectedItems), typeof(DataGridTreeColumn));
+        public static RoutedUICommand CloseSelectedItems { get; } = new RoutedUICommand(nameof(CloseSelectedItems), nameof(CloseSelectedItems), typeof(DataGridTreeColumn));
 
         /// <summary>
         /// 子要素のプロパティパス
@@ -163,8 +163,7 @@ namespace Toolkit.WPF.Controls
             {
                 foreach (var item in this._DataGrid.SelectedCells.Select(i => i.Item).Distinct())
                 {
-                    this.UpdateTreeInfo(item, true);
-                    this.SetExpanded(item, true);
+                    this.SetExpandedDescendantsAndSelf(item, true);
                 }
                 this.ApplyDefaultFilter();
             }
@@ -180,8 +179,7 @@ namespace Toolkit.WPF.Controls
             {
                 foreach (var item in this._DataGrid.SelectedCells.Select(i => i.Item).Distinct())
                 {
-                    this.UpdateTreeInfo(item, false);
-                    this.SetExpanded(item, false);
+                    this.SetExpandedDescendantsAndSelf(item, false);
                 }
                 this.ApplyDefaultFilter();
             }
@@ -189,20 +187,18 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
-        /// 開閉状態を設定する
+        /// 自分を含んで子孫に開閉状態を設定する
         /// </summary>
-        private void SetExpanded(object item, bool isExpanded)
+        private void SetExpandedDescendantsAndSelf(object item, bool isExpanded)
         {
-            if( this._ExpandedPropertyInfo != null)
+            if (this._ChildrenPropertyInfo?.GetValue(item) is IEnumerable<object> children)
             {
                 this._ExpandedPropertyInfo?.SetValue(item, isExpanded);
+                this.UpdateTreeInfo(item, isExpanded);
 
-                if (this._ChildrenPropertyInfo?.GetValue(item) is IEnumerable<object> children)
+                foreach (var child in children)
                 {
-                    foreach (var child in children)
-                    {
-                        this.SetExpanded(child, isExpanded);
-                    }
+                    this.SetExpandedDescendantsAndSelf(child, isExpanded);
                 }
             }
         }

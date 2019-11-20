@@ -69,6 +69,7 @@
                         Header="Tree"
                         IconTemplate="{StaticResource IconTemplate}"
                         Binding="{Binding Name}"
+                        ExpandedPropertyPath="IsExpanded"
                         ChildrenPropertyPath="Children"
                         />
                 </DataGrid.Columns>
