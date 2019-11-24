@@ -7,7 +7,7 @@
     </ResourceDictionary.MergedDictionaries>
 
     <!-- ColumnHeaderTemplate -->
-    <DataTemplate x:Key="ColumnHeaderTemplate">
+    <DataTemplate x:Key="CombinationColumnHeaderTemplate">
         <ItemsControl
             Focusable="False"
             ItemsSource="{Binding Elements}"
@@ -39,7 +39,7 @@
 
     <!-- CombinationGrid -->
     <Style TargetType="{x:Type local:CombinationGrid}" BasedOn="{StaticResource {x:Type local:DynamicTableGrid}}">
-        <Setter Property="ColumnHeaderTemplate" Value="{StaticResource ColumnHeaderTemplate}" />
+        <Setter Property="ColumnHeaderTemplate" Value="{StaticResource CombinationColumnHeaderTemplate}" />
         <Setter Property="RowHeaderTemplate" Value="{StaticResource CombinationRowHeaderTemplate}" />
     </Style>
     

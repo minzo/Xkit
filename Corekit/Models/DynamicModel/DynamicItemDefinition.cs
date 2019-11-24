@@ -68,7 +68,7 @@ namespace Corekit.Models
         /// <summary>
         /// インデクサ
         /// </summary>
-        public IDynamicPropertyDefinition this[int index] => this.collection[index];
+        public IDynamicPropertyDefinition this[int index] => this._Collection[index];
 
         /// <summary>
         /// コンストラクタ
@@ -78,15 +78,15 @@ namespace Corekit.Models
             if(collection is INotifyCollectionChanged notify)
             {
                 notify.CollectionChanged += (s, e) => {
-                    e.OldItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => this.collection.Remove(i));
+                    e.OldItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => this._Collection.Remove(i));
                     int insertIndex = e.NewStartingIndex;
-                    e.NewItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => this.collection.Insert(insertIndex++, i));
+                    e.NewItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => this._Collection.Insert(insertIndex++, i));
                 };
             }
 
-            this.collection = new ObservableCollection<IDynamicPropertyDefinition>(collection);
-            this.collection.CollectionChanged += OnCollectionChanged;
-            this.collection.ForEach(i => i.PropertyChanged += OnPropertyChanged);
+            this._Collection = new ObservableCollection<IDynamicPropertyDefinition>(collection);
+            this._Collection.CollectionChanged += OnCollectionChanged;
+            this._Collection.ForEach(i => i.PropertyChanged += OnPropertyChanged);
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace Corekit.Models
         /// </summary>
         public void Add(IDynamicPropertyDefinition definition)
         {
-            this.collection.Add(definition);
+            this._Collection.Add(definition);
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace Corekit.Models
         /// </summary>
         public void Remove(IDynamicPropertyDefinition definition)
         {
-            this.collection.Remove(definition);
+            this._Collection.Remove(definition);
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace Corekit.Models
         /// </summary>
         public IEnumerator<IDynamicPropertyDefinition> GetEnumerator()
         {
-            return this.collection.GetEnumerator();
+            return this._Collection.GetEnumerator();
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Corekit.Models
         /// </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.collection.GetEnumerator();
+            return this._Collection.GetEnumerator();
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace Corekit.Models
             this.PropertyChanged?.Invoke(this, e);
         }
         
-        private ObservableCollection<IDynamicPropertyDefinition> collection;
+        private ObservableCollection<IDynamicPropertyDefinition> _Collection;
 
         #region Event
 

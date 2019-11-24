@@ -33,7 +33,15 @@ namespace Toolkit.WPF.Sample
 
     public class TreeGridWindowViewModel : INotifyPropertyChanged
     {
-        public string FilterText { get => this._FilterText; set => this.SetProperty(ref this._FilterText, value); }
+        public string FilterText { 
+            get => this._FilterText;
+            set {
+                if (this.SetProperty(ref this._FilterText, value))
+                {
+                    this._CollectionView.Filter = item => false;
+                }
+            }
+        }
 
         public ObservableCollection<TreeGridItem> Items { get; }
 
@@ -48,7 +56,8 @@ namespace Toolkit.WPF.Sample
                 .ToObservableCollection();
 
             this._CollectionView = System.Windows.Data.CollectionViewSource.GetDefaultView(this.Items);
-            this._CollectionView.Filter = item => (item as TreeGridItem).Name.Contains(this._FilterText);
+            (this._CollectionView as ICollectionViewLiveShaping).IsLiveFiltering = true;
+            (this._CollectionView as ICollectionViewLiveShaping).LiveFilteringProperties.Add(nameof(this.FilterText));
         }
 
         private TreeGridItem GenerateTree(int depth, int breadth)

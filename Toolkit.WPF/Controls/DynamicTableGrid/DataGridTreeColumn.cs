@@ -18,6 +18,8 @@ namespace Toolkit.WPF.Controls
     /// </summary>
     public class DataGridTreeColumn : DataGridBindingColumn
     {
+        #region コマンド
+
         /// <summary>
         /// ツリーをすべて開く
         /// このColumnを追加したDataGridのCommandBindingsに追加されます
@@ -32,13 +34,17 @@ namespace Toolkit.WPF.Controls
 
         /// <summary>
         /// 選択アイテム以下をすべて開く
+        /// このColumnを追加したDataGridのCommandBindingsに追加されます
         /// </summary>
         public static RoutedUICommand ExpandSelectedItems { get; } = new RoutedUICommand(nameof(ExpandSelectedItems), nameof(ExpandSelectedItems), typeof(DataGridTreeColumn));
 
         /// <summary>
         /// 選択アイテム以下をすべて閉じる
+        /// このColumnを追加したDataGridのCommandBindingsに追加されます
         /// </summary>
         public static RoutedUICommand CloseSelectedItems { get; } = new RoutedUICommand(nameof(CloseSelectedItems), nameof(CloseSelectedItems), typeof(DataGridTreeColumn));
+
+        #endregion
 
         /// <summary>
         /// 子要素のプロパティパス
@@ -264,7 +270,6 @@ namespace Toolkit.WPF.Controls
                 }
 
                 this.UpdateTreeInfo(expander.DataContext, expander.IsChecked == true);
-                this._CollectionView.CommitEdit();
                 this._CollectionView.Refresh();
             }
         }
@@ -345,8 +350,8 @@ namespace Toolkit.WPF.Controls
             // CollectionViewをクリア
             if (this._CollectionView != null)
             {
-                ((ICollectionView)this._CollectionView).CollectionChanged -= this.OnCollectionChanged;
-                this._CollectionView.LiveFilteringProperties.Clear();
+                this._CollectionView.CollectionChanged -= this.OnCollectionChanged;
+                (this._CollectionView as ICollectionViewLiveShaping)?.LiveFilteringProperties.Clear();
                 this._CollectionView = null;
             }
 
@@ -375,13 +380,16 @@ namespace Toolkit.WPF.Controls
                 this.UpdateTreeInfo(item, (bool?)this._ExpandedPropertyInfo?.GetValue(item) == true);
             }
 
-            if (CollectionViewSource.GetDefaultView(this.DataGridOwner.ItemsSource) is ICollectionView collection)
+            if (CollectionViewSource.GetDefaultView(this._DataGrid.ItemsSource) is ICollectionView collection)
             {
-                collection.CollectionChanged += this.OnCollectionChanged;
-                this._CollectionView = (ListCollectionView)collection;
-                this._CollectionView.IsLiveFiltering = true;
-                this._CollectionView.LiveFilteringProperties.Clear();
-                this._CollectionView.LiveFilteringProperties.Add(this.ExpandedPropertyPath);
+                this._CollectionView = collection;
+                this._CollectionView.CollectionChanged += this.OnCollectionChanged;
+                if( this._CollectionView is ICollectionViewLiveShaping liveShaping && !string.IsNullOrEmpty(this.ExpandedPropertyPath))
+                {
+                    liveShaping.IsLiveFiltering = true;
+                    liveShaping.LiveFilteringProperties.Clear();
+                    liveShaping.LiveFilteringProperties.Add(this.ExpandedPropertyPath);
+                }
             }
 
             // Tree情報をもとにフィルターを適用する
@@ -395,7 +403,7 @@ namespace Toolkit.WPF.Controls
         {
             if (this._CollectionView != null)
             {
-                this._CollectionView.Filter = item => this.GetIsVisible(item);
+                this._CollectionView.Filter = this.GetIsVisible;
             }
         }
 
@@ -490,7 +498,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// ツリー情報
         /// </summary>
-        class TreeInfo
+        private class TreeInfo
         {
             public bool IsVisible => this.IsParentVisible && this.IsParentExpanded;
 
@@ -506,7 +514,7 @@ namespace Toolkit.WPF.Controls
         private Dictionary<object, TreeInfo> _TreeInfo;
         private PropertyInfo _ExpandedPropertyInfo;
         private PropertyInfo _ChildrenPropertyInfo;
-        private ListCollectionView _CollectionView;
+        private ICollectionView _CollectionView;
 
         private DataGrid _DataGrid;
         private ResourceDictionary _ResourceDictionary;

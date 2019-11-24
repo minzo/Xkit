@@ -18,12 +18,8 @@
     </Window.Resources>
     
     <DockPanel>
-
         <StatusBar DockPanel.Dock="Top">
-            <tkitwpf:FilterTextBox 
-                MinWidth="100"
-                Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged, Delay=100}" WatermarkText="フィルタ" />
-
+            <tkitwpf:FilterTextBox MinWidth="100" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged, Delay=100}" WatermarkText="フィルタ" />
             <Button Content="すべて開く" Command="{x:Static tkitwpf:DataGridTreeColumn.ExpandAll}" CommandTarget="{Binding ElementName=DataGrid}" />
             <Button Content="すべて閉じる" Command="{x:Static tkitwpf:DataGridTreeColumn.CloseAll}" CommandTarget="{Binding ElementName=DataGrid}" />
             <Button Content="選択アイテム以下をすべて開く" Command="{x:Static tkitwpf:DataGridTreeColumn.ExpandSelectedItems}" CommandTarget="{Binding ElementName=DataGrid}" />
@@ -65,7 +61,7 @@
                 SelectionUnit="CellOrRowHeader"
                 ItemsSource="{Binding Items}">
                 <DataGrid.Columns>
-                    <tkitwpf:DataGridTreeColumn 
+                    <tkitwpf:DataGridTreeColumn
                         Header="Tree"
                         IconTemplate="{StaticResource IconTemplate}"
                         Binding="{Binding Name}"
