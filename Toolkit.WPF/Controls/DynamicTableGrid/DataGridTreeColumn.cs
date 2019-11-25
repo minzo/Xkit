@@ -116,6 +116,19 @@ namespace Toolkit.WPF.Controls
         #endregion
 
         /// <summary>
+        /// フィルター
+        /// </summary>
+        public Predicate<object> Filter
+        {
+            get { return (Predicate<object>)GetValue(FilterProperty); }
+            set { SetValue(FilterProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for Filter.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty FilterProperty =
+            DependencyProperty.Register("Filter", typeof(Predicate<object>), typeof(DataGridTreeColumn), new PropertyMetadata(null));
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         public DataGridTreeColumn()
@@ -403,7 +416,7 @@ namespace Toolkit.WPF.Controls
         {
             if (this._CollectionView != null)
             {
-                this._CollectionView.Filter = this.GetIsVisible;
+                this._CollectionView.Filter = item => this.Filter?.Invoke(item) ?? this.GetIsVisible(item);
             }
         }
 
@@ -508,7 +521,7 @@ namespace Toolkit.WPF.Controls
 
             public bool IsParentExpanded { get; internal set; } = true;
 
-            public int Depth { get; internal set; }
+            public int Depth { get; internal set; } = 0;
         }
 
         private Dictionary<object, TreeInfo> _TreeInfo;
