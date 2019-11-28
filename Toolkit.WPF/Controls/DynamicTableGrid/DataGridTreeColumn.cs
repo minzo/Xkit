@@ -135,6 +135,7 @@ namespace Toolkit.WPF.Controls
         {
             this._ResourceDictionary = Resource;
             this._TreeInfo = new Dictionary<object, TreeInfo>();
+            this.EnableToggleButtonAssist = false;
         }
 
         #region Treeの開閉処理
@@ -283,6 +284,7 @@ namespace Toolkit.WPF.Controls
                 }
 
                 this.UpdateTreeInfo(expander.DataContext, expander.IsChecked == true);
+                this._DataGrid.CommitEdit();
                 this._CollectionView.Refresh();
             }
         }

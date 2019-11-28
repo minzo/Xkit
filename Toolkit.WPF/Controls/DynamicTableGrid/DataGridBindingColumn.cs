@@ -14,6 +14,11 @@ namespace Toolkit.WPF.Controls
     /// </summary>
     public class DataGridBindingColumn : DataGridBoundColumn
     {
+        /// <summary>
+        /// トグルボタン系コントロール入力補助（セルクリック・スペースキーでの切り替え）
+        /// </summary>
+        public bool EnableToggleButtonAssist { get; set; } = true;
+
         #region Template
 
         public DataTemplate CellTemplate
@@ -96,7 +101,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// LoadTempalteContent
         /// </summary>
-        protected virtual FrameworkElement LoadTemplateContent(DataGridCell cell, object dataItem, DataTemplate template, DataTemplateSelector selector)            
+        protected virtual FrameworkElement LoadTemplateContent(DataGridCell cell, object dataItem, DataTemplate template, DataTemplateSelector selector)
         {
             var contentPresenter = new ContentPresenter()
             {
@@ -271,6 +276,11 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private bool ToggleButtonEditAssist(DataGridCell cell)
         {
+            if (!this.EnableToggleButtonAssist)
+            {
+                return false;
+            }
+
             if (cell == null || cell.IsReadOnly || !cell.IsSelected)
             {
                 return false;
