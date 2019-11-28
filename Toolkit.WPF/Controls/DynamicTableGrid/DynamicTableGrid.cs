@@ -19,6 +19,20 @@ namespace Toolkit.WPF.Controls
     /// </summary>
     public class DynamicTableGrid : DataGrid
     {
+        #region コマンド
+
+        /// <summary>
+        /// 水平セル選択コマンド
+        /// </summary>
+        public static RoutedUICommand SelectCellsHorizontalCommand { get; } = new RoutedUICommand(nameof(SelectCellsHorizontalCommand), nameof(SelectCellsHorizontalCommand), typeof(DynamicTableGrid));
+
+        /// <summary>
+        /// 垂直セル選択コマンド
+        /// </summary>
+        public static RoutedUICommand SelectCellsVerticalCommand { get; } = new RoutedUICommand(nameof(SelectCellsVerticalCommand), nameof(SelectCellsVerticalCommand), typeof(DynamicTableGrid));
+
+        #endregion
+
         #region DataTemplateSelector
 
         /// <summary>
@@ -252,6 +266,9 @@ namespace Toolkit.WPF.Controls
 
             this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Copy, (s, e) => this.OnCopy(), (s, e) => e.CanExecute = true));
             this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Paste, (s, e) => this.OnPaste(), (s, e) => e.CanExecute = true));
+            this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Cut, (s, e) => { }, (s, e) => e.CanExecute = true));
+            this.CommandBindings.Add(new CommandBinding(SelectCellsHorizontalCommand, (s, e) => this.SelectCellsHorizontal(), (s, e) => e.CanExecute = this.SelectedCells.Any()));
+            this.CommandBindings.Add(new CommandBinding(SelectCellsVerticalCommand, (s, e) => this.SelectCellsVertical(), (s, e) => e.CanExecute = this.SelectedCells.Any()));
         }
 
         /// <summary>
@@ -782,6 +799,46 @@ namespace Toolkit.WPF.Controls
         }
 
         #endregion
+
+        /// <summary>
+        /// 水平セル選択コマンド
+        /// </summary>
+        public void SelectCellsHorizontal()
+        {
+            var items = this.SelectedCells
+                .GroupBy(i => i.Item)
+                .Select(i => i.First().Item)
+                .ToList();
+
+            this.SelectedCells.Clear();
+            foreach (var column in this.Columns)
+            {
+                foreach (var item in items)
+                {
+                    this.SelectedCells.Add(new DataGridCellInfo(item, column));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 垂直セル選択コマンド
+        /// </summary>
+        public void SelectCellsVertical()
+        {
+            var columns = this.SelectedCells
+                .GroupBy(i => i.Column)
+                .Select(i => i.First().Column)
+                .ToList();
+
+            this.SelectedCells.Clear();
+            foreach (var column in columns)
+            {
+                foreach (var item in this.ItemsSource)
+                {
+                    this.SelectedCells.Add(new DataGridCellInfo(item, column));
+                }
+            }
+        }
 
         /// <summary>
         /// 列を選択する
