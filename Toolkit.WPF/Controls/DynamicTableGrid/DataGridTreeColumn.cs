@@ -24,25 +24,25 @@ namespace Toolkit.WPF.Controls
         /// ツリーをすべて開く
         /// このColumnを追加したDataGridのCommandBindingsに追加されます
         /// </summary>
-        public static RoutedUICommand ExpandAll { get; } = new RoutedUICommand(nameof(ExpandAll), nameof(ExpandAll), typeof(DataGridTreeColumn));
+        public static RoutedUICommand ExpandAllCommand { get; } = new RoutedUICommand(nameof(ExpandAllCommand), nameof(ExpandAllCommand), typeof(DataGridTreeColumn));
 
         /// <summary>
         /// ツリーをすべて閉じる
         /// このColumnを追加したDataGridのCommandBindingsに追加されます
         /// </summary>
-        public static RoutedUICommand CloseAll { get; } = new RoutedUICommand(nameof(CloseAll), nameof(CloseAll), typeof(DataGridTreeColumn));
+        public static RoutedUICommand CloseAllCommand { get; } = new RoutedUICommand(nameof(CloseAllCommand), nameof(CloseAllCommand), typeof(DataGridTreeColumn));
 
         /// <summary>
         /// 選択アイテム以下をすべて開く
         /// このColumnを追加したDataGridのCommandBindingsに追加されます
         /// </summary>
-        public static RoutedUICommand ExpandSelectedItems { get; } = new RoutedUICommand(nameof(ExpandSelectedItems), nameof(ExpandSelectedItems), typeof(DataGridTreeColumn));
+        public static RoutedUICommand ExpandSelectedItemsCommand { get; } = new RoutedUICommand(nameof(ExpandSelectedItemsCommand), nameof(ExpandSelectedItemsCommand), typeof(DataGridTreeColumn));
 
         /// <summary>
         /// 選択アイテム以下をすべて閉じる
         /// このColumnを追加したDataGridのCommandBindingsに追加されます
         /// </summary>
-        public static RoutedUICommand CloseSelectedItems { get; } = new RoutedUICommand(nameof(CloseSelectedItems), nameof(CloseSelectedItems), typeof(DataGridTreeColumn));
+        public static RoutedUICommand CloseSelectedItemsCommand { get; } = new RoutedUICommand(nameof(CloseSelectedItemsCommand), nameof(CloseSelectedItemsCommand), typeof(DataGridTreeColumn));
 
         #endregion
 
@@ -142,7 +142,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// すべて開く
         /// </summary>
-        private void ExpandAllImpl(object sender, ExecutedRoutedEventArgs e)
+        public void ExpandAll(object sender, ExecutedRoutedEventArgs e)
         {
             if (this._DataGrid.ItemsSource != null)
             {
@@ -159,7 +159,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// すべて閉じる
         /// </summary>
-        private void CloseAllImpl(object sender, ExecutedRoutedEventArgs e)
+        public void CloseAll(object sender, ExecutedRoutedEventArgs e)
         {
             if (this._DataGrid.ItemsSource != null)
             {
@@ -176,7 +176,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// 選択アイテム以下をすべて開く
         /// </summary>
-        private void ExpandSelectedItemsImpl(object sender, ExecutedRoutedEventArgs e)
+        public void ExpandSelectedItems(object sender, ExecutedRoutedEventArgs e)
         {
             if (this._DataGrid.SelectedCells != null)
             {
@@ -192,7 +192,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// 選択アイテム以下をすべて閉じる
         /// </summary>
-        private void CloseSelectedItemsImpl(object sender, ExecutedRoutedEventArgs e)
+        public void CloseSelectedItems(object sender, ExecutedRoutedEventArgs e)
         {
             if (this._DataGrid.SelectedCells != null)
             {
@@ -312,10 +312,10 @@ namespace Toolkit.WPF.Controls
                     .FromProperty(DataGrid.ItemsSourceProperty, typeof(DataGrid))
                     .AddValueChanged(this._DataGrid, this.OnDataGridItemsSourceChanged);
 
-                this._DataGrid.CommandBindings.Add(new CommandBinding(ExpandAll, this.ExpandAllImpl));
-                this._DataGrid.CommandBindings.Add(new CommandBinding(CloseAll, this.CloseAllImpl));
-                this._DataGrid.CommandBindings.Add(new CommandBinding(ExpandSelectedItems, this.ExpandSelectedItemsImpl, (s, e) => { e.CanExecute = this._DataGrid.SelectedCells.Count > 0; }));
-                this._DataGrid.CommandBindings.Add(new CommandBinding(CloseSelectedItems, this.CloseSelectedItemsImpl, (s, e) => { e.CanExecute = this._DataGrid.SelectedCells.Count > 0; }));
+                this._DataGrid.CommandBindings.Add(new CommandBinding(ExpandAllCommand, this.ExpandAll));
+                this._DataGrid.CommandBindings.Add(new CommandBinding(CloseAllCommand, this.CloseAll));
+                this._DataGrid.CommandBindings.Add(new CommandBinding(ExpandSelectedItemsCommand, this.ExpandSelectedItems, (s, e) => e.CanExecute = this._DataGrid.SelectedCells.Count > 0 ));
+                this._DataGrid.CommandBindings.Add(new CommandBinding(CloseSelectedItemsCommand, this.CloseSelectedItems, (s, e) => e.CanExecute = this._DataGrid.SelectedCells.Count > 0));
 
                 this.Prepare();
             }
