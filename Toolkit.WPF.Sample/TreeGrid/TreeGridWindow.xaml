@@ -20,10 +20,10 @@
     <DockPanel>
         <StatusBar DockPanel.Dock="Top">
             <tkitwpf:FilterTextBox MinWidth="100" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged, Delay=100}" WatermarkText="フィルタ" />
-            <Button Content="すべて開く" Command="{x:Static tkitwpf:DataGridTreeColumn.ExpandAll}" CommandTarget="{Binding ElementName=DataGrid}" />
-            <Button Content="すべて閉じる" Command="{x:Static tkitwpf:DataGridTreeColumn.CloseAll}" CommandTarget="{Binding ElementName=DataGrid}" />
-            <Button Content="選択アイテム以下をすべて開く" Command="{x:Static tkitwpf:DataGridTreeColumn.ExpandSelectedItems}" CommandTarget="{Binding ElementName=DataGrid}" />
-            <Button Content="選択アイテム以下をすべて閉じる" Command="{x:Static tkitwpf:DataGridTreeColumn.CloseSelectedItems}" CommandTarget="{Binding ElementName=DataGrid}" />
+            <Button Content="すべて開く" Command="{x:Static tkitwpf:DataGridTreeColumn.ExpandAllCommand}" CommandTarget="{Binding ElementName=DataGrid}" />
+            <Button Content="すべて閉じる" Command="{x:Static tkitwpf:DataGridTreeColumn.CloseAllCommand}" CommandTarget="{Binding ElementName=DataGrid}" />
+            <Button Content="選択アイテム以下をすべて開く" Command="{x:Static tkitwpf:DataGridTreeColumn.ExpandSelectedItemsCommand}" CommandTarget="{Binding ElementName=DataGrid}" />
+            <Button Content="選択アイテム以下をすべて閉じる" Command="{x:Static tkitwpf:DataGridTreeColumn.CloseSelectedItemsCommand}" CommandTarget="{Binding ElementName=DataGrid}" />
         </StatusBar>
         
         <Grid>

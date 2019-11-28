@@ -54,6 +54,16 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
+
+        <ContextMenu x:Key="ContextMenu">
+            <MenuItem Header="選択しているセルの行を選択" Command="{x:Static tkit:DynamicTableGrid.SelectCellsHorizontalCommand}" />
+            <MenuItem Header="選択しているセルの列を選択" Command="{x:Static tkit:DynamicTableGrid.SelectCellsVerticalCommand}" />
+        </ContextMenu>
+
+        <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
+            <Setter Property="ContextMenu" Value="{StaticResource ContextMenu}" />
+        </Style>
+    
     </Window.Resources>
     
     <Grid>
