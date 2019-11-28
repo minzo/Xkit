@@ -147,6 +147,8 @@ namespace Toolkit.WPF.Controls
         {
             if (this._DataGrid.ItemsSource != null)
             {
+                bool ret = this._DataGrid.CommitEdit();
+
                 foreach (var item in this._DataGrid.ItemsSource)
                 {
                     this.UpdateTreeInfo(item, true);
@@ -164,6 +166,8 @@ namespace Toolkit.WPF.Controls
         {
             if (this._DataGrid.ItemsSource != null)
             {
+                this._DataGrid.CommitEdit();
+
                 foreach (var item in this._DataGrid.ItemsSource)
                 {
                     this.UpdateTreeInfo(item, false);
@@ -181,6 +185,8 @@ namespace Toolkit.WPF.Controls
         {
             if (this._DataGrid.SelectedCells != null)
             {
+                this._DataGrid.CommitEdit();
+
                 foreach (var item in this._DataGrid.SelectedCells.Select(i => i.Item).Distinct())
                 {
                     this.SetExpandedDescendantsAndSelf(item, true);
@@ -197,6 +203,8 @@ namespace Toolkit.WPF.Controls
         {
             if (this._DataGrid.SelectedCells != null)
             {
+                this._DataGrid.CommitEdit();
+
                 foreach (var item in this._DataGrid.SelectedCells.Select(i => i.Item).Distinct())
                 {
                     this.SetExpandedDescendantsAndSelf(item, false);
@@ -284,7 +292,6 @@ namespace Toolkit.WPF.Controls
                 }
 
                 this.UpdateTreeInfo(expander.DataContext, expander.IsChecked == true);
-                this._DataGrid.CommitEdit();
                 this._CollectionView.Refresh();
             }
         }
@@ -418,7 +425,13 @@ namespace Toolkit.WPF.Controls
         {
             if (this._CollectionView != null)
             {
-                this._CollectionView.Filter = item => this.Filter?.Invoke(item) ?? this.GetIsVisible(item);
+                try
+                {
+                    this._CollectionView.Filter = item => this.Filter?.Invoke(item) ?? this.GetIsVisible(item);
+                }
+                catch(InvalidOperationException)
+                {
+                }
             }
         }
 
