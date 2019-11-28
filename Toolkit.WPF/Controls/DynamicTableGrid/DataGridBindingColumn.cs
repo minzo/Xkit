@@ -230,6 +230,16 @@ namespace Toolkit.WPF.Controls
                     return;
                 }
 
+                // スペースキーでトグルボタンの入力補助
+                if (e.Key == Key.Space)
+                {
+                    e.Handled = this.ToggleButtonEditAssist(cell);
+                    if(e.Handled)
+                    {
+                        return;
+                    }
+                }
+
                 if (this.IsBeginEditCharacter(e.Key) || this.IsBeginEditCharacter(e.ImeProcessedKey))
                 {
                     this.DataGridOwner?.BeginEdit();
@@ -246,14 +256,6 @@ namespace Toolkit.WPF.Controls
                     this.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Background);
                 }
             }
-
-            if (e.Key == Key.Space)
-            {
-                e.Handled = this.CheckBoxEditAssist(cell);
-            }
-            else if (e.Key == Key.Delete)
-            {
-            }
         }
 
         /// <summary>
@@ -261,23 +263,23 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnPrevMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            e.Handled = this.CheckBoxEditAssist(sender as DataGridCell);
+            e.Handled = this.ToggleButtonEditAssist(sender as DataGridCell);
         }
 
         /// <summary>
-        /// チェックボックス入力補助
+        /// トグルボタン入力補助
         /// </summary>
-        private bool CheckBoxEditAssist(DataGridCell cell)
+        private bool ToggleButtonEditAssist(DataGridCell cell)
         {
             if (cell == null || cell.IsReadOnly || !cell.IsSelected)
             {
                 return false;
             }
 
-            var checkBox = EnumerateChildren(cell).OfType<CheckBox>().FirstOrDefault();
-            if (checkBox?.IsEnabled ?? false)
+            var toggleButton = EnumerateChildren(cell).OfType<System.Windows.Controls.Primitives.ToggleButton>().FirstOrDefault();
+            if (toggleButton?.IsEnabled ?? false)
             {
-                checkBox.IsChecked = !checkBox.IsChecked;
+                toggleButton.IsChecked = !toggleButton.IsChecked;
                 return true;
             }
 
