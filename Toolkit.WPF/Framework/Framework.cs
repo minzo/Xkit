@@ -49,7 +49,8 @@ namespace Toolkit.WPF
                 {
                     if (e.Exception is System.Runtime.InteropServices.COMException comException)
                     {
-                        e.Handled = comException.ErrorCode == -2147221040;
+                        e.Handled |= (comException.ErrorCode == -2147221040);
+                        e.Handled |= (comException.ErrorCode == 0x800401D0); // CLIPBRD_E_CANT_OPEN (0x800401D0);
                         return;
                     }
                     OnUnhandledException(s, e.Exception);
