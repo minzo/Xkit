@@ -38,7 +38,7 @@ namespace Toolkit.WPF.Sample
         {
             var definition = new DynamicItemDefinition(new IDynamicPropertyDefinition[] {
                 new DynamicPropertyDefinition<string>(){ Name = "Name" },
-                new DynamicPropertyDefinition<string>(){ Name = "Path", IsReadOnly = true },
+                new DynamicPropertyDefinition<string>(){ Name = "Path" },
                 new DynamicPropertyDefinition<Vector3>(){ Name = "Pos" },
                 new DynamicPropertyDefinition<bool>(){ Name = "ON" },
                 new DynamicPropertyDefinition<Mode>(){ Name = "Mode" },
@@ -74,11 +74,11 @@ namespace Toolkit.WPF.Sample
 
             items2[0].SetPropertyValue("DisplayColor", Colors.Orange);
 
-            ItemsCollection.Add(new ObservableCollection<DynamicItem>(items));
-            ItemsCollection.Add(new ObservableCollection<DynamicItem>(items2));
-            ItemsCollection.Add(new ObservableCollection<DynamicItem>(items));
-            ItemsCollection.Add(new ObservableCollection<DynamicItem>(items2));
-            ItemsCollection.Add(new ObservableCollection<DynamicItem>(items));
+            ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
+            ItemsCollection.Add(new TypedCollection<DynamicItem>(items2));
+            ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
+            ItemsCollection.Add(new TypedCollection<DynamicItem>(items2));
+            ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
         }
 
 #pragma warning disable CS0067

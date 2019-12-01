@@ -92,7 +92,6 @@
 
         <tkit:DynamicTableGrid
             Grid.Column="3"
-            tkit:CombinationGrid.IsSharedSizeScope="True"
             ItemsSource="{Binding Table}"
             />
     </Grid>

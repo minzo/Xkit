@@ -415,7 +415,7 @@ namespace Toolkit.WPF.Controls
             if (this.TryFindResource("BindingColumn") is DataGridBindingColumn column)
             {
                 column.Binding = new Binding(propertyName);
-                column.ClipboardContentBinding = new Binding($"{propertyName}.Value") { Mode = BindingMode.TwoWay };
+                column.ClipboardContentBinding = new Binding($"{propertyName}.Value") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged };
                 column.SortMemberPath = $"{propertyName}.Value";
                 column.IsReadOnly = isReadOnly;
                 column.Header = definition;
@@ -676,26 +676,29 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnPaste()
         {
-            var items = this.SelectedInfos
-                .Select(i => (Item: i.Item as IDynamicItem, Index: this.Columns.IndexOf(c => GetPropertyName(c) == i.PropertyName)))
-                .GroupBy(i => i.Item)
-                .Select(i => i.First())
-                .Where(i => i.Item != null)
+            var items = this.SelectedCells
+                .Select(i => i.Item)
+                .Distinct()
                 .ToList();
+
+            var columns = this.SelectedCells
+                .Select(i => i.Column)
+                .Distinct()
+                .ToList();
+
+            this._IsExecuteCommitEditing = true;
 
             var csv = Clipboard.GetText(TextDataFormat.CommaSeparatedValue);
             if (!string.IsNullOrEmpty(csv))
             {
-                var lines = csv.Split(new[] { "\n", Environment.NewLine }, StringSplitOptions.None);
-                for (var i = 0; i < items.Count; i++)
+                var rows = csv.Split(new[] { "\n", Environment.NewLine }, StringSplitOptions.None);
+                for (var r = 0; r < items.Count; r++)
                 {
-                    var values = lines[i % lines.Length].Split(',');
-                    for (var v = items[i].Index; v < values.Length; v++)
+                    var cols = rows[r % rows.Length].Split(new[] { ",", Environment.NewLine }, StringSplitOptions.None);
+                    for (var c = 0; c < columns.Count; c++)
                     {
-                        if (v < items[i].Item.Definition.Count())
-                        {
-                            items[i].Item.SetPropertyValue(v + items[i].Index, values[v]);
-                        }
+                        var value = cols[c % cols.Length];
+                        columns[c].OnPastingCellClipboardContent(items[r], value);
                     }
                 }
             }
@@ -703,19 +706,22 @@ namespace Toolkit.WPF.Controls
             var txt = Clipboard.GetText(TextDataFormat.Text);
             if (!string.IsNullOrEmpty(txt))
             {
-                var lines = txt.Split(new[] { "\n", Environment.NewLine }, StringSplitOptions.None);
-                for (var i = 0; i < items.Count; i++)
+                var rows = txt.Split(new[] { "\n", Environment.NewLine }, StringSplitOptions.None);
+                for (var r = 0; r < items.Count; r++)
                 {
-                    var values = lines[i % lines.Length].Split('\t');
-                    for (var v = 0; v < values.Length; v++)
+                    var cols = rows[r % rows.Length].Split(new[] { "\t", Environment.NewLine }, StringSplitOptions.None);
+                    for (var c = 0; c < columns.Count; c++)
                     {
-                        if (v < items[i].Item.Definition.Count())
-                        {
-                            items[i].Item.SetPropertyValue(v + items[i].Index, values[v]);
-                        }
+                        var value = cols[c % cols.Length];
+                        columns[c].OnPastingCellClipboardContent(items[r], value);
                     }
                 }
             }
+
+            // PasteによってEditing状態になっているのを確定する
+            this.CommitEdit();
+
+            this._IsExecuteCommitEditing = false;
         }
 
         #endregion
