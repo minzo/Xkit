@@ -11,6 +11,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Controls.Primitives;
+using System.ComponentModel;
 
 namespace Toolkit.WPF.Controls
 {
@@ -399,9 +400,15 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnAutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            if (e.PropertyDescriptor is DynamicPropertyDescriptor descriptor)
+            switch(e.PropertyDescriptor)
             {
-                e.Column = this.GenerateColumn(e.PropertyName, descriptor.IsReadOnly, descriptor.Definition) ?? e.Column;
+                case DynamicPropertyDescriptor v:
+                    e.Column = this.GenerateColumn(e.PropertyName, v.IsReadOnly, v.Definition) ?? e.Column;
+                    break;
+
+                case PropertyDescriptor v:
+                    e.Column.Visibility = v.IsBrowsable ? Visibility.Visible : Visibility.Collapsed;
+                    break;
             }
 
             SetPropertyName(e.Column, e.PropertyName);
@@ -418,6 +425,7 @@ namespace Toolkit.WPF.Controls
                 column.ClipboardContentBinding = new Binding($"{propertyName}.Value") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged };
                 column.SortMemberPath = $"{propertyName}.Value";
                 column.IsReadOnly = isReadOnly;
+                column.Visibility = definition.IsVisible ? Visibility.Visible : Visibility.Collapsed;
                 column.Header = definition;
                 column.HeaderTemplate = this.ColumnHeaderTemplate ?? column.HeaderTemplate;
                 column.CellTemplateSelector = this.CellTemplateSelector ?? column.CellTemplateSelector;
