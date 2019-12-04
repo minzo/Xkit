@@ -24,6 +24,11 @@ namespace Corekit.Models
         bool? IsReadOnly { get; }
 
         /// <summary>
+        /// 表示されるか
+        /// </summary>
+        bool IsVisible { get; }
+
+        /// <summary>
         /// 型
         /// </summary>
         Type ValueType { get; }
@@ -47,12 +52,17 @@ namespace Corekit.Models
         /// <summary>
         /// プロパティ定義の名前
         /// </summary>
-        public string Name { get => this._Name; set => SetProperty(ref this._Name, value); }
+        public string Name { get => this._Name; set => this.SetProperty(ref this._Name, value); }
 
         /// <summary>
         /// 読み取り専用（編集不可能か）
         /// </summary>
-        public bool? IsReadOnly { get => this._IsReadOnly; set => SetProperty(ref this._IsReadOnly, value); }
+        public bool? IsReadOnly { get => this._IsReadOnly; set => this.SetProperty(ref this._IsReadOnly, value); }
+
+        /// <summary>
+        /// 表示されるか
+        /// </summary>
+        public bool IsVisible { get => this._IsVisible; set => this.SetProperty(ref this._IsVisible, value); }
 
         /// <summary>
         /// 型
@@ -90,6 +100,7 @@ namespace Corekit.Models
 
         private string _Name = null;
         private bool? _IsReadOnly = null;
+        private bool _IsVisible = true;
 
 
         /// <summary>

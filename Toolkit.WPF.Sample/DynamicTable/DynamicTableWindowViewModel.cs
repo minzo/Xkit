@@ -108,6 +108,11 @@ namespace Toolkit.WPF.Sample
             public bool? IsReadOnly { get => this._IsReadOnly; set => this.SetProperty(ref this._IsReadOnly, value); }
 
             /// <summary>
+            /// 表示されるか
+            /// </summary>
+            public bool IsVisible { get => this._IsVisible; set => this.SetProperty(ref this._IsVisible, value); }
+
+            /// <summary>
             /// 型
             /// </summary>
             public Type ValueType => typeof(TValue);
@@ -151,6 +156,7 @@ namespace Toolkit.WPF.Sample
 
             private string _Name = null;
             private bool? _IsReadOnly = null;
+            private bool _IsVisible = true;
 
 #pragma warning disable CS0067
             public event PropertyChangingEventHandler PropertyChanging;
