@@ -35,13 +35,17 @@ namespace Toolkit.WPF.Sample
     {
         public string FilterText { 
             get => this._FilterText;
-            set {
+            set
+            {
                 if (this.SetProperty(ref this._FilterText, value))
                 {
-                    this._CollectionView.Filter = item => false;
+                    this.Filter = item => (item as TreeGridItem).Name.ToLower().Contains(this.FilterText.ToLower());
+                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Filter)));
                 }
             }
         }
+
+        public Predicate<object> Filter { get; set; }
 
         public ObservableCollection<TreeGridItem> Items { get; }
 
@@ -55,9 +59,9 @@ namespace Toolkit.WPF.Sample
                 .EnumerateTree(i => i.Children)
                 .ToObservableCollection();
 
-            this._CollectionView = System.Windows.Data.CollectionViewSource.GetDefaultView(this.Items);
-            (this._CollectionView as ICollectionViewLiveShaping).IsLiveFiltering = true;
-            (this._CollectionView as ICollectionViewLiveShaping).LiveFilteringProperties.Add(nameof(this.FilterText));
+            //this._CollectionView = System.Windows.Data.CollectionViewSource.GetDefaultView(this.Items);
+            //(this._CollectionView as ICollectionViewLiveShaping).IsLiveFiltering = true;
+            //(this._CollectionView as ICollectionViewLiveShaping).LiveFilteringProperties.Add(nameof(this.FilterText));
         }
 
         private TreeGridItem GenerateTree(int depth, int breadth)

@@ -115,18 +115,51 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
+        #region フィルター関連添付プロパティ
+
         /// <summary>
-        /// フィルター
+        /// フィルターテキスト
         /// </summary>
-        public Predicate<object> Filter
+        public static void SetFilterText(DependencyObject obj, string value)
         {
-            get { return (Predicate<object>)GetValue(FilterProperty); }
-            set { SetValue(FilterProperty, value); }
+            obj.SetValue(FilterTextProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for FilterText.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty FilterTextProperty =
+            DependencyProperty.RegisterAttached("FilterText", typeof(string), typeof(DataGridTreeColumn), new PropertyMetadata(null, (d, e) =>
+            {
+                if(d is DataGrid dataGrid)
+                {
+                    dataGrid.Columns
+                        .OfType<DataGridTreeColumn>()
+                        .FirstOrDefault()
+                        ?.ApplyFilter(e.NewValue as string);
+                }
+            }));
+
+        /// <summary>
+        /// ユーザーフィルターロジック
+        /// </summary>
+        public static void SetFilter(DependencyObject obj, Predicate<object> value)
+        {
+            obj.SetValue(FilterProperty, value);
         }
 
         // Using a DependencyProperty as the backing store for Filter.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty FilterProperty =
-            DependencyProperty.Register("Filter", typeof(Predicate<object>), typeof(DataGridTreeColumn), new PropertyMetadata(null));
+            DependencyProperty.RegisterAttached("Filter", typeof(Predicate<object>), typeof(DataGridTreeColumn), new PropertyMetadata(null, (d,e)=> 
+            {
+                if (d is DataGrid dataGrid)
+                {
+                    dataGrid.Columns
+                        .OfType<DataGridTreeColumn>()
+                        .FirstOrDefault()
+                        .SetUserFilter(e.NewValue as Predicate<object>);
+                }
+            }));
+
+        #endregion
 
         /// <summary>
         /// コンストラクタ
@@ -135,6 +168,7 @@ namespace Toolkit.WPF.Controls
         {
             this._ResourceDictionary = Resource;
             this._TreeInfo = new Dictionary<object, TreeInfo>();
+            this._FilterTreeInfo = new Dictionary<object, TreeInfo>();
             this.EnableToggleButtonAssist = false;
         }
 
@@ -152,7 +186,7 @@ namespace Toolkit.WPF.Controls
                     this.UpdateTreeInfo(item, true);
                     this._ExpandedPropertyInfo?.SetValue(item, true);
                 }
-                this.ApplyDefaultFilter();
+                this.RefreshFilter();
             }
             e.Handled = true;
         }
@@ -169,7 +203,7 @@ namespace Toolkit.WPF.Controls
                     this.UpdateTreeInfo(item, false);
                     this._ExpandedPropertyInfo?.SetValue(item, false);
                 }
-                this.ApplyDefaultFilter();
+                this.RefreshFilter();
             }
             e.Handled = true;
         }
@@ -185,7 +219,7 @@ namespace Toolkit.WPF.Controls
                 {
                     this.SetExpandedDescendantsAndSelf(item, true);
                 }
-                this.ApplyDefaultFilter();
+                this.RefreshFilter();
             }
             e.Handled = true;
         }
@@ -201,7 +235,7 @@ namespace Toolkit.WPF.Controls
                 {
                     this.SetExpandedDescendantsAndSelf(item, false);
                 }
-                this.ApplyDefaultFilter();
+                this.RefreshFilter();
             }
             e.Handled = true;
         }
@@ -284,7 +318,7 @@ namespace Toolkit.WPF.Controls
                 }
 
                 this.UpdateTreeInfo(expander.DataContext, expander.IsChecked == true);
-                this._CollectionView.Refresh();
+                this.RefreshFilter();
             }
         }
 
@@ -360,6 +394,7 @@ namespace Toolkit.WPF.Controls
         {
             // Tree情報をクリア
             this._TreeInfo.Clear();
+            this._FilterTreeInfo.Clear();
 
             // CollectionViewをクリア
             if (this._CollectionView != null)
@@ -394,37 +429,52 @@ namespace Toolkit.WPF.Controls
                 this.UpdateTreeInfo(item, (bool?)this._ExpandedPropertyInfo?.GetValue(item) == true);
             }
 
-            if (CollectionViewSource.GetDefaultView(this._DataGrid.ItemsSource) is ICollectionView collection)
+            this._CollectionView = this.DataGridOwner.Items;
+            this._CollectionView.CollectionChanged += this.OnCollectionChanged;
+            if (this._CollectionView is ICollectionViewLiveShaping liveShaping && !string.IsNullOrEmpty(this.ExpandedPropertyPath))
             {
-                this._CollectionView = collection;
-                this._CollectionView.CollectionChanged += this.OnCollectionChanged;
-                if( this._CollectionView is ICollectionViewLiveShaping liveShaping && !string.IsNullOrEmpty(this.ExpandedPropertyPath))
-                {
-                    liveShaping.IsLiveFiltering = true;
-                    liveShaping.LiveFilteringProperties.Clear();
-                    liveShaping.LiveFilteringProperties.Add(this.ExpandedPropertyPath);
-                }
+                liveShaping.IsLiveFiltering = true;
+                liveShaping.LiveFilteringProperties.Clear();
+                liveShaping.LiveFilteringProperties.Add(this.ExpandedPropertyPath);
             }
 
             // Tree情報をもとにフィルターを適用する
-            this.ApplyDefaultFilter();
+            this.RefreshFilter();
         }
 
         /// <summary>
         /// フィルタ状態にデフォルトを適用します
         /// </summary>
-        private void ApplyDefaultFilter()
+        private void RefreshFilter()
         {
             if (this._CollectionView != null)
             {
                 try
                 {
-                    this._CollectionView.Filter = item => this.Filter?.Invoke(item) ?? this.GetIsVisible(item);
+                    this._CollectionView.Filter = item => this.GetIsVisible(item) && this._UserFilter?.Invoke(item) != false;
                 }
                 catch(InvalidOperationException)
                 {
+                    // Editing状態でフィルターされた場合に例外を捕まえる
                 }
             }
+        }
+
+        /// <summary>
+        /// フィルターを適用します
+        /// </summary>
+        private void ApplyFilter(string filterText = null)
+        {
+            this._FilterText = filterText;
+        }
+
+        /// <summary>
+        /// ユーザーフィルターをセット
+        /// </summary>
+        private void SetUserFilter(Predicate<object> filter)
+        {
+            this._UserFilter = filter;
+            this.RefreshFilter();
         }
 
         /// <summary>
@@ -531,7 +581,11 @@ namespace Toolkit.WPF.Controls
             public int Depth { get; internal set; } = 0;
         }
 
+        private string _FilterText;
+        private Predicate<object> _UserFilter;
+
         private Dictionary<object, TreeInfo> _TreeInfo;
+        private Dictionary<object, TreeInfo> _FilterTreeInfo;
         private PropertyInfo _ExpandedPropertyInfo;
         private PropertyInfo _ChildrenPropertyInfo;
         private ICollectionView _CollectionView;
