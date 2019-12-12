@@ -168,7 +168,6 @@ namespace Toolkit.WPF.Controls
         {
             this._ResourceDictionary = Resource;
             this._TreeInfo = new Dictionary<object, TreeInfo>();
-            this._FilterTreeInfo = new Dictionary<object, TreeInfo>();
             this.EnableToggleButtonAssist = false;
         }
 
@@ -357,14 +356,6 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
-        /// OnDataGridItemsSourceChanged
-        /// </summary>
-        private void OnDataGridItemsSourceChanged(object sender, EventArgs e)
-        {
-            this.Prepare();
-        }
-
-        /// <summary>
         /// OnDataGridRowLoading
         /// </summary>
         private void OnDataGridRowLoading(object sender, DataGridRowEventArgs e)
@@ -388,13 +379,20 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
+        /// OnDataGridItemsSourceChanged
+        /// </summary>
+        private void OnDataGridItemsSourceChanged(object sender, EventArgs e)
+        {
+            this.Prepare();
+        }
+
+        /// <summary>
         /// 準備
         /// </summary>
-        private void Prepare(bool isLoaded = false)
+        private void Prepare()
         {
             // Tree情報をクリア
             this._TreeInfo.Clear();
-            this._FilterTreeInfo.Clear();
 
             // CollectionViewをクリア
             if (this._CollectionView != null)
@@ -414,14 +412,22 @@ namespace Toolkit.WPF.Controls
             var items = this._DataGrid.ItemsSource.OfType<object>();
             var type = items.FirstOrDefault()?.GetType();
 
+            // Expanded
             if (!string.IsNullOrEmpty(this.ExpandedPropertyPath))
             {
                 this._ExpandedPropertyInfo = type?.GetProperty(this.ExpandedPropertyPath);
             }
 
+            // Children
             if (!string.IsNullOrEmpty(this.ChildrenPropertyPath))
             {
                 this._ChildrenPropertyInfo = type?.GetProperty(this.ChildrenPropertyPath);
+            }
+
+            // FilterTarget
+            if(!string.IsNullOrEmpty(((Binding)this.Binding).Path.Path))
+            {
+                this._FilterTargetPropertyInfo = type?.GetProperty(((Binding)this.Binding).Path.Path);
             }
 
             foreach (var item in items)
@@ -465,7 +471,67 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void ApplyFilter(string filterText = null)
         {
-            this._FilterText = filterText;
+            this._FilterText = filterText.ToLower();
+
+            if (string.IsNullOrEmpty(this._FilterText))
+            {
+                // フィルターする前の状態を復活させる
+                foreach (var info in this._TreeInfo.Values)
+                {
+                    info.IsExpanded = info.IsExpandedPreserved;
+                    info.IsHitFilterChildren = false;
+                    info.IsHitFilter = false;
+                }
+
+                foreach (var info in this._TreeInfo)
+                {
+                    if(info.Value.IsRoot)
+                    {
+                        this.UpdateTreeInfo(info.Key, info.Value.IsExpanded);
+                    }
+                }
+            }
+            else
+            {
+                // フィルターする前の表示状態を保存する
+                foreach(var info in this._TreeInfo.Values)
+                {
+                    info.IsExpandedPreserved = info.IsExpanded;
+                    info.IsParentExpanded = false;
+                }
+
+                foreach (var info in this._TreeInfo)
+                {
+                    if (info.Value.IsRoot)
+                    {
+                        this.ApplyFilterImpl(info.Key);
+                    }
+                }
+            }
+
+            this.RefreshFilter();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private bool ApplyFilterImpl(object item)
+        {
+            if (this._TreeInfo.TryGetValue(item, out var info))
+            {
+                if (this._ChildrenPropertyInfo?.GetValue(item) is IEnumerable<object> children)
+                {
+                    bool isHitFilterChildren = false;
+                    foreach (var child in children)
+                    {
+                        isHitFilterChildren |= this.ApplyFilterImpl(child);
+                    }
+                    info.IsHitFilter = (this._FilterTargetPropertyInfo.GetValue(item) as string).ToLower().Contains(this._FilterText);
+                    info.IsHitFilterChildren = isHitFilterChildren;
+                    return info.IsHitFilterChildren || info.IsHitFilter;
+                }
+            }
+            return true;
         }
 
         /// <summary>
@@ -489,6 +555,11 @@ namespace Toolkit.WPF.Controls
             }
 
             info.IsExpanded = isExpanded;
+            if (info.IsRoot)
+            {
+                info.IsParentVisible = true;
+                info.IsParentExpanded = true;
+            }
 
             this.UpdateTreeInfo(item, info.IsExpanded, info.IsVisible, info.Depth);
         }
@@ -570,7 +641,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private class TreeInfo
         {
-            public bool IsVisible => this.IsParentVisible && this.IsParentExpanded;
+            public bool IsVisible => (this.IsParentVisible && this.IsParentExpanded) || this.IsHitFilter || this.IsHitFilterChildren;
 
             public bool IsExpanded { get; internal set; } = false;
 
@@ -578,16 +649,24 @@ namespace Toolkit.WPF.Controls
 
             public bool IsParentExpanded { get; internal set; } = true;
 
+            public bool IsHitFilter { get; internal set; }
+
+            public bool IsHitFilterChildren { get; internal set; }
+
+            public bool IsExpandedPreserved { get; internal set; }
+
             public int Depth { get; internal set; } = 0;
+
+            public bool IsRoot => this.Depth == 0;
         }
 
         private string _FilterText;
         private Predicate<object> _UserFilter;
 
         private Dictionary<object, TreeInfo> _TreeInfo;
-        private Dictionary<object, TreeInfo> _FilterTreeInfo;
         private PropertyInfo _ExpandedPropertyInfo;
         private PropertyInfo _ChildrenPropertyInfo;
+        private PropertyInfo _FilterTargetPropertyInfo;
         private ICollectionView _CollectionView;
 
         private DataGrid _DataGrid;

@@ -15,7 +15,7 @@ namespace Toolkit.WPF.Controls
     public class DataGridBindingColumn : DataGridBoundColumn
     {
         /// <summary>
-        /// トグルボタン系コントロール入力補助（セルクリック・スペースキーでの切り替え）
+        /// トグルボタン系コントロール入力補助が有効か（セルクリック・スペースキーでの切り替え）
         /// </summary>
         public bool EnableToggleButtonAssist { get; set; } = true;
 
