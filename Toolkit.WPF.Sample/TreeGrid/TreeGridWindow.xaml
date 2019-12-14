@@ -69,7 +69,7 @@
                 CanUserDeleteRows="False"
                 SelectionUnit="CellOrRowHeader"
                 ItemsSource="{Binding Items}"
-                tkitwpf:DataGridTreeColumn.FilterText="{Binding FilterText}"
+                tkitwpf:DataGridTreeColumn.FilterText="{Binding FilterText}">
                 <DataGrid.Columns>
                     <tkitwpf:DataGridTreeColumn
                         Header="Tree"

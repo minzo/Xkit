@@ -18,5 +18,6 @@
         <Button Command="{x:Static local:MainWindow.OpenWindow}" CommandParameter="{x:Type local:DynamicItemListWindow}" Content="DynamicItemListWindow" />
         <Button Command="{x:Static local:MainWindow.OpenWindow}" CommandParameter="{x:Type local:DynamicTableItemsWindow}" Content="DynamicTableItemsWindow" />
         <Button Command="{x:Static local:MainWindow.OpenWindow}" CommandParameter="{x:Type local:CombinationGridWindow}" Content="CombinationWindow" />
+        <Button Command="{x:Static local:MainWindow.OpenWindow}" CommandParameter="{x:Type local:CIEWindow}" Content="CIE" />
     </StackPanel>
 </Window>

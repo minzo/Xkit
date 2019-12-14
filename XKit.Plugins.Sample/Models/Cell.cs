@@ -26,10 +26,14 @@ namespace Xkit.Plugins.Sample.Models
             this.Sources = source;
             this.Targets = target;
 
-            var defaults = Enumerable.Repeat(0, 2)
+            var children = Enumerable.Repeat(0, 2)
                 .Select(i => new EventTrigger(this));
 
-            this.Triggers = new TypedCollection<EventTrigger>(defaults);
+            var trigger = new EventTrigger(this);
+            trigger.Children.Add(children.FirstOrDefault());
+            trigger.Children.Add(children.Skip(1).FirstOrDefault());
+
+            this.Triggers = new TypedCollection<EventTrigger>(children.Prepend(trigger));
         }
 
         public void Add()
