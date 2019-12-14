@@ -72,6 +72,19 @@ namespace Toolkit.WPF.Controls
         public static readonly DependencyProperty ExpandedPropertyPathProperty =
             DependencyProperty.Register("ExpandedPropertyPath", typeof(string), typeof(DataGridTreeColumn), new PropertyMetadata(null));
 
+        /// <summary>
+        /// フィルターの対象にするプロパティのパス
+        /// </summary>
+        public string FilterTargetPropertyPath
+        {
+            get { return (string)GetValue(FilterTargetPropertyPathProperty); }
+            set { SetValue(FilterTargetPropertyPathProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for FilterTargetPropertyPath.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty FilterTargetPropertyPathProperty =
+            DependencyProperty.Register("FilterTargetPropertyPath", typeof(string), typeof(DataGridTreeColumn), new PropertyMetadata(null));
+
         #region Icon
 
         /// <summary>
@@ -140,6 +153,7 @@ namespace Toolkit.WPF.Controls
 
         /// <summary>
         /// ユーザーフィルターロジック
+        /// 通常のフィルターの結果を上書きできます
         /// </summary>
         public static void SetFilter(DependencyObject obj, Predicate<object> value)
         {
@@ -152,10 +166,10 @@ namespace Toolkit.WPF.Controls
             {
                 if (d is DataGrid dataGrid)
                 {
-                    dataGrid.Columns
+                    var column = dataGrid.Columns
                         .OfType<DataGridTreeColumn>()
-                        .FirstOrDefault()
-                        .SetUserFilter(e.NewValue as Predicate<object>);
+                        .FirstOrDefault();
+                    column._UserFilter = e.NewValue as Predicate<object>;
                 }
             }));
 
@@ -182,8 +196,7 @@ namespace Toolkit.WPF.Controls
             {
                 foreach (var item in this._DataGrid.ItemsSource)
                 {
-                    this.UpdateTreeInfo(item, true);
-                    this._ExpandedPropertyInfo?.SetValue(item, true);
+                    this.SetIsExpanded(item, true);
                 }
                 this.RefreshFilter();
             }
@@ -199,8 +212,7 @@ namespace Toolkit.WPF.Controls
             {
                 foreach (var item in this._DataGrid.ItemsSource)
                 {
-                    this.UpdateTreeInfo(item, false);
-                    this._ExpandedPropertyInfo?.SetValue(item, false);
+                    this.SetIsExpanded(item, false);
                 }
                 this.RefreshFilter();
             }
@@ -244,11 +256,10 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void SetExpandedDescendantsAndSelf(object item, bool isExpanded)
         {
+            this.SetIsExpanded(item, isExpanded);
+
             if (this._ChildrenPropertyInfo?.GetValue(item) is IEnumerable<object> children)
             {
-                this._ExpandedPropertyInfo?.SetValue(item, isExpanded);
-                this.UpdateTreeInfo(item, isExpanded);
-
                 foreach (var child in children)
                 {
                     this.SetExpandedDescendantsAndSelf(child, isExpanded);
@@ -316,7 +327,7 @@ namespace Toolkit.WPF.Controls
                     return;
                 }
 
-                this.UpdateTreeInfo(expander.DataContext, expander.IsChecked == true);
+                this.SetIsExpanded(expander.DataContext, expander.IsChecked == true);
                 this.RefreshFilter();
             }
         }
@@ -409,8 +420,7 @@ namespace Toolkit.WPF.Controls
             }
 
             // TreeInfoの構築
-            var items = this._DataGrid.ItemsSource.OfType<object>();
-            var type = items.FirstOrDefault()?.GetType();
+            var type = this._DataGrid.ItemsSource.OfType<object>().FirstOrDefault()?.GetType();
 
             // Expanded
             if (!string.IsNullOrEmpty(this.ExpandedPropertyPath))
@@ -425,14 +435,19 @@ namespace Toolkit.WPF.Controls
             }
 
             // FilterTarget
-            if(!string.IsNullOrEmpty(((Binding)this.Binding).Path.Path))
+            if (!string.IsNullOrEmpty(this.FilterTargetPropertyPath))
+            {
+                this._FilterTargetPropertyInfo = type?.GetProperty(this.FilterTargetPropertyPath);
+            }
+            else if (!string.IsNullOrEmpty(((Binding)this.Binding).Path.Path))
             {
                 this._FilterTargetPropertyInfo = type?.GetProperty(((Binding)this.Binding).Path.Path);
             }
 
-            foreach (var item in items)
+            // TreeInfoの構築
+            foreach (var item in this._DataGrid.ItemsSource)
             {
-                this.UpdateTreeInfo(item, (bool?)this._ExpandedPropertyInfo?.GetValue(item) == true);
+                this.SetIsExpanded(item, (bool?)this._ExpandedPropertyInfo?.GetValue(item) == true);
             }
 
             this._CollectionView = this.DataGridOwner.Items;
@@ -449,7 +464,7 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
-        /// フィルタ状態にデフォルトを適用します
+        /// フィルタ状態を更新します
         /// </summary>
         private void RefreshFilter()
         {
@@ -457,7 +472,14 @@ namespace Toolkit.WPF.Controls
             {
                 try
                 {
-                    this._CollectionView.Filter = item => this.GetIsVisible(item) && this._UserFilter?.Invoke(item) != false;
+                    if (string.IsNullOrEmpty(this._FilterText))
+                    {
+                        this._CollectionView.Filter = item => this.GetIsVisible(item);
+                    }
+                    else
+                    {
+                        this._CollectionView.Filter = item => this.GetIsVisibleOnFilter(item) && this._UserFilter?.Invoke(item) != false;
+                    }
                 }
                 catch(InvalidOperationException)
                 {
@@ -471,82 +493,57 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void ApplyFilter(string filterText = null)
         {
-            this._FilterText = filterText.ToLower();
-
-            if (string.IsNullOrEmpty(this._FilterText))
+            if (string.IsNullOrEmpty(filterText))
             {
                 // フィルターする前の状態を復活させる
-                foreach (var info in this._TreeInfo.Values)
-                {
-                    info.IsExpanded = info.IsExpandedPreserved;
-                    info.IsHitFilterChildren = false;
-                    info.IsHitFilter = false;
-                }
-
                 foreach (var info in this._TreeInfo)
                 {
-                    if(info.Value.IsRoot)
-                    {
-                        this.UpdateTreeInfo(info.Key, info.Value.IsExpanded);
-                    }
+                    this.SetIsExpanded(info.Key, info.Value.IsExpandedPreserved);
+                    info.Value.IsHitFilterChildren = false;
+                    info.Value.IsHitFilter = false;
                 }
+
+                this._FilterText = filterText;
             }
             else
             {
-                // フィルターする前の表示状態を保存する
-                foreach(var info in this._TreeInfo.Values)
+                if (string.IsNullOrEmpty(this._FilterText))
                 {
-                    info.IsExpandedPreserved = info.IsExpanded;
-                    info.IsParentExpanded = false;
+                    // フィルターする前の状態を保存する
+                    foreach (var info in this._TreeInfo)
+                    {
+                        info.Value.IsExpandedPreserved = info.Value.IsExpanded;
+                    }
                 }
 
+                this._FilterText = filterText.ToLower();
+
+                // フィルターする前の表示状態を保存しつつフィルターする
                 foreach (var info in this._TreeInfo)
                 {
-                    if (info.Value.IsRoot)
-                    {
-                        this.ApplyFilterImpl(info.Key);
-                    }
+                    info.Value.IsHitFilter = this._FilterTargetPropertyInfo.GetValue(info.Key).ToString().ToLower().Contains(this._FilterText);
                 }
-            }
 
-            this.RefreshFilter();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private bool ApplyFilterImpl(object item)
-        {
-            if (this._TreeInfo.TryGetValue(item, out var info))
-            {
-                if (this._ChildrenPropertyInfo?.GetValue(item) is IEnumerable<object> children)
+                // ツリー情報を更新
+                foreach(var info in this._TreeInfo)
                 {
-                    bool isHitFilterChildren = false;
-                    foreach (var child in children)
-                    {
-                        isHitFilterChildren |= this.ApplyFilterImpl(child);
-                    }
-                    info.IsHitFilter = (this._FilterTargetPropertyInfo.GetValue(item) as string).ToLower().Contains(this._FilterText);
-                    info.IsHitFilterChildren = isHitFilterChildren;
-                    return info.IsHitFilterChildren || info.IsHitFilter;
+                    this.UpdateTreeInfo(info.Key, info.Value.IsParentExpanded, info.Value.IsParentVisible, info.Value.Depth);
+                }
+
+                // フィルターの結果で開閉状態を設定する
+                foreach (var info in this._TreeInfo)
+                {
+                    this.SetIsExpanded(info.Key, info.Value.IsHitFilterChildren);
                 }
             }
-            return true;
-        }
 
-        /// <summary>
-        /// ユーザーフィルターをセット
-        /// </summary>
-        private void SetUserFilter(Predicate<object> filter)
-        {
-            this._UserFilter = filter;
             this.RefreshFilter();
         }
 
         /// <summary>
         /// Tree情報更新
         /// </summary>
-        private void UpdateTreeInfo(object item, bool isExpanded)
+        private bool UpdateTreeInfo(object item, bool isParentExpanded = true, bool isParentVisible = true, int depth = 0)
         {
             if (!this._TreeInfo.TryGetValue(item, out var info))
             {
@@ -554,38 +551,35 @@ namespace Toolkit.WPF.Controls
                 this._TreeInfo.Add(item, info);
             }
 
-            info.IsExpanded = isExpanded;
-            if (info.IsRoot)
-            {
-                info.IsParentVisible = true;
-                info.IsParentExpanded = true;
-            }
+            info.IsParentExpanded = isParentExpanded;
+            info.IsParentVisible = isParentVisible;
+            info.Depth = depth;
 
-            this.UpdateTreeInfo(item, info.IsExpanded, info.IsVisible, info.Depth);
+            if (this._ChildrenPropertyInfo?.GetValue(item) is IEnumerable<object> children)
+            {
+                info.IsHitFilterChildren = false;
+                foreach (var child in children)
+                {
+                    info.IsHitFilterChildren |= this.UpdateTreeInfo(child, info.IsExpanded, info.IsVisible, info.Depth + 1);
+                }
+                
+            }
+            return info.IsHitFilterChildren || info.IsHitFilter;
         }
 
         /// <summary>
-        /// Tree情報更新
+        /// 開いているか設定する
         /// </summary>
-        private void UpdateTreeInfo(object item, bool isParentExpanded, bool isParentVisible, int depth)
+        private void SetIsExpanded(object item, bool isExpanded)
         {
-            if (this._ChildrenPropertyInfo?.GetValue(item) is IEnumerable<object> children)
+            if (!this._TreeInfo.TryGetValue(item, out var info))
             {
-                foreach (var child in children)
-                {
-                    if (!this._TreeInfo.TryGetValue(child, out var info))
-                    {
-                        info = new TreeInfo();
-                        this._TreeInfo.Add(child, info);
-                    }
-
-                    info.IsParentExpanded = isParentExpanded;
-                    info.IsParentVisible = isParentVisible;
-                    info.Depth = depth + 1;
-
-                    this.UpdateTreeInfo(child, info.IsExpanded, info.IsVisible, info.Depth);
-                }
+                info = new TreeInfo();
             }
+
+            info.IsExpanded = isExpanded;
+            info.IsHitFilterChildren = this.UpdateTreeInfo(item, info.IsParentExpanded, info.IsParentVisible, info.Depth);
+            this._ExpandedPropertyInfo?.SetValue(item, info.IsExpanded);
         }
 
         /// <summary>
@@ -594,6 +588,14 @@ namespace Toolkit.WPF.Controls
         private bool GetIsVisible(object item)
         {
             return this._TreeInfo.TryGetValue(item, out var info) ? info.IsVisible : false;
+        }
+
+        /// <summary>
+        /// フィルター時に表示されるか
+        /// </summary>
+        private bool GetIsVisibleOnFilter(object item)
+        {
+            return this._TreeInfo.TryGetValue(item, out var info) ? info.IsVisibleOnFilter : false;
         }
 
         /// <summary>
@@ -634,6 +636,19 @@ namespace Toolkit.WPF.Controls
                     this._TreeInfo.Remove(item);
                 }
             }
+
+            // 追加された行のTreeInfoを辞書に追加
+            if (e.NewItems != null)
+            {
+                foreach (var item in e.NewItems)
+                {
+                    var info = new TreeInfo()
+                    {
+                        IsExpanded = (this._ExpandedPropertyInfo?.GetValue(item) as bool?) == true
+                    };
+                    this._TreeInfo.Add(item, info);
+                }
+            }
         }
 
         /// <summary>
@@ -641,23 +656,48 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private class TreeInfo
         {
-            public bool IsVisible => (this.IsParentVisible && this.IsParentExpanded) || this.IsHitFilter || this.IsHitFilterChildren;
+            [Flags]
+            enum Flags : int
+            {
+                IsExpanded          = 0x0001,
+                IsParentVisible     = 0x0002,
+                IsParentExpanded    = 0x0004,
+                IsHitFilter         = 0x0008,
+                IsHitFilterChildren = 0x0010,
+                IsExpandedPreserved = 0x0020,
+            }
 
-            public bool IsExpanded { get; internal set; } = false;
+            public bool IsVisible => this.IsRoot || this.IsParentVisible && this.IsParentExpanded;
 
-            public bool IsParentVisible { get; internal set; } = true;
+            public bool IsVisibleOnFilter => this.IsHitFilter || this.IsHitFilterChildren;
 
-            public bool IsParentExpanded { get; internal set; } = true;
+            public bool IsExpanded { get => this.IsOnBit(Flags.IsExpanded); set => this.SetBit(Flags.IsExpanded, value); }
 
-            public bool IsHitFilter { get; internal set; }
+            public bool IsParentVisible { get => this.IsOnBit(Flags.IsParentVisible); set => this.SetBit(Flags.IsParentVisible, value); }
 
-            public bool IsHitFilterChildren { get; internal set; }
+            public bool IsParentExpanded { get => this.IsOnBit(Flags.IsParentExpanded); set => this.SetBit(Flags.IsParentExpanded, value); }
 
-            public bool IsExpandedPreserved { get; internal set; }
+            public bool IsHitFilter { get => this.IsOnBit(Flags.IsHitFilter); set => this.SetBit(Flags.IsHitFilter, value); }
 
-            public int Depth { get; internal set; } = 0;
+            public bool IsHitFilterChildren { get => this.IsOnBit(Flags.IsHitFilterChildren); set => this.SetBit(Flags.IsHitFilterChildren, value); }
+
+            public bool IsExpandedPreserved { get => this.IsOnBit(Flags.IsExpandedPreserved); set => this.SetBit(Flags.IsExpandedPreserved, value); }
 
             public bool IsRoot => this.Depth == 0;
+
+            public int Depth { get; internal set; }
+
+            private void SetBit(Flags flags, bool value)
+            {
+                this._Flags = value ? (this._Flags | flags) : (this._Flags & ~flags);
+            }
+
+            private bool IsOnBit(Flags flags)
+            {
+                return (this._Flags & flags) == flags;
+            }
+
+            private Flags _Flags;
         }
 
         private string _FilterText;

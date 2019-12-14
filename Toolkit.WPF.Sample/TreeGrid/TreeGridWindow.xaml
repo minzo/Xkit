@@ -70,7 +70,6 @@
                 SelectionUnit="CellOrRowHeader"
                 ItemsSource="{Binding Items}"
                 tkitwpf:DataGridTreeColumn.FilterText="{Binding FilterText}"
-                tkitwpf:DataGridTreeColumn.Filter="{Binding Filter}">
                 <DataGrid.Columns>
                     <tkitwpf:DataGridTreeColumn
                         Header="Tree"
