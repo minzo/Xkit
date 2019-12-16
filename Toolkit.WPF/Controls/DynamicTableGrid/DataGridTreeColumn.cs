@@ -580,6 +580,7 @@ namespace Toolkit.WPF.Controls
             if (!this._TreeInfo.TryGetValue(item, out var info))
             {
                 info = new TreeInfo();
+                this._TreeInfo.Add(item, info);
             }
 
             info.IsExpanded = isExpanded;
