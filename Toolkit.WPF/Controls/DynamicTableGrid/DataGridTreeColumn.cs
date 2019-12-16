@@ -138,6 +138,11 @@ namespace Toolkit.WPF.Controls
             obj.SetValue(FilterTextProperty, value);
         }
 
+        public static string GetFilterText(DependencyObject obj)
+        {
+            return (string)obj.GetValue(FilterTextProperty);
+        }
+
         // Using a DependencyProperty as the backing store for FilterText.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty FilterTextProperty =
             DependencyProperty.RegisterAttached("FilterText", typeof(string), typeof(DataGridTreeColumn), new PropertyMetadata(null, (d, e) =>
@@ -172,6 +177,24 @@ namespace Toolkit.WPF.Controls
                     column._UserFilter = e.NewValue as Predicate<object>;
                 }
             }));
+
+
+
+        public static int GetMyProperty(DependencyObject obj)
+        {
+            return (int)obj.GetValue(MyPropertyProperty);
+        }
+
+        public static void SetMyProperty(DependencyObject obj, int value)
+        {
+            obj.SetValue(MyPropertyProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty MyPropertyProperty =
+            DependencyProperty.RegisterAttached("MyProperty", typeof(int), typeof(ownerclass), new PropertyMetadata(0));
+
+
 
         #endregion
 
@@ -439,7 +462,7 @@ namespace Toolkit.WPF.Controls
             {
                 this._FilterTargetPropertyInfo = type?.GetProperty(this.FilterTargetPropertyPath);
             }
-            else if (!string.IsNullOrEmpty(((Binding)this.Binding).Path.Path))
+            else if (!string.IsNullOrEmpty((this.Binding as Binding)?.Path?.Path))
             {
                 this._FilterTargetPropertyInfo = type?.GetProperty(((Binding)this.Binding).Path.Path);
             }
