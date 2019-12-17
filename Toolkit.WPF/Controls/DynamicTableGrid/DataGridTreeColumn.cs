@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -195,7 +196,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// すべて開く
         /// </summary>
-        public void ExpandAll(object sender, ExecutedRoutedEventArgs e)
+        public void ExpandAll()
         {
             if (this._DataGrid.ItemsSource != null)
             {
@@ -205,13 +206,12 @@ namespace Toolkit.WPF.Controls
                 }
                 this.RefreshFilter();
             }
-            e.Handled = true;
         }
 
         /// <summary>
         /// すべて閉じる
         /// </summary>
-        public void CloseAll(object sender, ExecutedRoutedEventArgs e)
+        public void CloseAll()
         {
             if (this._DataGrid.ItemsSource != null)
             {
@@ -221,13 +221,12 @@ namespace Toolkit.WPF.Controls
                 }
                 this.RefreshFilter();
             }
-            e.Handled = true;
         }
 
         /// <summary>
         /// 選択アイテム以下をすべて開く
         /// </summary>
-        public void ExpandSelectedItems(object sender, ExecutedRoutedEventArgs e)
+        public void ExpandSelectedItems()
         {
             if (this._DataGrid.SelectedCells != null)
             {
@@ -237,13 +236,12 @@ namespace Toolkit.WPF.Controls
                 }
                 this.RefreshFilter();
             }
-            e.Handled = true;
         }
 
         /// <summary>
         /// 選択アイテム以下をすべて閉じる
         /// </summary>
-        public void CloseSelectedItems(object sender, ExecutedRoutedEventArgs e)
+        public void CloseSelectedItems()
         {
             if (this._DataGrid.SelectedCells != null)
             {
@@ -253,7 +251,6 @@ namespace Toolkit.WPF.Controls
                 }
                 this.RefreshFilter();
             }
-            e.Handled = true;
         }
 
         /// <summary>
@@ -362,10 +359,10 @@ namespace Toolkit.WPF.Controls
                     .FromProperty(DataGrid.ItemsSourceProperty, typeof(DataGrid))
                     .AddValueChanged(this._DataGrid, this.OnDataGridItemsSourceChanged);
 
-                this._DataGrid.CommandBindings.Add(new CommandBinding(ExpandAllCommand, this.ExpandAll));
-                this._DataGrid.CommandBindings.Add(new CommandBinding(CloseAllCommand, this.CloseAll));
-                this._DataGrid.CommandBindings.Add(new CommandBinding(ExpandSelectedItemsCommand, this.ExpandSelectedItems, (s, e) => e.CanExecute = this._DataGrid.SelectedCells.Count > 0 ));
-                this._DataGrid.CommandBindings.Add(new CommandBinding(CloseSelectedItemsCommand, this.CloseSelectedItems, (s, e) => e.CanExecute = this._DataGrid.SelectedCells.Count > 0));
+                this._DataGrid.CommandBindings.Add(new CommandBinding(ExpandAllCommand, (s, e) => { this.ExpandAll(); e.Handled = true; }));
+                this._DataGrid.CommandBindings.Add(new CommandBinding(CloseAllCommand, (s, e) => { this.CloseAll(); e.Handled = true; }));
+                this._DataGrid.CommandBindings.Add(new CommandBinding(ExpandSelectedItemsCommand, (s, e) => { this.ExpandSelectedItems(); e.Handled = true; }, (s, e) => e.CanExecute = this._DataGrid.SelectedCells.Count > 0));
+                this._DataGrid.CommandBindings.Add(new CommandBinding(CloseSelectedItemsCommand, (s, e) => { this.CloseSelectedItems(); e.Handled = true; }, (s, e) => e.CanExecute = this._DataGrid.SelectedCells.Count > 0));
 
                 this.Prepare();
             }
@@ -413,9 +410,15 @@ namespace Toolkit.WPF.Controls
             // CollectionViewをクリア
             if (this._CollectionView != null)
             {
-                this._CollectionView.CollectionChanged -= this.OnCollectionChanged;
                 (this._CollectionView as ICollectionViewLiveShaping)?.LiveFilteringProperties.Clear();
                 this._CollectionView = null;
+            }
+
+            // ItemsSourceをクリア
+            if (this._ItemsSource != null)
+            {
+                this._ItemsSource.CollectionChanged -= this.OnCollectionChanged;
+                this._ItemsSource = null;
             }
 
             // Item が空なので構築しない
@@ -424,8 +427,19 @@ namespace Toolkit.WPF.Controls
                 return;
             }
 
-            // TreeInfoの構築
+            // ItemsSourceを覚えておく
+            if (this._DataGrid.ItemsSource is INotifyCollectionChanged itemsSource)
+            {
+                this._ItemsSource = itemsSource;
+                this._ItemsSource.CollectionChanged += this.OnCollectionChanged;
+            }
+
+            // Type が無いので構築しない
             var type = this._DataGrid.ItemsSource.OfType<object>().FirstOrDefault()?.GetType();
+            if (type == null)
+            {
+                return;
+            }
 
             // Expanded
             if (!string.IsNullOrEmpty(this.ExpandedPropertyPath))
@@ -455,8 +469,7 @@ namespace Toolkit.WPF.Controls
                 this.SetIsExpanded(item, (bool?)this._ExpandedPropertyInfo?.GetValue(item) == true);
             }
 
-            this._CollectionView = this.DataGridOwner.Items;
-            this._CollectionView.CollectionChanged += this.OnCollectionChanged;
+            this._CollectionView = this._DataGrid.Items;
             if (this._CollectionView is ICollectionViewLiveShaping liveShaping && !string.IsNullOrEmpty(this.ExpandedPropertyPath))
             {
                 liveShaping.IsLiveFiltering = true;
@@ -634,6 +647,16 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            if (this._CollectionView == null)
+            {
+                this.Prepare();
+            }
+
+            if(e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                this._TreeInfo?.Clear();
+            }
+
             // 削除された行のTreeInfoを辞書から削除
             if (e.OldItems != null)
             {
@@ -648,13 +671,12 @@ namespace Toolkit.WPF.Controls
             {
                 foreach (var item in e.NewItems)
                 {
-                    var info = new TreeInfo()
-                    {
-                        IsExpanded = (this._ExpandedPropertyInfo?.GetValue(item) as bool?) == true
-                    };
-                    this._TreeInfo.Add(item, info);
+                    this.SetIsExpanded(item, (this._ExpandedPropertyInfo?.GetValue(item) as bool?) == true);
                 }
             }
+
+            // フィルター状態を更新する CollectionChanged のたびに行うともったいない
+            this.RefreshFilter();
         }
 
         /// <summary>
@@ -713,10 +735,13 @@ namespace Toolkit.WPF.Controls
         private PropertyInfo _ExpandedPropertyInfo;
         private PropertyInfo _ChildrenPropertyInfo;
         private PropertyInfo _FilterTargetPropertyInfo;
+        
+        private INotifyCollectionChanged _ItemsSource;
         private ICollectionView _CollectionView;
 
         private DataGrid _DataGrid;
         private ResourceDictionary _ResourceDictionary;
+
 
         /// <summary>
         /// 静的コンストラクタ

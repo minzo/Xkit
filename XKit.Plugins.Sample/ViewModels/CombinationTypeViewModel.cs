@@ -26,7 +26,7 @@ namespace Xkit.Plugins.Sample.ViewModels
         /// <summary>
         /// Trigger
         /// </summary>
-        public IEnumerable<EventTrigger> SelectedTriggers { get; private set; }
+        public TypedCollection<EventTrigger> SelectedTriggers { get; set; }
 
         /// <summary>
         /// 選択情報
@@ -47,7 +47,15 @@ namespace Xkit.Plugins.Sample.ViewModels
 
                 if (triggers != null)
                 {
-                    this.SetProperty(nameof(this.SelectedTriggers), new TypedCollection<EventTrigger>(triggers));
+                    var intersect = this.SelectedTriggers.Intersect(triggers);
+                    var added = triggers.Concat(intersect).GroupBy(i => i).Select(i => i.First()).ToList();
+                    var deleted = this.SelectedTriggers.Concat(intersect).GroupBy(i => i).Select(i => i.First()).ToList();
+
+                    deleted.ForEach(i => this.SelectedTriggers.Remove(i));
+                    added.ForEach(i => this.SelectedTriggers.Add(i));
+
+                    //this.SelectedTriggers = new TypedCollection<EventTrigger>(triggers);
+                    //this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.SelectedTriggers)));
                 }
             }
         }
@@ -72,6 +80,8 @@ namespace Xkit.Plugins.Sample.ViewModels
                 var rStr = rItem.Elements[1].Value;
                 return string.Compare(lStr, rStr);
             });
+
+            this.SelectedTriggers = new TypedCollection<EventTrigger>();
 
             this.CornerButtonCommand = new DelegateCommand(_ => this._View.Refresh());
         }

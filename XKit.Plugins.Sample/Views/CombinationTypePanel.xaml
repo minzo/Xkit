@@ -80,7 +80,6 @@
                         Binding="{Binding Key.Value}"
                         ChildrenPropertyPath="Children"
                         />
-
                 </tkit:DynamicTableGrid.Columns>
             </tkit:DynamicTableGrid>
         </DockPanel>
