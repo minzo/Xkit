@@ -27,10 +27,11 @@ namespace Xkit.Plugins.Sample.Models
             this.Targets = target;
 
             var children = Enumerable.Repeat(0, 2)
-                .Select(i => new EventTrigger(this));
+                .Select(i => new EventTrigger(this))
+                .ToList();
 
             var trigger = new EventTrigger(this);
-            trigger.Children.Add(children.FirstOrDefault());
+            trigger.Children.Add(children.Skip(0).FirstOrDefault());
             trigger.Children.Add(children.Skip(1).FirstOrDefault());
 
             this.Triggers = new TypedCollection<EventTrigger>(children.Prepend(trigger));
