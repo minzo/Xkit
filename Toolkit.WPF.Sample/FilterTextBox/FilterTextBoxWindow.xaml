@@ -5,10 +5,37 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Toolkit.WPF.Sample"
         xmlns:tkitwpf="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
+        xmlns:converters="clr-namespace:Toolkit.WPF.Converters;assembly=Toolkit.WPF"
         mc:Ignorable="d"
         Title="FilterTextBoxWindow" Height="450" Width="800">
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <TextBlock Text="FilterTextBox" />
-        <tkitwpf:FilterTextBox WatermarkText="検索" MinWidth="100" Margin="8 0 0 0" />
+    <!-- DataContext -->
+    <Window.DataContext>
+        <local:FilterTextBoxWindowViewModel />
+    </Window.DataContext>
+    
+    <!-- Resource -->
+    <Window.Resources>
+        <converters:FileSizeUnitConverter x:Key="FileSizeUnitConverter" SizeUnit="{Binding SelectedUnit}" StringFormat="p"/>
+    </Window.Resources>
+
+    <!-- Content -->
+    <StackPanel>
+        <DockPanel>
+            <ComboBox 
+                x:Name="ComboBox" 
+                DockPanel.Dock="Right"
+                Width="140" 
+                SelectedValue="{Binding SelectedUnit}"
+                ItemsSource="{Binding FileSizeSelection}"/>
+            <tkitwpf:FilterTextBox WatermarkText="検索" MinWidth="100" />
+        </DockPanel>
+
+        <DataGrid ItemsSource="{Binding FileEntries}" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="FileName" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="FileSize" Binding="{Binding Length, 
+                    Converter={StaticResource FileSizeUnitConverter}}" />
+            </DataGrid.Columns>
+        </DataGrid>
     </StackPanel>
 </Window>
