@@ -15,7 +15,7 @@
     
     <!-- Resource -->
     <Window.Resources>
-        <converters:FileSizeUnitConverter x:Key="FileSizeUnitConverter" SizeUnit="{Binding SelectedUnit}" StringFormat="p"/>
+        <converters:FileSizeUnitConverter x:Key="FileSizeUnitConverter" SizeUnit="{Binding SelectedUnit}" />
     </Window.Resources>
 
     <!-- Content -->

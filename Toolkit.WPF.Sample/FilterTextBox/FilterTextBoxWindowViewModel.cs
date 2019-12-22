@@ -39,8 +39,9 @@ namespace Toolkit.WPF.Sample
 
         public IEnumerable<FileInfo> GetFileInfos()
         {
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
-            return Directory.EnumerateFileSystemEntries(path, "*", SearchOption.TopDirectoryOnly)
+            var path = System.Reflection.Assembly.GetEntryAssembly().Location;
+            var dir = Path.GetDirectoryName(path);
+            return Directory.EnumerateFileSystemEntries(dir, "*", SearchOption.TopDirectoryOnly)
                 .Select(i => new FileInfo(i))
                 .ToList();
         }
