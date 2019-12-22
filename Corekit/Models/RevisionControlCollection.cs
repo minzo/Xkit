@@ -43,6 +43,8 @@ namespace Corekit.Models
 
         /// <summary>
         /// コンストラクタ
+        /// capacityに最大サイズを指定します
+        /// revisioning_length には変換テーブルを保持するリビジョン数を指定します
         /// </summary>
         public RevisionControlCollection(int capacity, int revisioning_length)
         {
