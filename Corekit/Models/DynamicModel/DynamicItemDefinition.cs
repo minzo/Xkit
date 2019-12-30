@@ -156,4 +156,29 @@ namespace Corekit.Models
 
         #endregion
     }
+
+    /// <summary>
+    /// 拡張
+    /// </summary>
+    public static class DynamicItemDefinitionExtensions
+    {
+        public static DynamicItemDefinition ToDynamicItemDefinition<T, TResult>(this IEnumerable<T> collection, Func<T,TResult> predicate)
+            where TResult : IDynamicPropertyDefinition
+        {
+            var items = new ObservableCollection<TResult>(collection.Select(i => predicate(i)));
+            if (collection is INotifyCollectionChanged notify)
+            {
+                notify.CollectionChanged += (s, e) =>
+                {
+                    int removeIndex = e.OldStartingIndex;
+                    e.OldItems?.Cast<T>().ForEach(i => items.RemoveAt(removeIndex));
+
+                    int insertIndex = e.NewStartingIndex;
+                    e.NewItems?.Cast<T>().ForEach(i => items.Insert(insertIndex++, predicate(i)));
+                };
+            }
+
+            return new DynamicItemDefinition(items as IEnumerable<IDynamicPropertyDefinition>);
+        }
+    }
 }

@@ -71,7 +71,7 @@ namespace Corekit.Extensions
         }
 
         /// <summary>
-        /// Nullな場合はDefaultを返す
+        /// Nullな場合はEmptyを返す
         /// </summary>
         public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> source)
         {
