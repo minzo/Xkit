@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
@@ -12,7 +13,7 @@ namespace Corekit.Models
     /// <summary>
     /// リビジョン管理コレクション
     /// </summary>
-    public class RevisionControlCollection<T> : ICollection<T>, IReadOnlyCollection<T>
+    public class RevisionControlCollection<T> : ICollection<T>, IReadOnlyCollection<T>, INotifyCollectionChanged
     {
         /// <summary>
         /// リビジョン番号
@@ -97,7 +98,7 @@ namespace Corekit.Models
             // リビジョン更新の後も使える領域が無かったら例外
             if (index < 0)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("リビジョン更新しましたが空きがありませんでした");
             }
 
             // 値を設定
@@ -105,6 +106,9 @@ namespace Corekit.Models
 
             // 使っている状態にする
             this._State[index] |= ContainerState.Used;
+
+            // イベント通知
+            this.CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<T>() { item }, index));
         }
 
         /// <summary>
@@ -135,6 +139,9 @@ namespace Corekit.Models
                 this._Collection[index] = default;
             }
 
+            // イベント通知
+            this.CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, Enumerable.Empty<T>(), new List<T>() { item }, index));
+
             return true;
         }
 
@@ -152,14 +159,6 @@ namespace Corekit.Models
         public bool Contains(T item)
         {
             return this._Collection.Contains(item);
-        }
-
-        /// <summary>
-        /// 配列にコピー
-        /// </summary>
-        public void CopyTo(T[] array, int arrayIndex)
-        {
-            this._Collection.CopyTo(array, arrayIndex);
         }
 
         /// <summary>
@@ -258,8 +257,10 @@ namespace Corekit.Models
             this.Revision++;
         }
 
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
         [Flags]
-        enum ContainerState : byte
+        private enum ContainerState : byte
         {
             None  = 0b000, // 初期状態
             Used  = 0b001, // 使用している領域
@@ -276,14 +277,36 @@ namespace Corekit.Models
 
         #region IEnumerable
 
+        /// <summary>
+        /// 使われている領域のみを列挙します
+        /// </summary>
         public IEnumerator<T> GetEnumerator()
         {
-            return this._Collection.GetEnumerator();
+            for (int i = 0; i < this._State.Count; i++)
+            {
+                yield return this._Collection[i];
+            }
         }
 
+        /// <summary>
+        /// 使われている領域のみを列挙します
+        /// </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        #endregion
+
+        #region ICollection
+
+        public bool IsSynchronized => false;
+
+        public object SyncRoot => null;
+
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            this._Collection.CopyTo(array, arrayIndex);
         }
 
         #endregion
