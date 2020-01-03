@@ -71,6 +71,16 @@ namespace Corekit.Extensions
         }
 
         /// <summary>
+        /// 指定した要素で重複を除去する
+        /// </summary>
+        public static IEnumerable<T> Distinct<T, T1>(this IEnumerable<T> collection, Func<T, T1> predicate)
+        {
+            return collection
+                .GroupBy(i => predicate(i))
+                .Select(i => i.First());
+        }
+
+        /// <summary>
         /// Nullな場合はEmptyを返す
         /// </summary>
         public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> source)
