@@ -14,6 +14,8 @@ namespace Toolkit.WPF.Controls
     {
         public List<DataTemplate> Templates { get; set; } = new List<DataTemplate>();
 
+        public string TargetPropertyPath { get; set; }
+
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
             if (item == null)
@@ -22,6 +24,11 @@ namespace Toolkit.WPF.Controls
             }
 
             var type = item.GetType();
+            if (!string.IsNullOrWhiteSpace(this.TargetPropertyPath))
+            {
+                type = type.GetProperty(this.TargetPropertyPath)?.PropertyType ?? type;
+            }
+
             var template = this.Templates.FirstOrDefault(i => (i.DataType as Type).IsAssignableFrom(type));
             return template ?? base.SelectTemplate(item, container);
         }

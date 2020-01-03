@@ -343,6 +343,16 @@ namespace Toolkit.WPF.Controls
             {
                 newTable.PropertyDefinitionsChanged += this.OnPropertyDefinitionsChanged;
             }
+
+            if (newValue is IDynamicItem oldItem)
+            {
+                (oldItem.Definition as INotifyCollectionChanged).CollectionChanged -= this.OnPropertyDefinitionsChanged;
+            }
+
+            if (newValue is IDynamicItem newItem)
+            {
+                (newItem.Definition as INotifyCollectionChanged).CollectionChanged += this.OnPropertyDefinitionsChanged;
+            }
         }
 
         /// <summary>
