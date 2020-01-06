@@ -43,6 +43,14 @@
             </ItemsControl>
         </DataTemplate>
 
+        <DataTemplate x:Key="ComboBoxCellTemplate">
+            <tkit:DataGridComboBox SelectedIndex="{Binding Value}">
+                <ComboBoxItem Content="新規" />
+                <ComboBoxItem Content="作業中" />
+                <ComboBoxItem Content="完了" />
+            </tkit:DataGridComboBox>
+        </DataTemplate>
+        
     </UserControl.Resources>
     
     <Grid>
@@ -72,6 +80,7 @@
         <DockPanel Grid.Row="2">
             <StatusBar DockPanel.Dock="Top" Margin="4" Background="White" />
             <tkit:DynamicTableGrid
+                SelectionUnit="Cell"
                 IsVisibleZoomValue="True"
                 ItemsSource="{Binding SelectedTriggers, Mode=OneWay}">
                 <tkit:DynamicTableGrid.Columns>
@@ -79,6 +88,11 @@
                         Header="Key"
                         Binding="{Binding Key.Value}"
                         ChildrenPropertyPath="Children"
+                        />
+                    <tkit:DataGridBindingColumn
+                        Header="Status"
+                        Binding="{Binding Status}"
+                        CellEditingTemplate="{StaticResource ComboBoxCellTemplate}" 
                         />
                 </tkit:DynamicTableGrid.Columns>
             </tkit:DynamicTableGrid>

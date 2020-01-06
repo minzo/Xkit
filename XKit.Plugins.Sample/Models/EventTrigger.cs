@@ -54,8 +54,9 @@ namespace Xkit.Plugins.Sample.Models
         static EventTrigger()
         {
             _PropertyDefinitions = new IDynamicPropertyDefinition[] {
+                new DynamicPropertyDefinition<int>(){ Name = "Status", IsVisible = false },
                 new DynamicPropertyDefinition<string>(){ Name = "Owner" },
-                new DynamicPropertyDefinition<string>(){ Name = "Key" },
+                new DynamicPropertyDefinition<string>(){ Name = "Key", IsVisible = false },
                 new DynamicPropertyDefinition<float>(){ Name = "Volume" },
                 new DynamicPropertyDefinition<float>(){ Name = "Pitch" },
                 new DynamicPropertyDefinition<int>(){ Name = "Variation" },

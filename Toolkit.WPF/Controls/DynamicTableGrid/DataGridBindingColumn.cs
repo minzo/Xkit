@@ -202,7 +202,6 @@ namespace Toolkit.WPF.Controls
                         case ComboBox v:
                             v.SelectedItem = uneditedValue;
                             break;
-
                         default:
                             break;
                     }
@@ -286,8 +285,8 @@ namespace Toolkit.WPF.Controls
                 return false;
             }
 
-            var toggleButton = EnumerateChildren(cell).OfType<System.Windows.Controls.Primitives.ToggleButton>().FirstOrDefault();
-            if (toggleButton?.IsEnabled ?? false)
+            var control = EnumerateChildren(cell).OfType<Control>().FirstOrDefault();
+            if(control is System.Windows.Controls.Primitives.ToggleButton toggleButton && toggleButton.IsEnabled)
             {
                 toggleButton.IsChecked = !toggleButton.IsChecked;
                 return true;
