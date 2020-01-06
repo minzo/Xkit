@@ -21,6 +21,7 @@ namespace Toolkit.WPF.Controls
         public DataGridComboBox()
         {
             this.Loaded += this.OnLoaded;
+            this.Unloaded += this.OnUnloaded;
             this.PreviewKeyDown += this.OnPreviewKeyDown;
             this.DropDownClosed += this.OnDropDownClosed;
         }
@@ -32,6 +33,14 @@ namespace Toolkit.WPF.Controls
         {
             this.IsDropDownOpen = true;
             this._DataGridOwner = EnumerateParent(this).OfType<DataGrid>().FirstOrDefault();
+        }
+
+        /// <summary>
+        /// OnUnloaded
+        /// </summary>
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            this.IsDropDownOpen = false;
         }
 
         /// <summary>
@@ -55,6 +64,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnDropDownClosed(object sender, EventArgs e)
         {
+            this.GetBindingExpression(ComboBox.TextProperty)?.UpdateSource();
             this._DataGridOwner?.CommitEdit(DataGridEditingUnit.Cell, true);
         }
 
