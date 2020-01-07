@@ -84,7 +84,7 @@ namespace Corekit.Models
             }
             else
             {
-                return Activator.CreateInstance(typeof(T), false);
+                return Activator.CreateInstance(typeof(T), true);
             }
         }
 
