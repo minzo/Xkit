@@ -1,6 +1,8 @@
-﻿using Corekit.Models;
+﻿using Corekit.Extensions;
+using Corekit.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -13,34 +15,48 @@ namespace Xkit.Plugins.Sample.Models
         /// <summary>
         /// ソース
         /// </summary>
-        public Combination<string> Source { get; }
+        public Combination<Element> Source { get; }
 
         /// <summary>
         /// ターゲット
         /// </summary>
-        public Combination<string> Target { get; }
+        public Combination<Element> Target { get; }
 
         /// <summary>
         /// テーブル
         /// </summary>
-        public CombinationTable<Cell,string,string> Table { get; }
+        public CombinationTable<Cell,Element,Element> Table { get; }
+
+        /// <summary>
+        /// ソース
+        /// </summary>
+        public ObservableCollection<Frame> SourceFrames { get; } = new ObservableCollection<Frame>(new[] {
+            new Frame("Type", new[] { "Land", "Drag", "Roll" }),
+            new Frame("Size", new[] { "Small", "Middle", "Big" }),
+            new Frame("Mat", new[] { "Body", "Stone", "Metal", "Wood", })
+        });
+
+        /// <summary>
+        /// ターゲット
+        /// </summary>
+        public ObservableCollection<Frame> TargetFrames { get; } = new ObservableCollection<Frame>(new[] {
+            new Frame("Obj", new[] { "Small", "Middle" }),
+            new Frame("Mas", new[] { "Light", "Normal", "Heavy" }),
+            new Frame("Col", new[] { "White", "Gray", "Black" })
+        });
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
         public CombinationType()
         {
-            this.Source = new Combination<string>();
-            this.Source.Definitions.Add("Type", new List<string>() { "Land", "Drag", "Roll" });
-            this.Source.Definitions.Add("Size", new List<string>() { "Small", "Middle", "Big" });
-            this.Source.Definitions.Add("Mat", new List<string>() { "Body", "Stone", "Metal", "Wood", });
+            this.Source = new Combination<Element>(x => x.Name);
+            this.SourceFrames.ForEach(i => this.Source.Definitions.Add(i.Name, i.Elements));
 
-            this.Target = new Combination<string>();
-            this.Target.Definitions.Add("Obj", new List<string>() { "Small", "Middle" });
-            this.Target.Definitions.Add("Mas", new List<string>() { "Light", "Normal", "Heavy" });
-            this.Target.Definitions.Add("Col", new List<string>() { "White", "Gray", "Black" });
+            this.Target = new Combination<Element>(x => x.Name);
+            this.TargetFrames.ForEach(i => this.Target.Definitions.Add(i.Name, i.Elements));
 
-            this.Table = new CombinationTable<Cell,string,string>(this.Source, this.Target);
+            this.Table = new CombinationTable<Cell,Element,Element>(this.Source, this.Target);
 
             foreach (var row in this.Table)
             {

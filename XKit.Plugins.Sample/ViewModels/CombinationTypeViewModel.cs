@@ -63,7 +63,17 @@ namespace Xkit.Plugins.Sample.ViewModels
         /// <summary>
         /// テーブル
         /// </summary>
-        public CombinationTable<Cell,string,string> Table => this._Model.Table;
+        public CombinationTable<Cell,Element,Element> Table => this._Model.Table;
+
+        /// <summary>
+        /// ソース
+        /// </summary>
+        public IEnumerable<Frame> SourceFrames => this._Model.SourceFrames;
+
+        /// <summary>
+        /// ターゲット
+        /// </summary>
+        public IEnumerable<Frame> TargetFrames => this._Model.TargetFrames;
 
         /// <summary>
         /// コンストラクタ
@@ -73,13 +83,13 @@ namespace Xkit.Plugins.Sample.ViewModels
             this._Model = model;
 
             this._View = CollectionViewSource.GetDefaultView(this.Table) as ListCollectionView;
-            this._View.CustomSort = new DelegateComparer<DynamicItem>((lha, rha) => {
-                var lItem = lha.Definition as CombinationItemDefinition<string>;
-                var rItem = rha.Definition as CombinationItemDefinition<string>;
-                var lStr = lItem.Elements[1].Value;
-                var rStr = rItem.Elements[1].Value;
-                return string.Compare(lStr, rStr);
-            });
+            //this._View.CustomSort = new DelegateComparer<DynamicItem>((lha, rha) => {
+            //    var lItem = lha.Definition as CombinationItemDefinition<Element>;
+            //    var rItem = rha.Definition as CombinationItemDefinition<Element>;
+            //    var lStr = lItem.Elements[1].Value.Name;
+            //    var rStr = rItem.Elements[1].Value.Name;
+            //    return string.Compare(lStr, rStr);
+            //});
 
             this.SelectedTriggers = new TypedCollection<EventTrigger>();
 

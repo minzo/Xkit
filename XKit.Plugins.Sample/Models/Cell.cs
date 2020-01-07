@@ -16,11 +16,6 @@ namespace Xkit.Plugins.Sample.Models
 
         public IReadOnlyCollection<EventTrigger> Triggers { get; }
 
-        public Cell()
-        {
-
-        }
-
         public Cell(ICombinationDefinition source, ICombinationDefinition target)
         {
             this.Sources = source;
@@ -35,6 +30,11 @@ namespace Xkit.Plugins.Sample.Models
             trigger.Children.Add(children.Skip(1).FirstOrDefault());
 
             this.Triggers = new TypedCollection<EventTrigger>(children.Prepend(trigger));
+        }
+
+        private Cell()
+        {
+            this.Triggers = new TypedCollection<EventTrigger>();
         }
 
         public void Add()

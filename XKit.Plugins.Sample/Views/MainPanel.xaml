@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Xkit.Plugins.Sample.Views"
+             xmlns:ctrls="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
@@ -17,8 +18,75 @@
 
         <GridSplitter Grid.Column="1" Width="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
 
-        <local:CombinationTypePanel
-            Grid.Column="2"
-            DataContext="{Binding CombinationTypeVM}" />
+        <TabControl Grid.Column="2">
+            <!-- Resources -->
+            <TabControl.Resources>
+                <DataTemplate x:Key="ElementTemplate">
+                    <DockPanel>
+                        <ListBox 
+                            DockPanel.Dock="Left"
+                            Width="100" 
+                            ItemsSource="{Binding}" 
+                            DisplayMemberPath="Name"
+                            IsSynchronizedWithCurrentItem="True"/>
+                            <DataGrid
+                                ItemsSource="{Binding Path=/Elements}" 
+                                HeadersVisibility="Column"
+                                AutoGenerateColumns="False"
+                                CanUserAddRows="False"
+                                CanUserDeleteRows="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                                <DataGridTemplateColumn Header="Condition">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox SelectedIndex="{Binding Condition}" IsHitTestVisible="False" BorderThickness="0" Background="Transparent" IsEditable="True">
+                                                <ComboBoxItem Content="＝" />
+                                                <ComboBoxItem Content="＜" />
+                                                <ComboBoxItem Content="≦" />
+                                                <ComboBoxItem Content="＞" />
+                                                <ComboBoxItem Content="≧" />
+                                                <ComboBoxItem Content="≠" />
+                                            </ComboBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <ctrls:DataGridComboBox SelectedIndex="{Binding Condition}" >
+                                                <ComboBoxItem Content="＝" />
+                                                <ComboBoxItem Content="＜" />
+                                                <ComboBoxItem Content="≦" />
+                                                <ComboBoxItem Content="＞" />
+                                                <ComboBoxItem Content="≧" />
+                                                <ComboBoxItem Content="≠" />
+                                            </ctrls:DataGridComboBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Target" Binding="{Binding Target}" />
+                                <DataGridTextColumn Header="TargetName" Binding="{Binding TargetName}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </DataTemplate>
+            </TabControl.Resources>
+            
+            <TabItem Header="テーブル" DataContext="{Binding CombinationTypeVM}">
+                <local:CombinationTypePanel />
+            </TabItem>
+
+            <TabItem 
+                Header="Source" 
+                ContentTemplate="{StaticResource ElementTemplate}"
+                Content="{Binding CombinationTypeVM.SourceFrames}"
+                />
+
+            <TabItem
+                Header="Target"
+                ContentTemplate="{StaticResource ElementTemplate}"
+                Content="{Binding CombinationTypeVM.TargetFrames}"
+                />
+            
+        </TabControl>
     </Grid>
 </UserControl>
