@@ -43,14 +43,22 @@
             </ItemsControl>
         </DataTemplate>
 
-        <DataTemplate x:Key="ComboBoxCellTemplate">
+        <DataTemplate x:Key="ComboBoxCellEditingTemplate">
             <tkit:DataGridComboBox SelectedIndex="{Binding Value}">
                 <ComboBoxItem Content="新規" />
                 <ComboBoxItem Content="作業中" />
                 <ComboBoxItem Content="完了" />
             </tkit:DataGridComboBox>
         </DataTemplate>
-        
+
+        <DataTemplate x:Key="ComboBoxCellTemplate">
+            <ComboBox SelectedIndex="{Binding Value}" IsReadOnly="True" BorderThickness="0" Background="Transparent">
+                <ComboBoxItem Content="新規" />
+                <ComboBoxItem Content="作業中" />/
+                <ComboBoxItem Content="完了" />
+            </ComboBox>
+        </DataTemplate>
+
     </UserControl.Resources>
     
     <Grid>
@@ -92,7 +100,8 @@
                     <tkit:DataGridBindingColumn
                         Header="Status"
                         Binding="{Binding Status}"
-                        CellEditingTemplate="{StaticResource ComboBoxCellTemplate}" 
+                        CellTemplate="{StaticResource ComboBoxCellTemplate}"
+                        CellEditingTemplate="{StaticResource ComboBoxCellEditingTemplate}" 
                         />
                 </tkit:DynamicTableGrid.Columns>
             </tkit:DynamicTableGrid>
