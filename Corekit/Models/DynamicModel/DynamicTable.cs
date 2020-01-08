@@ -94,22 +94,35 @@ namespace Corekit.Models
         /// </summary>
         private void OnRowsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.Action == NotifyCollectionChangedAction.Move)
+            switch (e.Action)
             {
-                e.OldItems?
-                    .Cast<IDynamicTableFrame>()
-                    .ForEach(i => this.MoveItem(i.Name, e.NewStartingIndex));
-            }
-            else
-            {
-                e.OldItems?
-                    .Cast<IDynamicTableFrame>()
-                    .ForEach(i => this.RemoveItem(i.Name));
+                case NotifyCollectionChangedAction.Move:
+                    e.OldItems?
+                        .Cast<IDynamicTableFrame>()
+                        .ForEach(i => this.MoveItem(i.Name, e.NewStartingIndex));
+                    break;
 
-                int index = e.NewStartingIndex;
-                e.NewItems?
-                    .Cast<IDynamicTableFrame>()
-                    .ForEach(i => this.InsertItem(index++, this.CreateDynamicItem(i)));
+                case NotifyCollectionChangedAction.Replace:
+                    throw new NotImplementedException();
+
+                case NotifyCollectionChangedAction.Reset:
+                    this.Select(i => i.Definition.Name)
+                        .ToList()
+                        .ForEach(i => this.RemoveItem(i));
+                    break;
+
+                case NotifyCollectionChangedAction.Add:
+                case NotifyCollectionChangedAction.Remove:
+                default:
+                    e.OldItems?
+                        .Cast<IDynamicTableFrame>()
+                        .ForEach(i => this.RemoveItem(i.Name));
+
+                    int index = e.NewStartingIndex;
+                    e.NewItems?
+                        .Cast<IDynamicTableFrame>()
+                        .ForEach(i => this.InsertItem(index++, this.CreateDynamicItem(i)));
+                    break;
             }
         }
 
@@ -118,22 +131,35 @@ namespace Corekit.Models
         /// </summary>
         private void OnColsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if(e.Action == NotifyCollectionChangedAction.Move)
+            switch (e.Action)
             {
-                e.OldItems?
-                    .Cast<IDynamicTableFrame>()
-                    .ForEach(i => this.MoveDefinition(i.Name, e.OldStartingIndex));
-            }
-            else
-            {
-                e.OldItems?
-                    .Cast<IDynamicTableFrame>()
-                    .ForEach(i => this.RemoveDefinition(i.Name));
+                case NotifyCollectionChangedAction.Move:
+                    e.OldItems?
+                        .Cast<IDynamicTableFrame>()
+                        .ForEach(i => this.MoveDefinition(i.Name, e.OldStartingIndex));
+                    break;
 
-                int index = e.NewStartingIndex;
-                e.NewItems?
-                    .Cast<IDynamicTableFrame>()
-                    .ForEach(i => this.InsertDefinition(index++, this.CreateDefinition(i)));
+                case NotifyCollectionChangedAction.Replace:
+                    throw new NotImplementedException();
+
+                case NotifyCollectionChangedAction.Reset:
+                    this._Properties.Select(i => i.Name)
+                        .ToList()
+                        .ForEach(i => this.RemoveDefinition(i));
+                    break;
+
+                case NotifyCollectionChangedAction.Add:
+                case NotifyCollectionChangedAction.Remove:
+                default:
+                    e.OldItems?
+                        .Cast<IDynamicTableFrame>()
+                        .ForEach(i => this.RemoveDefinition(i.Name));
+
+                    int index = e.NewStartingIndex;
+                    e.NewItems?
+                        .Cast<IDynamicTableFrame>()
+                        .ForEach(i => this.InsertDefinition(index++, this.CreateDefinition(i)));
+                    break;
             }
         }
 
