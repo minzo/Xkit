@@ -51,10 +51,10 @@ namespace Xkit.Plugins.Sample.Models
         public CombinationType()
         {
             this.Source = new Combination<Element>(x => x.Name);
-            this.SourceFrames.ForEach(i => this.Source.Definitions.Add(i.Name, i.Elements));
+            this.SourceFrames.ForEach(i => this.Source.AddDefinitions(i.Name, i.Elements));
 
             this.Target = new Combination<Element>(x => x.Name);
-            this.TargetFrames.ForEach(i => this.Target.Definitions.Add(i.Name, i.Elements));
+            this.TargetFrames.ForEach(i => this.Target.AddDefinitions(i.Name, i.Elements));
 
             this.Table = new CombinationTable<Cell,Element,Element>(this.Source, this.Target);
 

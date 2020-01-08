@@ -83,12 +83,12 @@ namespace Toolkit.WPF.Sample
         public CombinationGridWindowViewModel()
         {
             var row = new Combination<string>();
-            row.Definitions.Add("Mat", new List<string>() { "Body", "Stone", "Wood", "Metal" });
-            row.Definitions.Add("Sub", new List<string>() { "Small", "Middle", "Big" });
+            row.AddDefinitions("Mat", new List<string>() { "Body", "Stone", "Wood", "Metal" });
+            row.AddDefinitions("Sub", new List<string>() { "Small", "Middle", "Big" });
             var col = new Combination<string>();
-            col.Definitions.Add("Obj", new List<string>() { "Small", "Middle" });
-            col.Definitions.Add("Mas", new List<string>() { "Light", "Normal", "Heavy" });
-            col.Definitions.Add("Col", new List<string>() { "White", "Gray", "Black" });
+            col.AddDefinitions("Obj", new List<string>() { "Small", "Middle" });
+            col.AddDefinitions("Mas", new List<string>() { "Light", "Normal", "Heavy" });
+            col.AddDefinitions("Col", new List<string>() { "White", "Gray", "Black" });
             this.Table = new CombinationTable<Cell,string,string>(row, col);
 
             this.Initialize();

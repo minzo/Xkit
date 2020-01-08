@@ -94,9 +94,19 @@ namespace Xkit.Plugins.Sample.ViewModels
             this.SelectedTriggers = new TypedCollection<EventTrigger>();
 
             this.CornerButtonCommand = new DelegateCommand(_ => this._View.Refresh());
+
+            this.AddDefinition = new DelegateCommand(_ => {
+                this._Model.SourceFrames.FirstOrDefault()?.Elements.Add(new Element() { Name = "HOGE" });
+            });
         }
 
+        #region Command
+
         public ICommand CornerButtonCommand { get; }
+
+        public ICommand AddDefinition { get; }
+
+        #endregion
 
         public System.Collections.IComparer Comparer { get; }
 

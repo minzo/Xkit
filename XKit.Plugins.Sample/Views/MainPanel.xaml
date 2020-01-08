@@ -72,7 +72,10 @@
             </TabControl.Resources>
             
             <TabItem Header="テーブル" DataContext="{Binding CombinationTypeVM}">
-                <local:CombinationTypePanel />
+                <DockPanel>
+                    <Button DockPanel.Dock="Top" Content="+"  Command="{Binding AddDefinition}" />
+                    <local:CombinationTypePanel />
+                </DockPanel>
             </TabItem>
 
             <TabItem 
