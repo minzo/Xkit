@@ -24,4 +24,24 @@ namespace Corekit.Models
 
         private Func<T, T, int> _Comparer;
     }
+
+    public class DelegateComparer<T, TKey> : IEqualityComparer<T>
+    {
+        public DelegateComparer(Func<T, TKey> selector)
+        {
+            this._Selector = selector;
+        }
+
+        public bool Equals(T x, T y)
+        {
+            return _Selector(x).Equals(_Selector(y));
+        }
+
+        public int GetHashCode(T obj)
+        {
+            return _Selector(obj).GetHashCode();
+        }
+
+        private Func<T, TKey> _Selector;
+    }
 }

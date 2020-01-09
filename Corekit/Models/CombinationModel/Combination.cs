@@ -36,7 +36,7 @@ namespace Corekit.Models
         /// <summary>
         /// 定義を追加する
         /// </summary>
-        public void AddDefinitions(string key, IEnumerable<T> elements)
+        public void AddDefinition(string key, IEnumerable<T> elements)
         {
             this._Definitions.Add(key, elements);
 
@@ -86,8 +86,15 @@ namespace Corekit.Models
                 .Select(i => new CombinationTableFrame<T>() { Name = string.Join("_", i.Select(x => x.Value).Select(this._ConvertNameFunc)), Elements = i.ToList() })
                 .ToList();
 
-            this._Combinations.Clear();
-            foreach (var item in next)
+            var del = prev.Except(next, new DelegateComparer<CombinationTableFrame<T>, string>(x => x.Name)).ToList();
+            var add = next.Except(prev, new DelegateComparer<CombinationTableFrame<T>, string>(x => x.Name)).ToList();
+
+            foreach (var item in del)
+            {
+                this._Combinations.Remove(item);
+            }
+
+            foreach (var item in add)
             {
                 this._Combinations.Add(item);
             }
