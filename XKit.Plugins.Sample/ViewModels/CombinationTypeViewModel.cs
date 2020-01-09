@@ -68,12 +68,12 @@ namespace Xkit.Plugins.Sample.ViewModels
         /// <summary>
         /// ソース
         /// </summary>
-        public IEnumerable<Frame> SourceFrames => this._Model.SourceFrames;
+        public FrameViewModel SourceFrameVM { get; }
 
         /// <summary>
         /// ターゲット
         /// </summary>
-        public IEnumerable<Frame> TargetFrames => this._Model.TargetFrames;
+        public FrameViewModel TargetFrameVM { get; }
 
         /// <summary>
         /// コンストラクタ
@@ -81,6 +81,8 @@ namespace Xkit.Plugins.Sample.ViewModels
         public CombinationTypeViewModel(CombinationType model)
         {
             this._Model = model;
+            this.SourceFrameVM = new FrameViewModel(this._Model.SourceFrames);
+            this.TargetFrameVM = new FrameViewModel(this._Model.TargetFrames);
 
             this._View = CollectionViewSource.GetDefaultView(this.Table) as ListCollectionView;
             //this._View.CustomSort = new DelegateComparer<DynamicItem>((lha, rha) => {
