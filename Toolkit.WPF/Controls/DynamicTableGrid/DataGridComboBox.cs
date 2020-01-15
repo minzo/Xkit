@@ -66,6 +66,7 @@ namespace Toolkit.WPF.Controls
         {
             this.GetBindingExpression(ComboBox.TextProperty)?.UpdateSource();
             this._DataGridOwner?.CommitEdit(DataGridEditingUnit.Cell, true);
+            this._DataGridOwner?.CommitEdit(DataGridEditingUnit.Row, true);
         }
 
         /// <summary>
