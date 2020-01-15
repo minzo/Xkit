@@ -60,9 +60,33 @@ namespace Xkit.Plugins.Sample.ViewModels
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public IEnumerable<Toolkit.WPF.Controls.DynamicTableGrid.SelectedInfo> SelectedParams
         {
             set { } 
+        }
+
+        /// <summary>
+        /// 表示プロパティ名
+        /// </summary>
+        public string DisplayPropertyName {
+            get => this._DisplayPropertyName;
+            set
+            {
+                if (this.SetProperty(ref this._DisplayPropertyName, value))
+                {
+                    foreach(var row in this.Table.Rows)
+                    {
+                        var rowName = row.Name;
+                        foreach (var cell in this.Table.Cols)
+                        {
+                            this.Table.GetPropertyValue(rowName, cell.Name).DisplayPropertyName = this._DisplayPropertyName;
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -118,6 +142,7 @@ namespace Xkit.Plugins.Sample.ViewModels
         private ListCollectionView _View { get; }
 
         private CombinationType _Model;
+        private string _DisplayPropertyName;
 
 #pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;

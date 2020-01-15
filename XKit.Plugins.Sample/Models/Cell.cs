@@ -1,4 +1,5 @@
-﻿using Corekit.Models;
+﻿using Corekit.Extensions;
+using Corekit.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,7 +17,18 @@ namespace Xkit.Plugins.Sample.Models
 
         public IReadOnlyCollection<EventTrigger> Triggers { get; }
 
-        public object Value => this.Triggers.Count;
+        public string DisplayPropertyName { 
+            get => this._DisplayPropertyName;
+            set
+            {
+                if (this.SetProperty(ref this._DisplayPropertyName, value))
+                {
+                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+                }
+            }
+        }
+
+        public object Value => this.Triggers.FirstOrDefault()?.GetPropertyValue(this._DisplayPropertyName) ?? this.Triggers.Count;
 
         public Cell(ICombinationDefinition source, ICombinationDefinition target)
         {
@@ -32,6 +44,17 @@ namespace Xkit.Plugins.Sample.Models
             trigger.Children.Add(children.Skip(1).FirstOrDefault());
 
             this.Triggers = new TypedCollection<EventTrigger>(children.Prepend(trigger));
+
+            foreach(var trig in this.Triggers)
+            {
+                trig.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == this._DisplayPropertyName)
+                    {
+                        this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+                    }
+                };
+            }
         }
 
         private Cell()
@@ -46,6 +69,8 @@ namespace Xkit.Plugins.Sample.Models
         public void Remove()
         {
         }
+
+        private string _DisplayPropertyName;
 
 #pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
