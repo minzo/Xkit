@@ -16,6 +16,8 @@ namespace Xkit.Plugins.Sample.Models
 
         public IReadOnlyCollection<EventTrigger> Triggers { get; }
 
+        public object Value => this.Triggers.Count;
+
         public Cell(ICombinationDefinition source, ICombinationDefinition target)
         {
             this.Sources = source;

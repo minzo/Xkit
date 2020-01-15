@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -16,19 +14,13 @@ using System.Windows.Shapes;
 namespace Xkit.Plugins.Sample.Views
 {
     /// <summary>
-    /// CombinationTypePanel.xaml の相互作用ロジック
+    /// BatchEditPanel.xaml の相互作用ロジック
     /// </summary>
-    public partial class CombinationTypePanel : UserControl
+    public partial class BatchEditPanel : UserControl
     {
-        public CombinationTypePanel()
+        public BatchEditPanel()
         {
             InitializeComponent();
-        }
-
-        private void OnOpenWindow(object sender, RoutedEventArgs e)
-        {
-            var window = new Window() { Width = 720, Height = 360, Content = new BatchEditPanel() };
-            window.Show();
         }
     }
 }

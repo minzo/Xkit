@@ -11,8 +11,9 @@
 
     <!-- Resources -->
     <UserControl.Resources>
+        
         <DataTemplate DataType="{x:Type model:Cell}">
-            <TextBlock Text="{Binding Triggers.Count}" />
+            <TextBlock Text="{Binding Value}" />
         </DataTemplate>
 
         <tkit:DynamicPropertyTemplateSelector x:Key="CellTemplateSelector">
@@ -78,7 +79,12 @@
 
         <DockPanel Grid.Row="0">
             <StatusBar DockPanel.Dock="Top" Margin="4" Background="White">
-                <ComboBox Text="実装数" />
+                <ComboBox
+                    ItemsSource="{Binding Table[0].Value[0].Value.Triggers[0].Definition}"
+                    DisplayMemberPath="Name"
+                    SelectedIndex="0"
+                    MinWidth="60"
+                    />
             </StatusBar>
             <tkit:CombinationGrid
                 IsReadOnly="True"
@@ -89,26 +95,52 @@
                 SelectedInfos="{Binding SelectedInfos, Mode=OneWayToSource}"
                 CellTemplateSelector="{StaticResource CellTemplateSelector}"
                 RowHeaderTemplate="{StaticResource RowHeaderTemplate}"
-                ColumnHeaderTemplate="{StaticResource ColHeaderTemplate}"/>
+                ColumnHeaderTemplate="{StaticResource ColHeaderTemplate}">
+                <tkit:CombinationGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="選択しているセルの行を選択" Command="{x:Static tkit:DynamicTableGrid.SelectCellsHorizontalCommand}" />
+                        <MenuItem Header="選択しているセルの列を選択" Command="{x:Static tkit:DynamicTableGrid.SelectCellsVerticalCommand}" />
+                    </ContextMenu>
+                </tkit:CombinationGrid.ContextMenu>
+            </tkit:CombinationGrid>
         </DockPanel>
 
         <GridSplitter Grid.Row="1" Height="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
 
         <DockPanel Grid.Row="2">
-            <StatusBar DockPanel.Dock="Top" Margin="4" Background="White" />
+            <StatusBar DockPanel.Dock="Top" Margin="4" Background="White">
+                <Button Content="+" Width="24" Height="24"/>
+            </StatusBar>
             <tkit:DynamicTableGrid
                 SelectionUnit="Cell"
                 IsVisibleZoomValue="True"
-                ItemsSource="{Binding SelectedTriggers, Mode=OneWay}">
+                ItemsSource="{Binding SelectedTriggers, Mode=OneWay}"
+                SelectedInfos="{Binding SelectedParams, Mode=OneWayToSource}">
+                <tkit:DynamicTableGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="選択しているセルの行を選択" Command="{x:Static tkit:DynamicTableGrid.SelectCellsHorizontalCommand}" />
+                        <MenuItem Header="選択しているセルの列を選択" Command="{x:Static tkit:DynamicTableGrid.SelectCellsVerticalCommand}" />
+                        <Separator />
+                        <MenuItem Header="すべて開く" Command="{x:Static tkit:DataGridTreeColumn.ExpandAllCommand}" />
+                        <MenuItem Header="すべて閉じる" Command="{x:Static tkit:DataGridTreeColumn.CloseAllCommand}" />
+                        <MenuItem Header="選択アイテム以下をすべて開く" Command="{x:Static tkit:DataGridTreeColumn.ExpandSelectedItemsCommand}" />
+                        <MenuItem Header="選択アイテム以下をすべて閉じる" Command="{x:Static tkit:DataGridTreeColumn.CloseSelectedItemsCommand}" />
+                        <Separator />
+                        <MenuItem Header="一括編集" Click="OnOpenWindow" />
+                        <MenuItem Header="一括編集_" Command="{Binding OpenBatchEditWindow}" />
+                    </ContextMenu>
+                </tkit:DynamicTableGrid.ContextMenu>
                 <tkit:DynamicTableGrid.Columns>
                     <tkit:DataGridTreeColumn
                         Header="Key"
                         Binding="{Binding Key.Value}"
                         ChildrenPropertyPath="Children"
+                        FilterTargetPropertyPath=""
                         />
                     <tkit:DataGridBindingColumn
                         Header="Status"
                         Binding="{Binding Status}"
+                        ClipboardContentBinding="{Binding Status}"
                         CellTemplate="{StaticResource ComboBoxCellTemplate}"
                         CellEditingTemplate="{StaticResource ComboBoxCellEditingTemplate}" 
                         />

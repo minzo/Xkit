@@ -14,11 +14,11 @@ using System.Windows.Shapes;
 namespace Xkit.Plugins.Sample.Views
 {
     /// <summary>
-    /// CombinationFrameViewModel.xaml の相互作用ロジック
+    /// CombinationFramePanel.xaml の相互作用ロジック
     /// </summary>
-    public partial class CombinationFrameViewModel : UserControl
+    public partial class CombinationFramePanel : UserControl
     {
-        public CombinationFrameViewModel()
+        public CombinationFramePanel()
         {
             InitializeComponent();
         }

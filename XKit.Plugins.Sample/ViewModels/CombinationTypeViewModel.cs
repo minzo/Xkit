@@ -60,6 +60,11 @@ namespace Xkit.Plugins.Sample.ViewModels
             }
         }
 
+        public IEnumerable<Toolkit.WPF.Controls.DynamicTableGrid.SelectedInfo> SelectedParams
+        {
+            set { } 
+        }
+
         /// <summary>
         /// テーブル
         /// </summary>
@@ -97,16 +102,14 @@ namespace Xkit.Plugins.Sample.ViewModels
 
             this.CornerButtonCommand = new DelegateCommand(_ => this._View.Refresh());
 
-            this.AddDefinition = new DelegateCommand(_ => {
-                this._Model.SourceFrames.FirstOrDefault()?.Elements.Add(new Element() { Name = "HOGE" });
-            });
+            this.OpenBatchEditWindow = new DelegateCommand(_ => new System.Windows.Window() { Content = new Views.BatchEditPanel() }.Show());
         }
 
         #region Command
 
         public ICommand CornerButtonCommand { get; }
 
-        public ICommand AddDefinition { get; }
+        public ICommand OpenBatchEditWindow { get; }
 
         #endregion
 

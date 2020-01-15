@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows.Input;
+using Toolkit.WPF;
 using Xkit.Plugins.Sample.Models;
 
 namespace Xkit.Plugins.Sample.ViewModels
@@ -18,6 +20,17 @@ namespace Xkit.Plugins.Sample.ViewModels
         public FrameViewModel(IEnumerable<Frame> model)
         {
             this.Frames = model;
+
+            this.AddDefinition = new DelegateCommand(_ => {});
+            this.RemoveDefinition = new DelegateCommand(_ => {});
         }
+
+        #region Command
+
+        public ICommand AddDefinition { get; }
+
+        public ICommand RemoveDefinition { get; }
+
+        #endregion
     }
 }

@@ -24,11 +24,11 @@
             </TabItem>
 
             <TabItem Header="Source" DataContext="{Binding CombinationTypeVM.SourceFrameVM}">
-                <local:CombinationFrameViewModel />
+                <local:CombinationFramePanel />
             </TabItem>
 
             <TabItem Header="Target" DataContext="{Binding CombinationTypeVM.TargetFrameVM}">
-                <local:CombinationFrameViewModel />
+                <local:CombinationFramePanel />
             </TabItem>
         </TabControl>
     </Grid>
