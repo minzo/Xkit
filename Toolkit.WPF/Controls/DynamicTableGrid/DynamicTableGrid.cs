@@ -850,7 +850,7 @@ namespace Toolkit.WPF.Controls
             this.SelectedCells.Clear();
             foreach (var column in columns)
             {
-                foreach (var item in this.ItemsSource)
+                foreach (var item in this.Items)
                 {
                     this.SelectedCells.Add(new DataGridCellInfo(item, column));
                 }
