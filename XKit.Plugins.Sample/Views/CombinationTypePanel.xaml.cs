@@ -24,11 +24,5 @@ namespace Xkit.Plugins.Sample.Views
         {
             InitializeComponent();
         }
-
-        private void OnOpenWindow(object sender, RoutedEventArgs e)
-        {
-            var window = new Window() { Width = 720, Height = 360, Content = new BatchEditPanel() };
-            window.Show();
-        }
     }
 }

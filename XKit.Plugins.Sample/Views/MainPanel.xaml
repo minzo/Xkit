@@ -10,13 +10,21 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.3*"/>
-            <ColumnDefinition Width="4"/>
+            <ColumnDefinition Width="8"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <ListBox Grid.Column="0"/>
 
-        <GridSplitter Grid.Column="1" Width="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <GridSplitter
+            Grid.Column="1"
+            BorderThickness="1 0 0 0"
+            BorderBrush="LightGray"
+            Margin="4 0 0 0"
+            Background="Transparent"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            />
 
         <TabControl Grid.Column="2">
             <TabItem Header="テーブル" DataContext="{Binding CombinationTypeVM}">
@@ -29,6 +37,10 @@
 
             <TabItem Header="Target" DataContext="{Binding CombinationTypeVM.TargetFrameVM}">
                 <local:CombinationFramePanel />
+            </TabItem>
+
+            <TabItem Header="CellTemplate">
+                <TextBlock Text="Under Construction" VerticalAlignment="Center" HorizontalAlignment="Center" />
             </TabItem>
         </TabControl>
     </Grid>
