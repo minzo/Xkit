@@ -15,18 +15,29 @@ namespace Toolkit.WPF.Commands
     /// </summary>
     public class OpenWindowCommand : MarkupExtension, ICommand
     {
-        public Type WindowType { get; set; } = typeof(Window);
-
-        public Type ContentType { get; set; }
-
+        /// <summary>
+        /// Windowタイトル
+        /// </summary>
         public string Title { get; set; } = "Window";
 
+        /// <summary>
+        /// Window幅
+        /// </summary>
         public double Width { get; set; } = 480D;
 
+        /// <summary>
+        /// Window高さ
+        /// </summary>
         public double Height { get; set; } = 320D;
 
+        /// <summary>
+        /// WindowStyle
+        /// </summary>
         public WindowStyle WindowStyle { get; set; } = WindowStyle.SingleBorderWindow;
 
+        /// <summary>
+        /// StartupLocation
+        /// </summary>
         public WindowStartupLocation StartupLocation { get; set; } = WindowStartupLocation.CenterOwner;
 
         /// <summary>
@@ -43,6 +54,16 @@ namespace Toolkit.WPF.Commands
         /// ContentTemplateSelector
         /// </summary>
         public DataTemplateSelector ContentTemplateSelector { get; set; }
+
+        /// <summary>
+        /// Windowのタイプ
+        /// </summary>
+        public Type WindowType { get; set; } = typeof(Window);
+
+        /// <summary>
+        /// Contentに設定するパネルのタイプ
+        /// </summary>
+        public Type ContentType { get; set; }
 
         /// <summary>
         /// コンストラクタ
@@ -117,7 +138,7 @@ namespace Toolkit.WPF.Commands
         private IRootObjectProvider _RootObjectProvider;
         private readonly Func<object, bool> _CanExecute;
 
-        public static IEnumerable<DependencyObject> EnumerateParent(DependencyObject source)
+        private static IEnumerable<DependencyObject> EnumerateParent(DependencyObject source)
         {
             while ((source = VisualTreeHelper.GetParent(source)) != null)
             {
