@@ -24,15 +24,23 @@
         <!-- StatusBar -->
         <StatusBar
             DockPanel.Dock="Top"
-            TextBlock.FontFamily="Segoe MDL2 Assets"
-            TextBlock.FontSize="24"
             Margin="0 0 0 2"
             Padding="2 0 2 2"
             BorderThickness="0 0 0 1"
             BorderBrush="Yellow"
             Background="White">
-            <Button Content="&#xE700;" ToolTip="メニュー" Width="32" Height="32"/>
-            <Button Content="&#xE74E;" ToolTip="保存&amp;コンバート" Width="32" Height="32" />
+            <Button ToolTip="メニュー" Width="48" Height="48">
+                <StackPanel>
+                    <TextBlock Text="&#xE700;" FontSize="24" FontFamily="Segoe MDL2 Assets" TextAlignment="Center"/>
+                    <TextBlock Text="メニュー"/>
+                </StackPanel>
+            </Button>
+            <Button ToolTip="保存&amp;コンバート" Width="48" Height="48">
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="&#xE74E;" FontSize="24" FontFamily="Segoe MDL2 Assets" TextAlignment="Center"/>
+                    <TextBlock Text="保存&amp;&#xa;コンバート" FontSize="8"/>
+                </StackPanel>
+            </Button>
             <StatusBar.Effect>
                 <DropShadowEffect ShadowDepth="1" Direction="270" Opacity="0.8" BlurRadius="4" Color="#ffa200" />
             </StatusBar.Effect>
@@ -41,15 +49,15 @@
         <!-- MainContent -->
         <Grid Margin="4" Background="White">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="60" />
                 <ColumnDefinition Width="8" />
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <ListBox
-                BorderThickness="0"
                 Grid.Column="0"
                 ItemsSource="{Binding Content}"
+                BorderThickness="0"
                 DisplayMemberPath="Name"
                 IsSynchronizedWithCurrentItem="True"
                 />
@@ -61,6 +69,7 @@
                 Margin="4 0 0 0"
                 Background="Transparent"
                 HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
                 />
 
             <DockPanel Grid.Column="2" Margin="4 2 2 2">

@@ -28,15 +28,17 @@
                 </DockPanel>
             </StackPanel>
         </Border>
-        
 
         <GridSplitter Grid.Row="1" VerticalContentAlignment="Stretch" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"/>
 
-        <DataGrid Grid.Row="2">
+        <DataGrid 
+            Grid.Row="2"
+            ItemsSource="{Binding}"
+            AutoGenerateColumns="False">
             <DataGrid.Columns>
-                <DataGridTextColumn />
-                <DataGridTextColumn Header="元"/>
-                <DataGridTextColumn Header="結果"/>
+                <DataGridTextColumn Header="パラメータ名" Binding="{Binding Name}"/>
+                <DataGridTextColumn Header="元" Binding="{Binding Value}"/>
+                <DataGridTextColumn Header="結果" Binding="{Binding NewValue}"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

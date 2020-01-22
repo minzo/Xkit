@@ -8,6 +8,7 @@ using System.Windows.Input;
 using Corekit;
 using Corekit.Extensions;
 using Toolkit.WPF;
+using Toolkit.WPF.Commands;
 
 namespace System.Resource.ViewModels
 {

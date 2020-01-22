@@ -18,9 +18,20 @@ namespace Xkit.Plugins.Sample.Views
     /// </summary>
     public partial class BatchEditPanel : UserControl
     {
+        #region コマンド
+
+        public static RoutedUICommand ApplyCommand { get; } = new RoutedUICommand(nameof(ApplyCommand), nameof(ApplyCommand), typeof(BatchEditPanel));
+
+        #endregion
+
         public BatchEditPanel()
         {
             InitializeComponent();
+        }
+
+        private void hoge(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

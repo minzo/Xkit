@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Xkit.Plugins.Sample.Models
 {
+    /// <summary>
+    /// セル
+    /// </summary>
     public class Cell : INotifyPropertyChanged
     {
         public ICombinationDefinition Sources { get; }
@@ -17,19 +20,14 @@ namespace Xkit.Plugins.Sample.Models
 
         public IReadOnlyCollection<EventTrigger> Triggers { get; }
 
-        public string DisplayPropertyName { 
-            get => this._DisplayPropertyName;
-            set
-            {
-                if (this.SetProperty(ref this._DisplayPropertyName, value))
-                {
-                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
-                }
-            }
-        }
-
+        /// <summary>
+        /// 値
+        /// </summary>
         public object Value => this.Triggers.FirstOrDefault()?.GetPropertyValue(this._DisplayPropertyName) ?? this.Triggers.Count;
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public Cell(ICombinationDefinition source, ICombinationDefinition target)
         {
             this.Sources = source;
@@ -57,17 +55,31 @@ namespace Xkit.Plugins.Sample.Models
             }
         }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         private Cell()
         {
             this.Triggers = new TypedCollection<EventTrigger>();
         }
 
-        public void Add()
-        { 
+        /// <summary>
+        /// 
+        /// </summary>
+        public void SetDisplayPropertyName(string propertyName)
+        {
+            if (this.SetProperty(ref this._DisplayPropertyName, propertyName))
+            {
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+            }
         }
 
-        public void Remove()
+        /// <summary>
+        /// 
+        /// </summary>
+        public void SetDisplayValue(string propertyName)
         {
+
         }
 
         private string _DisplayPropertyName;

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 using Toolkit.WPF;
+using Toolkit.WPF.Commands;
 using Xkit.Plugins.Sample.Models;
 
 namespace Xkit.Plugins.Sample.ViewModels
@@ -27,6 +28,13 @@ namespace Xkit.Plugins.Sample.ViewModels
         /// Trigger
         /// </summary>
         public TypedCollection<EventTrigger> SelectedTriggers { get; set; }
+
+        /// <summary>
+        /// 選択しているトリガーのパラメータのリスト
+        /// </summary>
+        public IEnumerable<IDynamicProperty> SelectedTriggerParams { get; private set; }
+
+        #region Binding用 選択
 
         /// <summary>
         /// 選択情報
@@ -61,12 +69,21 @@ namespace Xkit.Plugins.Sample.ViewModels
         }
 
         /// <summary>
-        /// 
+        /// 選択しているトリガー
         /// </summary>
-        public IEnumerable<Toolkit.WPF.Controls.DynamicTableGrid.SelectedInfo> SelectedParams
+        public IEnumerable<Toolkit.WPF.Controls.DynamicTableGrid.SelectedInfo> SelectedTriggerParamInfos
         {
-            set { } 
+            set
+            {
+                var props = value?
+                    .Select(i => (i.Item as IDynamicItem).GetProperty(i.PropertyName))
+                    .ToList();
+
+                this.SetProperty(nameof(this.SelectedTriggerParams), props);
+            }
         }
+
+        #endregion
 
         /// <summary>
         /// 表示プロパティ名
@@ -79,10 +96,11 @@ namespace Xkit.Plugins.Sample.ViewModels
                 {
                     foreach(var row in this.Table.Rows)
                     {
-                        var rowName = row.Name;
                         foreach (var cell in this.Table.Cols)
                         {
-                            this.Table.GetPropertyValue(rowName, cell.Name).DisplayPropertyName = this._DisplayPropertyName;
+                            this.Table
+                                .GetPropertyValue(row.Name, cell.Name)
+                                .SetDisplayPropertyName(this._DisplayPropertyName);
                         }
                     }
                 }
@@ -126,7 +144,16 @@ namespace Xkit.Plugins.Sample.ViewModels
 
             this.CornerButtonCommand = new DelegateCommand(_ => this._View.Refresh());
 
-            this.OpenBatchEditWindow = new DelegateCommand(_ => new System.Windows.Window() { Content = new Views.BatchEditPanel() }.Show());
+            this.OpenBatchEditWindow = new DelegateCommand(_ => new System.Windows.Window() { 
+                Owner = System.Windows.Application.Current.MainWindow,
+                Content = new Xkit.Plugins.Sample.Views.BatchEditPanel(),
+                Title = nameof(Xkit.Plugins.Sample.Views.BatchEditPanel),
+                DataContext = this.SelectedTriggerParams.ToList(),
+                Width = 480,
+                Height = 320,
+                WindowStyle = System.Windows.WindowStyle.ToolWindow,
+                WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner
+            }.ShowDialog());
         }
 
         #region Command
@@ -134,6 +161,8 @@ namespace Xkit.Plugins.Sample.ViewModels
         public ICommand CornerButtonCommand { get; }
 
         public ICommand OpenBatchEditWindow { get; }
+
+        public ICommand ApplyValueCommand { get; }
 
         #endregion
 

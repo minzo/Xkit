@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Input;
 using Toolkit.WPF;
+using Toolkit.WPF.Commands;
 using Xkit.Plugins.Sample.Models;
 
 namespace Xkit.Plugins.Sample.ViewModels

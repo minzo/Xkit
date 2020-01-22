@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Xkit.Plugins.Sample.Views"
+             xmlns:cmds="clr-namespace:Toolkit.WPF.Commands;assembly=Toolkit.WPF"
              xmlns:tkit="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
              xmlns:model="clr-namespace:Xkit.Plugins.Sample.Models"
              mc:Ignorable="d" 
@@ -27,7 +28,7 @@
                 HorizontalContentAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Focusable="False"
-                DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}"                
+                DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}"
                 ItemsSource="{Binding Definition.Elements}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -52,38 +53,22 @@
                 />
         </DataTemplate>
 
-        <DataTemplate x:Key="ComboBoxCellEditingTemplate">
-            <tkit:DataGridComboBox SelectedIndex="{Binding Value}">
-                <ComboBoxItem Content="新規" />
-                <ComboBoxItem Content="作業中" />
-                <ComboBoxItem Content="完了" />
-            </tkit:DataGridComboBox>
-        </DataTemplate>
-
-        <DataTemplate x:Key="ComboBoxCellTemplate">
-            <ComboBox SelectedIndex="{Binding Value}" IsHitTestVisible="False" BorderThickness="0" IsEditable="True" Background="Transparent">
-                <ComboBoxItem Content="新規" />
-                <ComboBoxItem Content="作業中" />
-                <ComboBoxItem Content="完了" />
-            </ComboBox>
-        </DataTemplate>
-
     </UserControl.Resources>
     
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" MinHeight="100" />
             <RowDefinition Height="8" />
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0">
             <StatusBar DockPanel.Dock="Top" Margin="4" Background="White">
                 <TextBlock Text="セル: " />
-                <ComboBox                    
-                    ItemsSource="{Binding Table[0].Value[0].Value.Triggers[0].Definition}"
-                    DisplayMemberPath="Name"
+                <ComboBox
+                    ItemsSource="{Binding Table[0].Value[0].Value.Triggers[0].Definition, Mode=OneTime}"
                     SelectedValuePath="Name"
+                    DisplayMemberPath="Name"
                     SelectedValue="{Binding DisplayPropertyName}"
                     SelectedIndex="0"
                     MinWidth="60"
@@ -144,7 +129,26 @@
                 SelectionUnit="Cell"
                 IsVisibleZoomValue="True"
                 ItemsSource="{Binding SelectedTriggers, Mode=OneWay}"
-                SelectedInfos="{Binding SelectedParams, Mode=OneWayToSource}">
+                SelectedInfos="{Binding SelectedTriggerParamInfos, Mode=OneWayToSource}">
+
+                <tkit:DynamicTableGrid.Resources>
+                    <DataTemplate x:Key="ComboBoxCellTemplate">
+                        <ComboBox SelectedIndex="{Binding Value}" IsHitTestVisible="False" BorderThickness="0" Background="Transparent">
+                            <ComboBoxItem Content="新規" />
+                            <ComboBoxItem Content="作業中" />
+                            <ComboBoxItem Content="完了" />
+                        </ComboBox>
+                    </DataTemplate>
+
+                    <DataTemplate x:Key="ComboBoxCellEditingTemplate">
+                        <tkit:DataGridComboBox SelectedIndex="{Binding Value}" BorderThickness="0">
+                            <ComboBoxItem Content="新規" />
+                            <ComboBoxItem Content="作業中" />
+                            <ComboBoxItem Content="完了" />
+                        </tkit:DataGridComboBox>
+                    </DataTemplate>
+                </tkit:DynamicTableGrid.Resources>
+                
                 <tkit:DynamicTableGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="選択しているセルの行を選択" Command="{x:Static tkit:DynamicTableGrid.SelectCellsHorizontalCommand}" />
@@ -155,10 +159,15 @@
                         <MenuItem Header="選択アイテム以下をすべて開く" Command="{x:Static tkit:DataGridTreeColumn.ExpandSelectedItemsCommand}" />
                         <MenuItem Header="選択アイテム以下をすべて閉じる" Command="{x:Static tkit:DataGridTreeColumn.CloseSelectedItemsCommand}" />
                         <Separator />
-                        <MenuItem Header="一括編集" Command="{Binding OpenBatchEditWindow}" />
+                        <MenuItem 
+                            Header="一括編集" 
+                            Command="{cmds:OpenWindowCommand Title=一括編集, IsModal=False, ContentType={x:Type local:BatchEditPanel}}"
+                            CommandParameter="{Binding SelectedTriggerParams, Mode=OneWay}"
+                            />
                         <MenuItem Header="カーブ入力" />
                     </ContextMenu>
                 </tkit:DynamicTableGrid.ContextMenu>
+
                 <tkit:DynamicTableGrid.Columns>
                     <tkit:DataGridTreeColumn
                         Header="Key"

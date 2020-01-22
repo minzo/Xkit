@@ -6,6 +6,7 @@ using System.Resource.Models.Data;
 using System.Text;
 using System.Windows.Input;
 using Toolkit.WPF;
+using Toolkit.WPF.Commands;
 
 namespace System.Resource.ViewModels
 {
