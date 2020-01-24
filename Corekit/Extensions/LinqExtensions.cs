@@ -83,9 +83,9 @@ namespace Corekit.Extensions
         /// <summary>
         /// Nullな場合はEmptyを返す
         /// </summary>
-        public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> source)
+        public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> collection)
         {
-            return source ?? Enumerable.Empty<T>();
+            return collection ?? Enumerable.Empty<T>();
         }
 
         /// <summary>
@@ -138,6 +138,14 @@ namespace Corekit.Extensions
                 };
             }
             return items;
+        }
+
+        /// <summary>
+        /// To
+        /// </summary>
+        public static TResult To<T,TResult>(this T source, Func<T, TResult> predicate)
+        {
+            return predicate.Invoke(source);
         }
     }
 }
