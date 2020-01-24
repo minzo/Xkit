@@ -39,7 +39,7 @@ namespace Corekit
         }
 
         /// <summary>
-        /// 無効化する（Dispose時にも呼ばれます）
+        /// 無効化する
         /// </summary>
         internal void Invalidate()
         {
@@ -174,7 +174,7 @@ namespace Corekit
             /// <summary>
             /// 参照されているか
             /// </summary>
-            internal static bool IsReferenced(T source)
+            public static bool IsReferenced(T source)
             {
                 if (ReferenceInfo.TryGetValue(source, out Info info))
                 {

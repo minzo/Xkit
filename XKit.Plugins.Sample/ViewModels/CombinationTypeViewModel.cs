@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
+using Toolkit.WPF;
 using Toolkit.WPF.Commands;
 using Xkit.Plugins.Sample.Models;
 
@@ -32,14 +33,6 @@ namespace Xkit.Plugins.Sample.ViewModels
         /// 選択しているトリガーのパラメータのリスト
         /// </summary>
         public IEnumerable<IDynamicProperty> SelectedTriggerParams { get; private set; }
-
-        /// <summary>
-        /// 一括編集VM
-        /// </summary>
-        public BatchEditPanelViewModel BatchEditVM => this.SelectedTriggerParams
-            .Select(i => i.Owner)
-            .OfType<EventTrigger>()
-            .To(i => new BatchEditPanelViewModel(i));
 
         #region Binding用 選択
 
@@ -150,11 +143,24 @@ namespace Xkit.Plugins.Sample.ViewModels
             this.SelectedTriggers = new TypedCollection<EventTrigger>();
 
             this.CornerButtonCommand = new DelegateCommand(_ => this._View.Refresh());
+
+            this.OpenBatchEditWindow = new DelegateCommand(_ => new System.Windows.Window() { 
+                Owner = System.Windows.Application.Current.MainWindow,
+                Content = new Xkit.Plugins.Sample.Views.BatchEditPanel(),
+                Title = nameof(Xkit.Plugins.Sample.Views.BatchEditPanel),
+                DataContext = this.SelectedTriggerParams.ToList(),
+                Width = 480,
+                Height = 320,
+                WindowStyle = System.Windows.WindowStyle.ToolWindow,
+                WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner
+            }.ShowDialog());
         }
 
         #region Command
 
         public ICommand CornerButtonCommand { get; }
+
+        public ICommand OpenBatchEditWindow { get; }
 
         public ICommand ApplyValueCommand { get; }
 

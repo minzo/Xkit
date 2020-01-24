@@ -34,7 +34,6 @@ namespace System.Resource.Framework
             this._Resource = System.Resource.Models.Data.Resource.CreateDefault();
 
             this._ViewModels = new ObservableCollection<object>();
-            this._ViewModels.Add(new { Name = "システム全般", Description = "全体設定です", Icon= char.ConvertFromUtf32(0xE713) });
             this._ViewModels.Add(new FormMarkingUnitViewModel(this._Resource));
             this._ViewModels.Add(new ConstitutionPresetDefinitionViewModel(this._Resource));
         }

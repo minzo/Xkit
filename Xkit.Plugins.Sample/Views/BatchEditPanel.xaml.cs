@@ -28,5 +28,10 @@ namespace Xkit.Plugins.Sample.Views
         {
             InitializeComponent();
         }
+
+        private void hoge(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
