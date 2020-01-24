@@ -31,8 +31,21 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            this.IsDropDownOpen = true;
+            EnumerateChildren(this)
+                .OfType<Border>()
+                .Where(i => i.Name == "templateRoot")
+                .FirstOrDefault()
+                ?.SetCurrentValue(Border.BackgroundProperty, this.Background);
+
+            this._DataGridColumnOwner = EnumerateParent(this).OfType<DataGridCell>().FirstOrDefault()?.Column;
             this._DataGridOwner = EnumerateParent(this).OfType<DataGrid>().FirstOrDefault();
+
+            if (this._DataGridOwner?.IsReadOnly == true || this._DataGridColumnOwner?.IsReadOnly == true|| this.IsReadOnly)
+            {
+                return;
+            }
+
+            this.IsDropDownOpen = true;
         }
 
         /// <summary>
@@ -80,6 +93,17 @@ namespace Toolkit.WPF.Controls
             }
         }
 
+        /// <summary>
+        /// VisualChildrenを列挙する
+        /// </summary>
+        private static IEnumerable<DependencyObject> EnumerateChildren(DependencyObject dp)
+        {
+            var count = VisualTreeHelper.GetChildrenCount(dp);
+            var children = Enumerable.Range(0, count).Select(i => VisualTreeHelper.GetChild(dp, i));
+            return children.Concat(children.SelectMany(i => EnumerateChildren(i)));
+        }
+
         private DataGrid _DataGridOwner;
+        private DataGridColumn _DataGridColumnOwner;
     }
 }
