@@ -58,9 +58,21 @@
                 Grid.Column="0"
                 ItemsSource="{Binding Content}"
                 BorderThickness="0"
-                DisplayMemberPath="Name"
                 IsSynchronizedWithCurrentItem="True"
-                />
+                Grid.IsSharedSizeScope="True">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="Icon" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter Grid.Column="0" Content="{Binding Icon}" Margin="0 0 4 0" TextBlock.FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center"/>
+                            <ContentPresenter Grid.Column="1" Content="{Binding Name}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
             <GridSplitter
                 Grid.Column="1"

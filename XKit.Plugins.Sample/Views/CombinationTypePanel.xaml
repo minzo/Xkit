@@ -133,11 +133,11 @@
 
                 <tkit:DynamicTableGrid.Resources>
                     <DataTemplate x:Key="ComboBoxCellTemplate">
-                        <ComboBox SelectedIndex="{Binding Value}" IsHitTestVisible="False" BorderThickness="0" Background="Transparent">
+                        <tkit:DataGridComboBox SelectedIndex="{Binding Value}" IsHitTestVisible="False" BorderThickness="0" Background="Transparent" IsReadOnly="True">
                             <ComboBoxItem Content="新規" />
                             <ComboBoxItem Content="作業中" />
                             <ComboBoxItem Content="完了" />
-                        </ComboBox>
+                        </tkit:DataGridComboBox>
                     </DataTemplate>
 
                     <DataTemplate x:Key="ComboBoxCellEditingTemplate">
@@ -162,7 +162,7 @@
                         <MenuItem 
                             Header="一括編集" 
                             Command="{cmds:OpenWindowCommand Title=一括編集, IsModal=False, ContentType={x:Type local:BatchEditPanel}}"
-                            CommandParameter="{Binding SelectedTriggerParams, Mode=OneWay}"
+                            CommandParameter="{Binding BatchEditVM, Mode=OneWay}"
                             />
                         <MenuItem Header="カーブ入力" />
                     </ContextMenu>
