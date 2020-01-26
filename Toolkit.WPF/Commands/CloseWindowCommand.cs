@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Markup;
@@ -21,20 +20,18 @@ namespace Toolkit.WPF.Commands
         public CloseWindowCommand() { }
 
         /// <summary>
-        /// コンストラクタ
-        /// ViewModelから生成するときにCanExecuteを制御する想定
-        /// </summary>
-        public CloseWindowCommand(Func<object, bool> canExecute = null)
-        {
-            this._CanExecute = canExecute;
-        }
-
-        /// <summary>
         /// 実行可能か
         /// </summary>
         public bool CanExecute(object parameter)
         {
-            return this._CanExecute?.Invoke(parameter) ?? true;
+            if (this._OwnerWindow == null)
+            {
+                if (this._RootObjectProvider.RootObject is FrameworkElement element)
+                {
+                    this._OwnerWindow = EnumerateParent(element)?.OfType<Window>()?.FirstOrDefault();
+                }
+            }
+            return this._OwnerWindow != null;
         }
 
         /// <summary>
@@ -42,11 +39,7 @@ namespace Toolkit.WPF.Commands
         /// </summary>
         public void Execute(object parameter)
         {
-            if (this._RootObjectProvider.RootObject is FrameworkElement element)
-            {
-                this._OwnerWindow = EnumerateParent(element)?.OfType<Window>()?.FirstOrDefault();
-                this._OwnerWindow?.Close();
-            }
+            this._OwnerWindow?.Close();
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
@@ -57,7 +50,6 @@ namespace Toolkit.WPF.Commands
 
         private Window _OwnerWindow;
         private IRootObjectProvider _RootObjectProvider;
-        private readonly Func<object, bool> _CanExecute;
 
         private static IEnumerable<DependencyObject> EnumerateParent(DependencyObject source)
         {

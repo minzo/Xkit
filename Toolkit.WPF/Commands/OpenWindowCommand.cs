@@ -71,20 +71,11 @@ namespace Toolkit.WPF.Commands
         public OpenWindowCommand() { }
 
         /// <summary>
-        /// コンストラクタ
-        /// ViewModelから生成するときにCanExecuteを制御する想定
-        /// </summary>
-        public OpenWindowCommand(Func<object, bool> canExecute = null)
-        {
-            this._CanExecute = canExecute;
-        }
-
-        /// <summary>
         /// 実行可能か
         /// </summary>
         public bool CanExecute(object parameter)
         {
-            return this._CanExecute?.Invoke(parameter) ?? true;
+            return true;
         }
 
         /// <summary>
@@ -136,7 +127,6 @@ namespace Toolkit.WPF.Commands
         private FrameworkElement _Parent;
 
         private IRootObjectProvider _RootObjectProvider;
-        private readonly Func<object, bool> _CanExecute;
 
         private static IEnumerable<DependencyObject> EnumerateParent(DependencyObject source)
         {
