@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Xkit.Plugins.Sample.Views"
+             xmlns:ctrls="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
              xmlns:cmds="clr-namespace:Toolkit.WPF.Commands;assembly=Toolkit.WPF"
              xmlns:converters="clr-namespace:Toolkit.WPF.Converters;assembly=Toolkit.WPF"
              mc:Ignorable="d" 
@@ -21,7 +22,6 @@
                     <Border BorderBrush="Silver" BorderThickness="1" CornerRadius="2">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0 4 0 2">
                             <RadioButton Width="30" Margin="4 0 8 0" GroupName="Opetation" Content="＋" IsChecked="{Binding Operator, Converter={StaticResource EnumToBool}, ConverterParameter=Addition}" />
-                            <RadioButton Width="30" Margin="0 0 8 0" GroupName="Opetation" Content="ー" IsChecked="{Binding Operator, Converter={StaticResource EnumToBool}, ConverterParameter=Subtraction}" />
                             <RadioButton Width="30" Margin="0 0 2 0" GroupName="Opetation" Content="×" IsChecked="{Binding Operator, Converter={StaticResource EnumToBool}, ConverterParameter=Multiplication}" />
                         </StackPanel>
                     </Border>
@@ -44,13 +44,21 @@
         </StatusBar>
 
         <!-- Bottom -->
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom">
-            <Button Content="確定" IsDefault="True" />
-            <Button Content="キャンセル" IsCancel="True" Command="{cmds:CloseWindowCommand}" />
+        <StackPanel DockPanel.Dock="Bottom" HorizontalAlignment="Right" Orientation="Horizontal" Margin="4">
+            <Button
+                Content="確定"
+                Command="{Binding ApplyCommand, Mode=OneTime}"
+                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                IsDefault="True"
+                Width="80"
+                Height="24"
+                Margin="0 0 4 0" 
+                />
+            <Button Content="キャンセル" IsCancel="True" Width="80" Height="24" Command="{cmds:CloseWindowCommand}" />
         </StackPanel>
 
         <!-- Content -->
-        <DataGrid
+        <ctrls:DynamicTableGrid
             Grid.Row="1"
             ItemsSource="{Binding Items, Mode=OneWay}"
             AutoGenerateColumns="False"
@@ -60,6 +68,6 @@
                 <DataGridTextColumn IsReadOnly="True" Header="元" Binding="{Binding Value}" MinWidth="100" />
                 <DataGridTextColumn IsReadOnly="True" Header="結果" Binding="{Binding NewValue}" MinWidth="100" />
             </DataGrid.Columns>
-        </DataGrid>
+        </ctrls:DynamicTableGrid>
     </DockPanel>
 </UserControl>

@@ -26,7 +26,12 @@ namespace Xkit.Plugins.Sample.ViewModels
             public object Value
             {
                 get => this._Item.GetPropertyValue(this._PropertyName);
-                set => this._Item.SetPropertyValue(this._PropertyName, value);
+                set
+                {
+                    var property = this._Item.GetProperty(this._PropertyName);
+                    var val = Convert.ChangeType(value, property.Definition.ValueType);
+                    this._Item.SetPropertyValue(this._PropertyName, val);
+                }
             }
 
             public object NewValue { 
@@ -129,7 +134,20 @@ namespace Xkit.Plugins.Sample.ViewModels
                 .Select(i => new BatchEditItem(i, this._PropertyName))
                 .ToList();
 
-            this.ApplyCommand = new DelegateCommand(_ => this.DoCalc());
+            this.ApplyCommand = new DelegateCommand(param => {
+                this.Confirm();
+                (param as System.Windows.Window)?.Close();
+            });
+        }
+
+        /// <summary>
+        /// 確定
+        /// </summary>
+        private void Confirm()
+        {
+            this.Items
+                .OfType<BatchEditItem>()
+                .ForEach(i => i.Value = i.NewValue);
         }
 
         /// <summary>
