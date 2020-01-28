@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -31,16 +32,21 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            EnumerateChildren(this)
-                .OfType<Border>()
-                .Where(i => i.Name == "templateRoot")
-                .FirstOrDefault()
-                ?.SetCurrentValue(Border.BackgroundProperty, this.Background);
+            this.SetBinding(DataGridComboBox.ForegroundProperty, new Binding(nameof(this.Foreground)) {
+                RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) { AncestorType = typeof(Control) }
+            });
+
+            if (TryFindChild(this, "templateRoot", out Border border))
+            {
+                border.SetBinding(Border.BackgroundProperty, new Binding(nameof(this.Background)) {
+                    RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) { AncestorType = typeof(Control) }
+                });
+            }
 
             this._DataGridColumnOwner = EnumerateParent(this).OfType<DataGridCell>().FirstOrDefault()?.Column;
             this._DataGridOwner = EnumerateParent(this).OfType<DataGrid>().FirstOrDefault();
 
-            if (this._DataGridOwner?.IsReadOnly == true || this._DataGridColumnOwner?.IsReadOnly == true|| this.IsReadOnly)
+            if (this._DataGridOwner?.IsReadOnly == true || this._DataGridColumnOwner?.IsReadOnly == true || this.IsReadOnly)
             {
                 return;
             }
@@ -101,6 +107,15 @@ namespace Toolkit.WPF.Controls
             var count = VisualTreeHelper.GetChildrenCount(dp);
             var children = Enumerable.Range(0, count).Select(i => VisualTreeHelper.GetChild(dp, i));
             return children.Concat(children.SelectMany(i => EnumerateChildren(i)));
+        }
+
+        /// <summary>
+        /// VisualChildを探す
+        /// </summary>
+        private static bool TryFindChild<T>(DependencyObject dp, string elementName, out T element) where T : FrameworkElement
+        {
+            element = EnumerateChildren(dp).OfType<T>().FirstOrDefault(i => i.Name == elementName);
+            return element != null;
         }
 
         private DataGrid _DataGridOwner;
