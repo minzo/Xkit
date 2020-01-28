@@ -26,7 +26,7 @@ namespace Toolkit.WPF.Sample
         {
             InitializeComponent();
 
-            CommandBindings.Add(new CommandBinding(OpenWindow, OnOpenWindow));
+            this.CommandBindings.Add(new CommandBinding(OpenWindow, this.OnOpenWindow));
         }
 
         private void OnOpenWindow(object sender, ExecutedRoutedEventArgs e)
