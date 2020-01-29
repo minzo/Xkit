@@ -29,14 +29,14 @@
                 <DataGridTemplateColumn Header="Condition">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ComboBox SelectedIndex="{Binding Condition}" IsHitTestVisible="False" BorderThickness="0" Background="Transparent" IsEditable="True">
+                            <ctrls:DataGridComboBox SelectedIndex="{Binding Condition}" IsHitTestVisible="False" BorderThickness="0" Background="Transparent" IsReadOnly="True">
                                 <ComboBoxItem Content="＝" />
                                 <ComboBoxItem Content="＜" />
                                 <ComboBoxItem Content="≦" />
                                 <ComboBoxItem Content="＞" />
                                 <ComboBoxItem Content="≧" />
                                 <ComboBoxItem Content="≠" />
-                            </ComboBox>
+                            </ctrls:DataGridComboBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>

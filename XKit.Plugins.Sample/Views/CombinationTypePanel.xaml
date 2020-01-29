@@ -141,7 +141,7 @@
                     </DataTemplate>
 
                     <DataTemplate x:Key="ComboBoxCellEditingTemplate">
-                        <tkit:DataGridComboBox SelectedIndex="{Binding Value}" BorderThickness="0">
+                        <tkit:DataGridComboBox SelectedIndex="{Binding Value}" BorderThickness="0" Foreground="Black">
                             <ComboBoxItem Content="新規" />
                             <ComboBoxItem Content="作業中" />
                             <ComboBoxItem Content="完了" />
