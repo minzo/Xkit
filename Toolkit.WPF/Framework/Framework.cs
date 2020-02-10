@@ -14,12 +14,18 @@ namespace Toolkit.WPF
     public class Framework
     {
         /// <summary>
+        /// 実行中のEXEの名前
+        /// </summary>
+        public string AssemblyName { get; } = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
+
+        /// <summary>
         /// 実行
         /// </summary>
         public int Run<TApp, TWindow>(object dataContext = null)
             where TApp : Application, IComponentConnector, new()
             where TWindow : Window, new()
         {
+            this.JITProfileStart();
             var app = UnhandledExceptionSubscriber(new TApp());
             (app as IComponentConnector).InitializeComponent();
             return app.Run(new TWindow() { DataContext = dataContext });
@@ -31,10 +37,17 @@ namespace Toolkit.WPF
         public int Run<TWindow>(object dataContext, string resourcePath)
             where TWindow : Window, new()
         {
+            this.JITProfileStart();
             var app = UnhandledExceptionSubscriber(new Application());
-            var resourceLocator = new Uri(resourcePath, System.UriKind.Relative);
+            var resourceLocator = new Uri(resourcePath, UriKind.Relative);
             Application.LoadComponent(app, resourceLocator);
             return app.Run(new TWindow() { DataContext = dataContext });
+        }
+
+        private void JITProfileStart()
+        {
+            System.Runtime.ProfileOptimization.SetProfileRoot(Environment.CurrentDirectory);
+            System.Runtime.ProfileOptimization.StartProfile($"{this.AssemblyName}.JIT.Profile");
         }
 
         /// <summary>
