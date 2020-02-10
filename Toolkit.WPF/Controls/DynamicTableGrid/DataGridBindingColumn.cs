@@ -257,7 +257,10 @@ namespace Toolkit.WPF.Controls
                     // recorded in the TextBox. Hence the call to synchronously drain
                     // the Dispatcher queue.
                     //
-                    this.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Background);
+                    if (e.Key == Key.ImeProcessed)
+                    {
+                        this.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Background);
+                    }
                 }
             }
         }
