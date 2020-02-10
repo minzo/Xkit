@@ -5,6 +5,9 @@ using Corekit.Extensions;
 
 namespace Toolkit.WPF.Commands
 {
+    /// <summary>
+    /// DelegateCommand
+    /// </summary>
     public class DelegateCommand : ICommand
     {
         public event EventHandler CanExecuteChanged
@@ -33,7 +36,43 @@ namespace Toolkit.WPF.Commands
         private readonly Func<object, bool> _CanExecute;
     }
 
+    /// <summary>
+    /// AsyncDelegateCommand
+    /// </summary>
+    public class AsyncDelegateCommand : ICommand
+    {
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
 
+        public bool CanExecute(object parameter)
+        {
+            return !this._IsExecuting && (this._CanExecute?.Invoke(parameter) ?? true);
+        }
+
+        public void Execute(object parameter)
+        {
+            try
+            {
+                this._IsExecuting = false;
+                System.Threading.Tasks.Task.Factory.StartNew(this._Execute, parameter);
+            }
+            finally
+            {
+                this._IsExecuting = true;
+            }
+        }
+
+        private bool _IsExecuting = false;
+        private readonly Action<object> _Execute;
+        private readonly Func<object, bool> _CanExecute;
+    }
+
+    /// <summary>
+    /// MenuCommand
+    /// </summary>
     public class MenuCommand : DelegateCommand, ICommand, INotifyPropertyChanged
     {
         public object Icon {
