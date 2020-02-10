@@ -32,10 +32,6 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            this.SetBinding(DataGridComboBox.ForegroundProperty, new Binding(nameof(this.Foreground)) {
-                RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) { AncestorType = typeof(Control) }
-            });
-
             if (TryFindChild(this, "templateRoot", out Border border))
             {
                 border.SetBinding(Border.BackgroundProperty, new Binding(nameof(this.Background)) {

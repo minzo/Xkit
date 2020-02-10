@@ -37,9 +37,9 @@ namespace Xkit.Plugins.Sample.ViewModels
         /// 一括編集VM
         /// </summary>
         public BatchEditPanelViewModel BatchEditVM => this.SelectedTriggerParams
-            .Select(i => i.Owner)
-            .OfType<EventTrigger>()
-            .To(i => new BatchEditPanelViewModel(i));
+            ?.Select(i => i.Owner)
+            ?.OfType<EventTrigger>()
+            ?.To(i => new BatchEditPanelViewModel(i));
 
         #region Binding用 選択
 
