@@ -136,17 +136,18 @@ namespace Corekit.Extensions
         /// </summary>
         public static IEnumerable<T> EnumerateTreeBreadthFirst<T>(this T root, Func<T,IEnumerable<T>> selector)
         {
-            yield return root;
-
-            var children = selector(root);
-            if (children == null)
+            var queue = new Queue<IEnumerable<T>>(root.AsEnumerable().AsEnumerable());
+            while (queue.TryDequeue(out IEnumerable<T> source))
             {
-                yield break;
-            }
-
-            foreach (var child in children.SelectMany(i => i.EnumerateTreeBreadthFirst(selector)))
-            {
-
+                foreach (var item in source)
+                {
+                    var children = selector(item);
+                    if (children != null)
+                    {
+                        queue.Enqueue(children);
+                    }
+                    yield return item;
+                }
             }
         }
 
@@ -186,7 +187,7 @@ namespace Corekit.Extensions
             return predicate.Invoke(source);
         }
 
-#if NETFRAMEWORK || NET20 || NET35 || NET40 || NET45 || NET451 || NET452 || NET46 || NET461 || NET462 || NET47 || NET471 || NET472 || NET48
+#if !NETSTANDARD
         /// <summary>
         /// 先頭に使いする
         /// </summary>
