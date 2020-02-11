@@ -56,5 +56,74 @@ namespace Corekit.Extensions.Tests
              
             Assert.IsTrue(isEqual2);
         }
+
+        class Tree
+        {
+            public int Number { get; set; }
+
+            public List<Tree> Chidlren { get; set; }
+        }
+
+        [TestMethod]
+        public void EnumerateTreeBreadthFirst()
+        {
+            var root = new Tree()
+            {
+                Number = 0,
+                Chidlren = new List<Tree>() {
+                    new Tree() {
+                        Number = 1,
+                        Chidlren = new List<Tree>() {
+                            new Tree() { Number = 2 },
+                            new Tree() { Number = 3 }
+                        }
+                    },
+                    new Tree() { 
+                        Number = 4 
+                    },
+                    new Tree() { 
+                        Number = 5 
+                    },
+                    new Tree() { 
+                        Number = 6,
+                        Chidlren = new List<Tree>() {
+                            new Tree() { Number = 7 },
+                            new Tree() { Number = 8 }
+                        }
+                    },
+                }
+            };
+
+            var result = new[] { 0, 1, 4, 5, 6, 2, 3, 7, 8 };
+            var sequence = root.EnumerateTreeBreadthFirst(i => i.Chidlren).Select(i => i.Number);
+
+            Assert.IsTrue(sequence.SequenceEqual(result));
+        }
+
+        [TestMethod]
+        public void EnumerateTreeDepthFirst()
+        {
+            var root = new Tree()
+            {
+                Number = 0,
+                Chidlren = new List<Tree>() {
+                    new Tree() {
+                        Number = 1,
+                        Chidlren = new List<Tree>() {
+                            new Tree() { Number = 2 },
+                            new Tree() { Number = 3 }
+                        }
+                    },
+                    new Tree() { Number = 4 },
+                    new Tree() { Number = 5 },
+                    new Tree() { Number = 6 },
+                }
+            };
+
+            var result = new[] { 0, 1, 2, 3, 4, 5, 6 };
+            var sequence = root.EnumerateTreeDepthFirst(i => i.Chidlren).Select(i => i.Number);
+
+            Assert.IsTrue(sequence.SequenceEqual(result));
+        }
     }
 }

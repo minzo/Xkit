@@ -113,6 +113,44 @@ namespace Corekit.Extensions
         }
 
         /// <summary>
+        /// 木構造の深さ優先探索
+        /// </summary>
+        public static IEnumerable<T> EnumerateTreeDepthFirst<T>(this T root, Func<T,IEnumerable<T>> selector)
+        {
+            yield return root;
+
+            var children = selector(root);
+            if (children == null)
+            {
+                yield break;
+            }
+
+            foreach (var child in children.SelectMany(i => i.EnumerateTreeDepthFirst(selector)))
+            {
+                yield return child;
+            }
+        }
+
+        /// <summary>
+        /// 木構造の幅優先列挙
+        /// </summary>
+        public static IEnumerable<T> EnumerateTreeBreadthFirst<T>(this T root, Func<T,IEnumerable<T>> selector)
+        {
+            yield return root;
+
+            var children = selector(root);
+            if (children == null)
+            {
+                yield break;
+            }
+
+            foreach (var child in children.SelectMany(i => i.EnumerateTreeBreadthFirst(selector)))
+            {
+
+            }
+        }
+
+        /// <summary>
         /// ObservableCollectionにする
         /// </summary>
         public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> collection)
@@ -147,5 +185,33 @@ namespace Corekit.Extensions
         {
             return predicate.Invoke(source);
         }
+
+#if NETFRAMEWORK || NET20 || NET35 || NET40 || NET45 || NET451 || NET452 || NET46 || NET461 || NET462 || NET47 || NET471 || NET472 || NET48
+        /// <summary>
+        /// 先頭に使いする
+        /// </summary>
+        public static IEnumerable<T> Prepend<T>(this IEnumerable<T> source, T element)
+        {
+            yield return element;
+
+            foreach (var item in source)
+            {
+                yield return item;
+            }
+        }
+
+        /// <summary>
+        /// 最後に追加する
+        /// </summary>
+        public static IEnumerable<T> Append<T>(this IEnumerable<T> source, T element)
+        {
+            foreach (var item in source)
+            {
+                yield return item;
+            }
+
+            yield return element;
+        }
+#endif
     }
 }
