@@ -97,15 +97,17 @@ namespace Corekit.Extensions
         }
 
         /// <summary>
-        /// 深さ優先探索
+        /// 木構造の深さ優先探索
         /// </summary>
-        public static IEnumerable<T> EnumerateTree<T>(this IEnumerable<T> items, Func<T, IEnumerable<T>> selector)
+        public static IEnumerable<T> EnumerateTreeDepthFirst<T>(this IEnumerable<T> items, Func<T, IEnumerable<T>> selector)
         {
             foreach (var item in items)
             {
                 yield return item;
 
-                foreach (var child in selector(item).EnumerateTree(selector))
+                var children = selector(item)?.EnumerateTreeDepthFirst(selector) ?? Enumerable.Empty<T>();
+
+                foreach (var child in children)
                 {
                     yield return child;
                 }
@@ -119,13 +121,13 @@ namespace Corekit.Extensions
         {
             yield return root;
 
-            var children = selector(root);
+            var children = selector(root)?.EnumerateTreeDepthFirst(selector);
             if (children == null)
             {
                 yield break;
             }
 
-            foreach (var child in children.SelectMany(i => i.EnumerateTreeDepthFirst(selector)))
+            foreach (var child in children)
             {
                 yield return child;
             }
@@ -134,9 +136,10 @@ namespace Corekit.Extensions
         /// <summary>
         /// 木構造の幅優先列挙
         /// </summary>
-        public static IEnumerable<T> EnumerateTreeBreadthFirst<T>(this T root, Func<T,IEnumerable<T>> selector)
+        public static IEnumerable<T> EnumerateTreeBreadthFirst<T>(this IEnumerable<T> items, Func<T, IEnumerable<T>> selector)
         {
-            var queue = new Queue<IEnumerable<T>>(root.AsEnumerable().AsEnumerable());
+            var queue = new Queue<IEnumerable<T>>();
+            queue.Enqueue(items);
             while (queue.TryDequeue(out IEnumerable<T> source))
             {
                 foreach (var item in source)
@@ -148,6 +151,25 @@ namespace Corekit.Extensions
                     }
                     yield return item;
                 }
+            }
+        }
+
+        /// <summary>
+        /// 木構造の幅優先列挙
+        /// </summary>
+        public static IEnumerable<T> EnumerateTreeBreadthFirst<T>(this T root, Func<T,IEnumerable<T>> selector)
+        {
+            yield return root;
+
+            var children = selector(root)?.EnumerateTreeBreadthFirst(selector);
+            if (children == null)
+            {
+                yield break;
+            }
+
+            foreach(var child in children)
+            {
+                yield return child;
             }
         }
 
