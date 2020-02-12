@@ -14,9 +14,10 @@ namespace Corekit.Extensions.Tests
         [TestInitialize]
         public void Initialize()
         {
-            Variables.Add("Material", "マテリアル");
-            Variables.Add("SubMaterial", "サブマテリアル");
-            Variables.Add("RootDir", @"C:\Windows");
+            this.Variables.Clear();
+            this.Variables.Add("Material", "マテリアル");
+            this.Variables.Add("SubMaterial", "サブマテリアル");
+            this.Variables.Add("RootDir", @"C:\Windows");
         }
 
         [TestMethod]
@@ -24,15 +25,35 @@ namespace Corekit.Extensions.Tests
         {
             var str0 = "Test_{Material}";
             var ret0 = "Test_マテリアル";
-            Assert.IsTrue(ret0 == str0.ExpandVariables("{", "}", Variables));
+            Assert.IsTrue(ret0 == str0.ExpandVariables("{", "}", this.Variables));
 
             var str1 = "%RootDir%";
             var ret1 = @"C:\Windows";
-            Assert.IsTrue(ret1 == str1.ExpandVariables("%", "%", Variables));
+            Assert.IsTrue(ret1 == str1.ExpandVariables("%", "%", this.Variables));
 
             var str2 = "Test_${Material}_${SubMaterial}";
             var ret2 = "Test_マテリアル_サブマテリアル";
-            Assert.IsTrue(ret2 == str2.ExpandVariables("${", "}", Variables));
+            Assert.IsTrue(ret2 == str2.ExpandVariables("${", "}", this.Variables));
+        }
+
+        [TestMethod]
+        public void Substring()
+        {
+            Assert.IsTrue("Main" == "[Main]".Substring("[", "]"));
+
+            Assert.IsTrue("Main"== "<Main>Main</Main>".Substring("<Main>", "</Main>"));
+
+            Assert.IsTrue("Main" == "<<Main>>Main</Main>".Substring("<<Main>>", "</Main>"));
+        }
+
+        [TestMethod]
+        public void SubtringWith()
+        {
+            Assert.IsTrue("[Main]" == "[Main]:CONTENT".SubstringWith("[", "]"));
+
+            Assert.IsTrue("<Main>Main</Main>" == "<Main>Main</Main>".SubstringWith("<Main>", "</Main>"));
+
+            Assert.IsTrue("<<Main>>Main</Main>" == "<<Main>>Main</Main>".SubstringWith("<<Main>>", "</Main>"));
         }
     }
 }
