@@ -47,7 +47,7 @@ namespace Toolkit.WPF.Sample
             this.TreeRootItems = this.GenerateTree(3, 4).Children.ToObservableCollection();
 
             this.Items = this.TreeRootItems
-                .EnumerateTree(i => i.Children)
+                .EnumerateTreeDepthFirst(i => i.Children)
                 .ToObservableCollection();
         }
 
