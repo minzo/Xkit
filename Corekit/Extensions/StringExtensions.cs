@@ -7,7 +7,7 @@ namespace Corekit.Extensions
     public static class StringExtensions
     {
         /// <summary>
-        /// 変数を展開した文字列を返す
+        /// 変数を展開した文字列を返します
         /// </summary>
         public static string ExpandVariables(this string str, string start, string end, IDictionary<string, string> variables)
         {
@@ -19,7 +19,7 @@ namespace Corekit.Extensions
         }
 
         /// <summary>
-        /// 指定文字列で囲まれた文字列を切り出す
+        /// 指定文字列で囲まれた文字列を切り出します
         /// </summary>
         public static string Substring(this string str, string headStr, string tailStr)
         {
@@ -29,12 +29,12 @@ namespace Corekit.Extensions
         }
 
         /// <summary>
-        /// 指定文字列で囲まれた文字列を切り出す
+        /// 指定文字列を含んで囲まれた文字列を切り出します
         /// </summary>
-        public static string SubstringWith(this string str, string start, string end)
+        public static string SubstringWith(this string str, string headStr, string tailStr)
         {
-            var head = str.IndexOf(start);
-            var tail = str.IndexOf(end) + end.Length;
+            var head = str.IndexOf(headStr);
+            var tail = str.IndexOf(tailStr) + tailStr.Length;
             return str.Substring(head, tail);
         }
     }
