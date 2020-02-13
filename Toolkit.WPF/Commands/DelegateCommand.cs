@@ -47,6 +47,12 @@ namespace Toolkit.WPF.Commands
             remove { CommandManager.RequerySuggested -= value; }
         }
 
+        public AsyncDelegateCommand(Action<object> execute, Func<object, bool> canExecute = null)
+        {
+            this._Execute = execute;
+            this._CanExecute = canExecute;
+        }
+
         public bool CanExecute(object parameter)
         {
             return !this._IsExecuting && (this._CanExecute?.Invoke(parameter) ?? true);
