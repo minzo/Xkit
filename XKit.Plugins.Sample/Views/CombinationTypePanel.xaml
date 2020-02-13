@@ -161,8 +161,7 @@
                         <Separator />
                         <MenuItem 
                             Header="一括編集" 
-                            Command="{cmds:OpenWindowCommand Title=一括編集, IsModal=False, ContentType={x:Type local:BatchEditPanel},WindowStyle=ToolWindow}"
-                            CommandParameter="{Binding BatchEditVM, Mode=OneWay}"
+                            Command="{cmds:OpenWindowCommand Title=一括編集, Binding={Binding BatchEditVM}, IsModal=False, ContentType={x:Type local:BatchEditPanel}, WindowStyle=ToolWindow}"
                             />
                         <MenuItem Header="カーブ入力" />
                     </ContextMenu>
