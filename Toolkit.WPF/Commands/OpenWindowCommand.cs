@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
@@ -29,6 +30,16 @@ namespace Toolkit.WPF.Commands
         /// Window高さ
         /// </summary>
         public double Height { get; set; } = 320D;
+
+        /// <summary>
+        /// Bindingパス
+        /// </summary>
+        public string BindingPath { get; set; }
+
+        /// <summary>
+        /// Binding
+        /// </summary>
+        public BindingBase Binding { get; set; }
 
         /// <summary>
         /// WindowStyle
@@ -89,10 +100,10 @@ namespace Toolkit.WPF.Commands
                 this._Parent = element.Parent as FrameworkElement;
             }
 
-            object content = null;
+            FrameworkElement content = null;
             if (typeof(FrameworkElement).IsAssignableFrom(this.ContentType))
             {
-                content = Activator.CreateInstance(this.ContentType);
+                content = (FrameworkElement)Activator.CreateInstance(this.ContentType);
             }
 
             var window = (Window)Activator.CreateInstance(this.WindowType);
@@ -106,6 +117,12 @@ namespace Toolkit.WPF.Commands
             window.ContentTemplateSelector = this.ContentTemplateSelector;
             window.WindowStyle = this.WindowStyle;
             window.WindowStartupLocation = this.StartupLocation;
+
+            var binding = this.Binding ?? new Binding(this.BindingPath) { Mode = BindingMode.OneWay };
+            if (binding != null)
+            {
+                BindingOperations.SetBinding(content, FrameworkElement.DataContextProperty, binding);
+            }
 
             if (this.IsModal)
             {
