@@ -512,7 +512,7 @@ namespace Toolkit.WPF.Controls
                     .Distinct()
                     .ToList();
 
-                this.ItemsSource
+                this.ItemsSource?
                     .OfType<object>()
                     .SelectMany(i => columns.Select(x => x.GetCellContent(i)))
                     .Where(i => i != null)
@@ -566,7 +566,7 @@ namespace Toolkit.WPF.Controls
                     .Distinct()
                     .ToList();
 
-                this.ItemsSource
+                this.ItemsSource?
                     .OfType<object>()
                     .SelectMany(i => columns.Select(x => x.GetCellContent(i)))
                     .Where(i => i != null)
