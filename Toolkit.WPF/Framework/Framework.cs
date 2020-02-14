@@ -44,6 +44,9 @@ namespace Toolkit.WPF
             return app.Run(new TWindow() { DataContext = dataContext });
         }
 
+        /// <summary>
+        /// JITProfileを開始します
+        /// </summary>
         private void JITProfileStart()
         {
             System.Runtime.ProfileOptimization.SetProfileRoot(Environment.CurrentDirectory);
