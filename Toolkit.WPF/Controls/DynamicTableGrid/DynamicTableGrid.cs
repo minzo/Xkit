@@ -21,16 +21,10 @@ namespace Toolkit.WPF.Controls
     public class DynamicTableGrid : DataGrid
     {
         #region コマンド
-
-        /// <summary>
-        /// 水平セル選択コマンド
-        /// </summary>
-        public static RoutedUICommand SelectCellsHorizontalCommand { get; } = new RoutedUICommand(nameof(SelectCellsHorizontalCommand), nameof(SelectCellsHorizontalCommand), typeof(DynamicTableGrid));
-
-        /// <summary>
-        /// 垂直セル選択コマンド
-        /// </summary>
-        public static RoutedUICommand SelectCellsVerticalCommand { get; } = new RoutedUICommand(nameof(SelectCellsVerticalCommand), nameof(SelectCellsVerticalCommand), typeof(DynamicTableGrid));
+        public static RoutedUICommand SelectCellsHorizontalCommand { get; } = new RoutedUICommand("選択しているセルの行を選択", nameof(SelectCellsHorizontalCommand), typeof(DynamicTableGrid));
+        public static RoutedUICommand SelectCellsVerticalCommand { get; } = new RoutedUICommand("選択しているセルの列を選択", nameof(SelectCellsVerticalCommand), typeof(DynamicTableGrid));
+        public static RoutedUICommand MinimizeColumnWidthCommand { get; } = new RoutedUICommand("列幅を最小化する", nameof(MinimizeColumnWidthCommand), typeof(DynamicTableGrid));
+        public static RoutedUICommand RestoreColumnWidthCommand { get; } = new RoutedUICommand("列幅を復元する", nameof(RestoreColumnWidthCommand), typeof(DynamicTableGrid));
 
         #endregion
 
@@ -278,6 +272,8 @@ namespace Toolkit.WPF.Controls
             this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Cut, (s, e) => { }, (s, e) => e.CanExecute = true));
             this.CommandBindings.Add(new CommandBinding(SelectCellsHorizontalCommand, (s, e) => this.SelectCellsHorizontal(), (s, e) => e.CanExecute = this.SelectedCells.Any()));
             this.CommandBindings.Add(new CommandBinding(SelectCellsVerticalCommand, (s, e) => this.SelectCellsVertical(), (s, e) => e.CanExecute = this.SelectedCells.Any()));
+            this.CommandBindings.Add(new CommandBinding(MinimizeColumnWidthCommand, (s, e) => this.MinimizeColumnWidth(), (s, e) => e.CanExecute = true));
+            this.CommandBindings.Add(new CommandBinding(RestoreColumnWidthCommand, (s, e) => this.RestoreColumnWidth(), (s, e) => e.CanExecute = true));
         }
 
         /// <summary>
@@ -504,7 +500,7 @@ namespace Toolkit.WPF.Controls
         private void OnSelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
             // ハイライト情報のリセット
-            if (this.EnableColumnHighlighting || this.EnableColumnHighlighting)
+            if (this.EnableRowHighlighting || this.EnableColumnHighlighting)
             {
                 var columns = e.RemovedCells
                     .Where(i => i.IsValid)
@@ -856,6 +852,29 @@ namespace Toolkit.WPF.Controls
                 }
             }
         }
+
+        /// <summary>
+        /// 列幅最小化コマンド
+        /// </summary>
+        private void MinimizeColumnWidth()
+        {
+            foreach (var column in this.Columns)
+            {
+                column.SetValue(DataGridColumn.WidthProperty, DataGridLength.SizeToCells);
+            }
+        }
+
+        /// <summary>
+        /// 列幅復元コマンド
+        /// </summary>
+        private void RestoreColumnWidth()
+        {
+            foreach (var column in this.Columns)
+            {
+                column.SetValue(DataGridColumn.WidthProperty, DataGridLength.SizeToHeader);
+            }
+        }
+
 
         #region Utilities
 

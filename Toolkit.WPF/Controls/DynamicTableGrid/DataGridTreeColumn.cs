@@ -25,25 +25,25 @@ namespace Toolkit.WPF.Controls
         /// ツリーをすべて開く
         /// このColumnを追加したDataGridのCommandBindingsに追加されます
         /// </summary>
-        public static RoutedUICommand ExpandAllCommand { get; } = new RoutedUICommand(nameof(ExpandAllCommand), nameof(ExpandAllCommand), typeof(DataGridTreeColumn));
+        public static RoutedUICommand ExpandAllCommand { get; } = new RoutedUICommand("すべて開く", nameof(ExpandAllCommand), typeof(DataGridTreeColumn));
 
         /// <summary>
         /// ツリーをすべて閉じる
         /// このColumnを追加したDataGridのCommandBindingsに追加されます
         /// </summary>
-        public static RoutedUICommand CloseAllCommand { get; } = new RoutedUICommand(nameof(CloseAllCommand), nameof(CloseAllCommand), typeof(DataGridTreeColumn));
+        public static RoutedUICommand CloseAllCommand { get; } = new RoutedUICommand("すべて閉じる", nameof(CloseAllCommand), typeof(DataGridTreeColumn));
 
         /// <summary>
         /// 選択アイテム以下をすべて開く
         /// このColumnを追加したDataGridのCommandBindingsに追加されます
         /// </summary>
-        public static RoutedUICommand ExpandSelectedItemsCommand { get; } = new RoutedUICommand(nameof(ExpandSelectedItemsCommand), nameof(ExpandSelectedItemsCommand), typeof(DataGridTreeColumn));
+        public static RoutedUICommand ExpandSelectedItemsCommand { get; } = new RoutedUICommand("選択アイテム以下をすべて開く", nameof(ExpandSelectedItemsCommand), typeof(DataGridTreeColumn));
 
         /// <summary>
         /// 選択アイテム以下をすべて閉じる
         /// このColumnを追加したDataGridのCommandBindingsに追加されます
         /// </summary>
-        public static RoutedUICommand CloseSelectedItemsCommand { get; } = new RoutedUICommand(nameof(CloseSelectedItemsCommand), nameof(CloseSelectedItemsCommand), typeof(DataGridTreeColumn));
+        public static RoutedUICommand CloseSelectedItemsCommand { get; } = new RoutedUICommand("選択アイテム以下をすべて閉じる", nameof(CloseSelectedItemsCommand), typeof(DataGridTreeColumn));
 
         #endregion
 
