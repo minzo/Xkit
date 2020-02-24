@@ -733,7 +733,7 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
-        #region 列のプロパティ
+        #region 列名のプロパティ
 
         private static string GetPropertyName(DataGridColumn obj)
         {
@@ -750,6 +750,24 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
+        #region 列幅のプロパティ
+
+        private static DataGridLength GetColumnWidthLength(DependencyObject obj)
+        {
+            return (DataGridLength)obj.GetValue(ColumnWidthLengthProperty);
+        }
+
+        private static void SetColumnWidthLength(DependencyObject obj, DataGridLength value)
+        {
+            obj.SetValue(ColumnWidthLengthProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for ColumnWidthLength.  This enables animation, styling, binding, etc...
+        private static readonly DependencyProperty ColumnWidthLengthProperty =
+            DependencyProperty.RegisterAttached("ColumnWidthLength", typeof(DataGridLength), typeof(DynamicTableGrid), new PropertyMetadata(DataGridLength.Auto));
+
+        #endregion
+
         #region 選択されている行または列に属しているか
 
         public static bool GetIsSelectedCellContains(DependencyObject obj)
@@ -757,13 +775,13 @@ namespace Toolkit.WPF.Controls
             return (bool)(obj?.GetValue(IsSelectedCellContainsProperty) ?? false);
         }
 
-        public static void SetIsSelectedCellContains(DependencyObject obj, bool value)
+        private static void SetIsSelectedCellContains(DependencyObject obj, bool value)
         {
             obj?.SetValue(IsSelectedCellContainsProperty, value);
         }
 
         // Using a DependencyProperty as the backing store for IsSelectedCellContains.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty IsSelectedCellContainsProperty =
+        private static readonly DependencyProperty IsSelectedCellContainsProperty =
             DependencyProperty.RegisterAttached("IsSelectedCellContains", typeof(bool), typeof(DynamicTableGrid), new PropertyMetadata(false));
 
         #endregion
@@ -860,6 +878,7 @@ namespace Toolkit.WPF.Controls
         {
             foreach (var column in this.Columns)
             {
+                SetColumnWidthLength(column, column.Width);
                 column.SetValue(DataGridColumn.WidthProperty, DataGridLength.SizeToCells);
             }
         }
@@ -871,7 +890,7 @@ namespace Toolkit.WPF.Controls
         {
             foreach (var column in this.Columns)
             {
-                column.SetValue(DataGridColumn.WidthProperty, DataGridLength.SizeToHeader);
+                column.SetValue(DataGridColumn.WidthProperty, GetColumnWidthLength(column));
             }
         }
 
