@@ -49,7 +49,9 @@
             <ItemsControl
                 Focusable="False"
                 ItemsSource="{Binding Elements}"
-                DisplayMemberPath="Value.Name" />
+                DisplayMemberPath="Value.Name"
+                ToolTip="{Binding Name}"
+                />
         </DataTemplate>
 
     </UserControl.Resources>

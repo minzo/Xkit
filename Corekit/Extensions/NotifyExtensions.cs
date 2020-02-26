@@ -8,30 +8,15 @@ using System.Text;
 
 namespace Corekit.Extensions
 {
+    /// <summary>
+    /// プロパティ変更通知拡張
+    /// </summary>
     public static class NotifyExtensions
     {
         /// <summary>
         /// プロパティをセットしてプロパティ変更通知を送る
         /// </summary>
-        public static bool SetProperty<T>(this INotifyPropertyChanged self, T property, T value, string propertyName)
-        {
-            if (Equals(property, value))
-            {
-                return false;
-            }
-
-            self.GetType()
-                .GetPropertyInfo(propertyName)
-                ?.SetValue(self, value);
-            InvokePropertyChanged(self, propertyName);
-
-            return true;
-        }
-
-        /// <summary>
-        /// プロパティをセットしてプロパティ変更通知を送る
-        /// </summary>
-        public static bool SetProperty<T>(this INotifyPropertyChanged self, string propertyName, T value)
+        public static bool SetProperty<TSelf, T>(this TSelf self, string propertyName, T value) where TSelf : INotifyPropertyChanged
         {
             var info = self.GetType().GetPropertyInfo(propertyName);
             if (info == null)
@@ -46,14 +31,14 @@ namespace Corekit.Extensions
             }
 
             info.SetValue(self, value);
-            InvokePropertyChanged(self, propertyName);
+            InvokePropertyChanged(self, ref propertyName);
             return true;
         }
 
         /// <summary>
         /// プロパティをセットしてプロパティ変更通知を送る
         /// </summary>
-        public static bool SetProperty<T>(this INotifyPropertyChanged self, ref T field, T value, [CallerMemberName] string propertyName = null)
+        public static bool SetProperty<TSelf, T>(this TSelf self, ref T field, T value, [CallerMemberName] string propertyName = null ) where TSelf : INotifyPropertyChanged
         {
             if (Equals(field, value))
             {
@@ -61,7 +46,7 @@ namespace Corekit.Extensions
             }
 
             field = value;
-            InvokePropertyChanged(self, propertyName);
+            InvokePropertyChanged(self, ref propertyName);
 
             return true;
         }
@@ -69,23 +54,24 @@ namespace Corekit.Extensions
         /// <summary>
         /// プロパティ変更通知を送る
         /// </summary>
-        private static void InvokePropertyChanged(object sender, string propertyName)
+        private static void InvokePropertyChanged<TSelf>(this TSelf sender, ref string propertyName)
         {
-            var handler = sender.GetType()
-                .GetFieldInfo(nameof(INotifyPropertyChanged.PropertyChanged))
-                .GetValue(sender) as MulticastDelegate;
-
-            if (handler == null)
+            if (Cache<TSelf>.Handler?.GetValue(sender) is MulticastDelegate handler)
             {
-                return;
+                var args = new PropertyChangedEventArgs(propertyName);
+                foreach (var invocation in handler.GetInvocationList())
+                {
+                    invocation.Method.Invoke(invocation.Target, new object[] { sender, args });
+                }
             }
+        }
 
-            var args = new PropertyChangedEventArgs(propertyName);
-
-            foreach (var invocation in handler.GetInvocationList())
-            {
-                invocation.Method.Invoke(invocation.Target, new object[] { sender, args });
-            }
+        /// <summary>
+        /// キャッシュ
+        /// </summary>
+        private class Cache<T>
+        {
+            public static FieldInfo Handler { get; } = typeof(T).GetFieldInfo(nameof(INotifyPropertyChanged.PropertyChanged));
         }
     }
 }
