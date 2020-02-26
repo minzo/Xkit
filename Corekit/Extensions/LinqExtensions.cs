@@ -211,7 +211,7 @@ namespace Corekit.Extensions
 
 #if !NETSTANDARD
         /// <summary>
-        /// 先頭に使いする
+        /// 先頭に追加する
         /// </summary>
         public static IEnumerable<T> Prepend<T>(this IEnumerable<T> source, T element)
         {
