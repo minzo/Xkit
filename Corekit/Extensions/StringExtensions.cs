@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Corekit.Extensions
 {
+    /// <summary>
+    /// 文字列処理拡張
+    /// </summary>
     public static class StringExtensions
     {
         /// <summary>
