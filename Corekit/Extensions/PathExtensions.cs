@@ -1,4 +1,6 @@
-﻿namespace Corekit
+﻿using System;
+
+namespace Corekit
 {
     /// <summary>
     /// パス処理拡張
@@ -25,6 +27,24 @@
             {
                 return path.Substring(0, index);
             }
+        }
+
+        /// <summary>
+        /// Unixのパスとしてスラッシュ(/)区切りのパスを取得します
+        /// </summary>
+        public static string GetUnixPath(string path)
+        {
+            return path.Replace(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar);
+        }
+
+        /// <summary>
+        /// 指定したパスを基準にした相対パスを取得する
+        /// </summary>
+        public static string GetRelativePath(string path, string basePath)
+        {
+            var baseUrl = new Uri(System.IO.Path.GetFullPath(basePath));
+            var relativeUrl = new Uri(baseUrl, path);
+            return relativeUrl.LocalPath;
         }
     }
 }
