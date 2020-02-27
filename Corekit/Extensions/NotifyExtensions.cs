@@ -16,9 +16,9 @@ namespace Corekit.Extensions
         /// <summary>
         /// プロパティをセットしてプロパティ変更通知を送る
         /// </summary>
-        public static bool SetProperty<TSelf, T>(this TSelf self, string propertyName, T value) where TSelf : INotifyPropertyChanged
+        public static bool SetProperty<TSelf, T>(this TSelf self, in string propertyName, T value) where TSelf : INotifyPropertyChanged
         {
-            var info = self.GetType().GetPropertyInfo(propertyName);
+            var info = typeof(TSelf).GetPropertyInfo(propertyName);
             if (info == null)
             {
                 return false;
@@ -31,14 +31,14 @@ namespace Corekit.Extensions
             }
 
             info.SetValue(self, value);
-            InvokePropertyChanged(self, ref propertyName);
+            InvokePropertyChanged(self, in propertyName);
             return true;
         }
 
         /// <summary>
         /// プロパティをセットしてプロパティ変更通知を送る
         /// </summary>
-        public static bool SetProperty<TSelf, T>(this TSelf self, ref T field, T value, [CallerMemberName] string propertyName = null ) where TSelf : INotifyPropertyChanged
+        public static bool SetProperty<TSelf, T>(this TSelf self, ref T field, T value, [CallerMemberName] in string propertyName = null ) where TSelf : INotifyPropertyChanged
         {
             if (Equals(field, value))
             {
@@ -46,7 +46,7 @@ namespace Corekit.Extensions
             }
 
             field = value;
-            InvokePropertyChanged(self, ref propertyName);
+            InvokePropertyChanged(self, in propertyName);
 
             return true;
         }
@@ -54,14 +54,19 @@ namespace Corekit.Extensions
         /// <summary>
         /// プロパティ変更通知を送る
         /// </summary>
-        private static void InvokePropertyChanged<TSelf>(this TSelf sender, ref string propertyName)
+        private static void InvokePropertyChanged<TSelf>(this TSelf sender, in string propertyName) where TSelf : INotifyPropertyChanged
         {
+
             if (Cache<TSelf>.Handler?.GetValue(sender) is MulticastDelegate handler)
             {
-                var args = new PropertyChangedEventArgs(propertyName);
-                foreach (var invocation in handler.GetInvocationList())
+                var invocations = handler.GetInvocationList();
+                if (invocations.Length > 0)
                 {
-                    invocation.Method.Invoke(invocation.Target, new object[] { sender, args });
+                    var args = new PropertyChangedEventArgs(propertyName);
+                    foreach (var invocation in invocations)
+                    {
+                        invocation.Method.Invoke(invocation.Target, new object[] { sender, args });
+                    }
                 }
             }
         }
@@ -71,7 +76,7 @@ namespace Corekit.Extensions
         /// </summary>
         private class Cache<T>
         {
-            public static FieldInfo Handler { get; } = typeof(T).GetFieldInfo(nameof(INotifyPropertyChanged.PropertyChanged));
+            public static FieldInfo Handler = typeof(T).GetFieldInfo(nameof(INotifyPropertyChanged.PropertyChanged));
         }
     }
 }
