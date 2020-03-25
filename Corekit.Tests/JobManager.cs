@@ -2,21 +2,20 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Corekit.Worker;
 
 namespace Corekit.Tests
 {
     [TestClass]
-    public class JobManagerTest
+    public class JobManager
     {
         [TestMethod]
         public void JobRunningTest()
         {
-            using (var manager = new JobManager())
+            using (var manager = new Corekit.Worker.JobManager())
             {
                 for (int i = 0; i < 20; i++)
                 {
-                    manager.Request(Job);
+                    manager.Request(this.Job);
                 }
 
                 do
@@ -30,11 +29,11 @@ namespace Corekit.Tests
         [TestMethod]
         public void JobSingleRunningTest()
         {
-            using (var manager = new JobManager(1))
+            using (var manager = new Corekit.Worker.JobManager(1))
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    manager.Request(Job);
+                    manager.Request(this.Job);
                 }
 
                 do
@@ -48,7 +47,7 @@ namespace Corekit.Tests
         [TestMethod]
         public void JobCancelTest()
         {
-            var manager = new JobManager();
+            var manager = new Corekit.Worker.JobManager();
 
             for (int i = 0; i < 100; i++)
             {
