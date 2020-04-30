@@ -96,8 +96,17 @@ namespace Corekit.DB
 
             public object GetValue(object obj)
             {
-                // ちゃんとエスケープしたほうがいいかも
-                return this._Info.GetValue(obj);
+                switch (this.Type)
+                {
+                    case SqlDbType.Text:
+                    case SqlDbType.Date:
+                    case SqlDbType.DateTime:
+                        // スペースがあると困るのでシングルクォート(')で囲む
+                        // 文字列にシングルクォートが入っていると不正なクエリになるのでシングルクォートを重ねてエスケープ('')する
+                        return $"'{this._Info.GetValue(obj).ToString().Replace("'","''")}'";
+                    default:
+                        return this._Info.GetValue(obj);
+                }
             }
 
             private PropertyInfo _Info;
@@ -138,7 +147,7 @@ namespace Corekit.DB
         /// </summary>
         private static string AnalyzeCreateTableQuery()
         {
-            var columns = string.Join(',', _ColumnInfos.Select(i => $"{i.SanitizedColumnName}, {i.Type}"));
+            var columns = string.Join(',', _ColumnInfos.Select(i => $"{i.SanitizedColumnName} {i.Type}"));
             return $"CREATE TABLE {TableName} ({columns})";
         }
 
@@ -147,7 +156,7 @@ namespace Corekit.DB
         /// </summary>
         private static string AnalyzeCreateTableIfNotExistsQuery()
         {
-            var columns = string.Join(',', _ColumnInfos.Select(i => $"{i.SanitizedColumnName}, {i.Type}"));
+            var columns = string.Join(',', _ColumnInfos.Select(i => $"{i.SanitizedColumnName} {i.Type}"));
             return $"CREATE TABLE IF NOT EXISTS {TableName} ({columns})";
         }
 
