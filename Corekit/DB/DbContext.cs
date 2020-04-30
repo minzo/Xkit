@@ -5,24 +5,21 @@ using System.Threading;
 
 namespace Corekit.DB
 {
-    public class DbContext : IDisposable
+    /// <summary>
+    /// DBとの接続を管理するコンテキスト
+    /// </summary>
+    public abstract class DbContext : IDisposable
     {
-        /// <summary>
-        /// コネクション
-        /// </summary>
-        internal DbConnection Connection { get; }
-
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public DbContext(string connectionString, IsolationLevel defaultIsolationLevel = IsolationLevel.Serializable)
+        protected DbContext(IDbConnection connection, IsolationLevel defaultIsolationLevel)
         {
             try
             {
                 this._DefaultIsolationLevel = defaultIsolationLevel;
-                this.Connection = null; // ここを外から注入したい
-                this.Connection.ConnectionString = connectionString;
-                this.Connection.Open();
+                this._Connection = connection;
+                this._Connection.Open();
             }
             catch(DbException)
             {
@@ -32,13 +29,22 @@ namespace Corekit.DB
         }
 
         /// <summary>
+        /// 破棄処理
+        /// </summary>
+        public void Dispose()
+        {
+            this._Connection?.Dispose();
+            this._Connection = null;
+        }
+
+        /// <summary>
         /// Operatorを取得
         /// </summary>
         public DbOperator GetOperator(IsolationLevel isolationLevel)
         {
             if(Interlocked.Increment(ref this._ConnectionCount) == 1)
             {
-                this._Transaction = this.Connection.BeginTransaction(isolationLevel);
+                this._Transaction = this._Connection.BeginTransaction(isolationLevel);
             }
 
             return new DbOperator(this);
@@ -53,6 +59,16 @@ namespace Corekit.DB
         }
 
         /// <summary>
+        /// コマンドを生成して返します
+        /// </summary>
+        internal IDbCommand CreateCommand(string query)
+        {
+            var command = this._Connection.CreateCommand();
+            command.CommandText = query;
+            return command;
+        }
+
+        /// <summary>
         /// Operatorが終了した時に呼ばれる
         /// </summary>
         internal void OnCloseOperator()
@@ -64,14 +80,23 @@ namespace Corekit.DB
             }
         }
 
-        public void Dispose()
-        {
-            this.Connection?.Dispose();
-        }
-
+        private IDbConnection _Connection;
+        private IDbTransaction _Transaction;
         private IsolationLevel _DefaultIsolationLevel;
-        private DbTransaction _Transaction;
-
         private int _ConnectionCount = 0;
+    }
+
+    /// <summary>
+    /// DBとの接続を管理するコンテキスト
+    /// </summary>
+    public class DbContext<T> : DbContext where T : DbConnection, new()
+    {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public DbContext(string connectionString, IsolationLevel defaultIsolationLevel = IsolationLevel.Serializable)
+            : base(new T() { ConnectionString = connectionString }, defaultIsolationLevel)
+        {
+        }
     }
 }

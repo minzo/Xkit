@@ -8,7 +8,11 @@ using System.Threading;
 
 namespace Corekit.DB
 {
-    public struct DbOperator : IDisposable
+    /// <summary>
+    /// データベースに対する基本的な操作を提供します
+    /// このOperatorがDisposeされるまでDatabaseへのトランザクションが維持されます
+    /// </summary>
+    public class DbOperator : IDisposable
     {
         /// <summary>
         /// コンストラクタ
@@ -19,13 +23,29 @@ namespace Corekit.DB
         }
 
         /// <summary>
+        /// デストラクタ
+        /// </summary>
+        ~DbOperator()
+        {
+            this.Dispose();
+        }
+
+        /// <summary>
+        /// 破棄処理
+        /// </summary>
+        public void Dispose()
+        {
+            this._Context.OnCloseOperator();
+            this._Context = null;
+        }
+
+        /// <summary>
         /// クエリを実行します
         /// </summary>
         public void ExecuteQuery(string query)
         {
-            using(var command = this._Context.Connection.CreateCommand())
+            using(var command = this._Context.CreateCommand(query))
             {
-                command.CommandText = query;
                 command.ExecuteNonQuery();
             }
         }
@@ -35,9 +55,8 @@ namespace Corekit.DB
         /// </summary>
         public IEnumerable<IDataReader> ExecuteReader(string query)
         {
-            using(var command = this._Context.Connection.CreateCommand())
+            using(var command = this._Context.CreateCommand(query))
             {
-                command.CommandText = query;
                 using(var reader = command.ExecuteReader())
                 {
                     while(reader.Read())
@@ -48,11 +67,55 @@ namespace Corekit.DB
             }
         }
 
-        public void Dispose()
+        /// <summary>
+        /// クエリを実行して得られた結果の最初の行の最初の列の値を返します
+        /// </summary>
+        public object ExecuteScalar(string query)
         {
-            this._Context.OnCloseOperator();
+            using(var command = this._Context.CreateCommand(query))
+            {
+                return command.ExecuteScalar();
+            }
         }
 
         private DbContext _Context;
+    }
+
+    /// <summary>
+    /// データベースに対する操作を提供します
+    /// </summary>
+    public static class DbOperatorExtensions
+    {
+        /// <summary>
+        /// テーブルを生成します
+        /// </summary>
+        public static void ExecuteCreateTable<T>(this DbOperator dbOperator)
+        {
+            dbOperator.ExecuteQuery(DbAttributeAnalyzer<T>.QueryCreateTable());
+        }
+
+        /// <summary>
+        /// テーブルがなければテーブルを生成します
+        /// </summary>
+        public static void ExecuteCreateTableIfNotExists<T>(this DbOperator dbOperator)
+        {
+            dbOperator.ExecuteQuery(DbAttributeAnalyzer<T>.QueryCreateTableIfNotExists());
+        }
+
+        /// <summary>
+        /// 行を挿入します
+        /// </summary>
+        public static void ExecuteInsertItem<T>(this DbOperator dbOperator, T item)
+        {
+            dbOperator.ExecuteQuery(DbAttributeAnalyzer<T>.QueryInsertItem(item));
+        }
+
+        /// <summary>
+        /// 複数行を挿入します
+        /// </summary>
+        public static void ExecuteInsertItem<T>(this DbOperator dbOperator, IEnumerable<T> items)
+        {
+            dbOperator.ExecuteQuery(DbAttributeAnalyzer<T>.QueryInsertItem(items));
+        }
     }
 }
