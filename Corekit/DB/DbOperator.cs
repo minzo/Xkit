@@ -44,9 +44,18 @@ namespace Corekit.DB
         /// </summary>
         public void ExecuteQuery(string query)
         {
-            using(var command = this._Context.CreateCommand(query))
+            try
             {
-                command.ExecuteNonQuery();
+                using(var command = this._Context.CreateCommand(query))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch(DbException e)
+            {
+                // クエリをデータに詰めておく
+                e.Data.Add("query", query);
+                throw;
             }
         }
 
