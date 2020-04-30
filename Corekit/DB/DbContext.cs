@@ -75,6 +75,7 @@ namespace Corekit.DB
         {
             if(Interlocked.Decrement(ref this._ConnectionCount) == 0)
             {
+                this._Transaction.Commit();
                 this._Transaction.Dispose();
                 this._Transaction = null;
             }
