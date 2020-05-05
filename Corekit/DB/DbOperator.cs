@@ -42,7 +42,7 @@ namespace Corekit.DB
         /// <summary>
         /// クエリを実行します
         /// </summary>
-        public void ExecuteQuery(string query)
+        public void ExecuteNonQuery(string query)
         {
             try
             {
@@ -100,7 +100,7 @@ namespace Corekit.DB
         /// </summary>
         public static void ExecuteCreateTable<T>(this DbOperator dbOperator)
         {
-            dbOperator.ExecuteQuery(DbAttributeAnalyzer<T>.QueryCreateTable());
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer<T>.QueryCreateTable());
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace Corekit.DB
         /// </summary>
         public static void ExecuteCreateTableIfNotExists<T>(this DbOperator dbOperator)
         {
-            dbOperator.ExecuteQuery(DbAttributeAnalyzer<T>.QueryCreateTableIfNotExists());
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer<T>.QueryCreateTableIfNotExists());
         }
 
         /// <summary>
@@ -116,15 +116,47 @@ namespace Corekit.DB
         /// </summary>
         public static void ExecuteInsertItem<T>(this DbOperator dbOperator, T item)
         {
-            dbOperator.ExecuteQuery(DbAttributeAnalyzer<T>.QueryInsertItem(item));
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer<T>.QueryInsertItem(item));
         }
 
         /// <summary>
         /// 複数行を挿入します
         /// </summary>
-        public static void ExecuteInsertItem<T>(this DbOperator dbOperator, IEnumerable<T> items)
+        public static void ExecuteInsertItems<T>(this DbOperator dbOperator, IEnumerable<T> items)
         {
-            dbOperator.ExecuteQuery(DbAttributeAnalyzer<T>.QueryInsertItem(items));
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer<T>.QueryInsertItems(items));
+        }
+
+        /// <summary>
+        /// テーブルを生成します
+        /// </summary>
+        public static void ExecuteCreateTable(this DbOperator dbOperator, Type type)
+        {
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryCreateTable(type));
+        }
+
+        // <summary>
+        /// テーブルがなければテーブルを生成します
+        /// </summary>
+        public static void ExecuteCreateTableIfNotExists(this DbOperator dbOperator, Type type)
+        {
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryCreateTableIfNotExists(type));
+        }
+
+        /// <summary>
+        /// 行を挿入します
+        /// </summary>
+        public static void ExecuteInsertItem(this DbOperator dbOperator, Type type, object item)
+        {
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryInsertItem(type, item));
+        }
+
+        /// <summary>
+        /// 複数行を挿入します
+        /// </summary>
+        public static void ExecuteInsertItems(this DbOperator dbOperator, Type type, IEnumerable<object> items)
+        {
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryInsertItems(type, items));
         }
     }
 }
