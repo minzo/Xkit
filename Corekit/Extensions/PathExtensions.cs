@@ -10,7 +10,7 @@ namespace Corekit
         /// <summary>
         /// すべての拡張子を除いたファイル名を取得します
         /// </summary>
-        public static string GetFileNameWithoutAllExtensions(string path)
+        public static string GetFileNameWithoutAllExtensions(this string path)
         {
             path = System.IO.Path.GetFileName(path);
             if (path == null)
@@ -32,7 +32,7 @@ namespace Corekit
         /// <summary>
         /// Unixのパスとしてスラッシュ(/)区切りのパスを取得します
         /// </summary>
-        public static string GetUnixPath(string path)
+        public static string GetUnixPath(this string path)
         {
             return path.Replace(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar);
         }
@@ -40,7 +40,7 @@ namespace Corekit
         /// <summary>
         /// 指定したパスを基準にした相対パスを取得する
         /// </summary>
-        public static string GetRelativePath(string path, string basePath)
+        public static string GetRelativePath(this string path, string basePath)
         {
             var baseUrl = new Uri(System.IO.Path.GetFullPath(basePath));
             var relativeUrl = new Uri(baseUrl, path);
