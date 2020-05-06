@@ -158,5 +158,43 @@ namespace Corekit.DB
         {
             dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryInsertItems(type, items));
         }
+
+        /// <summary>
+        /// 複数行を挿入します
+        /// </summary>
+        public static void ExecuteInsertItemsIfNotExists(this DbOperator dbOperator, Type type, IEnumerable<object> items)
+        {
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryInsertItemsIfNotExists(type, items));
+        }
+
+        /// <summary>
+        /// VACUUM
+        /// </summary>
+        public static void Vacuum(this DbOperator dbOperator)
+        {
+            dbOperator.ExecuteNonQuery("VACUUM;");
+        }
+    }
+
+    /// <summary>
+    /// データベースに対する試験的な操作を提供します
+    /// </summary>
+    public static class DbOperatorExperimentalExtensions
+    {
+        /// <summary>
+        /// 複数行を挿入します（PrimaryKeyが一致する行は何もしません)
+        /// </summary>
+        public static void ExecuteInsertItemsIfNotExists<T>(this DbOperator dbOperator, Type type, IEnumerable<T> items)
+        {
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer<T>.QueryInsertItemsIfNotExists(items));
+        }
+
+        /// <summary>
+        /// 複数行を挿入します（PrimaryKeyが一致する行は何もしません)
+        /// </summary>
+        public static void ExecuteInsertItemsIfNotExists(this DbOperator dbOperator, Type type, IEnumerable items)
+        {
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryInsertItemsIfNotExists(type, items));
+        }
     }
 }
