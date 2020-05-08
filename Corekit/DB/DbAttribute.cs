@@ -1,6 +1,5 @@
 using System;
 using System.Data;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace Corekit.DB
@@ -19,12 +18,19 @@ namespace Corekit.DB
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public class DbColumnAttribute : Attribute
     {
+        /// <summary>
+        /// SQL列の型
+        /// </summary>
         public SqlDbType Type { get; }
 
+        /// <summary>
+        /// 列名
+        /// </summary>
         public string ColumnName { get; }
 
-        internal PropertyInfo PropertyInfo { get; set; }
-
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public DbColumnAttribute(SqlDbType type, [CallerMemberName] string columnName = null)
         {
             this.Type = type;
@@ -38,11 +44,17 @@ namespace Corekit.DB
     [AttributeUsage(AttributeTargets.Class)]
     public class DbTableAttribute : Attribute
     {
+        /// <summary>
+        /// テーブル名
+        /// </summary>
         public string TableName { get; }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public DbTableAttribute(string tableName)
         {
-            this.TableName = tableName;
+            this.TableName = tableName ?? throw new ArgumentNullException($"argument {nameof(tableName)} is null");
         }
     }
 }
