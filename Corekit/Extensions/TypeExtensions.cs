@@ -31,7 +31,7 @@ namespace Corekit.Extensions
             return type.GetProperty(name, flags) ?? type.BaseType?.GetPropertyInfo(name) ?? null;
         }
 
-        public static bool TryGetCustomAttribute<T>(this PropertyInfo info, out T attribute) where T : Attribute
+        public static bool TryGetCustomAttribute<T>(this MemberInfo info, out T attribute) where T : Attribute
         {
             attribute = info.GetCustomAttribute(typeof(T)) as T;
             return attribute != null;
