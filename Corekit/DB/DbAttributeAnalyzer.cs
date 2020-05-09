@@ -91,7 +91,7 @@ namespace Corekit.DB
                 }
             }
 
-            private PropertyInfo _Info;
+            private readonly PropertyInfo _Info;
         }
 
         /// <summary>
@@ -226,9 +226,9 @@ namespace Corekit.DB
 
         #endregion
 
-        private string _TableName;
-        private ColumnInfo _PrimaryKeyColumnInfo;
-        private ColumnInfo[] _ColumnInfos;
+        private readonly string _TableName;
+        private readonly ColumnInfo _PrimaryKeyColumnInfo;
+        private readonly ColumnInfo[] _ColumnInfos;
         private protected string _QueryCreateTable;
         private protected string _QueryCreateTableIfNotExists;
         private protected string _QueryInsertItemHead;
@@ -283,6 +283,6 @@ namespace Corekit.DB
             Cache.AddOrUpdate(typeof(T), (_) => Analyzer, (_a, _b) => Analyzer);
         }
 
-        private static DbAttributeAnalyzer<T> Analyzer;
+        private static readonly DbAttributeAnalyzer<T> Analyzer;
     }
 }

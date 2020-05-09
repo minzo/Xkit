@@ -54,7 +54,7 @@ namespace Corekit.DB
         /// </summary>
         public DbTableAttribute(string tableName)
         {
-            this.TableName = tableName ?? throw new ArgumentNullException($"argument {nameof(tableName)} is null");
+            this.TableName = tableName ?? throw new ArgumentNullException(nameof(tableName));
         }
     }
 }

@@ -83,7 +83,7 @@ namespace Corekit.DB
 
         private IDbConnection _Connection;
         private IDbTransaction _Transaction;
-        private IsolationLevel _DefaultIsolationLevel;
+        private readonly IsolationLevel _DefaultIsolationLevel;
         private int _ConnectionCount = 0;
     }
 

@@ -184,7 +184,7 @@ namespace Corekit.DB
         /// <summary>
         /// 複数行を挿入します（PrimaryKeyが一致する行は何もしません)
         /// </summary>
-        public static void ExecuteInsertItemsIfNotExists<T>(this DbOperator dbOperator, Type type, IEnumerable<T> items)
+        public static void ExecuteInsertItemsIfNotExists<T>(this DbOperator dbOperator, IEnumerable<T> items)
         {
             dbOperator.ExecuteNonQuery(DbAttributeAnalyzer<T>.QueryInsertItemsIfNotExists(items));
         }

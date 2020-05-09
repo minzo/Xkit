@@ -236,5 +236,22 @@ namespace Corekit.Extensions
             yield return element;
         }
 #endif
+
+        /// <summary>
+        /// シーケンスを指定した要素数のシーケンスに分割します
+        /// </summary>
+        public static IEnumerable<IEnumerable<T>> Chunk<T>(this IEnumerable<T> source, int chunkSize)
+        {
+            if (chunkSize <= 0)
+            {
+                throw new ArgumentException($"Chunk size must be greater than 0.", nameof(chunkSize));
+            }
+
+            while(source.Any())
+            {
+                yield return source.Take(chunkSize);
+                source = source.Skip(chunkSize);
+            }
+        }
     }
 }

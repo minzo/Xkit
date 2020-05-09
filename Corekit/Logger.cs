@@ -42,7 +42,7 @@ namespace Corekit
     /// </summary>
     public class Logger : INotifyPropertyChanged
     {
-        private ConcurrentQueue<LogData> logs = new ConcurrentQueue<LogData>();
+        private readonly ConcurrentQueue<LogData> logs = new ConcurrentQueue<LogData>();
 
         /// <summary>
         /// プロパティが変更されたときに呼ばれます
