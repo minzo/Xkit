@@ -73,6 +73,11 @@ namespace Corekit.DB
                     this.Type       = columnAttr.Type;
                     this.ColumnName = columnAttr.ColumnName;
                     this.SanitizedColumnName = this.ColumnName.Replace("'", "''");
+
+                    if(columnAttr.IsTypeAutoDetected)
+                    {
+                        this.Type = (SqlDbType)SqlTypeMap[this._Info.PropertyType];
+                    }
                 }
             }
 
@@ -80,18 +85,41 @@ namespace Corekit.DB
             {
                 switch (this.Type)
                 {
-                    case SqlDbType.Text:
                     case SqlDbType.Date:
                     case SqlDbType.DateTime:
+                        var date = DateTime.Parse(this._Info.GetValue(obj).ToString());
+                        return $"'{date.ToString("s").Replace("'","''")}'";
+
+                    case SqlDbType.Text:
                         // スペースがあると困るのでシングルクォート(')で囲む
                         // 文字列にシングルクォートが入っていると不正なクエリになるのでシングルクォートを重ねてエスケープ('')する
                         return $"'{this._Info.GetValue(obj).ToString().Replace("'","''")}'";
+
                     default:
                         return this._Info.GetValue(obj);
                 }
             }
 
             private readonly PropertyInfo _Info;
+
+            #region static
+
+            static ColumnInfo()
+            {
+                // 自動判定できる肩をここで登録しておく
+                SqlTypeMap.Add(typeof(Int16), SqlDbType.SmallInt);
+                SqlTypeMap.Add(typeof(Int32), SqlDbType.Int);
+                SqlTypeMap.Add(typeof(Int64), SqlDbType.BigInt);
+                SqlTypeMap.Add(typeof(Single), SqlDbType.Float);
+                SqlTypeMap.Add(typeof(Double), SqlDbType.Real);
+                SqlTypeMap.Add(typeof(String), SqlDbType.Text);
+                SqlTypeMap.Add(typeof(DateTime), SqlDbType.DateTime);
+                SqlTypeMap.Add(typeof(DateTimeOffset), SqlDbType.DateTimeOffset);
+            }
+
+            private static readonly Hashtable SqlTypeMap =  new Hashtable();
+
+            #endregion
         }
 
         /// <summary>

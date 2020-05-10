@@ -29,12 +29,27 @@ namespace Corekit.DB
         public string ColumnName { get; }
 
         /// <summary>
+        /// SQL列の型を自動判定します
+        /// </summary>
+        internal bool IsTypeAutoDetected { get; }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public DbColumnAttribute([CallerMemberName] string columnName = null)
+        {
+            this.ColumnName = columnName;
+            this.IsTypeAutoDetected = true;
+        }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         public DbColumnAttribute(SqlDbType type, [CallerMemberName] string columnName = null)
         {
             this.Type = type;
             this.ColumnName = columnName;
+            this.IsTypeAutoDetected = false;
         }
     }
 
