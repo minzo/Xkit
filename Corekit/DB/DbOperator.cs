@@ -144,6 +144,22 @@ namespace Corekit.DB
         }
 
         /// <summary>
+        /// テーブルを削除します
+        /// </summary>
+        public static void ExecuteDeleteTable(this DbOperator dbOperator, Type type)
+        {
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryDeleteTable(type));
+        }
+
+        /// <summary>
+        /// テーブルを削除します
+        /// </summary>
+        public static void ExecuteDeleteTable<T>(this DbOperator dbOperator)
+        {
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer<T>.QueryDeleteTable());
+        }
+
+        /// <summary>
         /// 行を挿入します
         /// </summary>
         public static void ExecuteInsertItem(this DbOperator dbOperator, Type type, object item)

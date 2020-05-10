@@ -25,6 +25,11 @@ namespace Corekit.DB
             return GetAnalyzer(type)._QueryCreateTableIfNotExists;
         }
 
+        public static string QueryDeleteTable(Type type)
+        {
+            return GetAnalyzer(type)._QueryDeleteTable;
+        }
+
         public static string QueryInsertItem(Type type, object item)
         {
             return GetAnalyzer(type).CreateQueryInsertItem(item);
@@ -144,6 +149,7 @@ namespace Corekit.DB
             // クエリ生成
             this._QueryCreateTable = AnalyzeCreateTableQuery();
             this._QueryCreateTableIfNotExists = AnalyzeCreateTableIfNotExistsQuery();
+            this._QueryDeleteTable = $"DROP TABLE ''{this._TableName}'';";
             this._QueryInsertItemHead = AnalyzeInsertItemQuery();
         }
 
@@ -259,6 +265,7 @@ namespace Corekit.DB
         private readonly ColumnInfo[] _ColumnInfos;
         private protected string _QueryCreateTable;
         private protected string _QueryCreateTableIfNotExists;
+        private protected string _QueryDeleteTable;
         private protected string _QueryInsertItemHead;
         private protected static ConcurrentDictionary<Type, DbAttributeAnalyzer> Cache = new ConcurrentDictionary<Type, DbAttributeAnalyzer>();
     }
@@ -277,6 +284,11 @@ namespace Corekit.DB
         public static string QueryCreateTableIfNotExists()
         {
             return Analyzer._QueryCreateTableIfNotExists;
+        }
+
+        public static string QueryDeleteTable()
+        {
+            return Analyzer._QueryDeleteTable;
         }
 
         public static string QueryInsertItem(T item)
