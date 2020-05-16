@@ -22,26 +22,26 @@ namespace Corekit.Models
             return this.Compare((T)lha, (T)rha);
         }
 
-        private Func<T, T, int> _Comparer;
+        private readonly Func<T, T, int> _Comparer;
     }
 
-    public class DelegateComparer<T, TKey> : IEqualityComparer<T>
+    public class DelegateEqualityComparer<T, TKey> : IEqualityComparer<T>
     {
-        public DelegateComparer(Func<T, TKey> selector)
+        public DelegateEqualityComparer(Func<T, TKey> selector)
         {
             this._Selector = selector;
         }
 
         public bool Equals(T x, T y)
         {
-            return _Selector(x).Equals(_Selector(y));
+            return this._Selector(x).Equals(_Selector(y));
         }
 
         public int GetHashCode(T obj)
         {
-            return _Selector(obj).GetHashCode();
+            return this._Selector(obj).GetHashCode();
         }
 
-        private Func<T, TKey> _Selector;
+        private readonly Func<T, TKey> _Selector;
     }
 }

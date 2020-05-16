@@ -73,11 +73,9 @@ namespace Corekit.Extensions
         /// <summary>
         /// 指定した要素で重複を除去する
         /// </summary>
-        public static IEnumerable<T> Distinct<T, T1>(this IEnumerable<T> collection, Func<T, T1> predicate)
+        public static IEnumerable<T> Distinct<T, T1>(this IEnumerable<T> collection, Func<T, T1> selector)
         {
-            return collection
-                .GroupBy(i => predicate(i))
-                .Select(i => i.First());
+            return collection.Distinct(new PrivateEqualityComparer<T,T1>(selector));
         }
 
         /// <summary>
@@ -252,6 +250,29 @@ namespace Corekit.Extensions
                 yield return source.Take(chunkSize);
                 source = source.Skip(chunkSize);
             }
+        }
+
+        /// <summary>
+        /// Distinct用のEqualityComparerer
+        /// </summary>
+        private class PrivateEqualityComparer<T, TKey> : IEqualityComparer<T>
+        {
+            public PrivateEqualityComparer(Func<T, TKey> selector)
+            {
+                this._Selector = selector;
+            }
+
+            public bool Equals(T x, T y)
+            {
+                return this._Selector(x).Equals(_Selector(y));
+            }
+
+            public int GetHashCode(T obj)
+            {
+                return this._Selector(obj).GetHashCode();
+            }
+
+            private readonly Func<T, TKey> _Selector;
         }
     }
 }
