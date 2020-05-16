@@ -73,9 +73,17 @@ namespace Corekit.Extensions
         /// <summary>
         /// 指定した要素で重複を除去する
         /// </summary>
-        public static IEnumerable<T> Distinct<T, T1>(this IEnumerable<T> collection, Func<T, T1> selector)
+        public static IEnumerable<T> Distinct<T, TElement>(this IEnumerable<T> collection, Func<T, TElement> selector)
         {
-            return collection.Distinct(new PrivateEqualityComparer<T,T1>(selector));
+            return collection.Distinct(new PrivateEqualityComparer<T,TElement>(selector));
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public static IEnumerable<T> Except<T, TElement>(this IEnumerable<T> first, IEnumerable<T> second, Func<T, TElement> selector)
+        {
+            return first.Except(second, new PrivateEqualityComparer<T,TElement>(selector));
         }
 
         /// <summary>

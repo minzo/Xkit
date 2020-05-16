@@ -86,8 +86,8 @@ namespace Corekit.Models
                 .Select(i => new CombinationTableFrame<T>() { Name = string.Join("_", i.Select(x => x.Value).Select(this._ConvertNameFunc)), Elements = i.ToList() })
                 .ToList();
 
-            var del = prev.Except(next, new DelegateComparer<CombinationTableFrame<T>, string>(x => x.Name)).ToList();
-            var add = next.Except(prev, new DelegateComparer<CombinationTableFrame<T>, string>(x => x.Name)).ToList();
+            var del = prev.Except(next, new DelegateEqualityComparer<CombinationTableFrame<T>, string>(x => x.Name)).ToList();
+            var add = next.Except(prev, new DelegateEqualityComparer<CombinationTableFrame<T>, string>(x => x.Name)).ToList();
 
             foreach (var item in del)
             {
@@ -133,7 +133,7 @@ namespace Corekit.Models
 
         #endregion
 
-        public event NotifyCollectionChangedEventHandler CollectionChanged { 
+        public event NotifyCollectionChangedEventHandler CollectionChanged {
             add => this._Combinations.CollectionChanged += value;
             remove => this._Combinations.CollectionChanged -= value;
         }
