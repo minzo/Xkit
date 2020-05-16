@@ -244,6 +244,14 @@ namespace Corekit.Extensions
 #endif
 
         /// <summary>
+        /// 連結します
+        /// </summary>
+        public static IEnumerable<T> Concat<T>(this T element, IEnumerable<T> collection)
+        {
+            return collection.Prepend(element);
+        }
+
+        /// <summary>
         /// シーケンスを指定した要素数のシーケンスに分割します
         /// </summary>
         public static IEnumerable<IEnumerable<T>> Chunk<T>(this IEnumerable<T> source, int chunkSize)
@@ -261,7 +269,7 @@ namespace Corekit.Extensions
         }
 
         /// <summary>
-        /// Distinct用のEqualityComparerer
+        /// LinqExtensionsの内部で使うEqualityComparerer
         /// </summary>
         private class PrivateEqualityComparer<T, TKey> : IEqualityComparer<T>
         {
