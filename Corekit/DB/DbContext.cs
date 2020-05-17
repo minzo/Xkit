@@ -90,7 +90,7 @@ namespace Corekit.DB
     /// <summary>
     /// DBとの接続を管理するコンテキスト
     /// </summary>
-    public class DbContext<T> : DbContext where T : DbConnection, new()
+    public class DbContext<T> : DbContext where T : IDbConnection, new()
     {
         /// <summary>
         /// コンストラクタ

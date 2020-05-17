@@ -81,9 +81,18 @@ namespace Corekit.DB
         /// </summary>
         public object ExecuteScalar(string query)
         {
-            using(var command = this._Context.CreateCommand(query))
+            try
             {
-                return command.ExecuteScalar();
+                using(var command = this._Context.CreateCommand(query))
+                {
+                    return command.ExecuteScalar();
+                }
+            }
+            catch(DbException e)
+            {
+                // クエリをデータに詰めておく
+                e.Data.Add("query", query);
+                throw;
             }
         }
 
