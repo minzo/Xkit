@@ -264,6 +264,7 @@ namespace Toolkit.WPF.Controls
             this.PreviewMouseMove += this.TryDrag;
             this.AllowDrop = true;
             this.Drop += this.Droped;
+            this.Loaded += this.OnLoaded;
 
             this.LayoutTransform = new ScaleTransform();
 
@@ -310,7 +311,7 @@ namespace Toolkit.WPF.Controls
                 if (scroll != null)
                 {
                     var grid = EnumerateChildren(scroll)
-                        .OfType<System.Windows.Controls.Primitives.ScrollBar>()
+                        .OfType<ScrollBar>()
                         .FirstOrDefault(i => i.Name == "PART_HorizontalScrollBar").Parent as Grid;
 
                     grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(100, GridUnitType.Auto) });
@@ -329,6 +330,14 @@ namespace Toolkit.WPF.Controls
         protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
         {
             base.OnItemsSourceChanged(oldValue, newValue);
+
+            // ItemsSource変更時に水平方向に少しでもスクロールしていると何故か一番右にスクロールする現象が起きるが
+            // ここでScrollViewerのオフセットをセットしておくとこの現象を回避できる
+            var scroll = EnumerateChildren(this).OfType<ScrollViewer>().FirstOrDefault(i => i.Name == "DG_ScrollViewer");
+            if (scroll != null)
+            {
+                scroll.ScrollToHorizontalOffset(scroll.ContentHorizontalOffset);
+            }
 
             if (oldValue is IDynamicTable oldTable)
             {
