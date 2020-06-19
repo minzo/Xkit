@@ -282,8 +282,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            var button = EnumerateChildren(this).OfType<Button>().FirstOrDefault();
-            if (button != null)
+            if (TryFindChild(this, out Button button))
             {
                 button.SetCurrentValue(Button.CommandProperty, this.CornerButtonCommand);
                 //if(button.Parent is Grid grid)
@@ -307,10 +306,9 @@ namespace Toolkit.WPF.Controls
 
             if (this.IsVisibleZoomValue)
             {
-                var scroll = EnumerateChildren(this).OfType<ScrollViewer>().FirstOrDefault(i => i.Name == "DG_ScrollViewer");
-                if (scroll != null)
+                if (TryFindChild(this, out ScrollViewer sv))
                 {
-                    var grid = EnumerateChildren(scroll)
+                    var grid = EnumerateChildren(sv)
                         .OfType<ScrollBar>()
                         .FirstOrDefault(i => i.Name == "PART_HorizontalScrollBar").Parent as Grid;
 
@@ -333,10 +331,9 @@ namespace Toolkit.WPF.Controls
 
             // ItemsSource変更時に水平方向に少しでもスクロールしていると何故か一番右にスクロールする現象が起きるが
             // ここでScrollViewerのオフセットをセットしておくとこの現象を回避できる
-            var scroll = EnumerateChildren(this).OfType<ScrollViewer>().FirstOrDefault(i => i.Name == "DG_ScrollViewer");
-            if (scroll != null)
+            if (TryFindChild(this, out ScrollViewer sv))
             {
-                scroll.ScrollToHorizontalOffset(scroll.ContentHorizontalOffset);
+                sv.ScrollToHorizontalOffset(sv.ContentHorizontalOffset);
             }
 
             if (oldValue is IDynamicTable oldTable)
@@ -357,6 +354,24 @@ namespace Toolkit.WPF.Controls
             if (newValue is IDynamicItem newItem)
             {
                 (newItem.Definition as INotifyCollectionChanged).CollectionChanged += this.OnPropertyDefinitionsChanged;
+            }
+        }
+
+        /// <summary>
+        /// Itemsの数の変更
+        /// </summary>
+        protected override void OnItemsChanged(NotifyCollectionChangedEventArgs e)
+        {
+            base.OnItemsChanged(e);
+
+            if (e.Action == NotifyCollectionChangedAction.Add && this.Items.Count == 1)
+            {
+                // 1つめのDataGridRow追加時に水平方向に少しでもスクロールしていると何故か一番右にスクロールする現象が起きるが
+                // ここでScrollViewerのオフセットをセットしておくとこの現象を回避できる
+                if (TryFindChild(this, out ScrollViewer sv))
+                {
+                    sv.ScrollToHorizontalOffset(sv.ContentHorizontalOffset);
+                }
             }
         }
 
@@ -560,7 +575,7 @@ namespace Toolkit.WPF.Controls
                     .ForEach(i => SetIsSelectedCellContains(i, true));
 
                 EnumerateChildren(this)
-                    .OfType<System.Windows.Controls.Primitives.DataGridColumnHeader>()
+                    .OfType<DataGridColumnHeader>()
                     .Where(i => i.Column != null)
                     .ForEach(i => SetIsSelectedCellContains(i, GetIsSelectedCellContains(i.Column)));
 
@@ -888,7 +903,7 @@ namespace Toolkit.WPF.Controls
             foreach (var column in this.Columns)
             {
                 SetColumnWidthLength(column, column.Width);
-                column.SetValue(DataGridColumn.WidthProperty, DataGridLength.SizeToCells);
+                column.SetCurrentValue(DataGridColumn.WidthProperty, DataGridLength.SizeToCells);
             }
         }
 
@@ -899,7 +914,7 @@ namespace Toolkit.WPF.Controls
         {
             foreach (var column in this.Columns)
             {
-                column.SetValue(DataGridColumn.WidthProperty, GetColumnWidthLength(column));
+                column.SetCurrentValue(DataGridColumn.WidthProperty, GetColumnWidthLength(column));
             }
         }
 
@@ -925,6 +940,15 @@ namespace Toolkit.WPF.Controls
             var count = VisualTreeHelper.GetChildrenCount(dp);
             var children = Enumerable.Range(0, count).Select(i => VisualTreeHelper.GetChild(dp, i));
             return children.Concat(children.SelectMany(i => EnumerateChildren(i)));
+        }
+
+        /// <summary>
+        /// 指定した型のVisualChildを取得します
+        /// </summary>
+        private static bool TryFindChild<T>(DependencyObject dp, out T child)
+        {
+            child = EnumerateChildren(dp).OfType<T>().FirstOrDefault(i => i != null);
+            return child != null;
         }
 
         #endregion
