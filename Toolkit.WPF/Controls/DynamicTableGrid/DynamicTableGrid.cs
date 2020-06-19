@@ -104,32 +104,16 @@ namespace Toolkit.WPF.Controls
         #region 選択情報
 
         /// <summary>
-        /// 選択情報構造体
-        /// </summary>
-        public struct SelectedInfo
-        {
-            public object Item { get; }
-
-            public string PropertyName { get; }
-
-            internal SelectedInfo(object item, string propertyName)
-            {
-                this.Item = item;
-                this.PropertyName = propertyName;
-            }
-        }
-
-        /// <summary>
         /// 選択情報
         /// </summary>
-        public IEnumerable<SelectedInfo> SelectedInfos
+        public IEnumerable<(object Item, string PropertyName)> SelectedInfos
         {
-            get { return (IEnumerable<SelectedInfo>)GetValue(SelectedInfosProperty); }
+            get { return (IEnumerable<(object Item, string PropertyName)>)GetValue(SelectedInfosProperty); }
             set { SetValue(SelectedInfosProperty, value); }
         }
 
         public static readonly DependencyProperty SelectedInfosProperty =
-            DependencyProperty.Register("SelectedInfos", typeof(IEnumerable<SelectedInfo>), typeof(DynamicTableGrid), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+            DependencyProperty.Register("SelectedInfos", typeof(IEnumerable<(object Item, string PropertyName)>), typeof(DynamicTableGrid), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #endregion
 
@@ -598,7 +582,7 @@ namespace Toolkit.WPF.Controls
             // セル選択情報の更新
             var cellInfos = this.SelectedCells
                 .Where(i => i.IsValid)
-                .Select(i => new SelectedInfo(i.Item, GetPropertyName(i.Column)))
+                .Select(i => (Item: i.Item, PropertyName:GetPropertyName(i.Column)))
                 .ToList();
 
             this.SetCurrentValue(DynamicTableGrid.SelectedInfosProperty, cellInfos);
