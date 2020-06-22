@@ -79,7 +79,7 @@ namespace Corekit.Extensions
         }
 
         /// <summary>
-        ///
+        /// 指定されたものから除かれる
         /// </summary>
         public static IEnumerable<T> Except<T, TElement>(this IEnumerable<T> first, IEnumerable<T> second, Func<T, TElement> selector)
         {
