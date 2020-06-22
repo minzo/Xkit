@@ -9,7 +9,7 @@ using System.Linq;
 namespace Corekit.DB.Tests
 {
     [TestClass]
-    public class DBTest
+    public class DbContext
     {
         [DbTable("TestRecord")]
         class Record
@@ -22,6 +22,10 @@ namespace Corekit.DB.Tests
         [TestInitialize]
         public void Initialize()
         {
+            if (System.IO.File.Exists(this._DBPath))
+            {
+                System.IO.File.Delete(this._DBPath);
+            }
         }
 
         [TestCleanup]
