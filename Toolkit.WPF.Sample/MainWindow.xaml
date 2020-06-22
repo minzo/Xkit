@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Toolkit.WPF.Sample"
+        xmlns:commands="clr-namespace:Toolkit.WPF.Commands;assembly=Toolkit.WPF"
         x:Class="Toolkit.WPF.Sample.MainWindow"
         mc:Ignorable="d"
         Title="Toolkit.WPF.Sample" Height="450" Width="800">
@@ -17,5 +18,6 @@
         <Button Command="{x:Static local:MainWindow.OpenWindow}" CommandParameter="{x:Type local:DynamicTableItemsWindow}" Content="DynamicTableItemsWindow" />
         <Button Command="{x:Static local:MainWindow.OpenWindow}" CommandParameter="{x:Type local:CombinationGridWindow}" Content="CombinationWindow" />
         <Button Command="{x:Static local:MainWindow.OpenWindow}" CommandParameter="{x:Type local:CIEWindow}" Content="CIE" />
+        <Button Command="{x:Static local:MainWindow.OpenWindow}" CommandParameter="{x:Type local:DynamicTableScrollChanged}" Content="Changed" />
     </StackPanel>
 </Window>

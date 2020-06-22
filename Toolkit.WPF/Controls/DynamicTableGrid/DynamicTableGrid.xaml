@@ -180,7 +180,7 @@
     <!-- ZoomBox -->
     <ComboBox x:Key="ZoomBox"
               x:Shared="False" 
-              Grid.Column="2"
+              Grid.Column="0"
               Width="50"
               Height="17"
               IsEditable="True"

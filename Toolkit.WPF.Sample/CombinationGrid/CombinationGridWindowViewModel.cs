@@ -60,7 +60,7 @@ namespace Toolkit.WPF.Sample
         /// <summary>
         /// 選択情報
         /// </summary>
-        public IEnumerable<Toolkit.WPF.Controls.DynamicTableGrid.SelectedInfo> SelectedInfos
+        public IEnumerable<(object Item, string PropertyName)> SelectedInfos
         {
             set
             {

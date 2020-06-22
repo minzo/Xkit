@@ -288,7 +288,7 @@ namespace Toolkit.WPF.Controls
                 //}
             }
 
-            if (this.IsVisibleZoomValue)
+            if (false && this.IsVisibleZoomValue)
             {
                 if (TryFindChild(this, out ScrollViewer sv))
                 {
@@ -296,11 +296,16 @@ namespace Toolkit.WPF.Controls
                         .OfType<ScrollBar>()
                         .FirstOrDefault(i => i.Name == "PART_HorizontalScrollBar").Parent as Grid;
 
-                    grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(100, GridUnitType.Auto) });
+                    grid.ColumnDefinitions.Insert(0, new ColumnDefinition() { Width = new GridLength(100, GridUnitType.Auto) });
 
                     if (this.TryFindResource("ZoomBox") is ComboBox comboBox)
                     {
-                        grid.Children.Add(comboBox);
+                        grid.Children.Insert(0, comboBox);
+                    }
+
+                    for (var i = 0; i < grid.Children.Count; i++)
+                    {
+                        Grid.SetColumn(grid.Children[i], i);
                     }
                 }
             }
