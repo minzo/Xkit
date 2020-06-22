@@ -149,7 +149,7 @@ namespace Corekit.DB
             // クエリ生成
             this._QueryCreateTable = AnalyzeCreateTableQuery();
             this._QueryCreateTableIfNotExists = AnalyzeCreateTableIfNotExistsQuery();
-            this._QueryDeleteTable = $"DROP TABLE ''{this._TableName}'';";
+            this._QueryDeleteTable = $"DROP TABLE '{this._TableName}';";
             this._QueryInsertItemHead = AnalyzeInsertItemQuery();
         }
 

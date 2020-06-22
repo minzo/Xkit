@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Threading;
 
 namespace Corekit.DB
@@ -8,6 +9,7 @@ namespace Corekit.DB
     /// <summary>
     /// DBとの接続を管理するコンテキスト
     /// </summary>
+    [DebuggerDisplay("{_Connetction}")]
     public abstract class DbContext : IDisposable
     {
         /// <summary>
