@@ -41,6 +41,35 @@ namespace Corekit.Perforce
         }
 
         /// <summary>
+        /// 指定したファイルの最新リビジョンを取得します
+        /// </summary>
+        internal bool Sync(string filePath)
+        {
+            return P4CommandDriver.Execute(this._Context, $"sync {filePath}");
+        }
+
+        /// <summary>
+        /// 指定したファイルの指定リビジョンを取得します
+        /// 負の値を指定した場合は最新リビジョンを基準にして指定された値だけ遡ったリビジョンを取得します
+        /// </summary>
+        internal bool Sync(string filePath, int revision)
+        {
+            // 負の値なら最新リビジョンからさかのぼったリビジョンを取得
+            if (revision < 0)
+            {
+                // ファイルの情報を取得
+                if (!this.TryGetFileInfo(filePath, out var info))
+                {
+                    return false;
+                }
+
+                revision = Math.Max(0, info.LatestRevision + revision);
+            }
+
+            return P4CommandDriver.Execute(this._Context, $"sync {filePath}#{revision}");
+        }
+
+        /// <summary>
         /// チェンジリストをサブミットします
         /// </summary>
         public bool Submit(P4ChangeList changeList)
@@ -764,6 +793,29 @@ namespace Corekit.Perforce
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 指定されたパスのファイルが最新かPerforceサーバーに問い合わせて確認します
+        /// バージョン管理外のファイルの場合は最新として扱います
+        /// </summary>
+        public static bool IsFileLatest(this P4Client client, string filePath)
+        {
+            if (!client.TryGetFileInfo(filePath, out var info))
+            {
+                // 管理下にない場合は最新の扱いにする
+                return true;
+            }
+            return info.IsLatest;
+        }
+
+        /// <summary>
+        /// 指定されたパスのファイルが全て最新かPerforceサーバーに問い合わせて確認します
+        /// バージョン管理外のファイルの場合は最新として扱います
+        /// </summary>
+        public static bool IsFileLatestAll(this P4Client client, IEnumerable<string> filePath)
+        {
+            return client.EnumerateFileInfo(filePath).All(i => i.IsLatest);
         }
     }
 }

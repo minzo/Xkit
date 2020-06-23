@@ -57,7 +57,7 @@ namespace Corekit.Perforce
         public int HaveRevision { get; }
 
         /// <summary>
-        /// チェンリスト番号
+        /// 現在作業状態になっているチェンリスト番号
         /// </summary>
         public string ChangeListNumber { get; }
 
@@ -72,9 +72,15 @@ namespace Corekit.Perforce
         public P4FileAction Action { get; }
 
         /// <summary>
+        /// Depot内の最新のアクション
+        /// </summary>
+        public P4FileAction HeadAction { get; }
+
+        /// <summary>
         /// 最新リビジョンを持っているか
         /// </summary>
-        public bool IsLatest => this.HaveRevision == this.LatestRevision;
+        public bool IsLatest => (this.HaveRevision == this.LatestRevision)
+            || (this.HaveRevision == -1 && this.HeadAction == P4FileAction.Delete);
 
         /// <summary>
         /// コンストラクタ
@@ -156,6 +162,45 @@ namespace Corekit.Perforce
                             default:
                                 throw new Exception("未知のアクション");
                         }
+                        break;
+
+                    case "headAction":
+                        switch (unit[2])
+                        {
+                            case "add":
+                                this.HeadAction = P4FileAction.Add;
+                                break;
+                            case "edit":
+                                this.HeadAction = P4FileAction.Edit;
+                                break;
+                            case "delete":
+                                this.HeadAction = P4FileAction.Delete;
+                                break;
+                            case "branch":
+                                this.HeadAction = P4FileAction.Branch;
+                                break;
+                            case "move/add":
+                                this.HeadAction = P4FileAction.MoveAdd;
+                                break;
+                            case "move/delete":
+                                this.HeadAction = P4FileAction.MoveAdd;
+                                break;
+                            case "integrate":
+                                this.HeadAction = P4FileAction.Integrate;
+                                break;
+                            case "import":
+                                this.HeadAction = P4FileAction.Import;
+                                break;
+                            case "purge":
+                                this.HeadAction = P4FileAction.Purge;
+                                break;
+                            case "archive":
+                                this.HeadAction = P4FileAction.Archive;
+                                break;
+                            default:
+                                throw new Exception("未知のアクション");
+                        }
+
                         break;
                     default:
                         break;

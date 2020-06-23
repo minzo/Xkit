@@ -52,7 +52,13 @@ namespace Corekit.Perforce.Tests
         [TestMethod]
         public void Sync()
         {
+            P4FileInfo info;
+
             Assert.IsTrue(this._Client.Sync());
+            Assert.IsTrue(this._Client.Sync(DeleteFilePath, -1));
+            Assert.IsTrue(this._Client.TryGetFileInfo(DeleteFilePath, out info));
+            Assert.IsTrue(info.LatestRevision - 1 == info.HaveRevision);
+            Assert.IsTrue(this._Client.Sync(DeleteFilePath));
         }
 
         [TestMethod]
@@ -207,6 +213,47 @@ namespace Corekit.Perforce.Tests
             Assert.IsTrue(this._Client.DeleteChangeList(changeList));
         }
 
+        [TestMethod]
+        public void IsLatestFile()
+        {
+            P4FileInfo info;
+
+            // 未管理のファイルを作成する
+            File.WriteAllText(UnorganizedFilePath, string.Empty);
+
+            // 最新か
+            Assert.IsTrue(this._Client.IsFileLatest(UnorganizedFilePath));
+            Assert.IsTrue(this._Client.IsFileLatest(EditFilePath));
+
+            // 1つ前のファイルを取得
+            Assert.IsTrue(this._Client.Sync(DeleteFilePath, -1));
+            Assert.IsTrue(this._Client.TryGetFileInfo(DeleteFilePath, out info));
+            Assert.IsTrue(info.LatestRevision - 1 == info.HaveRevision);
+
+            // 最新ではないはず
+            Assert.IsFalse(this._Client.IsFileLatest(DeleteFilePath));
+
+            // ファイル指定で最新取得
+            Assert.IsTrue(this._Client.Sync(DeleteFilePath));
+            Assert.IsTrue(this._Client.TryGetFileInfo(DeleteFilePath, out info));
+            Assert.IsTrue(this._Client.IsFileLatest(DeleteFilePath));
+
+
+            var filePath = new[] {
+                MoveOldFilePath,
+                EditFilePath,
+                UnorganizedFilePath,
+            };
+
+            Assert.IsTrue(this._Client.IsFileLatestAll(filePath));
+
+            // 未管理のファイルを削除する
+            if (File.Exists(UnorganizedFilePath))
+            {
+                File.Delete(UnorganizedFilePath);
+            }
+        }
+
         private Corekit.Perforce.P4Client _Client;
 
         private static readonly string ClientRootPath = Path.GetFullPath("../../../PrivateLocalPerforceDepot");
@@ -215,5 +262,6 @@ namespace Corekit.Perforce.Tests
         private static readonly string DeleteFilePath = Path.Combine(ClientRootPath, "DeleteFile.txt");
         private static readonly string MoveOldFilePath = Path.Combine(ClientRootPath, "MoveFileOld.txt");
         private static readonly string MoveNewFilePath = Path.Combine(ClientRootPath, "MoveFileNew.txt");
+        private static readonly string UnorganizedFilePath = Path.Combine(ClientRootPath, "UnorganizedFilePath.txt");
     }
 }
