@@ -38,9 +38,9 @@ namespace Corekit.Perforce
         public string ClientRootDirectoryPath { get; }
 
         /// <summary>
-        /// ストリーム
+        /// ローカルのルートディレクトリに対応するDepotのパス
         /// </summary>
-        public string ClientStream { get; }
+        public string DepotRootDirectoryPath { get; }
 
         /// <summary>
         /// コンストラクタ
@@ -59,8 +59,10 @@ namespace Corekit.Perforce
             // 作業ディレクトリ
             this.ClientWorkingDirectoryPath = workingDirectory;
 
+            // 作業ディレクトリが存在するなら
             // 最初は使えるかチェックするためにtrueにしておく
-            this.IsValid = true;
+            this.IsValid = !string.IsNullOrEmpty(this.ClientWorkingDirectoryPath)
+                && System.IO.Directory.Exists(this.ClientWorkingDirectoryPath);
 
             // p4 info コマンドが実行可能ならPerforceが使えると判断する
             this.IsValid = P4CommandDriver.Execute(this, "info", out string output);
@@ -75,7 +77,9 @@ namespace Corekit.Perforce
                 this.UserName = keyValuePairs.First(i => i.Key == "User name").Value;
                 this.ClientName = keyValuePairs.First(i => i.Key == "Client name").Value;
                 this.ClientRootDirectoryPath = keyValuePairs.First(i => i.Key == "Client root").Value;
-                this.ClientStream = keyValuePairs.First(i => i.Key == "Client stream").Value;
+
+                P4CommandDriver.Execute(this, "where DepotRoot", out string mapping);
+                this.DepotRootDirectoryPath = mapping.Split(' ').FirstOrDefault().Replace("/DepotRoot", string.Empty);
             }
         }
     }

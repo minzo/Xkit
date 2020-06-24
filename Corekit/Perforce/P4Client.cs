@@ -76,6 +76,7 @@ namespace Corekit.Perforce
         {
             if (P4CommandDriver.Execute(this._Context, $"submit -c {changeList.Number}"))
             {
+                changeList.Status = P4ChangeListStatus.Submitted;
                 return true;
             }
             return false;
@@ -305,7 +306,7 @@ namespace Corekit.Perforce
         /// </summary>
         public IEnumerable<P4ChangeList> EnumerateChangeList(P4ChangeListStatus status)
         {
-            return this.EnumerateChangeList($"changes -s {status}");
+            return this.EnumerateChangeList($"changes -s {status.ToString().ToLower()}");
         }
 
         /// <summary>
@@ -400,12 +401,30 @@ namespace Corekit.Perforce
                 throw new ArgumentNullException(nameof(changeList));
             }
 
-            if (P4CommandDriver.Execute(this._Context, $"change -d {changeList.Number}"))
+            if (changeList.Status == P4ChangeListStatus.Submitted)
             {
-                return true;
+                return false;
             }
 
-            return false;
+
+            if (!P4CommandDriver.Execute(this._Context, $"change -d {changeList.Number}", out string output))
+            {
+                return false;
+            }
+
+            // ファイルが含まれていると削除できないが戻り値が0なためtrueが返ってきてしまうので出力で確認する
+            if (output.TrimEnd('\n', '\r').EndsWith("can't be deleted."))
+            {
+                return false;
+            }
+
+            // まだ pending だったら 失敗
+            if (this.EnumerateSelfChangeList(P4ChangeListStatus.Pending).Any(i => i.Number == changeList.Number))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -435,7 +454,7 @@ namespace Corekit.Perforce
         /// </summary>
         private static string GetDepotFilePathFromClientFilePath(P4Context context, string depotFilePath)
         {
-            return Path.GetFullPath(depotFilePath.Replace(context.ClientStream, context.ClientRootDirectoryPath));
+            return Path.GetFullPath(depotFilePath.Replace(context.DepotRootDirectoryPath, context.ClientRootDirectoryPath));
         }
 
         private static readonly string[] LineBrake = new[] { Environment.NewLine, "\r\n", "\r", "\n" };
@@ -518,106 +537,6 @@ namespace Corekit.Perforce
     /// </summary>
     public static class P4ClientUtil
     {
-        /*
-        /// <summary>
-        /// 新しくチェンジリスト作成して変更をサブミットします
-        /// 
-        /// 指定したファイルの状態によって次の操作をおこなってからサブミットします
-        /// 作業状態になっていない場合はEdit・Addします
-        /// ローカルに存在しないファイルは削除します
-        /// </summary>
-        public static bool Submit(this P4Client client, string filePath, string description)
-        {
-            // ファイルがないものは削除コミットにする
-            if (File.Exists(filePath))
-            {
-                return false;
-            }
-
-            // チェンジリストを作る
-            if (!client.TryCreateChangeList(description, out P4ChangeList changeList))
-            {
-                return false;
-            }
-
-            // ファイルの状態を取得する
-            client.TryGetFileInfo(filePath, out P4FileInfo fileInfo);
-
-            // Edit・Addする
-            client.EditAdd(fileInfo.ClientFilePath, info);
-
-            // すでにEdit・Add済のときのためにチェンジリストを移動する
-            client.MoveFileAnotherChangeList(filePath, info);
-
-            // 移動ファイルがあったら一緒に移動する
-            if (!string.IsNullOrWhiteSpace(fileInfo.DepotMovedFilePath))
-            {
-                client.MoveFileAnotherChangeList(filePath, info);
-            }
-
-            // サブミットする
-            if (!client.Submit(info))
-            {
-                // 失敗したらチェンジリストを削除しておく
-                client.DeleteChangeListAndMoveDefault(info);
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// 新しくチェンジリスト作成して変更をサブミットします
-        /// 
-        /// 指定したファイルの状態によって次の操作をおこなってからサブミットします
-        /// 作業状態になっていない場合はEdit・Addします
-        /// ローカルに存在しないファイルは削除します
-        /// </summary>
-        public static bool Submit(this P4Client client, IEnumerable<string> filePath, string description)
-        {
-            // ファイルがなかったら失敗
-            if (!filePath.All(i => File.Exists(i)))
-            {
-                return false;
-            }
-
-            // チェンジリストを作る
-            if (!client.TryCreateChangeList(description, out P4ChangeList changeList))
-            {
-                return false;
-            }
-
-            // ファイルの状態を取得する
-            var fileInfoList = client.EnumerateFileInfo(filePath);
-
-            // Edit・Addする
-            client.EditAdd(fileInfoList.Select(i => i.ClientFilePath), info);
-
-            // すでにEdit・Add済のときのためにチェンジリストを移動する
-            client.MoveFileAnotherChangeList(fileInfoList.Select(i => i.ClientFilePath), info);
-
-            // 移動ファイルがあったら一緒に移動する
-            var movedFilePathList = fileInfoList
-                .Select(i => i.DepotMovedFilePath)
-                .Where(i => !string.IsNullOrWhiteSpace(i));
-
-            if (movedFilePathList.Any())
-            {
-                client.MoveFileAnotherChangeList(movedFilePathList, info);
-            }
-
-            // サブミットする
-            if (!client.Submit(info))
-            {
-                // 失敗したらチェンジリストを削除しておく
-                client.DeleteChangeListAndMoveDefault(info);
-                return false;
-            }
-
-            return true;
-        }
-        */
-
         /// <summary>
         /// ファイルを指定したチェンジリストで Edit・Add 状態にします
         /// 失敗した場合は一度 Revert して再度 EditAdd するので現在の状態を気にする必要がありません

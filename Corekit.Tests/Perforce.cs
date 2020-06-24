@@ -254,11 +254,35 @@ namespace Corekit.Perforce.Tests
             }
         }
 
+        [TestMethod]
+        public void DeleteChangeList()
+        {
+            P4ChangeList changeList;
+
+            Assert.IsTrue(this._Client.TryCreateChangeList("チェンジリスト", out changeList));
+            Assert.IsTrue(this._Client.DeleteChangeListAndMoveDefault(changeList));
+
+            // 存在しないチェンジリストを消したときはエラー
+            Assert.IsFalse(this._Client.DeleteChangeListAndMoveDefault(changeList));
+
+            Assert.IsTrue(this._Client.TryCreateChangeList("サブミット", out changeList));
+            Assert.IsTrue(this._Client.EditAdd(EditFile2Path, changeList));
+            Assert.IsTrue(this._Client.ReopenFileAnotherChangeList(EditFile2Path, changeList));
+            File.AppendAllText(EditFile2Path, "TEST");
+
+            // サブミット済のチェンジリストの削除もエラー
+            Assert.IsFalse(this._Client.DeleteChangeList(changeList));
+
+            // デフォルトチェンジリストに移動しつつ削除は成功する
+            Assert.IsTrue(this._Client.DeleteChangeListAndMoveDefault(changeList));
+        }
+
         private Corekit.Perforce.P4Client _Client;
 
         private static readonly string ClientRootPath = Path.GetFullPath("../../../PrivateLocalPerforceDepot");
         private static readonly string NewFilePath = Path.Combine(ClientRootPath, "NewFile.txt");
         private static readonly string EditFilePath = Path.Combine(ClientRootPath, "EditFile.txt");
+        private static readonly string EditFile2Path = Path.Combine(ClientRootPath, "EditFile2.txt");
         private static readonly string DeleteFilePath = Path.Combine(ClientRootPath, "DeleteFile.txt");
         private static readonly string MoveOldFilePath = Path.Combine(ClientRootPath, "MoveFileOld.txt");
         private static readonly string MoveNewFilePath = Path.Combine(ClientRootPath, "MoveFileNew.txt");

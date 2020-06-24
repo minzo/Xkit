@@ -31,7 +31,7 @@ namespace Corekit.Perforce
         /// <summary>
         /// 状態
         /// </summary>
-        public P4ChangeListStatus Status { get; }
+        public P4ChangeListStatus Status { get; internal set; }
 
         /// <summary>
         /// 日付と時刻
