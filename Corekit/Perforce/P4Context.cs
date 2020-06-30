@@ -64,8 +64,9 @@ namespace Corekit.Perforce
             this.IsValid = !string.IsNullOrEmpty(this.ClientWorkingDirectoryPath)
                 && System.IO.Directory.Exists(this.ClientWorkingDirectoryPath);
 
-            // p4 info コマンドが実行可能ならPerforceが使えると判断する
-            this.IsValid = P4CommandDriver.Execute(this, "info", out string output);
+            // p4 info と p4 where コマンドが実行可能ならPerforceが使えると判断する
+            this.IsValid &= P4CommandDriver.Execute(this, "info", out string output);
+            this.IsValid &= P4CommandDriver.Execute(this, "where DepotRoot", out string mapping);
 
             if (this.IsValid)
             {
@@ -78,7 +79,6 @@ namespace Corekit.Perforce
                 this.ClientName = keyValuePairs.First(i => i.Key == "Client name").Value;
                 this.ClientRootDirectoryPath = keyValuePairs.First(i => i.Key == "Client root").Value;
 
-                P4CommandDriver.Execute(this, "where DepotRoot", out string mapping);
                 this.DepotRootDirectoryPath = mapping.Split(' ').FirstOrDefault().Replace("/DepotRoot", string.Empty);
             }
         }
