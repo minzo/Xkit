@@ -498,7 +498,10 @@ namespace Corekit.Perforce
             /// </summary>
             private ScopedTempFile(string tempFileName = null)
             {
-                this.AppDirectory = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
+                var assembly = System.Reflection.Assembly.GetEntryAssembly()
+                    ?? System.Reflection.Assembly.GetExecutingAssembly();
+
+                this.AppDirectory = assembly.GetName().Name;
 
                 if (string.IsNullOrEmpty(tempFileName))
                 {
