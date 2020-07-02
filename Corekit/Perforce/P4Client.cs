@@ -445,6 +445,45 @@ namespace Corekit.Perforce
             return Enumerable.Empty<string>();
         }
 
+        /// <summary>
+        /// 競合解決の方法を指定します
+        /// </summary>
+        public enum ResolveType
+        {
+            AcceptMerge,
+            AcceptYours,
+            AcceptThiers,
+        }
+
+        /// <summary>
+        /// 競合解決の方法を指定します
+        /// /// </summary>
+        public bool Resolve(P4ChangeList changeList, ResolveType type)
+        {
+            string arg = null;
+            switch (type)
+            {
+                case ResolveType.AcceptMerge:
+                    arg = "-am";
+                    break;
+                case ResolveType.AcceptYours:
+                    arg = "-ay";
+                    break;
+                case ResolveType.AcceptThiers:
+                    arg = "-at";
+                    break;
+                default:
+                    throw new ArgumentException("未定義の競合解決方法が指定されました", nameof(type));
+            }
+
+            if (P4CommandDriver.Execute(this._Context, $"resolve {arg} -c {changeList.Number}"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         private readonly P4Context _Context;
 
         #region Utilities
@@ -655,9 +694,7 @@ namespace Corekit.Perforce
         /// </summary>
         public static bool MoveFileAnotherChangeList(this P4Client client, IEnumerable<string> filePath, P4ChangeList changeList = null)
         {
-            var fileInfoList = client.EnumerateFileInfo(filePath)
-                .Where(i => !string.IsNullOrWhiteSpace(i.DepotMovedFilePath))
-                .ToList();
+            var fileInfoList = client.EnumerateFileInfo(filePath).ToList();
 
             var depotFileList = fileInfoList
                 .Select(i => i.DepotFilePath)
@@ -675,8 +712,7 @@ namespace Corekit.Perforce
             else
             {
                 // 含まれてないやつがあったら合成する
-                client.ReopenFileAnotherChangeList(depotFileList.Union(movedFileList), changeList);
-                return false;
+                return client.ReopenFileAnotherChangeList(depotFileList.Union(movedFileList), changeList);
             }
         }
 
@@ -738,6 +774,14 @@ namespace Corekit.Perforce
         public static bool IsFileLatestAll(this P4Client client, IEnumerable<string> filePath)
         {
             return client.EnumerateFileInfo(filePath).All(i => i.IsLatest);
+        }
+
+        /// <summary>
+        /// 指定されたチェンジリストが空か
+        /// </summary>
+        public static bool IsEmptyChangeList(this P4Client client, P4ChangeList changeList)
+        {
+            return !client.EnumerateChangeListFilePath(changeList).Any();
         }
     }
 }
