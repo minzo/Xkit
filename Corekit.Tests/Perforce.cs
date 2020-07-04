@@ -15,6 +15,44 @@ namespace Corekit.Perforce.Tests
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
+            // Depot用のディレクトリがすでにあったら一度削除
+            if (Directory.Exists(DepotDir))
+            {
+                Directory.Delete(DepotDir, true);
+            }
+
+            // Depot用のディレクトリを作成
+            Directory.CreateDirectory(DepotDir);
+
+            // 新しくTest用のDepotを作成
+            // -C0 CaseSensitive
+            // -n Shift-jis
+            ExecuteP4Command($"init -C0 -n", DepotDir);
+
+            // テスト用にファイルをサブミットしておく
+            var client = new Corekit.Perforce.P4Client(new P4Context(ClientRootPath));
+
+            P4ChangeList changeList;
+            if(client.TryCreateChangeList("テスト準備サブミット", out changeList))
+            {
+                File.Create(EditFilePath).Close();
+                client.EditAdd(EditFilePath, changeList);
+                File.Create(EditFile2Path).Close();
+                client.EditAdd(EditFile2Path, changeList);
+                File.Create(EditFile3Path).Close();
+                client.EditAdd(EditFile3Path, changeList);
+                File.Create(MoveOldFilePath).Close();
+                client.EditAdd(MoveOldFilePath, changeList);
+                File.Create(DeleteFilePath).Close();
+                client.EditAdd(DeleteFilePath, changeList);
+                client.Submit(changeList);
+            }
+
+            if (client.TryCreateChangeList("テスト準備サブミット", out changeList))
+            {
+                client.Delete(DeleteFilePath, changeList);
+                client.Submit(changeList);
+            }
         }
 
         [ClassCleanup]
@@ -29,6 +67,12 @@ namespace Corekit.Perforce.Tests
 
             // 全部 Revert
             client.Revert(client.EnumerateChangeListFilePath(), true);
+
+            // テスト用のDepotを削除
+            if (Directory.Exists(DepotDir))
+            {
+                Directory.Delete(DepotDir, true);
+            }
         }
 
         [TestInitialize]
@@ -297,7 +341,55 @@ namespace Corekit.Perforce.Tests
 
         private Corekit.Perforce.P4Client _Client;
 
-        private static readonly string ClientRootPath = Path.GetFullPath("../../../PrivateLocalPerforceDepot");
+        private static bool ExecuteP4Command(string arguments, string workingDir)
+        {
+            var processInfo = new ProcessStartInfo()
+            {
+                FileName = "p4",
+                Arguments = arguments,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+                WorkingDirectory = workingDir,
+            };
+
+            var output = new StringBuilder(1024 * 100); // 100Kbyteぐらい確保しておく
+
+            using (var process = new Process() { StartInfo = processInfo })
+            {
+                process.OutputDataReceived += (s, e) =>
+                {
+                    if (e.Data != null)
+                    {
+                        output.AppendLine(e.Data);
+                        Debug.WriteLine(e.Data);
+                    }
+                };
+                process.ErrorDataReceived += (s, e) =>
+                {
+                    if (e.Data != null)
+                    {
+                        Debug.WriteLine(e.Data);
+                    }
+                };
+
+                Debug.WriteLine($"{processInfo.FileName} {processInfo.Arguments}");
+
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+                process.WaitForExit();
+
+                Debug.WriteLine($"ExitCode: {process.ExitCode}");
+
+                return process.ExitCode == 0;
+            }
+        }
+
+        private static readonly string DepotDir = Path.Combine(Environment.CurrentDirectory, "TestPerforceDepot");
+        private static readonly string ClientRootPath = DepotDir;
         private static readonly string NewFilePath = Path.Combine(ClientRootPath, "NewFile.txt");
         private static readonly string EditFilePath = Path.Combine(ClientRootPath, "EditFile.txt");
         private static readonly string EditFile2Path = Path.Combine(ClientRootPath, "EditFile2.txt");
