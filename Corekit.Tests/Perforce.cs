@@ -211,6 +211,24 @@ namespace Corekit.Perforce.Tests
 
             // チェンジリストを削除
             Assert.IsTrue(this._Client.DeleteChangeList(changeList));
+
+            // チェンジリスト作成
+            Assert.IsTrue(this._Client.TryCreateChangeList("移動サブミット", out changeList));
+            Assert.IsTrue(changeList.Status == P4ChangeListStatus.Pending);
+            Assert.IsTrue(changeList.Description == "移動サブミット");
+            // Edit
+            Assert.IsTrue(this._Client.EditAdd(EditFile3Path));
+            //移動
+            this._Client.MoveFileAnotherChangeList(new[] { MoveOldFilePath, EditFile3Path }, changeList);
+            // 移動先のチェンジリストに入っているか
+            Assert.IsTrue(new[] { MoveOldFilePath, MoveNewFilePath, EditFile3Path }.Select(i => i.ToLower()).Except(this._Client.EnumerateChangeListFilePath(changeList).Select(i => i.ToLower())).IsEmpty());
+            // Revert
+            Assert.IsTrue(this._Client.Revert(MoveOldFilePath));
+            Assert.IsTrue(this._Client.Revert(MoveNewFilePath));
+            Assert.IsTrue(this._Client.Revert(EditFile3Path));
+
+            // チェンジリストを削除
+            Assert.IsTrue(this._Client.DeleteChangeList(changeList));
         }
 
         [TestMethod]
@@ -283,6 +301,7 @@ namespace Corekit.Perforce.Tests
         private static readonly string NewFilePath = Path.Combine(ClientRootPath, "NewFile.txt");
         private static readonly string EditFilePath = Path.Combine(ClientRootPath, "EditFile.txt");
         private static readonly string EditFile2Path = Path.Combine(ClientRootPath, "EditFile2.txt");
+        private static readonly string EditFile3Path = Path.Combine(ClientRootPath, "EditFile3.txt");
         private static readonly string DeleteFilePath = Path.Combine(ClientRootPath, "DeleteFile.txt");
         private static readonly string MoveOldFilePath = Path.Combine(ClientRootPath, "MoveFileOld.txt");
         private static readonly string MoveNewFilePath = Path.Combine(ClientRootPath, "MoveFileNew.txt");
