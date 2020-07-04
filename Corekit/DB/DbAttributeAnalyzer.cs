@@ -98,7 +98,7 @@ namespace Corekit.DB
                     case SqlDbType.Text:
                         // スペースがあると困るのでシングルクォート(')で囲む
                         // 文字列にシングルクォートが入っていると不正なクエリになるのでシングルクォートを重ねてエスケープ('')する
-                        return $"'{this._Info.GetValue(obj).ToString().Replace("'","''")}'";
+                        return $"'{this._Info.GetValue(obj)?.ToString().Replace("'","''")}'";
 
                     default:
                         return this._Info.GetValue(obj);
@@ -163,7 +163,7 @@ namespace Corekit.DB
             // カンマ区切りにしてカッコで囲う
             var values = $"({string.Join(',', this._ColumnInfos.Select(i => i.GetValue(item)))})";
             // 先頭と合わせる
-            return $"{this._QueryInsertItemHead} ({values});";
+            return $"{this._QueryInsertItemHead} {values};";
         }
 
         /// <summary>

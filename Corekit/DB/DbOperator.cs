@@ -35,7 +35,7 @@ namespace Corekit.DB
         /// </summary>
         public void Dispose()
         {
-            this._Context.OnCloseOperator();
+            this._Context?.OnCloseOperator();
             this._Context = null;
         }
 
