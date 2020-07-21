@@ -76,7 +76,7 @@ namespace Corekit.Extensions
         /// </summary>
         private class Cache<T>
         {
-            public static FieldInfo Handler = typeof(T).GetFieldInfo(nameof(INotifyPropertyChanged.PropertyChanged));
+            public static FieldInfo Handler { get; } = typeof(T).GetFieldInfo(nameof(INotifyPropertyChanged.PropertyChanged));
         }
     }
 }
