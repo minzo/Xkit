@@ -26,7 +26,7 @@ namespace Corekit.Perforce
         /// </summary>
         public bool Sync()
         {
-            return P4CommandDriver.Execute(this._Context, $"sync {this._Context.ClientWorkingDirectoryPath}\\...");
+            return P4CommandExecutor.Execute(this._Context, $"sync {this._Context.ClientWorkingDirectoryPath}\\...");
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Corekit.Perforce
         {
             using (var temp = new ScopedTempFile(filePath))
             {
-                return P4CommandDriver.Execute(this._Context, $"-x {temp.TempFilePath} sync");
+                return P4CommandExecutor.Execute(this._Context, $"-x {temp.TempFilePath} sync");
             }
         }
 
@@ -45,7 +45,7 @@ namespace Corekit.Perforce
         /// </summary>
         internal bool Sync(string filePath)
         {
-            return P4CommandDriver.Execute(this._Context, $"sync {filePath}");
+            return P4CommandExecutor.Execute(this._Context, $"sync {filePath}");
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Corekit.Perforce
                 revision = Math.Max(0, info.LatestRevision + revision);
             }
 
-            return P4CommandDriver.Execute(this._Context, $"sync {filePath}#{revision}");
+            return P4CommandExecutor.Execute(this._Context, $"sync {filePath}#{revision}");
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Corekit.Perforce
         /// </summary>
         public bool Submit(P4ChangeList changeList)
         {
-            if (P4CommandDriver.Execute(this._Context, $"submit -c {changeList.Number}"))
+            if (P4CommandExecutor.Execute(this._Context, $"submit -c {changeList.Number}"))
             {
                 changeList.Status = P4ChangeListStatus.Submitted;
                 return true;
@@ -92,8 +92,8 @@ namespace Corekit.Perforce
             var arg = changeList != null ? $"-c {changeList.Number}" : string.Empty;
 
             bool result = false;
-            result |= P4CommandDriver.Execute(this._Context, $"edit {arg} {filePath}");
-            result |= P4CommandDriver.Execute(this._Context, $"add {arg} {filePath}");
+            result |= P4CommandExecutor.Execute(this._Context, $"edit {arg} {filePath}");
+            result |= P4CommandExecutor.Execute(this._Context, $"add {arg} {filePath}");
 
             return result;
         }
@@ -110,8 +110,8 @@ namespace Corekit.Perforce
             using (var temp = new ScopedTempFile(filePath))
             {
                 bool result = false;
-                result |= P4CommandDriver.Execute(this._Context, $"-x {temp.TempFilePath} edit {arg}");
-                result |= P4CommandDriver.Execute(this._Context, $"-x {temp.TempFilePath} add {arg}");
+                result |= P4CommandExecutor.Execute(this._Context, $"-x {temp.TempFilePath} edit {arg}");
+                result |= P4CommandExecutor.Execute(this._Context, $"-x {temp.TempFilePath} add {arg}");
                 return result;
             }
         }
@@ -125,7 +125,7 @@ namespace Corekit.Perforce
         {
             var arg = changeList != null ? $"-c {changeList.Number}" : string.Empty;
 
-            if (P4CommandDriver.Execute(this._Context, $"delete {arg} {filePath}"))
+            if (P4CommandExecutor.Execute(this._Context, $"delete {arg} {filePath}"))
             {
                 return true;
             }
@@ -144,7 +144,7 @@ namespace Corekit.Perforce
 
             using (var temp = new ScopedTempFile(filePath))
             {
-                if (P4CommandDriver.Execute(this._Context, $"-x {temp.TempFilePath} delete {arg}", out string _))
+                if (P4CommandExecutor.Execute(this._Context, $"-x {temp.TempFilePath} delete {arg}", out string _))
                 {
                     return true;
                 }
@@ -165,7 +165,7 @@ namespace Corekit.Perforce
             // Edit 状態じゃないと Move できないので Edit・Addしておく
             this.EditAdd(oldFilePath, changeList);
 
-            if (P4CommandDriver.Execute(this._Context, $"move {arg} {oldFilePath} {newFilePath}"))
+            if (P4CommandExecutor.Execute(this._Context, $"move {arg} {oldFilePath} {newFilePath}"))
             {
                 return true;
             }
@@ -184,7 +184,7 @@ namespace Corekit.Perforce
                 return false;
             }
 
-            if (!P4CommandDriver.Execute(this._Context, $"revert {filePath}"))
+            if (!P4CommandExecutor.Execute(this._Context, $"revert {filePath}"))
             {
                 return false;
             }
@@ -210,7 +210,7 @@ namespace Corekit.Perforce
 
             using (var temp = new ScopedTempFile(filePath))
             {
-                if (!P4CommandDriver.Execute(this._Context, $"-x {temp.TempFilePath} revert", out string _))
+                if (!P4CommandExecutor.Execute(this._Context, $"-x {temp.TempFilePath} revert", out string _))
                 {
                     return false;
                 }
@@ -231,7 +231,7 @@ namespace Corekit.Perforce
         /// </summary>
         public bool RevertIfNotChanged(string filePath)
         {
-            return P4CommandDriver.Execute(this._Context, $"revert -a {filePath}", out string _);
+            return P4CommandExecutor.Execute(this._Context, $"revert -a {filePath}", out string _);
         }
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace Corekit.Perforce
         {
             using (var temp = new ScopedTempFile(filePath))
             {
-                return P4CommandDriver.Execute(this._Context, $"-x {temp.TempFilePath} revert -a", out string _);
+                return P4CommandExecutor.Execute(this._Context, $"-x {temp.TempFilePath} revert -a", out string _);
             }
         }
 
@@ -250,7 +250,7 @@ namespace Corekit.Perforce
         /// </summary>
         internal IEnumerable<P4FileInfo> EnumerateFileInfo()
         {
-            if (P4CommandDriver.Execute(this._Context, $"fstat {this._Context.ClientWorkingDirectoryPath}/...", out string output))
+            if (P4CommandExecutor.Execute(this._Context, $"fstat {this._Context.ClientWorkingDirectoryPath}/...", out string output))
             {
                 return P4FileInfo.Parse(output);
             }
@@ -264,7 +264,7 @@ namespace Corekit.Perforce
         {
             using (var temp = new ScopedTempFile(filePath))
             {
-                if (P4CommandDriver.Execute(this._Context, $"-x {temp.TempFilePath} fstat", out string output))
+                if (P4CommandExecutor.Execute(this._Context, $"-x {temp.TempFilePath} fstat", out string output))
                 {
                     return P4FileInfo.Parse(output);
                 }
@@ -277,7 +277,7 @@ namespace Corekit.Perforce
         /// </summary>
         internal bool TryGetFileInfo(string filePath, out P4FileInfo info)
         {
-            if (!P4CommandDriver.Execute(this._Context, $"fstat {filePath}", out string output))
+            if (!P4CommandExecutor.Execute(this._Context, $"fstat {filePath}", out string output))
             {
                 info = default;
                 return false;
@@ -331,7 +331,7 @@ namespace Corekit.Perforce
         /// </summary>
         private IEnumerable<P4ChangeList> EnumerateChangeList(string command)
         {
-            if (P4CommandDriver.Execute(this._Context, command, out var output))
+            if (P4CommandExecutor.Execute(this._Context, command, out var output))
             {
                 return P4ChangeList.Parse(output);
             }
@@ -357,7 +357,7 @@ namespace Corekit.Perforce
             builder.AppendLine($"\t {descriptionFormated}");
 
             // 作成
-            if (!P4CommandDriver.Execute(this._Context, $"change -i", builder.ToString(), out var str))
+            if (!P4CommandExecutor.Execute(this._Context, $"change -i", builder.ToString(), out var str))
             {
                 changeList = default;
                 return false;
@@ -376,7 +376,7 @@ namespace Corekit.Perforce
         internal bool ReopenFileAnotherChangeList(string filePath, P4ChangeList changeList = null)
         {
             var number = changeList?.Number ?? "default";
-            return P4CommandDriver.Execute(this._Context, $"reopen -c {number} {filePath}");
+            return P4CommandExecutor.Execute(this._Context, $"reopen -c {number} {filePath}");
         }
 
         /// <summary>
@@ -387,7 +387,7 @@ namespace Corekit.Perforce
             using (var temp = new ScopedTempFile(filePath))
             {
                 var number = changeList?.Number ?? "default";
-                return P4CommandDriver.Execute(this._Context, $"-x {temp.TempFilePath} reopen -c {number}");
+                return P4CommandExecutor.Execute(this._Context, $"-x {temp.TempFilePath} reopen -c {number}");
             }
         }
 
@@ -407,7 +407,7 @@ namespace Corekit.Perforce
             }
 
 
-            if (!P4CommandDriver.Execute(this._Context, $"change -d {changeList.Number}", out string output))
+            if (!P4CommandExecutor.Execute(this._Context, $"change -d {changeList.Number}", out string output))
             {
                 return false;
             }
@@ -434,7 +434,7 @@ namespace Corekit.Perforce
         internal IEnumerable<string> EnumerateChangeListFilePath(P4ChangeList changeList = null)
         {
             var arg = changeList != null ? changeList.Number : "default";
-            if(P4CommandDriver.Execute(this._Context, $"opened -c {arg}", out string output))
+            if(P4CommandExecutor.Execute(this._Context, $"opened -c {arg}", out string output))
             {
                 var result = output.Split(LineBrake, StringSplitOptions.RemoveEmptyEntries)
                     .Select(i => i.Split(' ').First())
@@ -476,7 +476,7 @@ namespace Corekit.Perforce
                     throw new ArgumentException("未定義の競合解決方法が指定されました", nameof(type));
             }
 
-            if (P4CommandDriver.Execute(this._Context, $"resolve {arg} -c {changeList.Number}"))
+            if (P4CommandExecutor.Execute(this._Context, $"resolve {arg} -c {changeList.Number}"))
             {
                 return true;
             }

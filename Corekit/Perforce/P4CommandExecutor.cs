@@ -10,7 +10,7 @@ namespace Corekit.Perforce
     /// <summary>
     /// Perforceのコマンドを実行する
     /// </summary>
-    internal class P4CommandDriver
+    internal class P4CommandExecutor
     {
         /// <summary>
         /// p4コマンドを実行します
@@ -52,9 +52,36 @@ namespace Corekit.Perforce
                 WorkingDirectory = context.ClientWorkingDirectoryPath,
             };
 
+            return Execute(processInfo, input, out stdOutput);
+        }
+
+        /// <summary>
+        /// p4コマンドが存在する環境か
+        /// </summary>
+        internal static bool IsExistsCommand()
+        {
+            var processInfo = new ProcessStartInfo()
+            {
+                FileName = "where",
+                Arguments = CommandName,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+            };
+
+            return Execute(processInfo, null, out string _);
+        }
+
+        /// <summary>
+        /// コマンドを実行します
+        /// </summary>
+        private static bool Execute(ProcessStartInfo info, string input, out string stdOutput)
+        {
             var output = new StringBuilder(1024 * 100); // 100Kbyteぐらい確保しておく
 
-            using (var process = new Process() { StartInfo = processInfo })
+            using (var process = new Process() { StartInfo = info })
             {
                 process.OutputDataReceived += (s, e) =>
                 {
@@ -74,8 +101,8 @@ namespace Corekit.Perforce
                     }
                 };
 
-                OutputDataReceived?.Invoke(process, $"{processInfo.FileName} {processInfo.Arguments}");
-                Debug.WriteLine($"{processInfo.FileName} {processInfo.Arguments}");
+                OutputDataReceived?.Invoke(process, $"{info.FileName} {info.Arguments}");
+                Debug.WriteLine($"{info.FileName} {info.Arguments}");
 
                 process.Start();
                 process.BeginOutputReadLine();

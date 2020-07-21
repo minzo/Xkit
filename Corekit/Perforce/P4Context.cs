@@ -62,11 +62,12 @@ namespace Corekit.Perforce
             // 作業ディレクトリが存在するなら
             // 最初は使えるかチェックするためにtrueにしておく
             this.IsValid = !string.IsNullOrEmpty(this.ClientWorkingDirectoryPath)
-                && System.IO.Directory.Exists(this.ClientWorkingDirectoryPath);
+                && System.IO.Directory.Exists(this.ClientWorkingDirectoryPath)
+                && P4CommandExecutor.IsExistsCommand();
 
             // p4 info と p4 where コマンドが実行可能ならPerforceが使えると判断する
-            this.IsValid &= P4CommandDriver.Execute(this, "info", out string output);
-            this.IsValid &= P4CommandDriver.Execute(this, "where DepotRoot", out string mapping);
+            this.IsValid &= P4CommandExecutor.Execute(this, "info", out string output);
+            this.IsValid &= P4CommandExecutor.Execute(this, "where DepotRoot", out string mapping);
 
             if (this.IsValid)
             {
