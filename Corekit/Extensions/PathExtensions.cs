@@ -30,6 +30,16 @@ namespace Corekit
         }
 
         /// <summary>
+        /// 指定したパスを基準にした相対パスを取得する
+        /// </summary>
+        public static string GetRelativePath(this string path, string basePath)
+        {
+            var baseUrl = new Uri(System.IO.Path.GetFullPath(basePath));
+            var relativeUrl = new Uri(baseUrl, path);
+            return relativeUrl.LocalPath;
+        }
+
+        /// <summary>
         /// Unixのパスとしてスラッシュ(/)区切りのパスを取得します
         /// </summary>
         public static string GetUnixPath(this string path)
@@ -38,13 +48,19 @@ namespace Corekit
         }
 
         /// <summary>
-        /// 指定したパスを基準にした相対パスを取得する
+        /// Unixのパスとしてスラッシュ(/)区切りのフルパスを取得します
         /// </summary>
-        public static string GetRelativePath(this string path, string basePath)
+        public static string GetAbsoluteUnixPath(this string path)
         {
-            var baseUrl = new Uri(System.IO.Path.GetFullPath(basePath));
-            var relativeUrl = new Uri(baseUrl, path);
-            return relativeUrl.LocalPath;
+            return System.IO.Path.GetFullPath(path).GetUnixPath();
+        }
+
+        /// <summary>
+        /// 指定したパスを基準にしたUnix相対パスを取得する
+        /// </summary>
+        public static string GetRelativePathUnix(this string path, string basePath)
+        {
+            return GetRelativePath(path, basePath).GetUnixPath();
         }
     }
 }
