@@ -5,7 +5,7 @@ namespace Corekit
     /// <summary>
     /// パス処理拡張
     /// </summary>
-    public static class PathExtensions
+    public static class PathUtil
     {
         /// <summary>
         /// すべての拡張子を除いたファイル名を取得します
@@ -61,6 +61,18 @@ namespace Corekit
         public static string GetRelativePathUnix(this string path, string basePath)
         {
             return GetRelativePath(path, basePath).GetUnixPath();
+        }
+
+        /// <summary>
+        /// パスの区切り文字をOS標準のものに揃える
+        /// </summary>
+        public static string NormalizePath(this string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return string.Empty;
+            }
+            return new Uri(path).LocalPath;
         }
     }
 }
