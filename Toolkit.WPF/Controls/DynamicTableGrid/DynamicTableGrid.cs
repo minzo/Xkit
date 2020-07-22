@@ -196,8 +196,19 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for ZoomValue.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ZoomRateProperty =
             DependencyProperty.Register("ZoomRate", typeof(double), typeof(DynamicTableGrid), new PropertyMetadata(100.0, (d,e) => {
-                ((d as DynamicTableGrid).LayoutTransform as ScaleTransform).ScaleX = (double)e.NewValue * 0.01;
-                ((d as DynamicTableGrid).LayoutTransform as ScaleTransform).ScaleY = (double)e.NewValue * 0.01;
+                if (d is DynamicTableGrid table)
+                {
+                    var scale = (double)e.NewValue * 0.01D;
+                    if (TryFindChild(d, out ScrollViewer sv))
+                    {
+                        (sv.LayoutTransform as ScaleTransform).ScaleX = scale;
+                        (sv.LayoutTransform as ScaleTransform).ScaleY = scale;
+                    }
+                    (table.VerticalScrollBar.LayoutTransform as ScaleTransform).ScaleX = 1D / scale;
+                    (table.VerticalScrollBar.LayoutTransform as ScaleTransform).ScaleY = 1D / scale;
+                    ((table.HorizontalScrollBar.Parent as FrameworkElement).LayoutTransform as ScaleTransform).ScaleX = 1D / scale;
+                    ((table.HorizontalScrollBar.Parent as FrameworkElement).LayoutTransform as ScaleTransform).ScaleY = 1D / scale;
+                }
             }));
 
         #endregion
@@ -288,25 +299,42 @@ namespace Toolkit.WPF.Controls
                 //}
             }
 
-            if (false && this.IsVisibleZoomValue)
+            if (TryFindChild(this, out ScrollViewer sv))
             {
-                if (TryFindChild(this, out ScrollViewer sv))
+                sv.LayoutTransform = new ScaleTransform();
+                this.VerticalScrollBar.LayoutTransform = new ScaleTransform();
+                (this.HorizontalScrollBar.Parent as FrameworkElement).LayoutTransform = new ScaleTransform();
+            }
+
+            if (this.IsVisibleZoomValue)
+            {
+                if (this.HorizontalScrollBar.Parent is Grid grid)
                 {
-                    var grid = EnumerateChildren(sv)
-                        .OfType<ScrollBar>()
-                        .FirstOrDefault(i => i.Name == "PART_HorizontalScrollBar").Parent as Grid;
-
-                    grid.ColumnDefinitions.Insert(0, new ColumnDefinition() { Width = new GridLength(100, GridUnitType.Auto) });
-
+                    // スクロールバーの右側にZoomBoxを置く場合
                     if (this.TryFindResource("ZoomBox") is ComboBox comboBox)
                     {
-                        grid.Children.Insert(0, comboBox);
+                        comboBox.DropDownClosed += (s, e) => BindingOperations.GetBindingExpression(comboBox, ComboBox.TextProperty)?.UpdateSource();
+                        grid.Children.Add(comboBox);
+                        grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(100, GridUnitType.Auto) });
+                        Grid.SetColumn(comboBox, grid.ColumnDefinitions.Count - 1);
                     }
 
-                    for (var i = 0; i < grid.Children.Count; i++)
+                    // スクロールバーの左側にZoomBoxを置く場合
+                    /*
+                    if (this.TryFindResource("ZoomBox") is ComboBox comboBox)
                     {
-                        Grid.SetColumn(grid.Children[i], i);
+                        comboBox.DropDownClosed += (s, e) => BindingOperations.GetBindingExpression(comboBox, ComboBox.TextProperty)?.UpdateSource();
+                        grid.Children.Insert(0, comboBox);
+                        grid.ColumnDefinitions.Insert(1, new ColumnDefinition() { Width = new GridLength(100, GridUnitType.Auto) });
+                        for (var i = 0; i < grid.Children.Count; i++)
+                        {
+                            Grid.SetColumn(grid.Children[i], i + 1);
+                        }
                     }
+                    */
+
+                    this.SetCurrentValue(DataGrid.VerticalScrollBarVisibilityProperty, ScrollBarVisibility.Visible);
+                    this.SetCurrentValue(DataGrid.HorizontalScrollBarVisibilityProperty, ScrollBarVisibility.Visible);
                 }
             }
         }
@@ -829,18 +857,25 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void ChangeScale(double rate, bool isReset)
         {
-            if (this.LayoutTransform is ScaleTransform transform)
+            if (isReset)
             {
-                if (isReset)
-                {
-                    this.ZoomRate = 100;
-                }
-                else
-                {
-                    this.ZoomRate = Math.Min(Math.Max(this.ZoomRate + rate * 100, 20), 400);
-                }
+                this.ZoomRate = 100;
+            }
+            else
+            {
+                this.ZoomRate = Math.Min(Math.Max(this.ZoomRate + rate * 100, 20), 400);
             }
         }
+
+        /// <summary>
+        /// 水平スクロールバー
+        /// </summary>
+        private ScrollBar HorizontalScrollBar => EnumerateChildren(this).OfType<ScrollBar>().FirstOrDefault(i => i.Name == "PART_HorizontalScrollBar");
+
+        /// <summary>
+        /// 垂直スクロールバー
+        /// </summary>
+        private ScrollBar VerticalScrollBar => EnumerateChildren(this).OfType<ScrollBar>().FirstOrDefault(i => i.Name == "PART_VerticalScrollBar");
 
         #endregion
 
@@ -906,7 +941,6 @@ namespace Toolkit.WPF.Controls
                 column.SetCurrentValue(DataGridColumn.WidthProperty, GetColumnWidthLength(column));
             }
         }
-
 
         #region Utilities
 

@@ -92,7 +92,8 @@
 
         <tkit:DynamicTableGrid
             Grid.Column="3"
-            ItemsSource="{Binding Table}"
+            IsVisibleZoomValue="True"
+            ItemsSource="{Binding Table, Mode=OneWay}"
             />
     </Grid>
 </Window>
