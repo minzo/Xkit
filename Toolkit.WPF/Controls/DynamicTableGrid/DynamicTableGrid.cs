@@ -942,6 +942,66 @@ namespace Toolkit.WPF.Controls
             }
         }
 
+        class TiltWheel
+        {
+            public TiltWheel(DependencyObject dp)
+            {
+                IEnumerable<DependencyObject> EnumerateChildren(DependencyObject dp)
+                {
+                    var count = VisualTreeHelper.GetChildrenCount(dp);
+                    var children = Enumerable.Range(0, count).Select(i => VisualTreeHelper.GetChild(dp, i));
+                    return children.Concat(children.SelectMany(i => EnumerateChildren(i)));
+                }
+
+                this._ScrollViewer = EnumerateChildren(dp)
+                    .OfType<ScrollViewer>()
+                    .FirstOrDefault();
+
+                var window = Window.GetWindow(dp);
+                this._Source = System.Windows.Interop.HwndSource.FromHwnd(new System.Windows.Interop.WindowInteropHelper(window).Handle);
+                this._Source.AddHook(WndProc);
+
+            }
+
+            ~TiltWheel()
+            {
+                this._Source.RemoveHook(WndProc);
+            }
+
+            private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+            {
+                switch (msg)
+                {
+                    case MOUSEHWHEEL:
+                        // 左に倒すと-120, 右に倒すと120
+                        int delta = wParam.ToInt32() >> 16;
+
+                        // カーソルがこのコントロール外にあるときは無視
+                        if (!cursorOnControl) break;
+
+                        if (delta > 0)
+                        {
+                            this._ScrollViewer.LineRight();
+                        }
+                        else
+                        {
+                            this._ScrollViewer.LineLeft();
+                        }
+                        handled = true;
+                        break;
+                    default:
+                        break;
+                }
+
+                return IntPtr.Zero;
+            }
+
+            private const int MOUSEHWHEEL = 0x020E;
+            private ScrollViewer _ScrollViewer;
+            private System.Windows.Interop.HwndSource _Source;
+            private bool cursorOnControl;
+        }
+
         #region Utilities
 
         /// <summary>
