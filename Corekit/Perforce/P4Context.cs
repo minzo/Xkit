@@ -12,6 +12,27 @@ namespace Corekit.Perforce
     public class P4Context
     {
         /// <summary>
+        /// 無効なコンテキスト
+        /// </summary>
+        public static readonly P4Context InvalidContext = new P4Context(null);
+
+        /// <summary>
+        /// コンテキストを生成します
+        /// </summary>
+        public static P4Context NewContext()
+        {
+            return new P4Context(Environment.CurrentDirectory);
+        }
+
+        /// <summary>
+        /// コンテキストを生成します
+        /// </summary>
+        public static P4Context NewContext(string workingDirectory)
+        {
+            return new P4Context(workingDirectory);
+        }
+
+        /// <summary>
         /// Perforceにアクセス可能かどうか
         /// </summary>
         public bool IsValid { get; }
@@ -45,22 +66,12 @@ namespace Corekit.Perforce
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public P4Context()
-            : this(Environment.CurrentDirectory)
-        {
-
-        }
-
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        public P4Context(string workingDirectory)
+        private P4Context(string workingDirectory)
         {
             // 作業ディレクトリ
             this.ClientWorkingDirectoryPath = workingDirectory;
 
-            // 作業ディレクトリが存在するなら
-            // 最初は使えるかチェックするためにtrueにしておく
+            // 作業ディレクトリが存在するなら最初は使えるかチェックするためにtrueにしておく
             this.IsValid = !string.IsNullOrEmpty(this.ClientWorkingDirectoryPath)
                 && System.IO.Directory.Exists(this.ClientWorkingDirectoryPath)
                 && P4CommandExecutor.IsExistsCommand();

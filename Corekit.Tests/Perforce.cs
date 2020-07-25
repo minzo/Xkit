@@ -30,7 +30,7 @@ namespace Corekit.Perforce.Tests
             ExecuteP4Command($"init -C0 -n", DepotDir);
 
             // テスト用にファイルをサブミットしておく
-            var client = new Corekit.Perforce.P4Client(new P4Context(ClientRootPath));
+            var client = new Corekit.Perforce.P4Client(P4Context.NewContext(ClientRootPath));
 
             P4ChangeList changeList;
             if(client.TryCreateChangeList("テスト準備サブミット", out changeList))
@@ -58,7 +58,7 @@ namespace Corekit.Perforce.Tests
         [ClassCleanup]
         public static void ClassCleanup()
         {
-            var client = new Corekit.Perforce.P4Client(new P4Context(ClientRootPath));
+            var client = new Corekit.Perforce.P4Client(P4Context.NewContext(ClientRootPath));
 
             // チェンジリストを削除
             client
@@ -78,7 +78,7 @@ namespace Corekit.Perforce.Tests
         [TestInitialize]
         public void TestInitialize()
         {
-            this._Client = new Corekit.Perforce.P4Client(new P4Context(ClientRootPath));
+            this._Client = new Corekit.Perforce.P4Client(P4Context.NewContext(ClientRootPath));
         }
 
         [TestCleanup]
@@ -89,7 +89,7 @@ namespace Corekit.Perforce.Tests
         [TestMethod]
         public void Context()
         {
-            var context = new P4Context(ClientRootPath);
+            var context = P4Context.NewContext(ClientRootPath);
             Assert.IsTrue(context.ClientWorkingDirectoryPath == ClientRootPath);
         }
 
