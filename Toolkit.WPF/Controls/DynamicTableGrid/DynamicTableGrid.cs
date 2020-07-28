@@ -260,8 +260,7 @@ namespace Toolkit.WPF.Controls
             this.AllowDrop = true;
             this.Drop += this.Droped;
             this.Loaded += this.OnLoaded;
-
-            this.LayoutTransform = new ScaleTransform();
+            this.Unloaded += this.OnUnloaded;
 
             this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Copy, (s, e) => this.OnCopy(), (s, e) => e.CanExecute = true));
             this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Paste, (s, e) => this.OnPaste(), (s, e) => e.CanExecute = true));
@@ -337,6 +336,16 @@ namespace Toolkit.WPF.Controls
                     this.SetCurrentValue(DataGrid.HorizontalScrollBarVisibilityProperty, ScrollBarVisibility.Visible);
                 }
             }
+
+            this._TiltWheel = new TiltWheel(this);
+        }
+
+        /// <summary>
+        /// OnUnloaded
+        /// </summary>
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            this._TiltWheel?.Dispose();
         }
 
         /// <summary>
@@ -942,8 +951,14 @@ namespace Toolkit.WPF.Controls
             }
         }
 
-        class TiltWheel
+        /// <summary>
+        /// チルトホイール
+        /// </summary>
+        private class TiltWheel : IDisposable
         {
+            /// <summary>
+            /// コンストラクタ
+            /// </summary>
             public TiltWheel(DependencyObject dp)
             {
                 IEnumerable<DependencyObject> EnumerateChildren(DependencyObject dp)
@@ -958,36 +973,51 @@ namespace Toolkit.WPF.Controls
                     .FirstOrDefault();
 
                 var window = Window.GetWindow(dp);
-                this._Source = System.Windows.Interop.HwndSource.FromHwnd(new System.Windows.Interop.WindowInteropHelper(window).Handle);
-                this._Source.AddHook(WndProc);
-
+                if (window != null)
+                {
+                    var handle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
+                    this._Source = System.Windows.Interop.HwndSource.FromHwnd(handle);
+                    this._Source.AddHook(WndProc);
+                }
             }
 
-            ~TiltWheel()
+            /// <summary>
+            /// Dispose
+            /// </summary>
+            public void Dispose()
             {
-                this._Source.RemoveHook(WndProc);
+                if (!this._IsDisposed)
+                {
+                    this._Source?.RemoveHook(WndProc);
+                    this._IsDisposed = true;
+                }
             }
 
+            /// <summary>
+            /// WndProc
+            /// </summary>
             private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
             {
+                // カーソルがコントロールの外にある時は無視
+                if (this._ScrollViewer?.IsMouseOver != true)
+                {
+                    return IntPtr.Zero;
+                }
+
                 switch (msg)
                 {
                     case MOUSEHWHEEL:
-                        // 左に倒すと-120, 右に倒すと120
-                        int delta = wParam.ToInt32() >> 16;
-
-                        // カーソルがこのコントロール外にあるときは無視
-                        if (!cursorOnControl) break;
-
-                        if (delta > 0)
+                        try
                         {
-                            this._ScrollViewer.LineRight();
+                            // ToInt32() だと OverflowException になるデバイスがあるので GetHashCode() を使う
+                            int delta = wParam.GetHashCode() >> 16;
+                            this._ScrollViewer.ScrollToHorizontalOffset(this._ScrollViewer.HorizontalOffset + delta * 0.8);
+                            handled = true;
                         }
-                        else
+                        catch (OverflowException)
                         {
-                            this._ScrollViewer.LineLeft();
+                            // 握りつぶす
                         }
-                        handled = true;
                         break;
                     default:
                         break;
@@ -997,10 +1027,12 @@ namespace Toolkit.WPF.Controls
             }
 
             private const int MOUSEHWHEEL = 0x020E;
-            private ScrollViewer _ScrollViewer;
+            private readonly ScrollViewer _ScrollViewer;
             private System.Windows.Interop.HwndSource _Source;
-            private bool cursorOnControl;
+            private bool _IsDisposed;
         }
+
+        private TiltWheel _TiltWheel;
 
         #region Utilities
 
