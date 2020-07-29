@@ -138,47 +138,114 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         protected override object PrepareCellForEdit(FrameworkElement editingElement, RoutedEventArgs editingEventArgs)
         {
-            if (editingElement  != null)
+            bool TryPrepareControlForEdit(FrameworkElement frameworkElement, RoutedEventArgs routedEventArgs)
             {
-                foreach (var child in EnumerateChildren(editingElement))
+                switch (frameworkElement)
                 {
-                    switch (child)
+                    case TextBox v:
+                        v.Focus();
+                        v.SelectAll();
+                        v.Height = (routedEventArgs.OriginalSource as FrameworkElement).Height;
+
+                        // マウスクリックだったらTextBoxのキャレットの位置をマウス位置にする
+                        if (routedEventArgs is MouseButtonEventArgs mouseEventArgs)
+                        {
+                            var characterIndex = v.GetCharacterIndexFromPoint(Mouse.GetPosition(v), false);
+                            if (characterIndex >= 0)
+                            {
+                                v.Select(characterIndex, 0);
+                            }
+                        }
+                        return true;
+
+                    case ComboBox v:
+                        v.Focus();
+                        v.IsDropDownOpen = true;
+                        v.Height = (routedEventArgs.OriginalSource as FrameworkElement).Height;
+                        return true;
+
+                    default:
+                        return false;
+                }
+            }
+
+            object GetEditTargetValue(DependencyObject dp)
+            {
+                switch (dp)
+                {
+                    case TextBox v:
+                        return v.Text;
+
+                    case ComboBox v:
+                        if (BindingOperations.GetBinding(v, ComboBox.SelectedItemProperty) != null)
+                        {
+                            return v.SelectedItem;
+                        }
+                        else if (BindingOperations.GetBinding(v, ComboBox.SelectedValueProperty) != null)
+                        {
+                            return v.SelectedValue;
+                        }
+                        else
+                        {
+                            return v.Text;
+                        }
+                    case CheckBox v:
+                        return v.IsChecked;
+                    default:
+                        return null;
+                }
+            }
+
+            if (editingElement != null)
+            {
+                bool isPrepareSucceeded = false;
+
+                // セルを編集開始したときにマウスのあった場所のコントロールを編集状態にする
+                if (editingElement.InputHitTest(Mouse.GetPosition(editingElement)) is FrameworkElement element)
+                {
+                    while (element != null)
                     {
-                        case TextBox v:
-                            v.Focus();
-                            v.SelectAll();
-                            v.Height = editingElement.Height;
-
-                            // マウスクリックだったらTextBoxのキャレットの位置をマウス位置にする
-                            if (editingEventArgs is MouseButtonEventArgs mouseEventArgs)
-                            {
-                                var characterIndex = v.GetCharacterIndexFromPoint(Mouse.GetPosition(v), false);
-                                if (characterIndex >= 0)
-                                {
-                                    v.Select(characterIndex, 0);
-                                }
-                            }
-                            return v.Text;
-
-                        case ComboBox v:
-                            v.Focus();
-                            v.IsDropDownOpen = true;
-                            v.Height = editingElement.Height;
-
-                            if (BindingOperations.GetBinding(v, ComboBox.SelectedItemProperty) != null)
-                            {
-                                return v.SelectedItem;
-                            }
-                            else if (BindingOperations.GetBinding(v, ComboBox.SelectedValueProperty) != null)
-                            {
-                                return v.SelectedValue;
-                            }
-                            return v.Text;
-
-                        default:
+                        if (TryPrepareControlForEdit(element, editingEventArgs))
+                        {
+                            isPrepareSucceeded = true;
                             break;
+                        }
+                        
+                        if (TryPrepareControlForEdit(element.TemplatedParent as FrameworkElement, editingEventArgs))
+                        {
+                            isPrepareSucceeded = true;
+                            break;
+                        }
+
+                        element = element.Parent as FrameworkElement;
                     }
                 }
+
+                // 無ければVisualTreeで最初に見つかるコントロール
+                if (!isPrepareSucceeded)
+                {
+                    foreach (var child in EnumerateChildren(editingElement).OfType<FrameworkElement>())
+                    {
+                        if (TryPrepareControlForEdit(child, editingEventArgs))
+                        {
+                            isPrepareSucceeded = true;
+                            break;
+                        }
+                    }
+                }
+
+                // 編集前の値を収集する
+                var uneditedValueDict = new Dictionary<DependencyObject, object>();
+                foreach (var child in EnumerateChildren(editingElement))
+                {
+                    var value = GetEditTargetValue(child);
+                    if (value != null)
+                    {
+                        uneditedValueDict.TryAdd(child, value);
+                    }
+                }
+
+                return uneditedValueDict;
             }
 
             return base.PrepareCellForEdit(editingElement, editingEventArgs);
@@ -189,21 +256,55 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         protected override void CancelCellEdit(FrameworkElement editingElement, object uneditedValue)
         {
-            if ((editingElement as ContentPresenter)?.Content != null)
+            if ((editingElement as ContentPresenter)?.Content == null)
+            {
+                return;
+            }
+
+            if (uneditedValue is Dictionary<DependencyObject, object> uneditedValueDict)
             {
                 foreach (var child in EnumerateChildren(editingElement))
                 {
-                    switch (child)
+                    if (uneditedValueDict.TryGetValue(child, out var value))
                     {
-                        case TextBox v:
-                            v.Text = uneditedValue as string;
-                            break;
+                        switch (child)
+                        {
+                            case TextBox v:
+                                v.SetCurrentValue(TextBox.TextProperty, value);
+                                v.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
+                                break;
 
-                        case ComboBox v:
-                            v.SelectedItem = uneditedValue;
-                            break;
-                        default:
-                            break;
+                            case ComboBox v:
+                                BindingExpression bindingExpression = null;
+
+                                bindingExpression = v.GetBindingExpression(ComboBox.SelectedItemProperty);
+                                if (bindingExpression != null)
+                                {
+                                    v.SetCurrentValue(ComboBox.SelectedItemProperty, value);
+                                    bindingExpression.UpdateSource();
+                                    break;
+                                }
+
+                                bindingExpression = v.GetBindingExpression(ComboBox.SelectedValueProperty);
+                                if (bindingExpression != null)
+                                {
+                                    v.SetCurrentValue(ComboBox.SelectedValueProperty, value);
+                                    bindingExpression.UpdateSource();
+                                    break;
+                                }
+
+                                bindingExpression = v.GetBindingExpression(ComboBox.SelectedValueProperty);
+                                if (bindingExpression != null)
+                                {
+                                    v.SetCurrentValue(ComboBox.TextProperty, value); ;
+                                    bindingExpression?.UpdateSource();
+                                    break;
+                                }
+                                break;
+
+                            default:
+                                break;
+                        }
                     }
                 }
             }
