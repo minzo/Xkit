@@ -293,7 +293,7 @@ namespace Toolkit.WPF.Models
             this.PropertyChanged?.Invoke(this, e);
         }
 
-        private ObservableCollection<PropertyInfo> _PropertyInfo;
+        private readonly ObservableCollection<PropertyInfo> _PropertyInfo;
 
         #region Event
 

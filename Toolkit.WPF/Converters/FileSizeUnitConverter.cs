@@ -51,7 +51,7 @@ namespace Toolkit.WPF.Converters
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var val = 0D;
+            double val;
             var unit = parameter?.ToString() ?? this.SizeUnit ?? "Byte";
             var size = (Unit)Enum.Parse(typeof(Unit), unit);
             switch (size)
@@ -75,10 +75,10 @@ namespace Toolkit.WPF.Converters
             throw new NotImplementedException();
         }
 
-        private static ulong KiB = (ulong)0x01 << 10;
-        private static ulong MiB = (ulong)0x01 << 20;
-        private static ulong GiB = (ulong)0x01 << 40;
-        private static ulong TiB = (ulong)0x01 << 50;
+        private static readonly ulong KiB = (ulong)0x01 << 10;
+        private static readonly ulong MiB = (ulong)0x01 << 20;
+        private static readonly ulong GiB = (ulong)0x01 << 40;
+        private static readonly ulong TiB = (ulong)0x01 << 50;
 
         protected override Freezable CreateInstanceCore() => new FileSizeUnitConverter();
     }

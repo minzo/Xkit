@@ -413,7 +413,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// TrySetBinding
         /// </summary>
-        protected static bool TrySetBinding(DependencyObject dependencyObject, DependencyProperty dependencyProperty, string propertyPath, object dataContext = null)
+        protected static bool TrySetBinding(DependencyObject dependencyObject, DependencyProperty dependencyProperty, string propertyPath)
         {
             if (dependencyObject == null)
             {

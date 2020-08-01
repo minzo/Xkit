@@ -11,9 +11,8 @@ namespace Toolkit.WPF.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var sourceType = value.GetType();
-            var paramStr = parameter as string;
 
-            if (paramStr == null || !Enum.IsDefined(sourceType, value))
+            if (!(parameter is string paramStr) || !Enum.IsDefined(sourceType, value))
             {
                 return System.Windows.DependencyProperty.UnsetValue;
             }
@@ -25,9 +24,7 @@ namespace Toolkit.WPF.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var paramStr = parameter as string;
-
-            if (paramStr == null)
+            if (!(parameter is string paramStr))
             {
                 return System.Windows.DependencyProperty.UnsetValue;
             }

@@ -29,8 +29,7 @@ namespace Toolkit.WPF.Converters
             }
             else if (value is bool?)
             {
-                var nullableBoolValue = (bool?)value;
-                boolValue = nullableBoolValue.HasValue ? nullableBoolValue.Value : false;
+                boolValue = (bool?)value ?? false;
             }
 
             return boolValue ? this.VisibilityIfTrue : this.VisibilityIfFalse;

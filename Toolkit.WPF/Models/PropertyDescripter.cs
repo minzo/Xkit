@@ -10,39 +10,39 @@ namespace Toolkit.WPF.Models
 {
     public class CustomPropertyDescriptor : PropertyDescriptor
     {
-        private Type componentType_;
-        private Type propertyType_;
-
         public CustomPropertyDescriptor(Type componentType, PropertyInfo propertyInfo)
             : base(propertyInfo.Name, propertyInfo.GetCustomAttributes<Attribute>().ToArray())
         {
-            componentType_ = componentType;
-            propertyType_ = propertyInfo.PropertyType;
+            this._ComponentType = componentType;
+            this._PropertyType = propertyInfo.PropertyType;
         }
 
-        public override Type ComponentType => componentType_;
+        public override Type ComponentType => this._ComponentType;
 
         public override bool IsReadOnly => false;
 
-        public override Type PropertyType => propertyType_;
+        public override Type PropertyType => this._PropertyType;
 
         public override bool CanResetValue(object component) => false;
 
         public override object GetValue(object component)
         {
-            return componentType_.GetProperty(Name).GetValue(component);
+            return this._ComponentType.GetProperty(Name).GetValue(component);
         }
 
         public override void ResetValue(object component)
         {
-            componentType_.GetProperty(Name).SetValue(component, null);
+            this._ComponentType.GetProperty(Name).SetValue(component, null);
         }
 
         public override void SetValue(object component, object value)
         {
-            componentType_.GetProperty(Name).SetValue(component, value);
+            this._ComponentType.GetProperty(Name).SetValue(component, value);
         }
 
         public override bool ShouldSerializeValue(object component) => false;
+
+        private readonly Type _ComponentType;
+        private readonly Type _PropertyType;
     }
 }
