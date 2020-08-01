@@ -145,7 +145,6 @@ namespace Toolkit.WPF.Controls
                     case TextBox v:
                         v.Focus();
                         v.SelectAll();
-                        v.Height = (routedEventArgs.OriginalSource as FrameworkElement).Height;
 
                         // マウスクリックだったらTextBoxのキャレットの位置をマウス位置にする
                         if (routedEventArgs is MouseButtonEventArgs mouseEventArgs)
@@ -161,7 +160,6 @@ namespace Toolkit.WPF.Controls
                     case ComboBox v:
                         v.Focus();
                         v.IsDropDownOpen = true;
-                        v.Height = (routedEventArgs.OriginalSource as FrameworkElement).Height;
                         return true;
 
                     default:

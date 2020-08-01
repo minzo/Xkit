@@ -174,6 +174,9 @@ namespace Corekit.Models
         /// プロパティ定義数変更通知
         public event NotifyCollectionChangedEventHandler PropertyDefinitionsChanged;
 
+        /// プロパティ変更通知
+        public event PropertyChangedEventHandler DynamicTablePropertyChanged;
+
         #region getter setter
 
         /// <summary>
@@ -336,6 +339,8 @@ namespace Corekit.Models
                 this.FirstOrDefault(i => i.Definition.Name == e.PropertyName)?
                     .SetPropertyValue(item.Definition.Name, item.GetPropertyValue(e.PropertyName));
             }
+
+            this.DynamicTablePropertyChanged?.Invoke(sender, e);
         }
 
         #endregion

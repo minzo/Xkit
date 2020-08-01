@@ -36,6 +36,16 @@ namespace Corekit.Models
             set {
                 if (!Equals(this._Value, value))
                 {
+                    if (this._Value is INotifyPropertyChanged oldValue)
+                    {
+                        oldValue.PropertyChanged -= this.OnPropertyChanged;
+                    }
+
+                    if (value is INotifyPropertyChanged newValue)
+                    {
+                        newValue.PropertyChanged += this.OnPropertyChanged;
+                    }
+
                     this.PropertyChanging?.Invoke(this, _ChangingEventArgs);
                     this._Value = value;
                     this.PropertyChanged?.Invoke(this, _ChangedEventArgs);
@@ -61,12 +71,25 @@ namespace Corekit.Models
             this.Definition = definition;
             this.Owner = owner;
             this._Value = (T)this.Definition.GetDefaultValue();
+
+            if (this._Value is INotifyPropertyChanged value)
+            {
+                value.PropertyChanged += this.OnPropertyChanged;
+            }
         }
 
         /// <summary>
         /// ToString
         /// </summary>
         public override string ToString() => this.Value?.ToString();
+
+        /// <summary>
+        /// プロパティ変更通知
+        /// </summary>
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            this.PropertyChanged?.Invoke(this, _ChangedEventArgs);
+        }
 
         private T _Value;
 
