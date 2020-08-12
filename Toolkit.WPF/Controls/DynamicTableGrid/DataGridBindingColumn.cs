@@ -273,9 +273,7 @@ namespace Toolkit.WPF.Controls
                                 break;
 
                             case ComboBox v:
-                                BindingExpression bindingExpression = null;
-
-                                bindingExpression = v.GetBindingExpression(ComboBox.SelectedItemProperty);
+                                var bindingExpression = v.GetBindingExpression(ComboBox.SelectedItemProperty);
                                 if (bindingExpression != null)
                                 {
                                     v.SetCurrentValue(ComboBox.SelectedItemProperty, value);
