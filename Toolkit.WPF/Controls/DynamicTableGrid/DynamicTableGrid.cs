@@ -312,10 +312,14 @@ namespace Toolkit.WPF.Controls
                     // スクロールバーの右側にZoomBoxを置く場合
                     if (this.TryFindResource("ZoomBox") is ComboBox comboBox)
                     {
-                        comboBox.DropDownClosed += (s, e) => BindingOperations.GetBindingExpression(comboBox, ComboBox.TextProperty)?.UpdateSource();
-                        grid.Children.Add(comboBox);
-                        grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(100, GridUnitType.Auto) });
-                        Grid.SetColumn(comboBox, grid.ColumnDefinitions.Count - 1);
+                        var element = grid.Children.OfType<ComboBox>().FirstOrDefault();
+                        if (element == null)
+                        {
+                            comboBox.DropDownClosed += (s, e) => BindingOperations.GetBindingExpression(comboBox, ComboBox.TextProperty)?.UpdateSource();
+                            grid.Children.Add(comboBox);
+                            grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(100, GridUnitType.Auto) });
+                            Grid.SetColumn(comboBox, grid.ColumnDefinitions.Count - 1);
+                        }
                     }
 
                     // スクロールバーの左側にZoomBoxを置く場合
