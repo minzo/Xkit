@@ -307,7 +307,7 @@ namespace Toolkit.WPF.Controls
 
             if (this.IsVisibleZoomValue)
             {
-                if (this.HorizontalScrollBar.Parent is Grid grid)
+                if (this.HorizontalScrollBar?.Parent is Grid grid)
                 {
                     // スクロールバーの右側にZoomBoxを置く場合
                     if (this.TryFindResource("ZoomBox") is ComboBox comboBox)
