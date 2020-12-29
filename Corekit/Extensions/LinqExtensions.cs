@@ -215,7 +215,7 @@ namespace Corekit.Extensions
             return predicate.Invoke(source);
         }
 
-#if !NETSTANDARD
+#if NETFRAMEWORK
         /// <summary>
         /// 先頭に追加する
         /// </summary>
