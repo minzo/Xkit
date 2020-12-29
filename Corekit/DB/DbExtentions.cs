@@ -3,7 +3,7 @@ using System.Data;
 /// <summary>
 /// DB操作関連処理拡張
 /// </summary>
-static class DbExtentions
+public static class DbExtentions
 {
     /// <summary>
     /// 列名で値を取得します
