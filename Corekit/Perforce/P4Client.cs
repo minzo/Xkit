@@ -43,7 +43,7 @@ namespace Corekit.Perforce
         /// <summary>
         /// 指定したファイルの最新リビジョンを取得します
         /// </summary>
-        internal bool Sync(string filePath)
+        public bool Sync(string filePath)
         {
             return P4CommandExecutor.Execute(this._Context, $"sync {filePath}");
         }
