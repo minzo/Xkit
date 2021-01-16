@@ -448,7 +448,7 @@ namespace Corekit.Perforce
             if(P4CommandExecutor.Execute(this._Context, $"opened -c {arg}", out string output))
             {
                 var result = output.Split(LineBrake, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(i => i.Split(' ').First())
+                    .Select(i => i.Substring(0, i.LastIndexOf(" - ")))
                     .Select(i => i.Substring(0, i.IndexOf('#')))
                     .Select(i => P4Client.GetDepotFilePathFromClientFilePath(this._Context, i));
                 return result;
@@ -512,6 +512,7 @@ namespace Corekit.Perforce
         /// </summary>
         private static string EscapeFilePathForConsole(string filePath)
         {
+            // 半角スペースが含まれるファイルパスがコマンドラインで解釈できるようにダブルクォートで囲む
             if (!filePath.StartsWith('"') && !filePath.EndsWith('"') && filePath.Contains(' '))
             {
                 return $"\"{filePath}\"";
