@@ -157,6 +157,20 @@ namespace Corekit.Perforce.Tests
             Assert.IsTrue(this._Client.Revert(EditFilePath));
             Assert.IsTrue(this._Client.TryGetFileInfo(EditFilePath, out info));
             Assert.IsTrue(info.Action == P4FileAction.None);
+
+            // ファイルを作成する
+            File.WriteAllText(NewFile1Path, string.Empty);
+
+            //  EditAdd
+            Assert.IsTrue(this._Client.EditAdd(NewFile1Path));
+            Assert.IsTrue(this._Client.TryGetFileInfo(NewFile1Path, out info));
+            Assert.IsTrue(info.ChangeListNumber == "default");
+
+            // Revert
+            Assert.IsTrue(this._Client.Revert(NewFile1Path));
+            Assert.IsFalse(this._Client.TryGetFileInfo(NewFile1Path, out info)); // ファイルが非管理下なので失敗
+            Assert.IsTrue(info == null); // info も null
+            Assert.IsTrue(File.Exists(NewFile1Path)); // 削除してないからある
         }
 
         [TestMethod]
@@ -391,6 +405,7 @@ namespace Corekit.Perforce.Tests
         private static readonly string DepotDir = Path.Combine(Environment.CurrentDirectory, "TestPerforceDepot");
         private static readonly string ClientRootPath = DepotDir;
         private static readonly string NewFilePath = Path.Combine(ClientRootPath, "NewFile.txt");
+        private static readonly string NewFile1Path = Path.Combine(ClientRootPath, " NewFile.txt");
         private static readonly string EditFilePath = Path.Combine(ClientRootPath, "EditFile.txt");
         private static readonly string EditFile2Path = Path.Combine(ClientRootPath, "EditFile2.txt");
         private static readonly string EditFile3Path = Path.Combine(ClientRootPath, "EditFile3.txt");
