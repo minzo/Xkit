@@ -267,13 +267,13 @@ namespace Corekit.Models
             Fixed = 0b010, // リソース作成に使われたことがあるためリビジョンを更新するまで再利用不可の領域
         }
 
-        private int _Capacity = 0; // 最大で使えるサイズ
+        private readonly int _Capacity = 0; // 最大で使えるサイズ
 
         private List<ContainerState> _State;
         private ObservableCollection<T> _Collection;
 
-        private int _RevisioningLength = 0;
-        private List<int[]> _RevisioningConvertTables;
+        private readonly int _RevisioningLength = 0;
+        private readonly List<int[]> _RevisioningConvertTables;
 
         #region IEnumerable
 
