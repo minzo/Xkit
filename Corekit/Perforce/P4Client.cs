@@ -43,7 +43,7 @@ namespace Corekit.Perforce
         /// <summary>
         /// 指定したファイルの最新リビジョンを取得します
         /// </summary>
-        internal bool Sync(string filePath)
+        public bool Sync(string filePath)
         {
             return P4CommandExecutor.Execute(this._Context, $"sync {filePath}");
         }
@@ -54,6 +54,8 @@ namespace Corekit.Perforce
         /// </summary>
         internal bool Sync(string filePath, int revision)
         {
+            filePath = EscapeFilePathForConsole(filePath);
+
             // 負の値なら最新リビジョンからさかのぼったリビジョンを取得
             if (revision < 0)
             {
@@ -89,6 +91,8 @@ namespace Corekit.Perforce
         /// </summary>
         public bool EditAdd(string filePath, P4ChangeList changeList = null)
         {
+            filePath = EscapeFilePathForConsole(filePath);
+
             var arg = changeList != null ? $"-c {changeList.Number}" : string.Empty;
 
             bool result = false;
@@ -123,6 +127,8 @@ namespace Corekit.Perforce
         /// </summary>
         public bool Delete(string filePath, P4ChangeList changeList = null)
         {
+            filePath = EscapeFilePathForConsole(filePath);
+
             var arg = changeList != null ? $"-c {changeList.Number}" : string.Empty;
 
             if (P4CommandExecutor.Execute(this._Context, $"delete {arg} {filePath}"))
@@ -160,6 +166,9 @@ namespace Corekit.Perforce
         /// </summary>
         public bool Move(string oldFilePath, string newFilePath, P4ChangeList changeList = null)
         {
+            oldFilePath = EscapeFilePathForConsole(oldFilePath);
+            newFilePath = EscapeFilePathForConsole(newFilePath);
+
             var arg = changeList != null ? $"-c {changeList.Number}" : string.Empty;
 
             // Edit 状態じゃないと Move できないので Edit・Addしておく
@@ -179,6 +188,8 @@ namespace Corekit.Perforce
         /// </summary>
         public bool Revert(string filePath, bool withDelete = false)
         {
+            filePath = EscapeFilePathForConsole(filePath);
+
             if (!TryGetFileInfo(filePath, out P4FileInfo info))
             {
                 return false;
@@ -231,7 +242,7 @@ namespace Corekit.Perforce
         /// </summary>
         public bool RevertIfNotChanged(string filePath)
         {
-            return P4CommandExecutor.Execute(this._Context, $"revert -a {filePath}", out string _);
+            return P4CommandExecutor.Execute(this._Context, $"revert -a {EscapeFilePathForConsole(filePath)}", out string _);
         }
 
         /// <summary>
@@ -277,7 +288,7 @@ namespace Corekit.Perforce
         /// </summary>
         internal bool TryGetFileInfo(string filePath, out P4FileInfo info)
         {
-            if (!P4CommandExecutor.Execute(this._Context, $"fstat {filePath}", out string output))
+            if (!P4CommandExecutor.Execute(this._Context, $"fstat {EscapeFilePathForConsole(filePath)}", out string output))
             {
                 info = default;
                 return false;
@@ -376,7 +387,7 @@ namespace Corekit.Perforce
         internal bool ReopenFileAnotherChangeList(string filePath, P4ChangeList changeList = null)
         {
             var number = changeList?.Number ?? "default";
-            return P4CommandExecutor.Execute(this._Context, $"reopen -c {number} {filePath}");
+            return P4CommandExecutor.Execute(this._Context, $"reopen -c {number} {EscapeFilePathForConsole(filePath)}");
         }
 
         /// <summary>
@@ -437,7 +448,7 @@ namespace Corekit.Perforce
             if(P4CommandExecutor.Execute(this._Context, $"opened -c {arg}", out string output))
             {
                 var result = output.Split(LineBrake, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(i => i.Split(' ').First())
+                    .Select(i => i.Substring(0, i.LastIndexOf(" - ")))
                     .Select(i => i.Substring(0, i.IndexOf('#')))
                     .Select(i => P4Client.GetDepotFilePathFromClientFilePath(this._Context, i));
                 return result;
@@ -494,6 +505,19 @@ namespace Corekit.Perforce
         private static string GetDepotFilePathFromClientFilePath(P4Context context, string depotFilePath)
         {
             return Path.GetFullPath(depotFilePath.Replace(context.DepotRootDirectoryPath, context.ClientRootDirectoryPath));
+        }
+
+        /// <summary>
+        /// コマンドライン向けにファイルパスをエスケープする
+        /// </summary>
+        private static string EscapeFilePathForConsole(string filePath)
+        {
+            // 半角スペースが含まれるファイルパスがコマンドラインで解釈できるようにダブルクォートで囲む
+            if (!filePath.StartsWith('"') && !filePath.EndsWith('"') && filePath.Contains(' '))
+            {
+                return $"\"{filePath}\"";
+            }
+            return filePath;
         }
 
         private static readonly string[] LineBrake = new[] { Environment.NewLine, "\r\n", "\r", "\n" };
