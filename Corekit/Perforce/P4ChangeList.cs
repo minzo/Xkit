@@ -69,58 +69,16 @@ namespace Corekit.Perforce
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        private P4ChangeList(string str)
+        private P4ChangeList(IReadOnlyDictionary<string, string> keyValues)
         {
-            if (!str.StartsWith("Change"))
-            {
-                var exception = new ArgumentException("文字列が対応している形式ではありません");
-                exception.Data.Add("str", str);
-                throw exception;
-            }
-
-            var block = str.Split(' ');
-
-            // 番号
-            this.Number = block[1];
-
-            // 日時
-            if (DateTime.TryParse(block[3] + block[4], out DateTime dateTime))
-            {
-                // 時刻の解析も行う
-                this.DateTime = dateTime;
-            }
-            else if (DateTime.TryParse(block[3], out DateTime date))
-            {
-                // 時刻の解析に失敗したら日付だけで解析する
-                this.DateTime = date;
-            }
-            else
-            {
-                throw new ArgumentException("日付の解析に失敗");
-            }
-
-            var userAndClientIndex = Array.IndexOf(block, "by") + 1;
-            var userAndClient = block[userAndClientIndex].Split('@');
-
-            // ユーザー
-            this.UserName = userAndClient[0];
-
-            // クライアント
-            this.ClientName = userAndClient[1];
-
-            // 状態
-            var statusIndex = userAndClientIndex + 1;
-            if (statusIndex < block.Length && block[statusIndex] == "*pending*")
-            {
-                this.Status = P4ChangeListStatus.Pending;
-            }
-            else
-            {
-                this.Status = P4ChangeListStatus.Submitted;
-            }
-
-            // 説明
-            this.Description = string.Empty;
+            this.Number = keyValues["change"];
+            this.DateTime = DateTimeOffset.FromUnixTimeSeconds(int.Parse(keyValues["time"])).LocalDateTime.ToLocalTime();
+            this.UserName = keyValues["user"];
+            this.ClientName = keyValues["client"];
+            this.Status = keyValues["status"] == "*pending*"
+                ? P4ChangeListStatus.Pending
+                : P4ChangeListStatus.Submitted;
+            this.Description = keyValues["desc"];
         }
 
         /// <summary>
@@ -128,17 +86,40 @@ namespace Corekit.Perforce
         /// </summary>
         internal static IEnumerable<P4ChangeList> Parse(string str)
         {
-            using (var reader = new StringReader(str))
+            var tag = "... ";
+            var tagSize = tag.Length;
+            var dict = new Dictionary<string, string>();
+
+            for (int tagIndex = 0, length = str.Length; tagIndex < length; /**/ )
             {
-                while (reader.Peek() >= 0)
+                var keyIndex = tagIndex + tagSize;
+                var nextTagIndex = str.IndexOf(tag, keyIndex);
+                if (nextTagIndex < 0) nextTagIndex = length;
+                var block = str.Substring(keyIndex, nextTagIndex - keyIndex);
+                tagIndex = nextTagIndex;
+
+                var keyStartPos = 0;
+                var keyEndPos = block.IndexOf(' ');
+                var cmdSize = keyEndPos - keyStartPos;
+                var key = block.Substring(keyStartPos, cmdSize);
+                var valueStartPos = keyEndPos + 1; // スペースの次が先頭
+                var value = block.Substring(valueStartPos).Trim('\r', '\n', ' ').Trim('\n');
+
+                if (dict.ContainsKey(key))
                 {
-                    var line = reader.ReadLine();
-                    if (line.StartsWith("Change"))
-                    {
-                        var info = new P4ChangeList(line);
-                        yield return info;
-                    }
+                    var info = new P4ChangeList(dict);
+                    dict.Clear();
+                    yield return info;
                 }
+
+                dict.Add(key, value);
+            }
+
+            if (dict.Any())
+            {
+                var info = new P4ChangeList(dict);
+                dict.Clear();
+                yield return info;
             }
         }
     }

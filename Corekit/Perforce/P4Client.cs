@@ -308,16 +308,16 @@ namespace Corekit.Perforce
         /// </summary>
         public IEnumerable<P4ChangeList> EnumerateChangeList()
         {
-            return this.EnumerateChangeList($"changes -L -t");
+            return this.EnumerateChangeList($"{P4CommandChangesGlobalOpt} {P4CommandChanges} -L -t");
         }
 
         /// <summary>
         /// 指定した状態のチェンジリストを列挙します
         /// Depotに問い合わせるときに列挙するチェンジリストの状態を指定します
         /// </summary>
-        public IEnumerable<P4ChangeList> EnumerateChangeList(P4ChangeListStatus status)
+        public IEnumerable<P4ChangeList> EnumerateChangeList(P4ChangeListStatus status, string path = "")
         {
-            return this.EnumerateChangeList($"changes -s {status.ToString().ToLower()}");
+            return this.EnumerateChangeList($"{P4CommandChangesGlobalOpt} {P4CommandChanges} -L -t -s {status.ToString().ToLower()} {path}");
         }
 
         /// <summary>
@@ -325,7 +325,7 @@ namespace Corekit.Perforce
         /// </summary>
         public IEnumerable<P4ChangeList> EnumerateSelfChangeList()
         {
-            return this.EnumerateChangeList($"changes -L -t -u {this._Context.UserName}");
+            return this.EnumerateChangeList($"{P4CommandChangesGlobalOpt} {P4CommandChanges} -L -t -u {this._Context.UserName}");
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace Corekit.Perforce
         /// </summary>
         public IEnumerable<P4ChangeList> EnumerateSelfChangeList(P4ChangeListStatus status)
         {
-            return this.EnumerateChangeList($"changes -L -t -u {this._Context.UserName} -s {status.ToString().ToLower()}");
+            return this.EnumerateChangeList($"{P4CommandChangesGlobalOpt} {P4CommandChanges} -L -t -u {this._Context.UserName} -s {status.ToString().ToLower()}");
         }
 
         /// <summary>
@@ -594,6 +594,13 @@ namespace Corekit.Perforce
                 }
             }
         }
+
+        #endregion
+
+        #region P4 Commands
+
+        private readonly string P4CommandChanges = "changes";
+        private readonly string P4CommandChangesGlobalOpt = "-z tag";
 
         #endregion
     }
