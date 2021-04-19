@@ -168,6 +168,57 @@ namespace Corekit.Tests
         }
 
         [TestMethod]
+        public void DefragmentWithRevesionUpdate()
+        {
+            var collection = new RevisionControlCollection<int>(4, 2);
+
+            // 追加
+            collection.Add(10);
+            Assert.IsTrue(collection.SequenceEqual(new[] { 10 }));
+            Assert.IsTrue(collection.UsedSize == 1);
+
+            // 追加
+            collection.Add(11);
+            Assert.IsTrue(collection.SequenceEqual(new[] { 10, 11 }));
+            Assert.IsTrue(collection.UsedSize == 2);
+
+            // 追加
+            collection.Add(12);
+            Assert.IsTrue(collection.SequenceEqual(new[] { 10, 11, 12 }));
+            Assert.IsTrue(collection.UsedSize == 3);
+
+            // コミットして確定する
+            collection.Commit();
+
+            // 追加
+            collection.Add(13);
+            Assert.IsTrue(collection.Revision == 0);
+            Assert.IsTrue(collection.SequenceEqual(new[] { 10, 11, 12, 13 }));
+            Assert.IsTrue(collection.IsFull);
+
+            // 削除 
+            // 10 は Fixed なのでdefault値で埋められている
+            collection.Remove(10);
+            Assert.IsTrue(collection.SequenceEqual(new[] { default, 11, 12, 13 }));
+            Assert.IsTrue(collection.UsedSize == 3);
+
+            // 削除 
+            // 12 も Fixed なのでdefault値で埋められている
+            collection.Remove(12);
+            Assert.IsTrue(collection.SequenceEqual(new[] { default, 11, default, 13 }));
+            Assert.IsTrue(collection.UsedSize == 2);
+
+            // 見つからないはず
+            Assert.IsFalse(collection.Contains(default));
+
+            // デフラグ
+            collection.DefragmentWithRevisionUpdate();
+            Assert.IsTrue(collection.SequenceEqual(new[] { 11, 13 }));
+            Assert.IsTrue(collection.UsedSize == 2);
+            Assert.IsTrue(collection.Revision == 1);
+        }
+
+        [TestMethod]
         public void PrevIndexToCurrentIndex()
         {
             var collection = new RevisionControlCollection<int>(4, 2);

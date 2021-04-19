@@ -70,9 +70,9 @@ namespace Corekit.Models
         /// <summary>
         /// 変更を前に戻す
         /// </summary>
-        public void Revert()
+        private void Revert()
         {
-
+            throw new NotImplementedException(nameof(Revert));
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace Corekit.Models
             }
             else
             {
-                // 蜜った場所がFixedだったら使ってない状態にする
+                // 見つかった場所がFixedだったら使ってない状態にする
                 this._State[index] &= ~ContainerState.Used;
 
                 // 消す代わりにデフォルト値で埋めておく
@@ -146,11 +146,23 @@ namespace Corekit.Models
         }
 
         /// <summary>
-        /// クリア
+        /// 全ての要素を削除します（リビジョン番号は維持します）
         /// </summary>
         public void Clear()
         {
-            throw new NotImplementedException();
+            foreach (var item in this.ToList())
+            {
+                this.Remove(item);
+            }
+        }
+
+        /// <summary>
+        /// デフラグします
+        /// 飛び地になっている状態を解消して連続した領域を確保します(リビジョン番号も更新されます)
+        /// </summary>
+        public void DefragmentWithRevisionUpdate()
+        {
+            UpdateRevision();
         }
 
         /// <summary>
@@ -158,7 +170,9 @@ namespace Corekit.Models
         /// </summary>
         public bool Contains(T item)
         {
-            return this._Collection.Contains(item);
+            var index = this._Collection.IndexOf(item);
+            return (index >= 0 && index < this._Collection.Count) // 範囲チェック
+                && ((this._State[index] & ContainerState.Used) == ContainerState.Used);// 使用領域
         }
 
         /// <summary>
