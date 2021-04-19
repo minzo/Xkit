@@ -442,10 +442,19 @@ namespace Corekit.Perforce
         /// 指定したチェンジリストに含まれているファイルのパスを列挙します
         /// 指定しなかった場合には default チェンジリストに含まれているファイルパスが列挙されます
         /// </summary>
-        internal IEnumerable<string> EnumerateChangeListFilePath(P4ChangeList changeList = null)
+        public IEnumerable<string> EnumerateChangeListFilePath(P4ChangeList changeList)
         {
-            var arg = changeList != null ? changeList.Number : "default";
-            if(P4CommandExecutor.Execute(this._Context, $"opened -c {arg}", out string output))
+            return this.EnumerateChangeListFilePath(changeList?.Number);
+        }
+
+        /// <summary>
+        /// 指定したチェンジリストに含まれているファイルのパスを列挙します
+        /// 指定しなかった場合には default チェンジリストに含まれているファイルパスが列挙されます
+        /// </summary>
+        public IEnumerable<string> EnumerateChangeListFilePath(string changeListNumber = null)
+        {
+            var number = !string.IsNullOrWhiteSpace(changeListNumber) ? changeListNumber : "default";
+            if (P4CommandExecutor.Execute(this._Context, $"opened -c {number}", out string output))
             {
                 var result = output.Split(LineBrake, StringSplitOptions.RemoveEmptyEntries)
                     .Select(i => i.Substring(0, i.LastIndexOf(" - ")))
