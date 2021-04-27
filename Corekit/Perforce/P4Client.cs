@@ -344,7 +344,7 @@ namespace Corekit.Perforce
         {
             if (P4CommandExecutor.Execute(this._Context, command, out var output))
             {
-                return P4ChangeList.Parse(output);
+                return P4ChangeList.ParseFromChanges(output);
             }
             return Enumerable.Empty<P4ChangeList>();
         }
@@ -442,27 +442,61 @@ namespace Corekit.Perforce
         /// 指定したチェンジリストに含まれているファイルのパスを列挙します
         /// 指定しなかった場合には default チェンジリストに含まれているファイルパスが列挙されます
         /// </summary>
-        public IEnumerable<string> EnumerateChangeListFilePath(P4ChangeList changeList)
+        public IEnumerable<string> EnumerateChangeListFilePath(P4ChangeList changeList = null)
         {
-            return this.EnumerateChangeListFilePath(changeList?.Number);
+            var number = changeList?.Number ?? "default";
+
+            if (changeList?.Status == P4ChangeListStatus.Submitted)
+            {
+                if (P4CommandExecutor.Execute(this._Context, $"{P4CommandDescribeGlobalOpt} {P4CommandDescribe} {number}", out string output))
+                {
+                    using (var reader = new StringReader(output))
+                    {
+                        var key = "... depotFile";
+                        var length = key.Length;
+                        while (reader.Peek() >= 0)
+                        {
+                            var line = reader.ReadLine();
+                            if (line.StartsWith(key))
+                            {
+                                var startPos = line.IndexOf(' ', length) + 1;
+                                var str = line.Substring(startPos, line.Length - startPos);
+                                var path = P4Client.GetDepotFilePathFromClientFilePath(this._Context, str);
+                                yield return path;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (P4CommandExecutor.Execute(this._Context, $"opened -c {number}", out string output))
+                {
+                    using (var reader = new StringReader(output))
+                    {
+                        while (reader.Peek() >= 0)
+                        {
+                            var line = reader.ReadLine();
+                            var length = line.LastIndexOf('#', line.LastIndexOf(" - "));
+                            var str = line.Substring(0, length);
+                            var path = P4Client.GetDepotFilePathFromClientFilePath(this._Context, str);
+                            yield return path;
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
-        /// 指定したチェンジリストに含まれているファイルのパスを列挙します
-        /// 指定しなかった場合には default チェンジリストに含まれているファイルパスが列挙されます
+        /// 指定ディレクトリ以下のファイルの変更履歴を取得します
         /// </summary>
-        public IEnumerable<string> EnumerateChangeListFilePath(string changeListNumber = null)
+        public IEnumerable<P4FileRevisionInfo> EnumerateFileRevisionInfo(string path)
         {
-            var number = !string.IsNullOrWhiteSpace(changeListNumber) ? changeListNumber : "default";
-            if (P4CommandExecutor.Execute(this._Context, $"opened -c {number}", out string output))
+            if (P4CommandExecutor.Execute(this._Context, $"{P4CommandFileLogGlobalOpt} {P4CommandFileLog} {path}", out string output))
             {
-                var result = output.Split(LineBrake, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(i => i.Substring(0, i.LastIndexOf(" - ")))
-                    .Select(i => i.Substring(0, i.IndexOf('#')))
-                    .Select(i => P4Client.GetDepotFilePathFromClientFilePath(this._Context, i));
-                return result;
+                return P4FileRevisionInfo.ParseFromFilelog(output);
             }
-            return Enumerable.Empty<string>();
+            return Enumerable.Empty<P4FileRevisionInfo>();
         }
 
         /// <summary>
@@ -610,6 +644,10 @@ namespace Corekit.Perforce
 
         private readonly string P4CommandChanges = "changes";
         private readonly string P4CommandChangesGlobalOpt = "-z tag";
+        private readonly string P4CommandDescribe = "describe";
+        private readonly string P4CommandDescribeGlobalOpt = "-z tag";
+        private readonly string P4CommandFileLog = "filelog";
+        private readonly string P4CommandFileLogGlobalOpt = "-z tag";
 
         #endregion
     }

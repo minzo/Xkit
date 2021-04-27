@@ -20,7 +20,7 @@ namespace Corekit.Perforce
     /// <summary>
     /// チェンジリスト
     /// </summary>
-    [DebuggerDisplay("{DateTime} {Number} {UserName} {Status}")]
+    [DebuggerDisplay("{DateTime} {Number} {UserName} {Status} {Description}")]
     public class P4ChangeList
     {
         /// <summary>
@@ -75,35 +75,54 @@ namespace Corekit.Perforce
             this.DateTime = DateTimeOffset.FromUnixTimeSeconds(int.Parse(keyValues["time"])).LocalDateTime.ToLocalTime();
             this.UserName = keyValues["user"];
             this.ClientName = keyValues["client"];
-            this.Status = keyValues["status"] == "*pending*"
-                ? P4ChangeListStatus.Pending
-                : P4ChangeListStatus.Submitted;
+
+            if (keyValues.TryGetValue("status", out string status))
+            {
+                this.Status = status == "*pending*"
+                    ? P4ChangeListStatus.Pending
+                    : P4ChangeListStatus.Submitted;
+            }
+            else
+            {
+                this.Status = P4ChangeListStatus.Submitted;
+            }
+
             this.Description = keyValues["desc"];
         }
 
         /// <summary>
         /// 文字列を解析してチェンジリスト情報を列挙します
         /// </summary>
-        internal static IEnumerable<P4ChangeList> Parse(string str)
+        internal static IEnumerable<P4ChangeList> ParseFromChanges(string str)
         {
+            var headerMark = "... ";
+            var headerMarkSize = headerMark.Length;
             var tag = "... ";
             var tagSize = tag.Length;
+
             var dict = new Dictionary<string, string>();
 
-            for (int tagIndex = 0, length = str.Length; tagIndex < length; /**/ )
+            for (int headerIndex = 0, length = str.Length; headerIndex < length; /**/ )
             {
-                var keyIndex = tagIndex + tagSize;
+                var keyIndex = headerIndex + tagSize;
+                var nextHeaderIndex = str.IndexOf(headerMark, headerIndex + headerMarkSize);
+                if (nextHeaderIndex < 0) nextHeaderIndex = length;
+
                 var nextTagIndex = str.IndexOf(tag, keyIndex);
                 if (nextTagIndex < 0) nextTagIndex = length;
-                var block = str.Substring(keyIndex, nextTagIndex - keyIndex);
-                tagIndex = nextTagIndex;
+
+                var keyValue = str.Substring(keyIndex, nextTagIndex - keyIndex);
 
                 var keyStartPos = 0;
-                var keyEndPos = block.IndexOf(' ');
-                var cmdSize = keyEndPos - keyStartPos;
-                var key = block.Substring(keyStartPos, cmdSize);
+                var keyEndPos = keyValue.IndexOf(' ');
+                var keySize = keyEndPos - keyStartPos;
+                var key = keyValue.Substring(keyStartPos, keySize)
+                    .TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
                 var valueStartPos = keyEndPos + 1; // スペースの次が先頭
-                var value = block.Substring(valueStartPos).Trim('\r', '\n', ' ').Trim('\n');
+                var value = keyValue.Substring(valueStartPos)
+                    .Trim('\r', '\n', ' ') //改行とスペースを削除
+                    .Trim('\n'); // /r/n の場合も考慮
+
 
                 if (dict.ContainsKey(key))
                 {
@@ -113,6 +132,9 @@ namespace Corekit.Perforce
                 }
 
                 dict.Add(key, value);
+
+                // 次の位置へ移動
+                headerIndex = nextHeaderIndex;
             }
 
             if (dict.Any())
@@ -124,3 +146,4 @@ namespace Corekit.Perforce
         }
     }
 }
+

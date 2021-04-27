@@ -353,6 +353,23 @@ namespace Corekit.Perforce.Tests
             Assert.IsTrue(this._Client.DeleteChangeListAndMoveDefault(changeList));
         }
 
+        [TestMethod]
+        public void EnumerateChangeListFilePath()
+        {
+            var changeList = this._Client.EnumerateChangeList()
+                .LastOrDefault(i => i.Status == P4ChangeListStatus.Submitted);
+
+            var filePathList = this._Client.EnumerateChangeListFilePath(changeList).ToList();
+            Assert.IsTrue(filePathList.Count() == 5);
+        }
+
+        [TestMethod]
+        public void FileLog()
+        {
+            this._Client.EnumerateFileRevisionInfo($"{DepotDir}/...")
+                .ToList();
+        }
+
         private Corekit.Perforce.P4Client _Client;
 
         private static bool ExecuteP4Command(string arguments, string workingDir)
@@ -404,8 +421,9 @@ namespace Corekit.Perforce.Tests
 
         private static readonly string DepotDir = Path.Combine(Environment.CurrentDirectory, "TestPerforceDepot");
         private static readonly string ClientRootPath = DepotDir;
+
         private static readonly string NewFilePath = Path.Combine(ClientRootPath, "NewFile.txt");
-        private static readonly string NewFile1Path = Path.Combine(ClientRootPath, " NewFile.txt");
+        private static readonly string NewFile1Path = Path.Combine(ClientRootPath, "NewFile1.txt");
         private static readonly string EditFilePath = Path.Combine(ClientRootPath, "EditFile.txt");
         private static readonly string EditFile2Path = Path.Combine(ClientRootPath, "EditFile2.txt");
         private static readonly string EditFile3Path = Path.Combine(ClientRootPath, "EditFile3.txt");
