@@ -488,7 +488,7 @@ namespace Corekit.Perforce
         }
 
         /// <summary>
-        /// 指定ディレクトリ以下のファイルの変更履歴を取得します
+        /// 指定したパターンのパスの変更履歴を取得します
         /// </summary>
         public IEnumerable<P4FileRevisionInfo> EnumerateFileRevisionInfo(string path)
         {
@@ -498,6 +498,20 @@ namespace Corekit.Perforce
             }
             return Enumerable.Empty<P4FileRevisionInfo>();
         }
+
+        /// <summary>
+        /// 指定したパターンのパスの変更履歴を取得します
+        /// </summary>
+        public IEnumerable<P4FileRevisionInfo> EnumerateFileRevisionInfo(string path, string changeListNumber)
+        {
+            var number = $"@{changeListNumber},@{changeListNumber}";
+            if (P4CommandExecutor.Execute(this._Context, $"{P4CommandFileLogGlobalOpt} {P4CommandFileLog} {path}{number}", out string output))
+            {
+                return P4FileRevisionInfo.ParseFromFilelog(output);
+            }
+            return Enumerable.Empty<P4FileRevisionInfo>();
+        }
+
 
         /// <summary>
         /// 競合解決の方法を指定します
