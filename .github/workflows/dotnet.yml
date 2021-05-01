@@ -24,7 +24,7 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-        steps:
+    steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
@@ -39,7 +39,7 @@ jobs:
 
   build-mac:
     runs-on: macos-latest
-        steps:
+    steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
