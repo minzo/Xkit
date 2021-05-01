@@ -20,7 +20,7 @@ jobs:
     - name: Build
       run: dotnet build Xkit.sln --no-restore
     - name: Test
-      run: dotnet test Corekit.sln --no-build --verbosity normal
+      run: dotnet test Corekit.Tests.sln --no-build --verbosity normal
 
   build-windows:
     runs-on: windows-latest
@@ -35,7 +35,7 @@ jobs:
     - name: Build
       run: dotnet build Xkit.sln --no-restore
     - name: Test
-      run: dotnet test Corekit.sln --no-build --verbosity normal
+      run: dotnet test Corekit.Tests.sln --no-build --verbosity normal
 
   build-mac:
     runs-on: macos-latest
@@ -50,4 +50,4 @@ jobs:
     - name: Build
       run: dotnet build Xkit.sln --no-restore
     - name: Test
-      run: dotnet test Corekit.sln --no-build --verbosity normal
+      run: dotnet test Corekit.Tests.sln --no-build --verbosity normal
