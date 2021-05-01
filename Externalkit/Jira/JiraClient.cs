@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Corekit;
 
-namespace Corekit.Jira
+namespace Externalkit.Jira
 {
     public interface IJiraContext
     {

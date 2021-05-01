@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Corekit.Perforce
+namespace Externalkit.Perforce
 {
     /// <summary>
     /// チェンジリストの状態

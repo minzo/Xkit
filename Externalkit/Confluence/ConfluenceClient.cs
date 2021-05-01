@@ -5,8 +5,9 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using Corekit;
 
-namespace Corekit.Confluence
+namespace Externalkit.Confluence
 {
     /// <summary>
     /// Confluenceクライアント

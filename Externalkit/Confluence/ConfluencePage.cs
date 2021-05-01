@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 
-namespace Corekit.Confluence
+namespace Externalkit.Confluence
 {
     /// <summary>
     /// Confluenceのページ情報

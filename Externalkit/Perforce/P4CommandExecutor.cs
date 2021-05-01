@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Corekit.Perforce
+namespace Externalkit.Perforce
 {
     /// <summary>
     /// Perforceのコマンドを実行する

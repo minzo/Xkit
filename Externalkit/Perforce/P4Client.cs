@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Corekit.Perforce
+namespace Externalkit.Perforce
 {
     /// <summary>
     /// Perforceの基本的な操作を提供します
@@ -302,7 +302,7 @@ namespace Corekit.Perforce
             info = new P4FileInfo(output);
             return true;
         }
-       
+
         /// <summary>
         /// チェンリストを列挙します
         /// </summary>
@@ -683,7 +683,7 @@ namespace Corekit.Perforce
                 return true;
             }
 
-            // 一度 Revert 
+            // 一度 Revert
             client.Revert(filePath);
 
             // 再度 Edit・Add
@@ -704,7 +704,7 @@ namespace Corekit.Perforce
                 return true;
             }
 
-            // 一度 Revert 
+            // 一度 Revert
             client.Revert(filePath);
 
             // 再度 Delete

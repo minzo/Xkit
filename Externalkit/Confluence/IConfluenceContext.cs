@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Corekit.Confluence
+namespace Externalkit.Confluence
 {
     /// <summary>
     /// Confluenceにアクセスするための情報

@@ -5,7 +5,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 
-namespace Corekit.Confluence
+namespace Externalkit.Confluence
 {
     /// <summary>
     /// ページ編集パラメータ

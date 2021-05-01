@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Corekit.Perforce
+namespace Externalkit.Perforce
 {
     /// <summary>
     /// Perforceを使うために必要な情報を保持します
