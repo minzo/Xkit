@@ -10,7 +10,7 @@ using Corekit.Extensions;
 namespace Externalkit.Perforce.Tests
 {
     [TestClass]
-    public class P4Client
+    public class Perforce
     {
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)

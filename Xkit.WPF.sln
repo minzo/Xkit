@@ -13,6 +13,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolkit.WPF.Sample", "Toolk
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolkit.WPF", "Toolkit.WPF\Toolkit.WPF.csproj", "{128CAFE2-F332-4FDE-8CE2-4F4153331051}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Externalkit", "Externalkit\Externalkit.csproj", "{35B9D03D-52DA-4CE0-858B-688ECCE15FC0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Externalkit.Tests", "Externalkit.Tests\Externalkit.Tests.csproj", "{D131EA2A-D35D-40FE-B4B7-747A1272A8D0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{128CAFE2-F332-4FDE-8CE2-4F4153331051}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{128CAFE2-F332-4FDE-8CE2-4F4153331051}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{128CAFE2-F332-4FDE-8CE2-4F4153331051}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35B9D03D-52DA-4CE0-858B-688ECCE15FC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35B9D03D-52DA-4CE0-858B-688ECCE15FC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35B9D03D-52DA-4CE0-858B-688ECCE15FC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35B9D03D-52DA-4CE0-858B-688ECCE15FC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D131EA2A-D35D-40FE-B4B7-747A1272A8D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D131EA2A-D35D-40FE-B4B7-747A1272A8D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D131EA2A-D35D-40FE-B4B7-747A1272A8D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D131EA2A-D35D-40FE-B4B7-747A1272A8D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
