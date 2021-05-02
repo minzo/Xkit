@@ -5,40 +5,13 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
+    
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
-    - name: Restore dependencies
-      run: dotnet restore Xkit.sln
-    - name: Build
-      run: dotnet build Xkit.sln --no-restore
-    - name: Test
-      run: dotnet test Corekit.Tests --no-build --verbosity normal
-
-  build-windows:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
-    - name: Restore dependencies
-      run: dotnet restore Xkit.sln
-    - name: Build
-      run: dotnet build Xkit.sln --no-restore
-    - name: Test
-      run: dotnet test Corekit.Tests --no-build --verbosity normal
-
-  build-mac:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
