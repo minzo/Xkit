@@ -7,7 +7,7 @@ on:
     branches: [ master ]
     
 jobs:
-  build-linux:
+  build:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
