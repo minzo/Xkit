@@ -412,7 +412,7 @@ namespace Externalkit.Perforce.Tests
         {
             var localPath = this._Client.LocalRootPath;
             var depotPath = this._Client.DepotRootPath;
-            Assert.IsTrue(this._Client.GetDepotPathFromLocalPath(localPath) == depotPath);
+            Assert.IsTrue(P4Util.GetDepotPathFromLocalPath(this._Client, localPath) == depotPath);
         }
 
         [TestMethod]
@@ -420,7 +420,7 @@ namespace Externalkit.Perforce.Tests
         {
             var localPath = this._Client.LocalRootPath;
             var depotPath = this._Client.DepotRootPath;
-            Assert.IsTrue(this._Client.GetLocalPathFromDepotPath(depotPath) == localPath);
+            Assert.IsTrue(P4Util.GetLocalPathFromDepotPath(this._Client, depotPath) == localPath);
         }
 
 

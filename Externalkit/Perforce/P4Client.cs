@@ -246,8 +246,8 @@ namespace Externalkit.Perforce
         {
             var deleteFilePath = EnumerateFileInfo(filePath)
                 .Where(i => i.Action == P4FileAction.Delete)
-                .Where(i => File.Exists(i.ClientFilePath))
-                .Select(i => i.ClientFilePath);
+                .Where(i => File.Exists(i.LocalPath))
+                .Select(i => i.LocalPath);
 
             using (var temp = new ScopedTempFile(filePath))
             {
@@ -494,7 +494,7 @@ namespace Externalkit.Perforce
                             {
                                 var startPos = line.IndexOf(' ', length) + 1;
                                 var str = line.Substring(startPos, line.Length - startPos);
-                                var path = this.GetLocalPathFromDepotPath(str);
+                                var path = P4Util.GetLocalPathFromDepotPath(this, str);
                                 yield return path;
                             }
                         }
@@ -512,7 +512,7 @@ namespace Externalkit.Perforce
                             var line = reader.ReadLine();
                             var length = line.LastIndexOf('#', line.LastIndexOf(" - "));
                             var str = line.Substring(0, length);
-                            var path = this.GetLocalPathFromDepotPath(str);
+                            var path = P4Util.GetLocalPathFromDepotPath(this, str);
                             yield return path;
                         }
                     }
@@ -544,6 +544,21 @@ namespace Externalkit.Perforce
             }
             return Enumerable.Empty<P4FileRevisionInfo>();
         }
+
+        /// <summary>
+        /// 指定したリビジョンのファイルを指定した場所にダウンロードします
+        /// </summary>
+        public bool TryDownload(string filePath, string revision, string destPath)
+        {
+            if(P4CommandExecutor.Execute(this._Context, $"{P4CommandPrint} -o {destPath} {filePath}#{revision}"))
+            {
+                // File.WriteAllText(destPath, output);
+                // コマンドは成功しているのにファイルが存在しないことがある
+                return File.Exists(destPath);
+            }
+            return false;
+        }
+
 
         /// <summary>
         /// 競合解決の方法を指定します
@@ -686,6 +701,7 @@ namespace Externalkit.Perforce
         private static readonly string P4CommandDescribeGlobalOpt = "-z tag";
         private static readonly string P4CommandFileLog = "filelog";
         private static readonly string P4CommandFileLogGlobalOpt = "-z tag";
+        private static readonly string P4CommandPrint = "print";
 
         #endregion
     }
@@ -792,7 +808,7 @@ namespace Externalkit.Perforce
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(info.DepotMovedFilePath))
+            if (string.IsNullOrWhiteSpace(info.DepotMovedPath))
             {
                 // 1ファイルならReopen
                 return client.ReopenFileAnotherChangeList(filePath, changeList);
@@ -800,7 +816,7 @@ namespace Externalkit.Perforce
             else
             {
                 // 移動ファイルが存在したら複数ファイル移動
-                return client.ReopenFileAnotherChangeList(new[] { filePath, info.DepotMovedFilePath }, changeList);
+                return client.ReopenFileAnotherChangeList(new[] { filePath, info.DepotMovedPath }, changeList);
             }
         }
 
@@ -813,11 +829,11 @@ namespace Externalkit.Perforce
             var fileInfoList = client.EnumerateFileInfo(filePath).ToList();
 
             var depotFileList = fileInfoList
-                .Select(i => i.DepotFilePath)
+                .Select(i => i.DepotPath)
                 .OrderBy(i => i);
 
             var movedFileList = fileInfoList
-                .Select(i => i.DepotMovedFilePath)
+                .Select(i => i.DepotMovedPath)
                 .OrderBy(i => i);
 
             if (depotFileList.SequenceEqual(movedFileList))
@@ -898,6 +914,22 @@ namespace Externalkit.Perforce
         public static bool IsEmptyChangeList(this P4Client client, P4ChangeList changeList)
         {
             return !client.EnumerateChangeListFileLocalPath(changeList).Any();
+        }
+
+        /// <summary>
+        /// LocalSyntaxパスからDepotSyntaxのパスに変換します
+        /// </summary>
+        public static string GetDepotPathFromLocalPath(this P4Client client, string localPath)
+        {
+            return P4Util.GetDepotPathFromLocalPath(client, localPath);
+        }
+
+        /// <summary>
+        /// DepotSyntaxパスからのLocalSyntaxのパスに変換します
+        /// </summary>
+        public static string GetLocalPathFromDepotPath(this P4Client client, string depotPath)
+        {
+            return P4Util.GetLocalPathFromDepotPath(client, depotPath);
         }
     }
 }

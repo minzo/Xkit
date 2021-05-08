@@ -25,7 +25,7 @@ namespace Externalkit.Perforce
         /// </summary>
         internal static string GetDepotPathFromLocalPath(string depotRootPath, string localRootPath, string localPath)
         {
-            return localPath.Replace(localRootPath, depotRootPath).ToLower();
+            return localPath.Replace(localRootPath, depotRootPath).Replace('\\', '/');
         }
 
         /// <summary>
@@ -39,9 +39,9 @@ namespace Externalkit.Perforce
         /// <summary>
         /// DepotSyntaxパスからのLocalSyntaxのパスに変換します
         /// </summary>
-        internal static string GetLocalPathFromDepotPath(this P4Client client, string depotFilePath)
+        internal static string GetLocalPathFromDepotPath(this P4Client client, string depotPath)
         {
-            return P4Util.GetLocalPathFromDepotPath(client.DepotRootPath, client.LocalRootPath, depotFilePath);
+            return P4Util.GetLocalPathFromDepotPath(client.DepotRootPath, client.LocalRootPath, depotPath);
         }
 
         /// <summary>

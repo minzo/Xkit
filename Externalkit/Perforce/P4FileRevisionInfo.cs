@@ -58,6 +58,11 @@ namespace Externalkit.Perforce
         public DateTime DateTime { get; }
 
         /// <summary>
+        /// チェンジリスト番号
+        /// </summary>
+        public string ChangeListNumber { get; }
+
+        /// <summary>
         /// 前のリビジョンのDepotSytaxパス
         /// </summary>
         public string PrevRevisionDepotPath { get; }
@@ -112,6 +117,9 @@ namespace Externalkit.Perforce
             this.Revision = int.Parse(keyValues["rev"]);
             this.UserName = keyValues["user"];
             this.Description = keyValues["desc"];
+            this.Action = P4Util.ParseP4FileAction(keyValues["action"]);
+            this.ChangeListNumber = keyValues["change"];
+            this.DateTime = DateTimeOffset.FromUnixTimeSeconds(int.Parse(keyValues["time"])).LocalDateTime.ToLocalTime();
 
             if (keyValues.TryGetValue("how", out string how) && how == "moved from")
             {

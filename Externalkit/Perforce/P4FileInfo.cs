@@ -16,17 +16,17 @@ namespace Externalkit.Perforce
         /// <summary>
         /// Depot上でのパス
         /// </summary>
-        public string DepotFilePath { get; }
+        public string DepotPath { get; }
 
         /// <summary>
         /// ローカルでのパス
         /// </summary>
-        public string ClientFilePath { get; }
+        public string LocalPath { get; }
 
         /// <summary>
         /// 移動元のパス
         /// </summary>
-        public string DepotMovedFilePath { get; }
+        public string DepotMovedPath { get; }
 
         /// <summary>
         /// 最新のリビジョン
@@ -70,9 +70,9 @@ namespace Externalkit.Perforce
         public P4FileInfo(string str)
         {
             //　初期化
-            this.DepotFilePath = null;
-            this.ClientFilePath = null;
-            this.DepotMovedFilePath = null;
+            this.DepotPath = null;
+            this.LocalPath = null;
+            this.DepotMovedPath = null;
             this.LatestRevision = -1;
             this.HaveRevision = -1;
             this.ChangeListNumber = null;
@@ -90,13 +90,13 @@ namespace Externalkit.Perforce
                 switch (key)
                 {
                     case "depotFile":
-                        this.DepotFilePath = unit[2];
+                        this.DepotPath = unit[2];
                         break;
                     case "clientFile":
-                        this.ClientFilePath = unit[2];
+                        this.LocalPath = unit[2];
                         break;
                     case "movedFile":
-                        this.DepotMovedFilePath = unit[2];
+                        this.DepotMovedPath = unit[2];
                         break;
                     case "headRev":
                     case "movedRev":
