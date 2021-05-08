@@ -49,7 +49,7 @@ namespace Externalkit.Perforce
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 RedirectStandardInput = true,
-                WorkingDirectory = context.ClientWorkingDirectoryPath,
+                WorkingDirectory = context.LocalWorkingDirectoryPath,
             };
 
             return Execute(processInfo, input, out stdOutput);
@@ -79,7 +79,7 @@ namespace Externalkit.Perforce
         /// </summary>
         private static bool Execute(ProcessStartInfo info, string input, out string stdOutput)
         {
-            var output = new StringBuilder(1024 * 100); // 100Kbyteぐらい確保しておく
+            var output = new StringBuilder(1024 * 1000); // 1000Kbyteぐらい確保しておく
 
             using (var process = new Process() { StartInfo = info })
             {

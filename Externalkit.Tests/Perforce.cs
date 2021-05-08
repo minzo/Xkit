@@ -30,7 +30,7 @@ namespace Externalkit.Perforce.Tests
             ExecuteP4Command($"init -C0 -n", DepotDir);
 
             // テスト用にファイルをサブミットしておく
-            var client = new Externalkit.Perforce.P4Client(P4Context.NewContext(ClientRootPath));
+            var client = new Externalkit.Perforce.P4Client(P4Context.NewContext(LocalRootPath));
 
             P4ChangeList changeList;
             if(client.TryCreateChangeList("テスト準備サブミット", out changeList))
@@ -46,6 +46,8 @@ namespace Externalkit.Perforce.Tests
                 File.Create(DeleteFilePath).Close();
                 client.EditAdd(DeleteFilePath, changeList);
                 client.Submit(changeList);
+
+                File.Create(MoveOldFilePath).Close();
             }
 
             if (client.TryCreateChangeList("テスト準備サブミット", out changeList))
@@ -58,7 +60,7 @@ namespace Externalkit.Perforce.Tests
         [ClassCleanup]
         public static void ClassCleanup()
         {
-            var client = new Externalkit.Perforce.P4Client(P4Context.NewContext(ClientRootPath));
+            var client = new Externalkit.Perforce.P4Client(P4Context.NewContext(LocalRootPath));
 
             // チェンジリストを削除
             client
@@ -66,7 +68,7 @@ namespace Externalkit.Perforce.Tests
                 .ForEach(i => client.DeleteChangeListAndMoveDefault(i));
 
             // 全部 Revert
-            client.Revert(client.EnumerateChangeListFilePath(), true);
+            client.Revert(client.EnumerateChangeListFileLocalPath(), true);
 
             // テスト用のDepotを削除
             if (Directory.Exists(DepotDir))
@@ -78,7 +80,7 @@ namespace Externalkit.Perforce.Tests
         [TestInitialize]
         public void TestInitialize()
         {
-            this._Client = new Externalkit.Perforce.P4Client(P4Context.NewContext(ClientRootPath));
+            this._Client = new Externalkit.Perforce.P4Client(P4Context.NewContext(LocalRootPath));
         }
 
         [TestCleanup]
@@ -89,8 +91,8 @@ namespace Externalkit.Perforce.Tests
         [TestMethod]
         public void Context()
         {
-            var context = P4Context.NewContext(ClientRootPath);
-            Assert.IsTrue(context.ClientWorkingDirectoryPath == ClientRootPath);
+            var context = P4Context.NewContext(LocalRootPath);
+            Assert.IsTrue(context.LocalWorkingDirectoryPath == LocalRootPath);
         }
 
         [TestMethod]
@@ -227,11 +229,11 @@ namespace Externalkit.Perforce.Tests
 
             // EditAddWithRevert
             Assert.IsTrue(this._Client.EditAddWithRevert(EditFilePath, changeList));
-            Assert.IsTrue(this._Client.EnumerateChangeListFilePath(changeList).Any(i => i.ToLower() == EditFilePath.ToLower()));
+            Assert.IsTrue(this._Client.EnumerateChangeListFileLocalPath(changeList).Any(i => i.ToLower() == EditFilePath.ToLower()));
 
             // Revert
             Assert.IsTrue(this._Client.Revert(EditFilePath));
-            Assert.IsFalse(this._Client.EnumerateChangeListFilePath(changeList).Any());
+            Assert.IsFalse(this._Client.EnumerateChangeListFileLocalPath(changeList).Any());
         }
 
         [TestMethod]
@@ -245,24 +247,24 @@ namespace Externalkit.Perforce.Tests
             Assert.IsTrue(this._Client.Move(MoveOldFilePath, MoveNewFilePath));
 
             // デフォルトチェンジリストに入っているか
-            Assert.IsTrue(MoveFileList.Except(this._Client.EnumerateChangeListFilePath().Select(i => i.ToLower())).IsEmpty());
+            Assert.IsTrue(MoveFileList.Except(this._Client.EnumerateChangeListFileLocalPath().Select(i => i.ToLower()).ToList()).IsEmpty());
 
             // チェンジリスト作成
-            Assert.IsTrue(this._Client.TryCreateChangeList("移動サブミット", out changeList));
+            Assert.IsTrue(this._Client.TryCreateChangeList("移動サブミット\n... hoge\n... hoge", out changeList));
             Assert.IsTrue(changeList.Status == P4ChangeListStatus.Pending);
-            Assert.IsTrue(changeList.Description == "移動サブミット");
+            Assert.IsTrue(changeList.Description == "移動サブミット\n... hoge\n... hoge");
 
             // 別のチェンジリストに移動
             Assert.IsTrue(this._Client.MoveFileAnotherChangeList(MoveOldFilePath, changeList));
 
             // 移動先のチェンジリストに入っているか
-            Assert.IsTrue(MoveFileList.Except(this._Client.EnumerateChangeListFilePath(changeList).Select(i => i.ToLower())).IsEmpty());
+            Assert.IsTrue(MoveFileList.Except(this._Client.EnumerateChangeListFileLocalPath(changeList).Select(i => i.ToLower())).IsEmpty());
 
             // 再度デフォルトチェンジリストに移動
             Assert.IsTrue(this._Client.MoveFileAnotherChangeList(MoveNewFilePath));
 
             // デフォルトチェンジリストに入っているか
-            Assert.IsTrue(MoveFileList.Except(this._Client.EnumerateChangeListFilePath().Select(i => i.ToLower())).IsEmpty());
+            Assert.IsTrue(MoveFileList.Except(this._Client.EnumerateChangeListFileLocalPath().Select(i => i.ToLower())).IsEmpty());
 
             // Revert
             Assert.IsTrue(this._Client.Revert(MoveOldFilePath));
@@ -279,7 +281,7 @@ namespace Externalkit.Perforce.Tests
             //移動
             this._Client.MoveFileAnotherChangeList(new[] { MoveOldFilePath, EditFile3Path }, changeList);
             // 移動先のチェンジリストに入っているか
-            Assert.IsTrue(new[] { MoveOldFilePath, MoveNewFilePath, EditFile3Path }.Select(i => i.ToLower()).Except(this._Client.EnumerateChangeListFilePath(changeList).Select(i => i.ToLower())).IsEmpty());
+            Assert.IsTrue(new[] { MoveOldFilePath, MoveNewFilePath, EditFile3Path }.Select(i => i.ToLower()).Except(this._Client.EnumerateChangeListFileLocalPath(changeList).Select(i => i.ToLower())).IsEmpty());
             // Revert
             Assert.IsTrue(this._Client.Revert(MoveOldFilePath));
             Assert.IsTrue(this._Client.Revert(MoveNewFilePath));
@@ -331,10 +333,16 @@ namespace Externalkit.Perforce.Tests
         }
 
         [TestMethod]
+        public void CreateChangeList()
+        {
+            Assert.IsTrue(this._Client.TryCreateChangeList("チェンジリスト", out P4ChangeList changeList));
+            Assert.IsNotNull(changeList);
+        }
+
+        [TestMethod]
         public void DeleteChangeList()
         {
             P4ChangeList changeList;
-
             Assert.IsTrue(this._Client.TryCreateChangeList("チェンジリスト", out changeList));
             Assert.IsTrue(this._Client.DeleteChangeListAndMoveDefault(changeList));
 
@@ -359,16 +367,62 @@ namespace Externalkit.Perforce.Tests
             var changeList = this._Client.EnumerateChangeList()
                 .LastOrDefault(i => i.Status == P4ChangeListStatus.Submitted);
 
-            var filePathList = this._Client.EnumerateChangeListFilePath(changeList).ToList();
+            var filePathList = this._Client.EnumerateChangeListFileLocalPath(changeList).ToList();
             Assert.IsTrue(filePathList.Count() == 5);
         }
 
         [TestMethod]
         public void FileLog()
         {
-            this._Client.EnumerateFileRevisionInfo($"{DepotDir}/...")
+            P4ChangeList changeList;
+
+            var moveOldFile = CreateFile();
+            var moveNew0File = GetFilePath();
+            var moveNew1File = GetFilePath();
+
+            // ファイルが移動したファイルログを作る
+            {
+                // 作ったファイルをサブミット
+                Assert.IsTrue(this._Client.TryCreateChangeList("チェンジリスト0", out changeList));
+                Assert.IsTrue(this._Client.EditAdd(moveOldFile, changeList));
+                Assert.IsTrue(this._Client.Submit(changeList));
+
+                // 移動する
+                Assert.IsTrue(this._Client.TryCreateChangeList("チェンジリスト1", out changeList));
+                Assert.IsTrue(this._Client.Move(moveOldFile, moveNew0File, changeList));
+                Assert.IsTrue(this._Client.Submit(changeList));
+
+                // さらに移動する
+                Assert.IsTrue(this._Client.TryCreateChangeList("チェンジリスト2", out changeList));
+                Assert.IsTrue(this._Client.Move(moveNew0File, moveNew1File, changeList));
+                Assert.IsTrue(this._Client.Submit(changeList));
+
+                // 元に戻す
+                Assert.IsTrue(this._Client.TryCreateChangeList("チェンジリスト3", out changeList));
+                Assert.IsTrue(this._Client.Move(moveNew1File, moveOldFile, changeList));
+                Assert.IsTrue(this._Client.Submit(changeList));
+            }
+
+            var filelog = this._Client.EnumerateFileRevisionInfo($"{DepotDir}/...")
                 .ToList();
         }
+
+        [TestMethod]
+        public void GetDepotPathFromLocalPath()
+        {
+            var localPath = this._Client.LocalRootPath;
+            var depotPath = this._Client.DepotRootPath;
+            Assert.IsTrue(this._Client.GetDepotPathFromLocalPath(localPath) == depotPath);
+        }
+
+        [TestMethod]
+        public void GetLocalPathFromDepotPath()
+        {
+            var localPath = this._Client.LocalRootPath;
+            var depotPath = this._Client.DepotRootPath;
+            Assert.IsTrue(this._Client.GetLocalPathFromDepotPath(depotPath) == localPath);
+        }
+
 
         private Externalkit.Perforce.P4Client _Client;
 
@@ -419,17 +473,32 @@ namespace Externalkit.Perforce.Tests
             }
         }
 
-        private static readonly string DepotDir = Path.Combine(Environment.CurrentDirectory, "TestPerforceDepot");
-        private static readonly string ClientRootPath = DepotDir;
+        private static string CreateFile()
+        {
+            var path = GetFilePath();
+            return File.Create(path).Name;
+        }
 
-        private static readonly string NewFilePath = Path.Combine(ClientRootPath, "NewFile.txt");
-        private static readonly string NewFile1Path = Path.Combine(ClientRootPath, "NewFile1.txt");
-        private static readonly string EditFilePath = Path.Combine(ClientRootPath, "EditFile.txt");
-        private static readonly string EditFile2Path = Path.Combine(ClientRootPath, "EditFile2.txt");
-        private static readonly string EditFile3Path = Path.Combine(ClientRootPath, "EditFile3.txt");
-        private static readonly string DeleteFilePath = Path.Combine(ClientRootPath, "DeleteFile.txt");
-        private static readonly string MoveOldFilePath = Path.Combine(ClientRootPath, "MoveFileOld.txt");
-        private static readonly string MoveNewFilePath = Path.Combine(ClientRootPath, "MoveFileNew.txt");
-        private static readonly string UnorganizedFilePath = Path.Combine(ClientRootPath, "UnorganizedFilePath.txt");
+        private static string GetFilePath()
+        {
+            var index = Random.Next();
+            var path = Path.Combine(DepotDir, $"{index}.txt");
+            return path;
+        }
+
+        private static readonly Random Random = new Random(0);
+
+        private static readonly string DepotDir = Path.Combine(Environment.CurrentDirectory, "TestPerforceDepot");
+        private static readonly string LocalRootPath = DepotDir;
+
+        private static readonly string NewFilePath = Path.Combine(LocalRootPath, "NewFile.txt");
+        private static readonly string NewFile1Path = Path.Combine(LocalRootPath, "NewFile1.txt");
+        private static readonly string EditFilePath = Path.Combine(LocalRootPath, "EditFile.txt");
+        private static readonly string EditFile2Path = Path.Combine(LocalRootPath, "EditFile2.txt");
+        private static readonly string EditFile3Path = Path.Combine(LocalRootPath, "EditFile3.txt");
+        private static readonly string DeleteFilePath = Path.Combine(LocalRootPath, "DeleteFile.txt");
+        private static readonly string MoveOldFilePath = Path.Combine(LocalRootPath, "MoveFileOld.txt");
+        private static readonly string MoveNewFilePath = Path.Combine(LocalRootPath, "MoveFileNew.txt");
+        private static readonly string UnorganizedFilePath = Path.Combine(LocalRootPath, "UnorganizedFilePath.txt");
     }
 }

@@ -8,24 +8,6 @@ using System.Threading.Tasks;
 namespace Externalkit.Perforce
 {
     /// <summary>
-    /// ファイルにおこなったアクション
-    /// </summary>
-    internal enum P4FileAction
-    {
-        None,
-        Add,
-        Edit,
-        Delete,
-        Branch,
-        MoveAdd,
-        MoveDelete,
-        Integrate,
-        Import,
-        Purge,
-        Archive
-    }
-
-    /// <summary>
     /// ファイルの状態の情報
     /// </summary>
     [DebuggerDisplay("{ClientFilePath} {DepotFilePath} Latest:{LatestRevision} Have:{HaveRevision} ChangeList:{ChangeListNumber}")]
@@ -127,80 +109,10 @@ namespace Externalkit.Perforce
                         this.ChangeListNumber = unit[2];
                         break;
                     case "action":
-                        switch (unit[2])
-                        {
-                            case "add":
-                                this.Action = P4FileAction.Add;
-                                break;
-                            case "edit":
-                                this.Action = P4FileAction.Edit;
-                                break;
-                            case "delete":
-                                this.Action = P4FileAction.Delete;
-                                break;
-                            case "branch":
-                                this.Action = P4FileAction.Branch;
-                                break;
-                            case "move/add":
-                                this.Action = P4FileAction.MoveAdd;
-                                break;
-                            case "move/delete":
-                                this.Action = P4FileAction.MoveAdd;
-                                break;
-                            case "integrate":
-                                this.Action = P4FileAction.Integrate;
-                                break;
-                            case "import":
-                                this.Action = P4FileAction.Import;
-                                break;
-                            case "purge":
-                                this.Action = P4FileAction.Purge;
-                                break;
-                            case "archive":
-                                this.Action = P4FileAction.Archive;
-                                break;
-                            default:
-                                throw new Exception("未知のアクション");
-                        }
+                        this.Action = P4Util.ParseP4FileAction(unit[2]);
                         break;
-
                     case "headAction":
-                        switch (unit[2])
-                        {
-                            case "add":
-                                this.HeadAction = P4FileAction.Add;
-                                break;
-                            case "edit":
-                                this.HeadAction = P4FileAction.Edit;
-                                break;
-                            case "delete":
-                                this.HeadAction = P4FileAction.Delete;
-                                break;
-                            case "branch":
-                                this.HeadAction = P4FileAction.Branch;
-                                break;
-                            case "move/add":
-                                this.HeadAction = P4FileAction.MoveAdd;
-                                break;
-                            case "move/delete":
-                                this.HeadAction = P4FileAction.MoveAdd;
-                                break;
-                            case "integrate":
-                                this.HeadAction = P4FileAction.Integrate;
-                                break;
-                            case "import":
-                                this.HeadAction = P4FileAction.Import;
-                                break;
-                            case "purge":
-                                this.HeadAction = P4FileAction.Purge;
-                                break;
-                            case "archive":
-                                this.HeadAction = P4FileAction.Archive;
-                                break;
-                            default:
-                                throw new Exception("未知のアクション");
-                        }
-
+                        this.HeadAction = P4Util.ParseP4FileAction(unit[2]);
                         break;
                     default:
                         break;

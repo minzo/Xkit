@@ -11,8 +11,24 @@ namespace Externalkit.Perforce
     /// <summary>
     /// Perforceの基本的な操作を提供します
     /// </summary>
+    [DebuggerDisplay("{_Client}")]
     public sealed class P4Client
     {
+        /// <summary>
+        /// ローカルのルートディレクトリに対応するDepotのパス
+        /// </summary>
+        public string DepotRootPath => this._Context.DepotRootPath;
+
+        /// <summary>
+        /// ローカルのルートディレクトリに対応する
+        /// </summary>
+        public string ClientRootPath => this._Context.ClientRootPath;
+
+        /// <summary>
+        /// ローカルのルートディレクトリ
+        /// </summary>
+        public string LocalRootPath => this._Context.LocalRootPath;
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -21,12 +37,14 @@ namespace Externalkit.Perforce
             this._Context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
+        #region Sync
+
         /// <summary>
         /// 最新リビジョンを取得します
         /// </summary>
         public bool Sync()
         {
-            return P4CommandExecutor.Execute(this._Context, $"sync {this._Context.ClientWorkingDirectoryPath}\\...");
+            return P4CommandExecutor.Execute(this._Context, $"sync {this._Context.LocalWorkingDirectoryPath}\\...");
         }
 
         /// <summary>
@@ -71,6 +89,8 @@ namespace Externalkit.Perforce
             return P4CommandExecutor.Execute(this._Context, $"sync {filePath}#{revision}");
         }
 
+        #endregion
+
         /// <summary>
         /// チェンジリストをサブミットします
         /// </summary>
@@ -83,6 +103,8 @@ namespace Externalkit.Perforce
             }
             return false;
         }
+
+        #region EditAdd
 
         /// <summary>
         /// ファイルを Edit・Add 状態にします
@@ -119,6 +141,10 @@ namespace Externalkit.Perforce
                 return result;
             }
         }
+
+        #endregion
+
+        #region delete
 
         /// <summary>
         /// ファイルを Delete 状態にします
@@ -159,6 +185,8 @@ namespace Externalkit.Perforce
             return false;
         }
 
+        #endregion
+
         /// <summary>
         /// ファイルを移動・名前変更します
         /// ファイル操作は指定したチェンジリストに含まれます
@@ -181,6 +209,8 @@ namespace Externalkit.Perforce
 
             return false;
         }
+
+        #region revert
 
         /// <summary>
         /// Revertします
@@ -256,12 +286,14 @@ namespace Externalkit.Perforce
             }
         }
 
+        #endregion
+
         /// <summary>
         /// ファイルの情報を列挙します
         /// </summary>
         internal IEnumerable<P4FileInfo> EnumerateFileInfo()
         {
-            if (P4CommandExecutor.Execute(this._Context, $"fstat {this._Context.ClientWorkingDirectoryPath}/...", out string output))
+            if (P4CommandExecutor.Execute(this._Context, $"fstat {this._Context.LocalWorkingDirectoryPath}/...", out string output))
             {
                 return P4FileInfo.Parse(output);
             }
@@ -382,7 +414,7 @@ namespace Externalkit.Perforce
         }
 
         /// <summary>
-        /// 指定したファイルをチェンジリスト間で移動します
+        /// 指定したファイルを指定したチェンジリストに移動します
         /// </summary>
         internal bool ReopenFileAnotherChangeList(string filePath, P4ChangeList changeList = null)
         {
@@ -404,6 +436,7 @@ namespace Externalkit.Perforce
 
         /// <summary>
         /// チェンジリストを削除します
+        /// チェンジリストにファイルが含まれていると失敗します
         /// </summary>
         internal bool DeleteChangeList(P4ChangeList changeList)
         {
@@ -439,10 +472,10 @@ namespace Externalkit.Perforce
         }
 
         /// <summary>
-        /// 指定したチェンジリストに含まれているファイルのパスを列挙します
+        /// 指定したチェンジリストに含まれているファイルのLocalSyntaxパスを列挙します
         /// 指定しなかった場合には default チェンジリストに含まれているファイルパスが列挙されます
         /// </summary>
-        public IEnumerable<string> EnumerateChangeListFilePath(P4ChangeList changeList = null)
+        public IEnumerable<string> EnumerateChangeListFileLocalPath(P4ChangeList changeList = null)
         {
             var number = changeList?.Number ?? "default";
 
@@ -461,7 +494,7 @@ namespace Externalkit.Perforce
                             {
                                 var startPos = line.IndexOf(' ', length) + 1;
                                 var str = line.Substring(startPos, line.Length - startPos);
-                                var path = P4Client.GetDepotFilePathFromClientFilePath(this._Context, str);
+                                var path = this.GetLocalPathFromDepotPath(str);
                                 yield return path;
                             }
                         }
@@ -479,7 +512,7 @@ namespace Externalkit.Perforce
                             var line = reader.ReadLine();
                             var length = line.LastIndexOf('#', line.LastIndexOf(" - "));
                             var str = line.Substring(0, length);
-                            var path = P4Client.GetDepotFilePathFromClientFilePath(this._Context, str);
+                            var path = this.GetLocalPathFromDepotPath(str);
                             yield return path;
                         }
                     }
@@ -511,7 +544,6 @@ namespace Externalkit.Perforce
             }
             return Enumerable.Empty<P4FileRevisionInfo>();
         }
-
 
         /// <summary>
         /// 競合解決の方法を指定します
@@ -555,14 +587,6 @@ namespace Externalkit.Perforce
         private readonly P4Context _Context;
 
         #region Utilities
-
-        /// <summary>
-        /// ローカルのファイルパスからDepot上のファイルパスに変換します
-        /// </summary>
-        private static string GetDepotFilePathFromClientFilePath(P4Context context, string depotFilePath)
-        {
-            return Path.GetFullPath(depotFilePath.Replace(context.DepotRootDirectoryPath, context.ClientRootDirectoryPath));
-        }
 
         /// <summary>
         /// コマンドライン向けにファイルパスをエスケープする
@@ -656,12 +680,12 @@ namespace Externalkit.Perforce
 
         #region P4 Commands
 
-        private readonly string P4CommandChanges = "changes";
-        private readonly string P4CommandChangesGlobalOpt = "-z tag";
-        private readonly string P4CommandDescribe = "describe";
-        private readonly string P4CommandDescribeGlobalOpt = "-z tag";
-        private readonly string P4CommandFileLog = "filelog";
-        private readonly string P4CommandFileLogGlobalOpt = "-z tag";
+        private static readonly string P4CommandChanges = "changes";
+        private static readonly string P4CommandChangesGlobalOpt = "-z tag";
+        private static readonly string P4CommandDescribe = "describe";
+        private static readonly string P4CommandDescribeGlobalOpt = "-z tag";
+        private static readonly string P4CommandFileLog = "filelog";
+        private static readonly string P4CommandFileLogGlobalOpt = "-z tag";
 
         #endregion
     }
@@ -826,7 +850,7 @@ namespace Externalkit.Perforce
             }
 
             // 削除に失敗したらファイルが含まれているか調べる
-            var filePathList = client.EnumerateChangeListFilePath(changeList).ToList();
+            var filePathList = client.EnumerateChangeListFileLocalPath(changeList).ToList();
 
             // ファイルが含まれていたら
             if (filePathList.Any())
@@ -873,7 +897,7 @@ namespace Externalkit.Perforce
         /// </summary>
         public static bool IsEmptyChangeList(this P4Client client, P4ChangeList changeList)
         {
-            return !client.EnumerateChangeListFilePath(changeList).Any();
+            return !client.EnumerateChangeListFileLocalPath(changeList).Any();
         }
     }
 }
