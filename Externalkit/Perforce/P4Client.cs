@@ -559,6 +559,47 @@ namespace Externalkit.Perforce
             return false;
         }
 
+        /// <summary>
+        /// 指定したリビジョンのファイルを指定した場所にダウンロードします
+        /// </summary>
+        public IEnumerable<string> Download()
+        {
+            if (P4CommandExecutor.Execute(this._Context, $"{P4CommandPrint} ./...", out string output))
+            {
+                var path = string.Empty;
+                var builder = new StringBuilder(1024 * 1000);
+                using (var reader = new StringReader(output))
+                {
+                    while (reader.Peek() >= 0)
+                    {
+                        var line = reader.ReadLine();
+                        if (line.StartsWith(this.DepotRootPath))
+                        {
+                            if (builder.Length > 0)
+                            {
+                                File.WriteAllText(path, builder.ToString());
+                                yield return path;
+                                builder.Clear();
+                            }
+                            var pathSize = line.IndexOf(" - ");
+                            path = P4Util.GetLocalPathFromDepotPath(this, output.Substring(0, pathSize));
+                        }
+                        else
+                        {
+                            builder.AppendLine(line);
+                        }
+                    }
+                }
+
+                if (builder.Length > 0)
+                {
+                    File.WriteAllText(path, builder.ToString());
+                    yield return path;
+                    builder.Clear();
+                }
+            }
+        }
+
 
         /// <summary>
         /// 競合解決の方法を指定します

@@ -372,7 +372,7 @@ namespace Externalkit.Perforce.Tests
         }
 
         [TestMethod]
-        public void FileLog()
+        public void EnumerateFileRevisionInfo()
         {
             P4ChangeList changeList;
 
@@ -404,6 +404,45 @@ namespace Externalkit.Perforce.Tests
             }
 
             var filelog = this._Client.EnumerateFileRevisionInfo($"{DepotDir}/...")
+                .ToList();
+        }
+
+        [TestMethod]
+        public void Download()
+        {
+            var editFile1 = CreateFile();
+            var editFile2 = CreateFile();
+ 
+            P4ChangeList changeList;
+            {
+                Assert.IsTrue(this._Client.TryCreateChangeList("チェンジリスト", out changeList));
+                Assert.IsTrue(this._Client.EditAdd(editFile1, changeList));
+                Assert.IsTrue(this._Client.EditAdd(editFile2, changeList));
+                Assert.IsTrue(this._Client.Submit(changeList));
+
+                Assert.IsTrue(this._Client.TryCreateChangeList("チェンジリスト", out changeList));
+                Assert.IsTrue(this._Client.EditAdd(editFile1, changeList));
+                Assert.IsTrue(this._Client.EditAdd(editFile2, changeList));
+                File.AppendAllText(editFile1, "AppendLine0\n");
+                File.AppendAllText(editFile2, "AppendLine10\n");
+                Assert.IsTrue(this._Client.Submit(changeList));
+
+                Assert.IsTrue(this._Client.TryCreateChangeList("チェンジリスト", out changeList));
+                Assert.IsTrue(this._Client.EditAdd(editFile1, changeList));
+                Assert.IsTrue(this._Client.EditAdd(editFile2, changeList));
+                File.AppendAllText(editFile1, "AppendLine1\n");
+                File.AppendAllText(editFile2, "AppendLine11\n");
+                Assert.IsTrue(this._Client.Submit(changeList));
+
+                Assert.IsTrue(this._Client.TryCreateChangeList("チェンジリスト", out changeList));
+                Assert.IsTrue(this._Client.EditAdd(editFile1, changeList));
+                Assert.IsTrue(this._Client.EditAdd(editFile2, changeList));
+                File.AppendAllText(editFile1, "AppendLine2\n");
+                File.AppendAllText(editFile2, "AppendLine12\n");
+                Assert.IsTrue(this._Client.Submit(changeList));
+            }
+
+            this._Client.Download()
                 .ToList();
         }
 
