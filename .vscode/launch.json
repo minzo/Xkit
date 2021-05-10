@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "Build Corekit.Sample",
-            "program": "${workspaceFolder}/Corekit.Sample/bin/Debug/netcoreapp3.0/Corekit.Sample.dll",
+            "program": "${workspaceFolder}/Corekit.Sample/bin/Debug/net5.0/Corekit.Sample.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
