@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -96,7 +97,7 @@ namespace Externalkit.Perforce
 
                 this.UserName = keyValuePairs.First(i => i.Key == "User name").Value;
                 this.ClientName = keyValuePairs.First(i => i.Key == "Client name").Value;
-                this.LocalRootPath = keyValuePairs.First(i => i.Key == "Client root").Value;
+                this.LocalRootPath = Path.GetFullPath(keyValuePairs.First(i => i.Key == "Client root").Value);
 
                 var result = mapping.Split(' ');
                 this.DepotRootPath = result[0].Replace("/...", string.Empty);
