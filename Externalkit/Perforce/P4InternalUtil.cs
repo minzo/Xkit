@@ -72,7 +72,9 @@ namespace Externalkit.Perforce
             var headerMark = $"... ";
             var result = new Dictionary<string, string>();
 
-            var headerKey = str.Substring(headerMark.Length, str.IndexOf(' ', headerMark.Length) - headerMark.Length);
+            var headerKeyIndex = str.IndexOf(' ', headerMark.Length);
+            if (headerKeyIndex < 0) yield break;
+            var headerKey = str.Substring(headerMark.Length, headerKeyIndex - headerMark.Length);
 
             for (int headerIndex = 0, length = str.Length; headerIndex < length; /**/ )
             {
@@ -92,10 +94,10 @@ namespace Externalkit.Perforce
                 }
                 else
                 {
-                    while (str[valueEndPos - 1] != '\n')
+                    while (str[valueEndPos - 1] != '\n' && valueEndPos < str.Length)
                     {
-                        // 直前が改行=行頭かチェックする 行頭で無ければ探しなおし
-                        valueEndPos = str.IndexOf(headerMark, valueEndPos);
+                        // 直前が改行=行頭かチェックする 行頭で無ければ次のインデックスから探しなおし
+                        valueEndPos = str.IndexOf(headerMark, valueEndPos + 1);
                     }
                 }
                 var valueSize = valueEndPos - valueIndex;

@@ -95,54 +95,7 @@ namespace Externalkit.Perforce
         /// </summary>
         internal static IEnumerable<P4ChangeList> ParseFromChanges(string str)
         {
-            var headerMark = "... ";
-            var headerMarkSize = headerMark.Length;
-            var tag = "... ";
-            var tagSize = tag.Length;
-
-            var dict = new Dictionary<string, string>();
-
-            for (int headerIndex = 0, length = str.Length; headerIndex < length; /**/ )
-            {
-                var keyIndex = headerIndex + tagSize;
-                var nextHeaderIndex = str.IndexOf(headerMark, headerIndex + headerMarkSize);
-                if (nextHeaderIndex < 0) nextHeaderIndex = length;
-
-                var nextTagIndex = str.IndexOf(tag, keyIndex);
-                if (nextTagIndex < 0) nextTagIndex = length;
-
-                var keyValue = str.Substring(keyIndex, nextTagIndex - keyIndex);
-
-                var keyStartPos = 0;
-                var keyEndPos = keyValue.IndexOf(' ');
-                var keySize = keyEndPos - keyStartPos;
-                var key = keyValue.Substring(keyStartPos, keySize)
-                    .TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
-                var valueStartPos = keyEndPos + 1; // スペースの次が先頭
-                var value = keyValue.Substring(valueStartPos)
-                    .Trim('\r', '\n', ' ') //改行とスペースを削除
-                    .Trim('\n'); // /r/n の場合も考慮
-
-
-                if (dict.ContainsKey(key))
-                {
-                    var info = new P4ChangeList(dict);
-                    dict.Clear();
-                    yield return info;
-                }
-
-                dict.Add(key, value);
-
-                // 次の位置へ移動
-                headerIndex = nextHeaderIndex;
-            }
-
-            if (dict.Any())
-            {
-                var info = new P4ChangeList(dict);
-                dict.Clear();
-                yield return info;
-            }
+            return P4Util.Parse(str).Select(i => new P4ChangeList(i));
         }
     }
 }
