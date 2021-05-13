@@ -80,7 +80,7 @@ namespace Externalkit.Perforce
                 WorkingDirectory = context.LocalWorkingDirectoryPath,
             };
 
-            if (!Execute(processInfo, null, out stdOutput))
+            if (!Execute(processInfo, null, out string _))
             {
                 stdOutput = null;
                 return false;

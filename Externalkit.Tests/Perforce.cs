@@ -442,8 +442,19 @@ namespace Externalkit.Perforce.Tests
                 Assert.IsTrue(this._Client.Submit(changeList));
             }
 
-            this._Client.Download()
+            var depotPathList = Enumerable.Empty<string>()
+                .Append(P4Util.GetDepotPathFromLocalPath(this._Client, editFile1) + "#2")
+                .Append(P4Util.GetDepotPathFromLocalPath(this._Client, editFile2) + "#2");
+
+            var localPathList = depotPathList
+                .Select(i => Path.GetFileName(i))
+                .Select(i => Path.Combine(DepotDir, i))
+                .Select(i => Path.GetFullPath(i));
+
+            var downloadPathList = this._Client.Download(depotPathList, DepotDir)
                 .ToList();
+
+            Assert.IsTrue(downloadPathList.SequenceEqual(localPathList));
         }
 
         [TestMethod]

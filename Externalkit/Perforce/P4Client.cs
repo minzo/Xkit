@@ -561,43 +561,54 @@ namespace Externalkit.Perforce
 
         /// <summary>
         /// 指定したリビジョンのファイルを指定した場所にダウンロードします
+        /// ダウンロードしたファイルのパスを返します
         /// </summary>
-        public IEnumerable<string> Download()
+        public IReadOnlyList<string> Download(IEnumerable<string> depotPathWithRevision, string destDirPath)
         {
-            if (P4CommandExecutor.Execute(this._Context, $"{P4CommandPrint} ./...", out string output))
+            var localPathList = new List<string>();
+
+            using (var temp = new ScopedTempFile(depotPathWithRevision))
             {
-                var path = string.Empty;
-                var builder = new StringBuilder(1024 * 1000);
-                using (var reader = new StringReader(output))
+                if (P4CommandExecutor.ExecuteViaCmd(this._Context, $"-x {temp.TempFilePath} {P4CommandPrint}", out string output))
                 {
-                    while (reader.Peek() >= 0)
+                    // 1ファイルに関しての情報はファイルの DepotPath で始まるので DepotRootPath で先頭位置を探す
+                    var headerMark = this.DepotRootPath;
+
+                    for (var startIndex = output.IndexOf(headerMark); startIndex >= 0 && startIndex < output.Length; /* */)
                     {
-                        var line = reader.ReadLine();
-                        if (line.StartsWith(this.DepotRootPath))
+                        // 次のファイルの応報の先頭を探す(見つからなかったら末尾を意味する)
+                        var nextIndex = output.IndexOf(headerMark, startIndex + headerMark.Length);
+                        if (nextIndex < 0) nextIndex = output.Length;
+
+                        var size = nextIndex - startIndex;
+                        if (size > 0)
                         {
-                            if (builder.Length > 0)
-                            {
-                                File.WriteAllText(path, builder.ToString());
-                                yield return path;
-                                builder.Clear();
-                            }
-                            var pathSize = line.IndexOf(" - ");
-                            path = P4Util.GetLocalPathFromDepotPath(this, output.Substring(0, pathSize));
+                            // startIndex から nextIndex までを切り出した最初の1行目にファイルの情報が出力されるので
+                            // DepotPath(ファイルリビジョン付き)だけ切り出す
+                            var depotPathEndIndex = output.IndexOf(" - ", startIndex);
+                            var depotPathSize = depotPathEndIndex - startIndex;
+                            var depotPath = output.Substring(startIndex, depotPathSize);
+
+                            // ファイルの情報の次の行から nextIndex までファイルの中身なので改行を探してファイルの中身を切り出す
+                            var contentPathStartIndex = output.IndexOf(Environment.NewLine, depotPathEndIndex) + Environment.NewLine.Length;
+                            var contentPathSize = nextIndex - contentPathStartIndex;
+                            var content = output.Substring(contentPathStartIndex, contentPathSize);
+
+                            // DepotPathから保存すべきファイル名を取得してダウンロード先のローカルパスを作成する
+                            var fileName = Path.GetFileName(depotPath);
+                            var filePath = Path.Combine(destDirPath, fileName);
+                            File.WriteAllText(filePath, content);
+
+                            // ダウンロード先のパスを登録
+                            localPathList.Add(filePath);
                         }
-                        else
-                        {
-                            builder.AppendLine(line);
-                        }
+
+                        startIndex = nextIndex;
                     }
                 }
-
-                if (builder.Length > 0)
-                {
-                    File.WriteAllText(path, builder.ToString());
-                    yield return path;
-                    builder.Clear();
-                }
             }
+
+            return localPathList;
         }
 
 

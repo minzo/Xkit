@@ -71,7 +71,7 @@ namespace Externalkit.Perforce
         {
             var headerMark = $"... ";
             var result = new Dictionary<string, string>();
-
+            if (string.IsNullOrWhiteSpace(str)) yield break;
             var headerKeyIndex = str.IndexOf(' ', headerMark.Length);
             if (headerKeyIndex < 0) yield break;
             var headerKey = str.Substring(headerMark.Length, headerKeyIndex - headerMark.Length);
