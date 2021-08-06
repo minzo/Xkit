@@ -17,7 +17,7 @@ namespace Corekit.Models
             this.Definition = definition;
         }
 
-        public DynamicPropertyDescriptor(IDynamicProperty property) 
+        public DynamicPropertyDescriptor(IDynamicProperty property)
             : this(property.Definition)
         {
         }

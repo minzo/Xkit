@@ -17,7 +17,6 @@ namespace Corekit.Models
         public CombinationTable()
             : base()
         {
-
         }
 
         /// <summary>
@@ -33,7 +32,7 @@ namespace Corekit.Models
         /// </summary>
         protected override IDynamicItemDefinition CreateItemDefinition(IDynamicTableFrame row)
         {
-            return new CombinationItemDefinition<TSource>(this._Properties)
+            return new CombinationItemDefinition<TSource>(this.Properties)
             {
                 Name = row.Name,
                 IsReadOnly = row.IsReadOnly,

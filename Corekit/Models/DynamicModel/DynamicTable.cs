@@ -16,12 +16,12 @@ namespace Corekit.Models
         /// <summary>
         /// 行定義
         /// </summary>
-        public IEnumerable<IDynamicTableFrame> Rows { get; private set; }
+        public IReadOnlyList<IDynamicTableFrame> Rows { get; private set; }
 
         /// <summary>
         /// 列定義
         /// </summary>
-        public IEnumerable<IDynamicTableFrame> Cols { get; private set; }
+        public IReadOnlyList<IDynamicTableFrame> Cols { get; private set; }
 
         /// <summary>
         /// 名前
@@ -57,8 +57,24 @@ namespace Corekit.Models
                 throw new InvalidOperationException("DynamicTable Definition Already Attached");
             }
 
-            this.Rows = rows;
-            this.Cols = cols;
+            if (rows is IReadOnlyList<IDynamicTableFrame> rowslist)
+            {
+                this.Rows = rowslist;
+            }
+            else
+            {
+                this.Rows = rows.ToList();
+            }
+
+            if (cols is IReadOnlyList<IDynamicTableFrame> colslist)
+            {
+                this.Cols = colslist;
+            }
+            else
+            {
+                this.Cols = cols.ToList();
+            }
+
 
             // 列を追加
             foreach (var col in this.Cols)
@@ -73,15 +89,15 @@ namespace Corekit.Models
             }
 
             // 列定義追従
-            if (this.Cols is INotifyCollectionChanged _cols)
+            if (this.Cols is INotifyCollectionChanged cols_)
             {
-                _cols.CollectionChanged += this.OnColsCollectionChanged;
+                cols_.CollectionChanged += this.OnColsCollectionChanged;
             }
 
             // 行定義追従
-            if (this.Rows is INotifyCollectionChanged _rows)
+            if (this.Rows is INotifyCollectionChanged rows_)
             {
-                _rows.CollectionChanged += this.OnRowsCollectionChanged;
+                rows_.CollectionChanged += this.OnRowsCollectionChanged;
             }
 
             this._IsAttached = true;
@@ -345,8 +361,9 @@ namespace Corekit.Models
 
         #endregion
 
-        protected ObservableCollection<IDynamicPropertyDefinition> _Properties;
+        protected IReadOnlyList<IDynamicPropertyDefinition> Properties => this._Properties;
 
         private bool _IsAttached = false;
+        private readonly ObservableCollection<IDynamicPropertyDefinition> _Properties;
     }
 }
