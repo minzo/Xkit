@@ -72,11 +72,6 @@ namespace Toolkit.WPF.Commands
         public Type WindowType { get; set; } = typeof(Window);
 
         /// <summary>
-        /// Contentに設定するパネルのタイプ
-        /// </summary>
-        public Type ContentType { get; set; }
-
-        /// <summary>
         /// コンストラクタ
         /// </summary>
         public OpenWindowCommand() { }
@@ -97,18 +92,10 @@ namespace Toolkit.WPF.Commands
             if (this._RootObjectProvider.RootObject is FrameworkElement element)
             {
                 this._OwnerWindow = EnumerateParent(element)?.OfType<Window>()?.FirstOrDefault();
-                this._Parent = element.Parent as FrameworkElement;
-            }
-
-            FrameworkElement content = null;
-            if (typeof(FrameworkElement).IsAssignableFrom(this.ContentType))
-            {
-                content = (FrameworkElement)Activator.CreateInstance(this.ContentType);
             }
 
             var window = (Window)Activator.CreateInstance(this.WindowType);
-            window.Content = content;
-            window.DataContext = parameter ?? this._Parent?.DataContext;
+            window.SetCurrentValue(Window.DataContextProperty, parameter ?? this._Target?.DataContext);
             window.Owner = this._OwnerWindow;
             window.Title = this.Title;
             window.Width = this.Width;
@@ -118,10 +105,17 @@ namespace Toolkit.WPF.Commands
             window.WindowStyle = this.WindowStyle;
             window.WindowStartupLocation = this.StartupLocation;
 
-            var binding = this.Binding ?? new Binding(this.BindingPath) { Mode = BindingMode.OneWay };
-            if (binding != null)
+            if (this.Binding != null)
             {
-                BindingOperations.SetBinding(content, FrameworkElement.DataContextProperty, binding);
+                BindingOperations.SetBinding(window, Window.ContentProperty, this.Binding);
+            }
+            else if( !string.IsNullOrEmpty(this.BindingPath))
+            {
+                BindingOperations.SetBinding(window, Window.ContentProperty, new Binding(this.BindingPath) { Mode = BindingMode.OneWay });
+            }
+            else
+            {
+                BindingOperations.SetBinding(window, Window.ContentProperty, new Binding("DataContext") { Mode = BindingMode.OneWay, RelativeSource = new RelativeSource(RelativeSourceMode.Self) });
             }
 
             if (this.IsModal)
@@ -137,13 +131,21 @@ namespace Toolkit.WPF.Commands
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
             this._RootObjectProvider = (IRootObjectProvider)serviceProvider.GetService(typeof(IRootObjectProvider));
+            this._ProvideValueTarget = (IProvideValueTarget)serviceProvider.GetService(typeof(IProvideValueTarget));
+
+            if (this._ProvideValueTarget.TargetObject is FrameworkElement target)
+            {
+                this._Target = target;
+            }
+
             return this;
         }
 
         private Window _OwnerWindow;
-        private FrameworkElement _Parent;
+        private FrameworkElement _Target;
 
         private IRootObjectProvider _RootObjectProvider;
+        private IProvideValueTarget _ProvideValueTarget;
 
         private static IEnumerable<DependencyObject> EnumerateParent(DependencyObject source)
         {
