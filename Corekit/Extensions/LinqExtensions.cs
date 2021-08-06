@@ -280,7 +280,7 @@ namespace Corekit.Extensions
 
             public bool Equals(T x, T y)
             {
-                return this._Selector(x).Equals(_Selector(y));
+                return this._Selector(x).Equals(this._Selector(y));
             }
 
             public int GetHashCode(T obj)

@@ -6,14 +6,13 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 
 namespace Corekit.Models
 {
     /// <summary>
     /// 組み合わせ定義
     /// </summary>
-    public class Combination<T> : IEnumerable<CombinationTableFrame<T>>, INotifyCollectionChanged
+    public class Combination<T> : IReadOnlyCollection<CombinationTableFrame<T>>, INotifyCollectionChanged
     {
         /// <summary>
         /// コンストラクタ
@@ -22,15 +21,6 @@ namespace Corekit.Models
         {
             this._Definitions = new Dictionary<string, IEnumerable<T>>();
             this._Combinations = new ObservableCollection<CombinationTableFrame<T>>();
-        }
-
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        public Combination(Func<T, string> convertNameFunc)
-            : this()
-        {
-            this._ConvertNameFunc = convertNameFunc;
         }
 
         /// <summary>
@@ -83,11 +73,11 @@ namespace Corekit.Models
 
             var prev = this._Combinations;
             var next = this.ResolveCombination(sources)
-                .Select(i => new CombinationTableFrame<T>() { Name = string.Join("_", i.Select(x => x.Value).Select(this._ConvertNameFunc)), Elements = i.ToList() })
+                .Select(i => new CombinationTableFrame<T>(string.Join("_", i.Select(x => x.Value.GetHashCode())), i))
                 .ToList();
 
-            var del = prev.Except(next, new DelegateEqualityComparer<CombinationTableFrame<T>, string>(x => x.Name)).ToList();
-            var add = next.Except(prev, new DelegateEqualityComparer<CombinationTableFrame<T>, string>(x => x.Name)).ToList();
+            var del = prev.Except(next, EqualityComparer).ToList();
+            var add = next.Except(prev, EqualityComparer).ToList();
 
             foreach (var item in del)
             {
@@ -133,15 +123,21 @@ namespace Corekit.Models
 
         #endregion
 
+        #region IReadOnlyCollection
+
+        public int Count => this._Combinations.Count;
+
+        #endregion
+
         public event NotifyCollectionChangedEventHandler CollectionChanged {
             add => this._Combinations.CollectionChanged += value;
             remove => this._Combinations.CollectionChanged -= value;
         }
 
-        private Dictionary<string, IEnumerable<T>> _Definitions;
-        private ObservableCollection<CombinationTableFrame<T>> _Combinations;
+        private readonly Dictionary<string, IEnumerable<T>> _Definitions;
+        private readonly ObservableCollection<CombinationTableFrame<T>> _Combinations;
 
-        private Func<T, string> _ConvertNameFunc = x => x.ToString();
+        private static readonly IEqualityComparer<CombinationTableFrame<T>> EqualityComparer = new DelegateEqualityComparer<CombinationTableFrame<T>, string>(x => x.Name);
     }
 
     /// <summary>
@@ -152,7 +148,7 @@ namespace Corekit.Models
         /// <summary>
         /// プロパティ定義の名前
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
         /// 読み取り専用・編集不可能か（nullは未指定）
@@ -170,9 +166,26 @@ namespace Corekit.Models
         public bool IsMovable { get; set; }
 
         /// <summary>
-        /// 組み合わせ要素
+        /// 組み合わせ要素 (プロパティ名と要素名のペア)
         /// </summary>
-        public IReadOnlyList<KeyValuePair<string,T>> Elements { get; set; }
+        public IReadOnlyList<KeyValuePair<string,T>> Elements { get; }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public CombinationTableFrame(string name, IEnumerable<KeyValuePair<string,T>> elements)
+        {
+            this.Name = name;
+
+            if (elements is IReadOnlyList<KeyValuePair<string, T>> list)
+            {
+                this.Elements = list;
+            }
+            else
+            {
+                this.Elements = elements.ToList();
+            }
+        }
 
 #pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
