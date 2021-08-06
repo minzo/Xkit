@@ -123,8 +123,15 @@ namespace Externalkit.Perforce
 
             if (keyValues.TryGetValue("how", out string how) && how == "moved from")
             {
+                // 1つ前のリビジョンの情報で MoveAdd/MoveDeleteのときにMove元の情報がPerforceから取れる
+                // Moveしたときの情報なのでerevのリビジョンはMoveDeleteされたリビジョンを意味しているのでさらに1つ前のリビジョンを返す必要がある
                 this.PrevRevisionDepotPath = keyValues["file"];
                 this.PrevRevision = int.Parse(keyValues["erev"].Trim('#'));
+            }
+            else
+            {
+                this.PrevRevisionDepotPath = this.DepotPath;
+                this.PrevRevision = this.Revision - 1;
             }
         }
 

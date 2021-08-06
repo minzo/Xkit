@@ -540,23 +540,16 @@ namespace Externalkit.Perforce
             var number = $"@{changeListNumber},@{changeListNumber}";
             if (P4CommandExecutor.Execute(this._Context, $"{P4CommandFileLogGlobalOpt} {P4CommandFileLog} {path}{number}", out string output))
             {
-                return P4FileRevisionInfo.ParseFromFilelog(output);
+                var filelogs = P4FileRevisionInfo.ParseFromFilelog(output);
+                foreach (var info in filelogs)
+                {
+                    // Move元のログも出力されてしまうようなのでチェンジリスト番号もチェックして目的のものだけを返す
+                    if (info.ChangeListNumber == changeListNumber)
+                    {
+                        yield return info;
+                    }
+                }
             }
-            return Enumerable.Empty<P4FileRevisionInfo>();
-        }
-
-        /// <summary>
-        /// 指定したリビジョンのファイルを指定した場所にダウンロードします
-        /// </summary>
-        public bool TryDownload(string filePath, string revision, string destPath)
-        {
-            if(P4CommandExecutor.Execute(this._Context, $"{P4CommandPrint} -o {destPath} {filePath}#{revision}"))
-            {
-                // File.WriteAllText(destPath, output);
-                // コマンドは成功しているのにファイルが存在しないことがある
-                return File.Exists(destPath);
-            }
-            return false;
         }
 
         /// <summary>
@@ -567,7 +560,14 @@ namespace Externalkit.Perforce
         {
             var localPathList = new List<string>();
 
-            using (var temp = new ScopedTempFile(depotPathWithRevision))
+            // リストが空ならP4実行も不要
+            if (!depotPathWithRevision.Any())
+            {
+                return localPathList;
+            }
+
+            // 同じパスが渡された場合を考慮して重複を回避したリストにする
+            using (var temp = new ScopedTempFile(depotPathWithRevision.Distinct()))
             {
                 if (P4CommandExecutor.ExecuteViaCmd(this._Context, $"-x {temp.TempFilePath} {P4CommandPrint}", out string output))
                 {
