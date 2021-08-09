@@ -36,13 +36,13 @@ namespace Toolkit.WPF.Sample
 
             public ViewModel()
             {
-                Items = new ObservableCollection<ItemViewModel>();
-                Items.Add(new ItemViewModel());
-                Items.Add(new ItemViewModel());
-                Items.Add(new ItemViewModel());
-                Items.Add(new ItemViewModel());
-                Items.Add(new ItemViewModel());
-                Items.Add(new ItemViewModel());
+                this.Items = new ObservableCollection<ItemViewModel>();
+                this.Items.Add(new ItemViewModel());
+                this.Items.Add(new ItemViewModel());
+                this.Items.Add(new ItemViewModel());
+                this.Items.Add(new ItemViewModel());
+                this.Items.Add(new ItemViewModel());
+                this.Items.Add(new ItemViewModel());
             }
         }
 
@@ -69,10 +69,10 @@ namespace Toolkit.WPF.Sample
 
         public DynamicTableScrollChangedViewModel()
         {
-            AddCommand = new DelegateCommand(_ => {
+            this.AddCommand = new DelegateCommand(_ => {
                 this.Items.Add(new ItemViewModel() { Column0 = "Column00" });
             });
-            DelCommand = new DelegateCommand(_ => {
+            this.DelCommand = new DelegateCommand(_ => {
                 this.Items.Remove(this.Items.LastOrDefault());
             });
         }

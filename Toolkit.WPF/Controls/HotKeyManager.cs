@@ -98,7 +98,7 @@ namespace Toolkit.WPF
             this.HotKeyPressed?.Invoke(this, args);
         }
 
-        private IntPtr _Handle;
+        private readonly IntPtr _Handle;
         private int _Id;
 
         private const int WM_HOTKEY = 0x0312;

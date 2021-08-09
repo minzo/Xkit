@@ -51,7 +51,7 @@ namespace Corekit.Tests
 
             for (int i = 0; i < 100; i++)
             {
-                manager.Request(Job);
+                manager.Request(this.Job);
             }
 
             for (int i = 0; i < 5; i++)

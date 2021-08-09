@@ -20,12 +20,10 @@ namespace Toolkit.WPF.Controls
     /// </summary>
     public partial class ColorPicker : UserControl
     {
-
-
         public bool IsDropDownOpen
         {
-            get { return (bool)GetValue(IsDropDownOpenProperty); }
-            set { SetValue(IsDropDownOpenProperty, value); }
+            get { return (bool)this.GetValue(IsDropDownOpenProperty); }
+            set { this.SetValue(IsDropDownOpenProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for IsDropDownOpen.  This enables animation, styling, binding, etc...
@@ -36,7 +34,7 @@ namespace Toolkit.WPF.Controls
 
         public ColorPicker()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

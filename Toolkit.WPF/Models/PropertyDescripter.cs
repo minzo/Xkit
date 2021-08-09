@@ -27,17 +27,17 @@ namespace Toolkit.WPF.Models
 
         public override object GetValue(object component)
         {
-            return this._ComponentType.GetProperty(Name).GetValue(component);
+            return this._ComponentType.GetProperty(this.Name).GetValue(component);
         }
 
         public override void ResetValue(object component)
         {
-            this._ComponentType.GetProperty(Name).SetValue(component, null);
+            this._ComponentType.GetProperty(this.Name).SetValue(component, null);
         }
 
         public override void SetValue(object component, object value)
         {
-            this._ComponentType.GetProperty(Name).SetValue(component, value);
+            this._ComponentType.GetProperty(this.Name).SetValue(component, value);
         }
 
         public override bool ShouldSerializeValue(object component) => false;

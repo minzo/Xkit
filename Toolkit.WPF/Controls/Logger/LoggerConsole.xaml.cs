@@ -30,8 +30,8 @@ namespace Toolkit.WPF.Controls
 
         public string FilterText
         {
-            get { return (string)GetValue(FilterTextProperty); }
-            set { SetValue(FilterTextProperty, value); }
+            get { return (string)this.GetValue(FilterTextProperty); }
+            set { this.SetValue(FilterTextProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for FilterText.  This enables animation, styling, binding, etc...
@@ -44,8 +44,8 @@ namespace Toolkit.WPF.Controls
 
         public bool VisibleErrorLog
         {
-            get { return (bool)GetValue(VisibleErrorLogProperty); }
-            set { SetValue(VisibleErrorLogProperty, value); }
+            get { return (bool)this.GetValue(VisibleErrorLogProperty); }
+            set { this.SetValue(VisibleErrorLogProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for VisibleErrorLog.  This enables animation, styling, binding, etc...
@@ -55,8 +55,8 @@ namespace Toolkit.WPF.Controls
 
         public bool VisibleWarningLog
         {
-            get { return (bool)GetValue(VisibleWarningLogProperty); }
-            set { SetValue(VisibleWarningLogProperty, value); }
+            get { return (bool)this.GetValue(VisibleWarningLogProperty); }
+            set { this.SetValue(VisibleWarningLogProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for VisibleWarningLog.  This enables animation, styling, binding, etc...
@@ -66,8 +66,8 @@ namespace Toolkit.WPF.Controls
 
         public bool VisibleInfomationLog
         {
-            get { return (bool)GetValue(VisibleInfomationLogProperty); }
-            set { SetValue(VisibleInfomationLogProperty, value); }
+            get { return (bool)this.GetValue(VisibleInfomationLogProperty); }
+            set { this.SetValue(VisibleInfomationLogProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for VisibleInfomationLog.  This enables animation, styling, binding, etc...
@@ -82,7 +82,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public LoggerConsole()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         /// <summary>
@@ -97,11 +97,11 @@ namespace Toolkit.WPF.Controls
         {
             if (item is LogData data)
             {
-                bool isAcceptedFilterText = string.IsNullOrWhiteSpace(FilterText) || data.Message.ToLower().Contains(FilterText.ToLower());
+                bool isAcceptedFilterText = string.IsNullOrWhiteSpace(this.FilterText) || data.Message.ToLower().Contains(this.FilterText.ToLower());
                 bool isAcceptedCategory =
-                    (VisibleErrorLog      && data.Level == LogLevel.Error) ||
-                    (VisibleWarningLog    && data.Level == LogLevel.Warning) ||
-                    (VisibleInfomationLog && data.Level == LogLevel.Information) ||
+                    (this.VisibleErrorLog      && data.Level == LogLevel.Error) ||
+                    (this.VisibleWarningLog    && data.Level == LogLevel.Warning) ||
+                    (this.VisibleInfomationLog && data.Level == LogLevel.Information) ||
                     (data.Level == LogLevel.Developer);
                 return isAcceptedFilterText && isAcceptedCategory;
             }
@@ -117,14 +117,14 @@ namespace Toolkit.WPF.Controls
 
             if (oldValue is INotifyCollectionChanged oldCollection)
             {
-                collectionView.CollectionChanged -= OnCollectionChanged;
+                collectionView.CollectionChanged -= this.OnCollectionChanged;
             }
 
             if (newValue is INotifyCollectionChanged newCollection)
             {
                 collectionView = CollectionViewSource.GetDefaultView(newCollection);
-                collectionView.Filter = Filter;
-                collectionView.CollectionChanged += OnCollectionChanged;
+                collectionView.Filter = this.Filter;
+                collectionView.CollectionChanged += this.OnCollectionChanged;
                 if(collectionView is ICollectionViewLiveShaping live)
                 {
                     live.IsLiveFiltering = true;
@@ -137,9 +137,9 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.Action == NotifyCollectionChangedAction.Add && SelectedItem == null)
+            if (e.Action == NotifyCollectionChangedAction.Add && this.SelectedItem == null)
             {
-                ScrollIntoView(e?.NewItems[0]);
+                this.ScrollIntoView(e?.NewItems[0]);
             }
         }
     }

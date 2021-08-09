@@ -21,7 +21,7 @@ namespace Toolkit.WPF.Sample
     {
         public CombinationGridWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

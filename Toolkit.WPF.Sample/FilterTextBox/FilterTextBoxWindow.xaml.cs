@@ -21,7 +21,7 @@ namespace Toolkit.WPF.Sample
     {
         public FilterTextBoxWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

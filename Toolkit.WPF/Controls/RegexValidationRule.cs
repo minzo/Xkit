@@ -21,7 +21,7 @@ namespace Toolkit.WPF.Controls
         {
             if (regex == null)
             {
-                regex = new Regex(Regex, RegexOptions.Compiled);
+                regex = new Regex(this.Regex, RegexOptions.Compiled);
             }
 
             if (regex.IsMatch(value.ToString()))
@@ -29,7 +29,7 @@ namespace Toolkit.WPF.Controls
                 return ValidationResult.ValidResult;
             }
 
-            return new ValidationResult(false, ErrorMessage);
+            return new ValidationResult(false, this.ErrorMessage);
         }
     }
 }

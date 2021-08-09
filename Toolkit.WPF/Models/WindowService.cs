@@ -40,7 +40,7 @@ namespace Toolkit.WPF.Models
     /// </summary>
     public class WindowService : IWindowService, IMessageBoxService
     {
-        private System.Windows.Threading.Dispatcher dispatcher = null;
+        private readonly System.Windows.Threading.Dispatcher dispatcher = null;
 
         public WindowService(System.Windows.Threading.Dispatcher dispatcher)
         {

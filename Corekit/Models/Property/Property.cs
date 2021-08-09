@@ -132,7 +132,7 @@ namespace Corekit.Models
             }
 
             this._Value = value;
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsInheriting)));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsInheriting)));
             this.PropertyChanged?.Invoke(this, this._PropertyChangedArgs);
         }
 
@@ -185,7 +185,7 @@ namespace Corekit.Models
         }
 
         private object _Value;
-        private Property _InheritSource;
+        private readonly Property _InheritSource;
 
         #region ICustomTypeDescriptor
 
@@ -209,7 +209,7 @@ namespace Corekit.Models
 
         public PropertyDescriptorCollection GetProperties()
         {
-            switch (ValueType)
+            switch (this.ValueType)
             {
                 case ValueType.Bool:
                 case ValueType.S32:

@@ -123,13 +123,13 @@ namespace Corekit.Worker
             }
         }
 
-        private List<DependencyJob> _ReferencedJobs;
+        private readonly List<DependencyJob> _ReferencedJobs;
         private int _DependencyCount = 0;
 
-        private Action _Job;
+        private readonly Action _Job;
         private int _State;
 
-        private JobManager _JobManager;
+        private readonly JobManager _JobManager;
 
         /// <summary>
         /// デフォルトのJobManager
@@ -236,13 +236,13 @@ namespace Corekit.Worker
             }
         }
 
-        private ConcurrentQueue<Job> _ReferencedJobs;
+        private readonly ConcurrentQueue<Job> _ReferencedJobs;
         private int _ReferenceCount = 0;
 
-        private Action _Job;
+        private readonly Action _Job;
         private int _State;
 
-        private JobManager _JobManager;
+        private readonly JobManager _JobManager;
 
         /// <summary>
         /// デフォルトのJobManager

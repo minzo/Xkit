@@ -21,7 +21,7 @@ namespace Toolkit.WPF.Sample
     {
         public DynamicTableItemsWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

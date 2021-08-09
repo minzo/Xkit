@@ -162,7 +162,7 @@ namespace Corekit.Models
         /// </summary>
         public void DefragmentWithRevisionUpdate()
         {
-            UpdateRevision();
+            this.UpdateRevision();
         }
 
         /// <summary>

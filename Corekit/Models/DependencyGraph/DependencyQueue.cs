@@ -57,8 +57,8 @@ namespace Corekit.Models.DependencyGraph
             return false;
         }
 
-        private DependencyGraph<T> _DependencyGraph;
-        private ConcurrentQueue<T> _Queue;
+        private readonly DependencyGraph<T> _DependencyGraph;
+        private readonly ConcurrentQueue<T> _Queue;
     }
 
     public class DependencyJobQueue
@@ -94,9 +94,9 @@ namespace Corekit.Models.DependencyGraph
                 }
             }
 
-            private Action _Action;
+            private readonly Action _Action;
             private int _DependencyCount;
-            private List<Node> _ReferencedNodes;
+            private readonly List<Node> _ReferencedNodes;
         }
     }
 }

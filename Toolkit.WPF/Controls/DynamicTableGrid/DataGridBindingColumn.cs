@@ -23,8 +23,8 @@ namespace Toolkit.WPF.Controls
 
         public DataTemplate CellTemplate
         {
-            get { return (DataTemplate)GetValue(CellTemplateProperty); }
-            set { SetValue(CellTemplateProperty, value); }
+            get { return (DataTemplate)this.GetValue(CellTemplateProperty); }
+            set { this.SetValue(CellTemplateProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for CellTemplate.  This enables animation, styling, binding, etc...
@@ -33,8 +33,8 @@ namespace Toolkit.WPF.Controls
 
         public DataTemplateSelector CellTemplateSelector
         {
-            get { return (DataTemplateSelector)GetValue(CellTemplateSelectorProperty); }
-            set { SetValue(CellTemplateSelectorProperty, value); }
+            get { return (DataTemplateSelector)this.GetValue(CellTemplateSelectorProperty); }
+            set { this.SetValue(CellTemplateSelectorProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for CellTemplateSelector.  This enables animation, styling, binding, etc...
@@ -43,8 +43,8 @@ namespace Toolkit.WPF.Controls
 
         public DataTemplate CellEditingTemplate
         {
-            get { return (DataTemplate)GetValue(CellEditingTemplateProperty); }
-            set { SetValue(CellEditingTemplateProperty, value); }
+            get { return (DataTemplate)this.GetValue(CellEditingTemplateProperty); }
+            set { this.SetValue(CellEditingTemplateProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for CellEditingTemplate.  This enables animation, styling, binding, etc...
@@ -53,8 +53,8 @@ namespace Toolkit.WPF.Controls
 
         public DataTemplateSelector CellEditingTemplateSelector
         {
-            get { return (DataTemplateSelector)GetValue(CellEditingTemplateSelectorProperty); }
-            set { SetValue(CellEditingTemplateSelectorProperty, value); }
+            get { return (DataTemplateSelector)this.GetValue(CellEditingTemplateSelectorProperty); }
+            set { this.SetValue(CellEditingTemplateSelectorProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for CellEditingTemplateSelector.  This enables animation, styling, binding, etc...
@@ -123,13 +123,13 @@ namespace Toolkit.WPF.Controls
         {
             if(isEditing)
             {
-                template = CellEditingTemplate;
-                selector = CellEditingTemplateSelector;
+                template = this.CellEditingTemplate;
+                selector = this.CellEditingTemplateSelector;
             }
             else
             {
-                template = CellTemplate;
-                selector = CellTemplateSelector;
+                template = this.CellTemplate;
+                selector = this.CellTemplateSelector;
             }
         }
 

@@ -130,8 +130,8 @@ namespace Externalkit.Confluence
         /// </summary>
         public ConfluencePage UpdatePage(int pageId, string content)
         {
-            var page = GetPage(pageId);
-            return UpdatePage(page, content);
+            var page = this.GetPage(pageId);
+            return this.UpdatePage(page, content);
         }
 
         #endregion

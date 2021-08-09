@@ -19,8 +19,8 @@ namespace Toolkit.WPF.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var val = value as float?;
-            var alpha = (byte)(255f * (val - MinValue) / MaxValue);
-            var color = System.Windows.Media.Color.FromArgb(alpha, Color.R, Color.G, Color.B);
+            var alpha = (byte)(255f * (val - this.MinValue) / this.MaxValue);
+            var color = System.Windows.Media.Color.FromArgb(alpha, this.Color.R, this.Color.G, this.Color.B);
             return new System.Windows.Media.SolidColorBrush(color);
         }
 

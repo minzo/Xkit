@@ -25,35 +25,35 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private class WatermarkAdorner : Adorner
         {
-            private TextBlock watermark;
-            private VisualCollection visualChildren;
+            private readonly TextBlock _Watermark;
+            private readonly VisualCollection _VisualChildren;
 
-            public string WatermarkText { get => watermark.Text; set => watermark.Text = value; }
+            public string WatermarkText { get => this._Watermark.Text; set => this._Watermark.Text = value; }
 
             public WatermarkAdorner(UIElement adornedElement) : base(adornedElement)
             {
-                watermark = new TextBlock();
-                watermark.Margin = new Thickness(4, 1, 4, 1);
-                watermark.VerticalAlignment = VerticalAlignment.Center;
-                watermark.Opacity = 0.3;
-                watermark.IsHitTestVisible = false;
+                this._Watermark = new TextBlock();
+                this._Watermark.Margin = new Thickness(4, 1, 4, 1);
+                this._Watermark.VerticalAlignment = VerticalAlignment.Center;
+                this._Watermark.Opacity = 0.3;
+                this._Watermark.IsHitTestVisible = false;
 
-                visualChildren = new VisualCollection(this);
-                visualChildren.Add(watermark);
+                this._VisualChildren = new VisualCollection(this);
+                this._VisualChildren.Add(_Watermark);
             }
 
             protected override Size ArrangeOverride(Size finalSize)
             {
-                if (AdornedElement is FrameworkElement element)
+                if (this.AdornedElement is FrameworkElement element)
                 {
-                    watermark.Arrange(new Rect(0, 0, element.ActualWidth, element.ActualHeight));
+                    _Watermark.Arrange(new Rect(0, 0, element.ActualWidth, element.ActualHeight));
                 }
                 return finalSize;
             }
 
-            protected override int VisualChildrenCount => visualChildren.Count;
+            protected override int VisualChildrenCount => _VisualChildren.Count;
 
-            protected override Visual GetVisualChild(int index) => visualChildren[index];
+            protected override Visual GetVisualChild(int index) => _VisualChildren[index];
         }
 
         private WatermarkAdorner watermarkAdorner = null;
@@ -63,8 +63,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public string WatermarkText
         {
-            get { return (string)GetValue(WatermarkTextProperty); }
-            set { SetValue(WatermarkTextProperty, value); }
+            get { return (string)this.GetValue(WatermarkTextProperty); }
+            set { this.SetValue(WatermarkTextProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for WatermarkText.  This enables animation, styling, binding, etc...
@@ -82,7 +82,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public FilterTextBox()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         /// <summary>

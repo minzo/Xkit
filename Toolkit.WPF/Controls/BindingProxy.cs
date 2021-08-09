@@ -13,8 +13,8 @@ namespace Toolkit.WPF.Controls
 
         public object Data
         {
-            get { return (object)GetValue(DataProperty); }
-            set { SetValue(DataProperty, value); }
+            get { return (object)this.GetValue(DataProperty); }
+            set { this.SetValue(DataProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for Data.  This enables animation, styling, binding, etc...

@@ -42,7 +42,7 @@ namespace Corekit.Tests
 
             public Tree()
             {
-                Children = new ObservableCollection<Tree>();
+                this.Children = new ObservableCollection<Tree>();
             }
         }
 
@@ -53,7 +53,7 @@ namespace Corekit.Tests
             public int ParentIndex = -1;
         }
 
-        Dictionary<Tree, TreeInfo> dict = new Dictionary<Tree, TreeInfo>();
+        readonly Dictionary<Tree, TreeInfo> dict = new Dictionary<Tree, TreeInfo>();
 
         Tree Root;
 
@@ -63,7 +63,7 @@ namespace Corekit.Tests
             var flat =  Root
                 .EnumerateTreeBreadthFirst(i => i.Children);
 
-            var flat2 = EnumerateInfo(Root);
+            var flat2 = this.EnumerateInfo(this.Root);
         }
 
         private IEnumerable<Tree> EnumerateInfo(Tree node)

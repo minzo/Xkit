@@ -19,7 +19,8 @@ namespace Toolkit.WPF.Sample
     {
         public CIEWindow()
         {
-            InitializeComponent();
+            CIEWindow cIEWindow = this;
+            cIEWindow.InitializeComponent();
         }
     }
 }

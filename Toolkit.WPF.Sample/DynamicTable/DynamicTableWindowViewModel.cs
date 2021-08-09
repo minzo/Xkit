@@ -60,18 +60,18 @@ namespace Toolkit.WPF.Sample
         /// </summary>
         public DynamicTableWindowViewModel()
         {
-            Table = new DynamicTableViewModel<bool>(A_Modules, B_Modules);
+            this.Table = new DynamicTableViewModel<bool>(this.A_Modules, this.B_Modules);
 
-            AddRowCommand = new DelegateCommand(_ => {
-                A_Modules.Add(new Module() { Name = $"A_Module{A_Modules.Count}" });
+            this.AddRowCommand = new DelegateCommand(_ => {
+                this.A_Modules.Add(new Module() { Name = $"A_Module{this.A_Modules.Count}" });
             });
 
-            AddColCommand = new DelegateCommand(_ => {
-                B_Modules.Add(new Module() { Name = $"B_Module{B_Modules.Count}"});
+            this.AddColCommand = new DelegateCommand(_ => {
+                this.B_Modules.Add(new Module() { Name = $"B_Module{this.B_Modules.Count}"});
             });
 
             this.MoveCommand = new DelegateCommand(_ => {
-                B_Modules.Move(0, 2);
+                this.B_Modules.Move(0, 2);
             });
 
         }
@@ -152,7 +152,7 @@ namespace Toolkit.WPF.Sample
                 return new Property<TValue>(this, owner, _OwnerTableValue);
             }
 
-            private IDictionary<string, TValue> _OwnerTableValue;
+            private readonly IDictionary<string, TValue> _OwnerTableValue;
 
             private string _Name = null;
             private bool? _IsReadOnly = null;
@@ -169,8 +169,8 @@ namespace Toolkit.WPF.Sample
         /// </summary>
         internal class Property<TValue> : IDynamicProperty
         {
-            private IDictionary<string, TValue> _OwnerTableValue;
-            private IDictionary<string, TValue> _ParentTableValue;
+            private readonly IDictionary<string, TValue> _OwnerTableValue;
+            private readonly IDictionary<string, TValue> _ParentTableValue;
 
             /// <summary>
             /// 定義
@@ -185,12 +185,12 @@ namespace Toolkit.WPF.Sample
             /// <summary>
             /// 読み取り専用か (Ownerの状態も考慮して最終的な状態を返します)
             /// </summary>
-            public bool IsReadOnly => Owner?.Definition?.IsReadOnly == true || Definition.IsReadOnly == true;
+            public bool IsReadOnly => this.Owner?.Definition?.IsReadOnly == true || this.Definition.IsReadOnly == true;
 
             /// <summary>
             /// 継承しているか
             /// </summary>
-            public bool IsInheriting => !_OwnerTableValue.ContainsKey($"{Owner.Definition.Name}___{Definition.Name}");
+            public bool IsInheriting => !_OwnerTableValue.ContainsKey($"{this.Owner.Definition.Name}___{this.Definition.Name}");
 
             /// <summary>
             /// 値
@@ -201,11 +201,11 @@ namespace Toolkit.WPF.Sample
                 {
                     TValue value;
 
-                    if ( _OwnerTableValue.TryGetValue($"{Owner.Definition.Name}___{Definition.Name}", out value) )
+                    if ( _OwnerTableValue.TryGetValue($"{this.Owner.Definition.Name}___{this.Definition.Name}", out value) )
                     {
                         return value;
                     }
-                    else if( _ParentTableValue?.TryGetValue($"{Owner.Definition.Name}___{Definition.Name}", out value) == true)
+                    else if( _ParentTableValue?.TryGetValue($"{this.Owner.Definition.Name}___{this.Definition.Name}", out value) == true)
                     {
                         return value;
                     }
@@ -214,31 +214,31 @@ namespace Toolkit.WPF.Sample
                 }
                 set
                 {
-                    PropertyChanging?.Invoke(this, _changingEventArgs);
-                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(IsInheriting)));
-                    _OwnerTableValue[$"{Owner.Definition.Name}___{Definition.Name}"] = value;
-                    PropertyChanged?.Invoke(this, _changedEventArgs);
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsInheriting)));
+                    this.PropertyChanging?.Invoke(this, _changingEventArgs);
+                    this.PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(this.IsInheriting)));
+                    this._OwnerTableValue[$"{this.Owner.Definition.Name}___{this.Definition.Name}"] = value;
+                    this.PropertyChanged?.Invoke(this, _changedEventArgs);
+                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsInheriting)));
                 }
             }
 
             /// <summary>
             /// 値を取得する
             /// </summary>
-            public object GetValue() => Value;
+            public object GetValue() => this.Value;
 
             /// <summary>
             /// 値を設定する
             /// </summary>
-            public void SetValue(object value) => Value = (TValue)value;
+            public void SetValue(object value) => this.Value = (TValue)value;
 
             /// <summary>
             /// コンストラクタ
             /// </summary>
             internal Property(IDynamicPropertyDefinition definition, IDynamicItem owner, IDictionary<string, TValue> ownerTableValue)
             {
-                Definition = definition;
-                Owner = owner;
+                this.Definition = definition;
+                this.Owner = owner;
                 _OwnerTableValue = ownerTableValue;
                 _ParentTableValue = ownerTableValue;
             }
@@ -246,8 +246,8 @@ namespace Toolkit.WPF.Sample
             public event PropertyChangingEventHandler PropertyChanging;
             public event PropertyChangedEventHandler PropertyChanged;
 
-            private static PropertyChangingEventArgs _changingEventArgs = new PropertyChangingEventArgs(nameof(Value));
-            private static PropertyChangedEventArgs _changedEventArgs = new PropertyChangedEventArgs(nameof(Value));
+            private static readonly PropertyChangingEventArgs _changingEventArgs = new PropertyChangingEventArgs(nameof(Value));
+            private static readonly PropertyChangedEventArgs _changedEventArgs = new PropertyChangedEventArgs(nameof(Value));
         }
 
         /// <summary>

@@ -21,11 +21,11 @@ namespace Toolkit.WPF.Models
         {
             if (Equals(storage, value)) return false;
 
-            NotifyPropertyChanging(propertyName);
+            this.NotifyPropertyChanging(propertyName);
 
             storage = value;
 
-            NotifyPropertyChanged(propertyName);
+            this.NotifyPropertyChanged(propertyName);
 
             return true;
         }

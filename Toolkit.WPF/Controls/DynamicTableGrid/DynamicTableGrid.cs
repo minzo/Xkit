@@ -35,8 +35,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public DataTemplateSelector CellTemplateSelector
         {
-            get { return (DataTemplateSelector)GetValue(CellTemplateSelectorProperty); }
-            set { SetValue(CellTemplateSelectorProperty, value); }
+            get { return (DataTemplateSelector)this.GetValue(CellTemplateSelectorProperty); }
+            set { this.SetValue(CellTemplateSelectorProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for CellTemplateSelector.  This enables animation, styling, binding, etc...
@@ -48,8 +48,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public DataTemplateSelector CellEditingTemplateSelector
         {
-            get { return (DataTemplateSelector)GetValue(CellEditingTemplateSelectorProperty); }
-            set { SetValue(CellEditingTemplateSelectorProperty, value); }
+            get { return (DataTemplateSelector)this.GetValue(CellEditingTemplateSelectorProperty); }
+            set { this.SetValue(CellEditingTemplateSelectorProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for CellEditingTemplateSelector.  This enables animation, styling, binding, etc...
@@ -65,8 +65,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public DataTemplate ColumnHeaderTemplate
         {
-            get { return (DataTemplate)GetValue(ColumnHeaderTemplateProperty); }
-            set { SetValue(ColumnHeaderTemplateProperty, value); }
+            get { return (DataTemplate)this.GetValue(ColumnHeaderTemplateProperty); }
+            set { this.SetValue(ColumnHeaderTemplateProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for ColumnHeaderTemplate.  This enables animation, styling, binding, etc...
@@ -108,8 +108,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public IEnumerable<(object Item, string PropertyName)> SelectedInfos
         {
-            get { return (IEnumerable<(object Item, string PropertyName)>)GetValue(SelectedInfosProperty); }
-            set { SetValue(SelectedInfosProperty, value); }
+            get { return (IEnumerable<(object Item, string PropertyName)>)this.GetValue(SelectedInfosProperty); }
+            set { this.SetValue(SelectedInfosProperty, value); }
         }
 
         public static readonly DependencyProperty SelectedInfosProperty =
@@ -150,8 +150,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public Action<ReorderInfo> ReorderAction
         {
-            get { return (Action<ReorderInfo>)GetValue(ReorderActionProperty); }
-            set { SetValue(ReorderActionProperty, value); }
+            get { return (Action<ReorderInfo>)this.GetValue(ReorderActionProperty); }
+            set { this.SetValue(ReorderActionProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for ReorderAction.  This enables animation, styling, binding, etc...
@@ -167,8 +167,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public ICommand CornerButtonCommand
         {
-            get { return (ICommand)GetValue(CornerButtonCommandProperty); }
-            set { SetValue(CornerButtonCommandProperty, value); }
+            get { return (ICommand)this.GetValue(CornerButtonCommandProperty); }
+            set { this.SetValue(CornerButtonCommandProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for CornerButtonCommand.  This enables animation, styling, binding, etc...
@@ -189,8 +189,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public double ZoomRate
         {
-            get { return (double)GetValue(ZoomRateProperty); }
-            set { SetValue(ZoomRateProperty, value); }
+            get { return (double)this.GetValue(ZoomRateProperty); }
+            set { this.SetValue(ZoomRateProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for ZoomValue.  This enables animation, styling, binding, etc...
@@ -217,8 +217,8 @@ namespace Toolkit.WPF.Controls
 
         public Predicate<object> ColumnFilter
         {
-            get { return (Predicate<object>)GetValue(ColumnFilterProperty); }
-            set { SetValue(ColumnFilterProperty, value); }
+            get { return (Predicate<object>)this.GetValue(ColumnFilterProperty); }
+            set { this.SetValue(ColumnFilterProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for ColumnFilter.  This enables animation, styling, binding, etc...
@@ -981,7 +981,7 @@ namespace Toolkit.WPF.Controls
                 {
                     var handle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
                     this._Source = System.Windows.Interop.HwndSource.FromHwnd(handle);
-                    this._Source.AddHook(WndProc);
+                    this._Source.AddHook(this.WndProc);
                 }
             }
 
@@ -992,7 +992,7 @@ namespace Toolkit.WPF.Controls
             {
                 if (!this._IsDisposed)
                 {
-                    this._Source?.RemoveHook(WndProc);
+                    this._Source?.RemoveHook(this.WndProc);
                     this._IsDisposed = true;
                 }
             }
@@ -1032,7 +1032,7 @@ namespace Toolkit.WPF.Controls
 
             private const int MOUSEHWHEEL = 0x020E;
             private readonly ScrollViewer _ScrollViewer;
-            private System.Windows.Interop.HwndSource _Source;
+            private readonly System.Windows.Interop.HwndSource _Source;
             private bool _IsDisposed;
         }
 

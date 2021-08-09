@@ -21,7 +21,7 @@ namespace Toolkit.WPF.Sample
     {
         public LoggerConsoleWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

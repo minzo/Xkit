@@ -14,8 +14,8 @@ namespace Toolkit.WPF.Controls
     {
         public int ItemWidth
         {
-            get { return (int)GetValue(ItemWidthProperty); }
-            set { SetValue(ItemWidthProperty, value); }
+            get { return (int)this.GetValue(ItemWidthProperty); }
+            set { this.SetValue(ItemWidthProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for ItemWidth.  This enables animation, styling, binding, etc...
@@ -25,8 +25,8 @@ namespace Toolkit.WPF.Controls
 
         public int ItemHeight
         {
-            get { return (int)GetValue(ItemHeightProperty); }
-            set { SetValue(ItemHeightProperty, value); }
+            get { return (int)this.GetValue(ItemHeightProperty); }
+            set { this.SetValue(ItemHeightProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for ItemHeight.  This enables animation, styling, binding, etc...
@@ -35,8 +35,8 @@ namespace Toolkit.WPF.Controls
 
         public int ItemMaxWidth
         {
-            get { return (int)GetValue(ItemMaxWidthProperty); }
-            set { SetValue(ItemMaxWidthProperty, value); }
+            get { return (int)this.GetValue(ItemMaxWidthProperty); }
+            set { this.SetValue(ItemMaxWidthProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for ItemMaxWidth.  This enables animation, styling, binding, etc...
@@ -47,12 +47,12 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// 水平方向(Hue)の分割数
         /// </summary>
-        public int div_h { get; set; } = 16;
+        public int DivH { get; set; } = 16;
 
         /// <summary>
         /// 垂直方向の(Value)の分割数
         /// </summary>
-        public int div_v { get; set; } = 16;
+        public int DivV { get; set; } = 16;
 
         /// <summary>
         /// SelectedValueに設定された値をColorBrushListの一番近い値に設定する
@@ -92,21 +92,21 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public ColorSelectComboBox()
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
             Loaded += (s, e) => {
-                var width = (int)System.Math.Max(ActualWidth, div_h * ItemWidth);
-                ItemMaxWidth = width;
-                ItemWidth = width / div_h;
-                ItemHeight = ItemWidth;
-                ItemsSource = GetColorBrushList(div_h, div_v);
+                var width = (int)System.Math.Max(this.ActualWidth, this.DivH * this.ItemWidth);
+                this.ItemMaxWidth = width;
+                this.ItemWidth = width / this.DivH;
+                this.ItemHeight = this.ItemWidth;
+                this.ItemsSource = this.GetColorBrushList(this.DivH, this.DivV);
             };
         }
 
         #region 選択肢の色生成
 
         private List<SolidColorBrush> colorBrushList = null;
-        private List<SolidColorBrush> ColorBrushList => colorBrushList ?? (colorBrushList = GetColorBrushList(div_h, div_v));
+        private List<SolidColorBrush> ColorBrushList => colorBrushList ?? (colorBrushList = this.GetColorBrushList(this.DivH, this.DivV));
 
         private List<SolidColorBrush> GetColorBrushList(int div_horizontal, int div_vertical)
         {

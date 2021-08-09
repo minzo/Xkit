@@ -22,8 +22,8 @@ namespace Toolkit.WPF.Controls
     {
         public Color Color
         {
-            get { return (Color)GetValue(ColorProperty); }
-            set { SetValue(ColorProperty, value); }
+            get { return (Color)this.GetValue(ColorProperty); }
+            set { this.SetValue(ColorProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for Color.  This enables animation, styling, binding, etc...
@@ -33,8 +33,8 @@ namespace Toolkit.WPF.Controls
 
         public int R
         {
-            get { return (int)GetValue(RProperty); }
-            set { SetValue(RProperty, value); }
+            get { return (int)this.GetValue(RProperty); }
+            set { this.SetValue(RProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for R.  This enables animation, styling, binding, etc...
@@ -46,8 +46,8 @@ namespace Toolkit.WPF.Controls
 
         public int G
         {
-            get { return (int)GetValue(GProperty); }
-            set { SetValue(GProperty, value); }
+            get { return (int)this.GetValue(GProperty); }
+            set { this.SetValue(GProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for G.  This enables animation, styling, binding, etc...
@@ -59,8 +59,8 @@ namespace Toolkit.WPF.Controls
 
         public int B
         {
-            get { return (int)GetValue(BProperty); }
-            set { SetValue(BProperty, value); }
+            get { return (int)this.GetValue(BProperty); }
+            set { this.SetValue(BProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for B.  This enables animation, styling, binding, etc...
@@ -71,12 +71,12 @@ namespace Toolkit.WPF.Controls
 
         private void UpdateColor()
         {
-            SetCurrentValue(ColorProperty, Color.FromRgb((byte)R, (byte)G, (byte)B));
+            this.SetCurrentValue(ColorProperty, Color.FromRgb((byte)this.R, (byte)this.G, (byte)this.B));
         }
 
         public ColorEditor()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

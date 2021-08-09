@@ -23,7 +23,7 @@ namespace Toolkit.WPF.Sample
         /// </summary>
         public DynamicTableScrollChanged()
         {
-            InitializeComponent();
+            this.InitializeComponent();
             this.Loaded += this.OnLoaded;
         }
 
@@ -32,7 +32,7 @@ namespace Toolkit.WPF.Sample
         /// </summary>
         private void OnLoaded(object sender, EventArgs e)
         {
-            List.SelectionChanged += OnSelectionChanged;
+            List.SelectionChanged += this.OnSelectionChanged;
         }
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)

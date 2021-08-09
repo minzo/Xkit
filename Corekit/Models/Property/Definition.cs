@@ -24,7 +24,7 @@ namespace Corekit.Models
         /// <summary>
         /// プリミティブか
         /// </summary>
-        public bool IsPrimitive => ValueType <= ValueType.String;
+        public bool IsPrimitive => this.ValueType <= ValueType.String;
 
         /// <summary>
         /// プロパティ定義

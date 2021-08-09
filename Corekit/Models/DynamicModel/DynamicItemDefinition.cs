@@ -85,8 +85,8 @@ namespace Corekit.Models
             }
 
             this._Collection = new ObservableCollection<IDynamicPropertyDefinition>(collection);
-            this._Collection.CollectionChanged += OnCollectionChanged;
-            this._Collection.ForEach(i => i.PropertyChanged += OnPropertyChanged);
+            this._Collection.CollectionChanged += this.OnCollectionChanged;
+            this._Collection.ForEach(i => i.PropertyChanged += this.OnPropertyChanged);
         }
 
         /// <summary>
@@ -126,8 +126,8 @@ namespace Corekit.Models
         /// </summary>
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            e.OldItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => i.PropertyChanged -= OnPropertyChanged);
-            e.NewItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => i.PropertyChanged += OnPropertyChanged);
+            e.OldItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => i.PropertyChanged -= this.OnPropertyChanged);
+            e.NewItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => i.PropertyChanged += this.OnPropertyChanged);
 
             this.CollectionChanged?.Invoke(this, e);
         }
@@ -140,7 +140,7 @@ namespace Corekit.Models
             this.PropertyChanged?.Invoke(this, e);
         }
         
-        private ObservableCollection<IDynamicPropertyDefinition> _Collection;
+        private readonly ObservableCollection<IDynamicPropertyDefinition> _Collection;
 
         #region Event
 

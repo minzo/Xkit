@@ -22,7 +22,7 @@ namespace Toolkit.WPF.Controls
     {
         public VectorEditor()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

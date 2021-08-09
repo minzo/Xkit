@@ -17,7 +17,7 @@ namespace Externalkit.Confluence
         /// <summary>
         /// APIのURI
         /// </summary>
-        public string Uri => $"{RootUri}/rest/api";
+        public string Uri => $"{this.RootUri}/rest/api";
 
         /// <summary>
         /// 対象となるスペースのKey

@@ -29,11 +29,11 @@ namespace Corekit
 
         internal LogData(LogLevel level, string message, string description, string category)
         {
-            DateTime = DateTime.Now;
-            Level = level;
-            Message = message;
-            Description = description;
-            Category = category;
+            this.DateTime = DateTime.Now;
+            this.Level = level;
+            this.Message = message;
+            this.Description = description;
+            this.Category = category;
         }
     }
 
@@ -90,7 +90,7 @@ namespace Corekit
         /// </summary>
         public void AddLog(string message, LogLevel level, string category = null)
         {
-            AddLog(message, string.Empty, level, category);
+            this.AddLog(message, string.Empty, level, category);
         }
 
         /// <summary>
@@ -101,30 +101,30 @@ namespace Corekit
             var log = new LogData(level, message, description, category);
 
             logs.Enqueue(log);
-            LatestLog = log;
-            InvokePropertyChanged(nameof(LatestLog));
+            this.LatestLog = log;
+            this.InvokePropertyChanged(nameof(this.LatestLog));
             LogAdded?.BeginInvoke(this, log, null, null);
 
             switch (level)
             {
                 case LogLevel.Error:
-                    ErrorMessageCount++;
-                    InvokePropertyChanged(nameof(ErrorMessageCount));
+                    this.ErrorMessageCount++;
+                    this.InvokePropertyChanged(nameof(this.ErrorMessageCount));
                     break;
                 case LogLevel.Warning:
-                    WarningMessageCount++;
-                    InvokePropertyChanged(nameof(WarningMessageCount));
+                    this.WarningMessageCount++;
+                    this.InvokePropertyChanged(nameof(this.WarningMessageCount));
                     break;
                 case LogLevel.Information:
-                    InfomationMessageCount++;
-                    InvokePropertyChanged(nameof(InfomationMessageCount));
+                    this.InfomationMessageCount++;
+                    this.InvokePropertyChanged(nameof(this.InfomationMessageCount));
                     break;
                 case LogLevel.Developer:
                 default:
                     break;
             }
 
-            if (IsEnableWriteConsole)
+            if (this.IsEnableWriteConsole)
             {
                 Console.WriteLine($"{message} {description}");
             }
@@ -135,7 +135,7 @@ namespace Corekit
         /// </summary>
         private void InvokePropertyChanged(string propertyName)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

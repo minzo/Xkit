@@ -107,6 +107,6 @@ namespace Externalkit.Confluence
             return true;
         }
 
-        private JsonDocument _Document;
+        private readonly JsonDocument _Document;
     }
 }

@@ -9,7 +9,7 @@ namespace Corekit
 {
     public class PrePostCommandUtil : IDisposable
     {
-        private string tempFilePath = string.Empty;
+        private readonly string tempFilePath = string.Empty;
 
         public PrePostCommandUtil(IEnumerable<string> paths)
         {

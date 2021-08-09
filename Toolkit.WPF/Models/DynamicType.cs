@@ -82,7 +82,7 @@ namespace Toolkit.WPF.Models
             }
 
             this._PropertyInfo = new ObservableCollection<PropertyInfo>(collection);
-            this._PropertyInfo.CollectionChanged += OnCollectionChanged;
+            this._PropertyInfo.CollectionChanged += this.OnCollectionChanged;
             foreach(var property in this._PropertyInfo.OfType<INotifyPropertyChanged>())
             {
                 property.PropertyChanged += this.OnPropertyChanged;

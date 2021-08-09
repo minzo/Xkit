@@ -17,7 +17,7 @@ namespace Corekit
 
         private Throttle(Action<object, T> action, int millisecondsDelay)
         {
-            Handler = async (s, e) => {
+            this.Handler = async (s, e) => {
                 var id = System.Threading.Interlocked.Increment(ref invokeCount);
                 await System.Threading.Tasks.Task.Delay(millisecondsDelay);
                 var current = System.Threading.Interlocked.Read(ref invokeCount);

@@ -21,7 +21,7 @@ namespace Toolkit.WPF.Sample
     {
         public DynamicItemListWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

@@ -105,10 +105,10 @@ namespace Corekit.Models
             }
 
             private int _DependencyCount;
-            private List<Node> _ReferencedNodes;
+            private readonly List<Node> _ReferencedNodes;
         }
 
         private int _JobId;
-        private ConcurrentDictionary<int, Node> _Entities;
+        private readonly ConcurrentDictionary<int, Node> _Entities;
     }
 }

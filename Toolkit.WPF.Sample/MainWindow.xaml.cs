@@ -24,7 +24,7 @@ namespace Toolkit.WPF.Sample
 
         public MainWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
             this.CommandBindings.Add(new CommandBinding(OpenWindow, this.OnOpenWindow));
         }

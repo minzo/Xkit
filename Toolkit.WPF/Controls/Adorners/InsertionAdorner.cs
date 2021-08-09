@@ -123,7 +123,7 @@ namespace Toolkit.WPF.Controls.Adorners
             InsertChild // 対象の子として挿入
         }
 
-        private Type _TargetFrameworkElementType;
+        private readonly Type _TargetFrameworkElementType;
         private Rect _RenderRect;
         private Brush _RenderBrush;
         private readonly Brush _InsertPrevBrush;

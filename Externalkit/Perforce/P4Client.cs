@@ -220,7 +220,7 @@ namespace Externalkit.Perforce
         {
             filePath = EscapeFilePathForConsole(filePath);
 
-            if (!TryGetFileInfo(filePath, out P4FileInfo info))
+            if (!this.TryGetFileInfo(filePath, out P4FileInfo info))
             {
                 return false;
             }
@@ -244,7 +244,7 @@ namespace Externalkit.Perforce
         /// </summary>
         public bool Revert(IEnumerable<string> filePath, bool withDelete = false)
         {
-            var deleteFilePath = EnumerateFileInfo(filePath)
+            var deleteFilePath = this.EnumerateFileInfo(filePath)
                 .Where(i => i.Action == P4FileAction.Delete)
                 .Where(i => File.Exists(i.LocalPath))
                 .Select(i => i.LocalPath);
@@ -719,7 +719,7 @@ namespace Externalkit.Perforce
                     tempFileName = Path.GetRandomFileName();
                 }
 
-                var tempFileDir = Path.Combine(Path.GetTempPath(), AppDirectory);
+                var tempFileDir = Path.Combine(Path.GetTempPath(), this.AppDirectory);
                 if (!Directory.Exists(tempFileDir))
                 {
                     Directory.CreateDirectory(tempFileDir);

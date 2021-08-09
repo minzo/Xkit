@@ -172,7 +172,7 @@ namespace Corekit.Models
         /// </summary>
         private void RemoveProperty(string propertyName)
         {
-            var property = Value.FirstOrDefault(i => i.Definition.Name == propertyName);
+            var property = this.Value.FirstOrDefault(i => i.Definition.Name == propertyName);
             if (property != null)
             {
                 this.Value.Remove(property);
@@ -185,7 +185,7 @@ namespace Corekit.Models
         /// </summary>
         private void MoveProperty(string propertyName, int newIndex)
         {
-            var property = Value.FirstOrDefault(i => i.Definition.Name == propertyName);
+            var property = this.Value.FirstOrDefault(i => i.Definition.Name == propertyName);
             if (property != null)
             {
                 this.Value.Remove(property);
@@ -251,7 +251,7 @@ namespace Corekit.Models
 
         private bool _IsAttached = false;
 
-        private static IDynamicPropertyDefinition definition__ = new DynamicPropertyDefinition<DynamicPropertyCollection>()
+        private static readonly IDynamicPropertyDefinition definition__ = new DynamicPropertyDefinition<DynamicPropertyCollection>()
         {
             Name = nameof(DynamicItem),
         };

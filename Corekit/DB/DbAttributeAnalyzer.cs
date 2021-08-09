@@ -135,7 +135,7 @@ namespace Corekit.DB
             var attributes = Attribute.GetCustomAttributes(type);
 
             // テーブル名を取得
-            this._TableName = AnalyzeTableName(attributes);
+            this._TableName = this.AnalyzeTableName(attributes);
 
             // 列情報を取得
             this._ColumnInfos = type.GetProperties()
@@ -147,10 +147,10 @@ namespace Corekit.DB
             this._PrimaryKeyColumnInfo = this._ColumnInfos.FirstOrDefault(i=>i.IsPrimaryKey);
 
             // クエリ生成
-            this._QueryCreateTable = AnalyzeCreateTableQuery();
-            this._QueryCreateTableIfNotExists = AnalyzeCreateTableIfNotExistsQuery();
+            this._QueryCreateTable = this.AnalyzeCreateTableQuery();
+            this._QueryCreateTableIfNotExists = this.AnalyzeCreateTableIfNotExistsQuery();
             this._QueryDeleteTable = $"DROP TABLE '{this._TableName}';";
-            this._QueryInsertItemHead = AnalyzeInsertItemQuery();
+            this._QueryInsertItemHead = this.AnalyzeInsertItemQuery();
         }
 
         #region クエリ取得

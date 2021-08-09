@@ -205,7 +205,7 @@ namespace Corekit
                 public List<Reference<T>> ReferenceList { get; } = new List<Reference<T>>();
             }
 
-            private static ConcurrentDictionary<T, Info> ReferenceInfo;
+            private static readonly ConcurrentDictionary<T, Info> ReferenceInfo;
         }
 
         #endregion

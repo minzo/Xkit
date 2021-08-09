@@ -52,8 +52,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public string ChildrenPropertyPath
         {
-            get { return (string)GetValue(ChildrenPropertyPathProperty); }
-            set { SetValue(ChildrenPropertyPathProperty, value); }
+            get { return (string)this.GetValue(ChildrenPropertyPathProperty); }
+            set { this.SetValue(ChildrenPropertyPathProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for ChildrenPropertyPath.  This enables animation, styling, binding, etc...
@@ -65,8 +65,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public string ExpandedPropertyPath
         {
-            get { return (string)GetValue(ExpandedPropertyPathProperty); }
-            set { SetValue(ExpandedPropertyPathProperty, value); }
+            get { return (string)this.GetValue(ExpandedPropertyPathProperty); }
+            set { this.SetValue(ExpandedPropertyPathProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for ExpandePropertyPath.  This enables animation, styling, binding, etc...
@@ -78,8 +78,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public string FilterTargetPropertyPath
         {
-            get { return (string)GetValue(FilterTargetPropertyPathProperty); }
-            set { SetValue(FilterTargetPropertyPathProperty, value); }
+            get { return (string)this.GetValue(FilterTargetPropertyPathProperty); }
+            set { this.SetValue(FilterTargetPropertyPathProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for FilterTargetPropertyPath.  This enables animation, styling, binding, etc...
@@ -93,8 +93,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public object Icon
         {
-            get { return (object)GetValue(IconProperty); }
-            set { SetValue(IconProperty, value); }
+            get { return (object)this.GetValue(IconProperty); }
+            set { this.SetValue(IconProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for Icon.  This enables animation, styling, binding, etc...
@@ -106,8 +106,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public DataTemplate IconTemplate
         {
-            get { return (DataTemplate)GetValue(IconTemplateProperty); }
-            set { SetValue(IconTemplateProperty, value); }
+            get { return (DataTemplate)this.GetValue(IconTemplateProperty); }
+            set { this.SetValue(IconTemplateProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for IconTemplate.  This enables animation, styling, binding, etc...
@@ -119,8 +119,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public DataTemplateSelector IconTemplateSelector
         {
-            get { return (DataTemplateSelector)GetValue(IconTemplateSelectorProperty); }
-            set { SetValue(IconTemplateSelectorProperty, value); }
+            get { return (DataTemplateSelector)this.GetValue(IconTemplateSelectorProperty); }
+            set { this.SetValue(IconTemplateSelectorProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for IconTemplateSelector.  This enables animation, styling, binding, etc...
@@ -731,7 +731,7 @@ namespace Toolkit.WPF.Controls
         private string _FilterText;
         private Predicate<object> _UserFilter;
 
-        private Dictionary<object, TreeInfo> _TreeInfo;
+        private readonly Dictionary<object, TreeInfo> _TreeInfo;
         private PropertyInfo _ExpandedPropertyInfo;
         private PropertyInfo _ChildrenPropertyInfo;
         private PropertyInfo _FilterTargetPropertyInfo;
@@ -740,8 +740,7 @@ namespace Toolkit.WPF.Controls
         private ICollectionView _CollectionView;
 
         private DataGrid _DataGrid;
-        private ResourceDictionary _ResourceDictionary;
-
+        private readonly ResourceDictionary _ResourceDictionary;
 
         /// <summary>
         /// 静的コンストラクタ
@@ -751,7 +750,7 @@ namespace Toolkit.WPF.Controls
             Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/DynamicTableGrid/DataGridTreeColumn.xaml") };
         }
 
-        private static ResourceDictionary Resource;
+        private static readonly ResourceDictionary Resource;
         private static readonly double DepthMarginUnit = 12D;
 
         /// <summary>

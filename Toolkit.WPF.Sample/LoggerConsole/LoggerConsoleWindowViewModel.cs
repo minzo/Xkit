@@ -27,27 +27,27 @@ namespace Toolkit.WPF.Sample
         /// <summary>
         /// 直近のログ
         /// </summary>
-        public LogData LatestLog => Logger.LatestLog;
+        public LogData LatestLog => this.Logger.LatestLog;
 
         /// <summary>
         /// 直近のメッセージ
         /// </summary>
-        public string LatestLogMessage => Logger.LatestLog.Message;
+        public string LatestLogMessage => this.Logger.LatestLog.Message;
 
         /// <summary>
         /// エラーメッセージ数
         /// </summary>
-        public int ErrorMessageCount => Logger.ErrorMessageCount;
+        public int ErrorMessageCount => this.Logger.ErrorMessageCount;
 
         /// <summary>
         /// 警告メッセージ数
         /// </summary>
-        public int WarningMessageCount => Logger.WarningMessageCount;
+        public int WarningMessageCount => this.Logger.WarningMessageCount;
 
         /// <summary>
         /// 情報メッセージ数
         /// </summary>
-        public int InfomationMessageCount => Logger.InfomationMessageCount;
+        public int InfomationMessageCount => this.Logger.InfomationMessageCount;
 
 
         public ICommand AddLogCommand { get; }
@@ -58,24 +58,24 @@ namespace Toolkit.WPF.Sample
         /// </summary>
         public LoggerConsoleWindowViewModel()
         {
-            System.Windows.Data.BindingOperations.EnableCollectionSynchronization(Logs, this);
+            System.Windows.Data.BindingOperations.EnableCollectionSynchronization(this.Logs, this);
 
-            Logger.PropertyChanged += (s, e) => {
-                InvokePropertyChanged(e.PropertyName);
+            this.Logger.PropertyChanged += (s, e) => {
+                this.InvokePropertyChanged(e.PropertyName);
             };
 
-            Logger.LogAdded += (s, e) => {
-                lock (Logs)
+            this.Logger.LogAdded += (s, e) => {
+                lock (this.Logs)
                 {
-                    Logs.Add(e);
-                    InvokePropertyChanged(nameof(LatestLogMessage));
+                    this.Logs.Add(e);
+                    this.InvokePropertyChanged(nameof(this.LatestLogMessage));
                 }
             };
 
-            AddLogCommand = new DelegateCommand(_ => {
+            this.AddLogCommand = new DelegateCommand(_ => {
                 foreach(var i in Enumerable.Range(0, 100))
                 {
-                    Logger.AddLog($"TextLog{i}", LogLevel.Information);
+                    this.Logger.AddLog($"TextLog{i}", LogLevel.Information);
                 }
             });
         }

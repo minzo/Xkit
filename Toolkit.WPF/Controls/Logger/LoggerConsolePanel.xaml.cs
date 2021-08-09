@@ -27,9 +27,9 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public LoggerConsolePanel()
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
-            CommandBindings.Add(new CommandBinding(ApplicationCommands.Find, (s, e) => FilterTextBox.Focus(), (s, e) => e.CanExecute = true));
+            this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Find, (s, e) => FilterTextBox.Focus(), (s, e) => e.CanExecute = true));
         }
     }
 }

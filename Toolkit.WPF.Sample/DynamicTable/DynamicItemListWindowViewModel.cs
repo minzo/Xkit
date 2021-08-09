@@ -74,11 +74,11 @@ namespace Toolkit.WPF.Sample
 
             items2[0].SetPropertyValue("DisplayColor", Colors.Orange);
 
-            ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
-            ItemsCollection.Add(new TypedCollection<DynamicItem>(items2));
-            ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
-            ItemsCollection.Add(new TypedCollection<DynamicItem>(items2));
-            ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
+            this.ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
+            this.ItemsCollection.Add(new TypedCollection<DynamicItem>(items2));
+            this.ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
+            this.ItemsCollection.Add(new TypedCollection<DynamicItem>(items2));
+            this.ItemsCollection.Add(new TypedCollection<DynamicItem>(items));
         }
 
 #pragma warning disable CS0067

@@ -14,8 +14,8 @@ namespace Toolkit.WPF.Converters
         /// </summary>
         public string SizeUnit
         {
-            get => (string)GetValue(SizeUnitProperty);
-            set => SetValue(SizeUnitProperty, value);
+            get => (string)this.GetValue(SizeUnitProperty);
+            set => this.SetValue(SizeUnitProperty, value);
         }
 
         // Using a DependencyProperty as the backing store for SizeUnit.  This enables animation, styling, binding, etc...
@@ -27,8 +27,8 @@ namespace Toolkit.WPF.Converters
         /// </summary>
         public string StringFormat
         {
-            get { return (string)GetValue(StringFormatProperty); }
-            set { SetValue(StringFormatProperty, value); }
+            get { return (string)this.GetValue(StringFormatProperty); }
+            set { this.SetValue(StringFormatProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for StringFormat.  This enables animation, styling, binding, etc...
@@ -66,7 +66,7 @@ namespace Toolkit.WPF.Converters
                     return (double.TryParse(value?.ToString(), out val) ? val / TiB : 0).ToString(this.StringFormat) + $" {unit}";
                 case Unit.Byte:
                 default:
-                    return (double.TryParse(value?.ToString(), out val) ? val : 0).ToString(StringFormat) + $" {unit}";
+                    return (double.TryParse(value?.ToString(), out val) ? val : 0).ToString(this.StringFormat) + $" {unit}";
             }
         }
 

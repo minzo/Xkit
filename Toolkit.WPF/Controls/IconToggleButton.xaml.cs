@@ -27,8 +27,8 @@ namespace Toolkit.WPF.Controls
     {
         public UIElement Icon
         {
-            get { return (UIElement)GetValue(IconProperty); }
-            set { SetValue(IconProperty, value); }
+            get { return (UIElement)this.GetValue(IconProperty); }
+            set { this.SetValue(IconProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for Icon.  This enables animation, styling, binding, etc...
@@ -38,8 +38,8 @@ namespace Toolkit.WPF.Controls
 
         public new object Content
         {
-            get { return (object)GetValue(ContentProperty); }
-            set { SetValue(ContentProperty, value); }
+            get { return (object)this.GetValue(ContentProperty); }
+            set { this.SetValue(ContentProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for Content.  This enables animation, styling, binding, etc...
@@ -50,7 +50,7 @@ namespace Toolkit.WPF.Controls
 
         public IconToggleButton()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }
