@@ -9,7 +9,7 @@ namespace Corekit.Models
     /// <summary>
     /// 組み合わせテーブル
     /// </summary>
-    public class CombinationTable<T, TSource, TTarget> : DynamicTable<T>
+    public class CombinationTable<T, TSource, TTarget> : DynamicTable<T>, IDynamicTable
     {
         /// <summary>
         /// コンストラクタ

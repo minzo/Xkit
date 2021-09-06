@@ -12,8 +12,13 @@ namespace Corekit.Models
     /// <summary>
     /// 組み合わせ定義
     /// </summary>
-    public class Combination<T> : IReadOnlyCollection<CombinationTableFrame<T>>, INotifyCollectionChanged
+    public class Combination<T> : IReadOnlyList<CombinationTableFrame<T>>, INotifyCollectionChanged
     {
+        /// <summary>
+        /// 定義
+        /// </summary>
+        public IReadOnlyDictionary<string, IEnumerable<T>> Definitions => this._Definitions;
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -123,9 +128,11 @@ namespace Corekit.Models
 
         #endregion
 
-        #region IReadOnlyCollection
+        #region IReadOnlyList
 
         public int Count => this._Combinations.Count;
+
+        public CombinationTableFrame<T> this[int index] => this._Combinations[index];
 
         #endregion
 
