@@ -421,7 +421,7 @@ namespace Toolkit.WPF.Controls
                 e.OldItems?
                     .Cast<IDynamicPropertyDefinition>()
                     .Select(i => i.Name)
-                    .Select(i => this.Columns.FirstOrDefault(c => GetPropertyName(c) == i))
+                    .Select(i => this.Columns.FirstOrDefault(c => GetPropertyDescriptor(c).Name == i))
                     .Where(i => i != null)
                     .ForEach(i => this.Columns.Remove(i));
 
@@ -443,12 +443,12 @@ namespace Toolkit.WPF.Controls
             {
                 foreach (var column in this.Columns)
                 {
-                    var propertyName = GetPropertyName(column);
+                    var propertyName = GetPropertyDescriptor(column).Name;
                     var sourceColumn = EnumerateChildren(sharedSizeScopeRoot)
                         .OfType<DynamicTableGrid>()
                         .Where(i => i != this)
                         .SelectMany(i => i.Columns)
-                        .FirstOrDefault(i => i != column && GetPropertyName(i) == propertyName);
+                        .FirstOrDefault(i => i != column && GetPropertyDescriptor(i).Name == propertyName);
 
                     if (sourceColumn == null)
                     {
@@ -476,7 +476,7 @@ namespace Toolkit.WPF.Controls
                     break;
             }
 
-            SetPropertyName(e.Column, e.PropertyName);
+            SetPropertyDescriptor(e.Column, e.PropertyDescriptor as PropertyDescriptor);
         }
 
         /// <summary>
@@ -628,7 +628,7 @@ namespace Toolkit.WPF.Controls
             // セル選択情報の更新
             var cellInfos = this.SelectedCells
                 .Where(i => i.IsValid)
-                .Select(i => (Item: i.Item, PropertyName:GetPropertyName(i.Column)))
+                .Select(i => (Item: i.Item, PropertyName: GetPropertyDescriptor(i.Column).Name))
                 .ToList();
 
             this.SetCurrentValue(DynamicTableGrid.SelectedInfosProperty, cellInfos);
@@ -720,7 +720,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnCopy()
         {
-            var columns = this.Columns.ToDictionary(i => GetPropertyName(i), i => i);
+            var columns = this.Columns.ToDictionary(i => GetPropertyDescriptor(i).Name, i => i);
             var items = this.SelectedInfos
                 .Select(i => (Item: i.Item, Value: columns[i.PropertyName].OnCopyingCellClipboardContent(i.Item)))
                 .GroupBy(i => i.Item);
@@ -787,20 +787,21 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
-        #region 列名のプロパティ
+        #region PropertyDescriptorのプロパティ
 
-        private static string GetPropertyName(DataGridColumn obj)
+        private static PropertyDescriptor GetPropertyDescriptor(DependencyObject obj)
         {
-            return (string)obj.GetValue(PropertyNameProperty);
+            return (PropertyDescriptor)obj.GetValue(PropertyDescriptorProperty);
         }
 
-        private static void SetPropertyName(DataGridColumn obj, string value)
+        public static void SetPropertyDescriptor(DependencyObject obj, PropertyDescriptor value)
         {
-            obj.SetValue(PropertyNameProperty, value);
+            obj.SetValue(PropertyDescriptorProperty, value);
         }
 
-        private static readonly DependencyProperty PropertyNameProperty = 
-            DependencyProperty.RegisterAttached("PropertyName", typeof(string), typeof(DynamicTableGrid), new PropertyMetadata(null));
+        // Using a DependencyProperty as the backing store for PropertyDescriptor.  This enables animation, styling, binding, etc...
+        private static readonly DependencyProperty PropertyDescriptorProperty =
+            DependencyProperty.RegisterAttached("PropertyDescriptor", typeof(PropertyDescriptor), typeof(DynamicTableGrid), new PropertyMetadata(null));
 
         #endregion
 
