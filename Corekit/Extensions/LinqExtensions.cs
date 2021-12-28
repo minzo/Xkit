@@ -251,8 +251,10 @@ namespace Corekit.Extensions
             return collection.Prepend(element);
         }
 
+#if !NET6_0_OR_GREATER
         /// <summary>
         /// シーケンスを指定した要素数のシーケンスに分割します
+        /// .NET6 から標準の関数に追加されたたため.NET6以前でのみ有効化しています
         /// </summary>
         public static IEnumerable<IEnumerable<T>> Chunk<T>(this IEnumerable<T> source, int chunkSize)
         {
@@ -267,6 +269,7 @@ namespace Corekit.Extensions
                 source = source.Skip(chunkSize);
             }
         }
+#endif
 
         /// <summary>
         /// LinqExtensionsの内部で使うEqualityComparerer
