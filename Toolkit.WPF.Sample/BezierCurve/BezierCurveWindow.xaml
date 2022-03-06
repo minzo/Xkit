@@ -1,0 +1,19 @@
+﻿<Window x:Class="Toolkit.WPF.Sample.BezierCurveWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Toolkit.WPF.Sample"
+        mc:Ignorable="d"
+        Title="BezierCurveWindow" Height="450" Width="800"
+        MouseDown="Canvas_PreviewMouseDown">
+    <StackPanel>
+        <Button Content="Clear" Click="Button_Click" />
+
+        <DockPanel>
+            <TextBlock Text="{Binding Value, Mode=OneWay, ElementName=Slider}" Width="30" />
+            <Slider x:Name="Slider" Minimum="0.0" Maximum="1.0" TickFrequency="0.01" ValueChanged="Slider_ValueChanged" />
+        </DockPanel>
+        <Canvas x:Name="Canvas" />
+    </StackPanel>
+</Window>
