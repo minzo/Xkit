@@ -517,7 +517,7 @@ namespace Toolkit.WPF.Controls
                 foreach (var info in this._TreeInfo)
                 {
                     this.SetIsExpanded(info.Key, info.Value.IsExpandedPreserved);
-                    info.Value.IsHitFilterChildren = false;
+                    info.Value.IsHitFilterDescendant = false;
                     info.Value.IsHitFilter = false;
                 }
 
@@ -536,7 +536,7 @@ namespace Toolkit.WPF.Controls
 
                 this._FilterText = filterText.ToLower();
 
-                // フィルターする前の表示状態を保存しつつフィルターする
+                // フィルタにヒットするか更新する
                 foreach (var info in this._TreeInfo)
                 {
                     info.Value.IsHitFilter = this._FilterTargetPropertyInfo.GetValue(info.Key).ToString().ToLower().Contains(this._FilterText);
@@ -545,13 +545,13 @@ namespace Toolkit.WPF.Controls
                 // ツリー情報を更新
                 foreach(var info in this._TreeInfo)
                 {
-                    this.UpdateTreeInfo(info.Key, info.Value.IsParentExpanded, info.Value.IsParentVisible, info.Value.Depth);
+                    this.UpdateTreeInfo(info.Key, info.Value.IsParentExpanded, info.Value.IsParentVisible, info.Value.IsHitFilterAncestor, info.Value.Depth);
                 }
 
                 // フィルターの結果で開閉状態を設定する
                 foreach (var info in this._TreeInfo)
                 {
-                    this.SetIsExpanded(info.Key, info.Value.IsHitFilterChildren);
+                    this.SetIsExpanded(info.Key, info.Value.IsHitFilterDescendant);
                 }
             }
 
@@ -561,7 +561,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// Tree情報更新
         /// </summary>
-        private bool UpdateTreeInfo(object item, bool isParentExpanded = true, bool isParentVisible = true, int depth = 0)
+        private bool UpdateTreeInfo(object item, bool isParentExpanded = true, bool isParentVisible = true, bool isHitFilterAncestor = false, int depth = 0)
         {
             if (!this._TreeInfo.TryGetValue(item, out var info))
             {
@@ -569,20 +569,18 @@ namespace Toolkit.WPF.Controls
                 this._TreeInfo.Add(item, info);
             }
 
-            info.IsParentExpanded = isParentExpanded;
-            info.IsParentVisible = isParentVisible;
-            info.Depth = depth;
+            info.UpdateTreeInfo( isParentExpanded, isParentVisible, isHitFilterAncestor, depth);
 
             if (this._ChildrenPropertyInfo?.GetValue(item) is IEnumerable<object> children)
             {
-                info.IsHitFilterChildren = false;
+                info.IsHitFilterDescendant = false;
                 foreach (var child in children)
                 {
-                    info.IsHitFilterChildren |= this.UpdateTreeInfo(child, info.IsExpanded, info.IsVisible, info.Depth + 1);
+                    info.IsHitFilterDescendant |= this.UpdateTreeInfo(child, info.IsExpanded, info.IsVisible, (info.IsHitFilter || info.IsHitFilterAncestor), info.Depth + 1);
                 }
                 
             }
-            return info.IsHitFilterChildren || info.IsHitFilter;
+            return info.IsHitFilterDescendant || info.IsHitFilter;
         }
 
         /// <summary>
@@ -597,7 +595,7 @@ namespace Toolkit.WPF.Controls
             }
 
             info.IsExpanded = isExpanded;
-            info.IsHitFilterChildren = this.UpdateTreeInfo(item, info.IsParentExpanded, info.IsParentVisible, info.Depth);
+            info.IsHitFilterDescendant = this.UpdateTreeInfo(item, info.IsParentExpanded, info.IsParentVisible, info.IsHitFilterAncestor, info.Depth);
             this._ExpandedPropertyInfo?.SetValue(item, info.IsExpanded);
         }
 
@@ -684,38 +682,99 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private class TreeInfo
         {
+            //
+            // 表示状態の決まり方
+            //
+            //   通常時(フィルタなし)
+            //   ・親要素が表示されているかと親要素が開いているかで決まる
+            //   ・Rootであれば親がいないのでそのまま表示してよい
+            //   フィルタ時
+            //   ・先祖か子孫の中に直接フィルタにヒットしている要素がある場合は通常時と同じ条件で表示が決まる
+            //   ・先祖か子孫の中に直接フィルタにヒットしている要素がない場合は一切表示することがない
+            //
+
+            // todo
+            //   フィルタ解除時に選んだ要素だけは見える状態を維持し開閉状態を復元する
+
             [Flags]
             enum Flags : int
             {
-                IsExpanded          = 0x0001,
-                IsParentVisible     = 0x0002,
-                IsParentExpanded    = 0x0004,
-                IsHitFilter         = 0x0008,
-                IsHitFilterChildren = 0x0010,
-                IsExpandedPreserved = 0x0020,
+                IsExpanded            = 0x0001,
+                IsParentVisible       = 0x0002,
+                IsParentExpanded      = 0x0004,
+                IsHitFilter           = 0x0008,
+                IsHitFilterAncestor   = 0x0010,
+                IsHitFilterDescendant = 0x0020,
+                IsExpandedPreserved   = 0x0030, // フィルタ前の開閉状態
             }
 
+            /// <summary>
+            /// フィルタなしの状態で表示すべきか
+            /// </summary>
             public bool IsVisible => this.IsRoot || this.IsParentVisible && this.IsParentExpanded;
 
-            public bool IsVisibleOnFilter => this.IsHitFilter || this.IsHitFilterChildren;
+            /// <summary>
+            /// フィルタありの状態で表示すべきか
+            /// </summary>
+            public bool IsVisibleOnFilter => (this.IsHitFilter || this.IsHitFilterAncestor || this.IsHitFilterDescendant) && this.IsVisible;
 
-            public bool IsExpanded { get => this.IsOnBit(Flags.IsExpanded); set => this.SetBit(Flags.IsExpanded, value); }
+            /// <summary>
+            /// 親要素が表示されているかどうか
+            /// </summary>
+            public bool IsParentVisible { get => this.IsOnBit(Flags.IsParentVisible); private set => this.ChangeBit(Flags.IsParentVisible, value); }
 
-            public bool IsParentVisible { get => this.IsOnBit(Flags.IsParentVisible); set => this.SetBit(Flags.IsParentVisible, value); }
+            /// <summary>
+            /// 親要素が開いているかどうか
+            /// 親要素が開いていてもさらに親の要素が閉じていると表示されないことがあるため表示状態とは別です
+            /// </summary>
+            public bool IsParentExpanded { get => this.IsOnBit(Flags.IsParentExpanded); private set => this.ChangeBit(Flags.IsParentExpanded, value); }
 
-            public bool IsParentExpanded { get => this.IsOnBit(Flags.IsParentExpanded); set => this.SetBit(Flags.IsParentExpanded, value); }
+            /// <summary>
+            /// フィルタにヒットしているか
+            /// </summary>
+            public bool IsHitFilter { get => this.IsOnBit(Flags.IsHitFilter); set => this.ChangeBit(Flags.IsHitFilter, value); }
 
-            public bool IsHitFilter { get => this.IsOnBit(Flags.IsHitFilter); set => this.SetBit(Flags.IsHitFilter, value); }
+            /// <summary>
+            /// 先祖要素がフィルタにヒットしているか
+            /// </summary>
+            public bool IsHitFilterAncestor { get => this.IsOnBit(Flags.IsHitFilterAncestor); set => this.ChangeBit(Flags.IsHitFilterAncestor, value); }
 
-            public bool IsHitFilterChildren { get => this.IsOnBit(Flags.IsHitFilterChildren); set => this.SetBit(Flags.IsHitFilterChildren, value); }
+            /// <summary>
+            /// 子孫要素がフィルタにヒットしているか
+            /// </summary>
+            public bool IsHitFilterDescendant { get => this.IsOnBit(Flags.IsHitFilterDescendant); set => this.ChangeBit(Flags.IsHitFilterDescendant, value); }
 
-            public bool IsExpandedPreserved { get => this.IsOnBit(Flags.IsExpandedPreserved); set => this.SetBit(Flags.IsExpandedPreserved, value); }
+            /// <summary>
+            /// 開閉状態
+            /// </summary>
+            public bool IsExpanded { get => this.IsOnBit(Flags.IsExpanded); set => this.ChangeBit(Flags.IsExpanded, value); }
 
+            /// <summary>
+            /// フィルタ前の開閉状態
+            /// </summary>
+            public bool IsExpandedPreserved { get => this.IsOnBit(Flags.IsExpandedPreserved); set => this.ChangeBit(Flags.IsExpandedPreserved, value); }
+
+            /// <summary>
+            /// ルート要素か
+            /// </summary>
             public bool IsRoot => this.Depth == 0;
 
-            public int Depth { get; internal set; }
+            /// <summary>
+            /// 階層の深さ(Rootで0)
+            /// </summary>
+            public int Depth { get; private set; }
 
-            private void SetBit(Flags flags, bool value)
+
+            public void UpdateTreeInfo(bool isParentExpanded, bool isParentVisible, bool isHitFilterAncestor, int depth = 0 )
+            {
+                this.ChangeBit(Flags.IsParentExpanded, isParentExpanded);
+                this.ChangeBit(Flags.IsParentVisible, isParentVisible);
+                this.ChangeBit(Flags.IsHitFilterAncestor, isHitFilterAncestor);
+                
+                this.Depth = depth;
+            }
+
+            private void ChangeBit(Flags flags, bool value)
             {
                 this._Flags = value ? (this._Flags | flags) : (this._Flags & ~flags);
             }
