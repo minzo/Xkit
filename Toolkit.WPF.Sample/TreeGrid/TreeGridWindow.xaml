@@ -45,7 +45,8 @@
             <DockPanel>
                 <TextBlock DockPanel.Dock="Top" Text="TreeView" Margin="4"/>
                 <TreeView
-                    ItemsSource="{Binding TreeRootItems}"
+                    ItemsSource="{Binding TreeRootItems, Mode=OneTime}"
+                    VirtualizingPanel.IsVirtualizing="True"
                     IsTextSearchEnabled="False">
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate ItemsSource="{Binding Children}">
@@ -68,7 +69,9 @@
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
                 SelectionUnit="CellOrRowHeader"
-                ItemsSource="{Binding Items}"
+                EnableRowVirtualization="True"
+                VirtualizingPanel.IsVirtualizing="True"
+                ItemsSource="{Binding Items, Mode=OneTime}"
                 tkitwpf:DataGridTreeColumn.FilterText="{Binding FilterText}">
                 <DataGrid.Columns>
                     <tkitwpf:DataGridTreeColumn

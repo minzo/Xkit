@@ -44,25 +44,38 @@ namespace Toolkit.WPF.Sample
 
         public TreeGridWindowViewModel()
         {
-            this.TreeRootItems = this.GenerateTree(3, 4).Children.ToObservableCollection();
+            this.TreeRootItems = new ObservableCollection<TreeGridItem>() {
+                new TreeGridItem( "くだもの" ){
+                    Children = new List<TreeGridItem>(){
+                        new TreeGridItem("ばなな"),
+                        new TreeGridItem("みかん"),
+                        new TreeGridItem("りんご"),
+                    }
+                },
+                new TreeGridItem( "やさい" ){
+                    Children = new List<TreeGridItem>(){
+                        new TreeGridItem("だいこん"),
+                        new TreeGridItem("にんじん"),
+                        new TreeGridItem("たまねぎ"),
+                    }
+                },
+                new TreeGridItem( "どうぶつ" ){
+                    Children = new List<TreeGridItem>(){
+                        new TreeGridItem("いぬ"),
+                        new TreeGridItem("ねこ")
+                        {
+                            Children = new List<TreeGridItem>(){
+                                new TreeGridItem("みけ"),
+                                new TreeGridItem("しろ")
+                            }
+                        }
+                    }
+                },
+            };
 
             this.Items = this.TreeRootItems
                 .EnumerateTreeDepthFirst(i => i.Children)
                 .ToObservableCollection();
-        }
-
-        private TreeGridItem GenerateTree(int depth, int breadth)
-        {
-            if (depth > 0 && breadth > 0)
-            {
-                var children = Enumerable.Range(0, breadth)
-                    .Select(i => this.GenerateTree(depth - 1, breadth - 1))
-                    .ToList();
-
-                return new TreeGridItem($"Item_{depth}_{breadth}") { Children = children };
-            }
-
-            return new TreeGridItem($"Item_{depth}_{breadth}");
         }
 
         private string _FilterText = string.Empty;

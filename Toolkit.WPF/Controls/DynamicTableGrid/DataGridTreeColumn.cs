@@ -383,7 +383,7 @@ namespace Toolkit.WPF.Controls
                     expander.Visibility = this.HasChildren(e.Row.Item) ? Visibility.Visible : Visibility.Hidden;
 
                     // ExpandedPropertyPath が指定されていないときは自分の情報から復元する
-                    if (this._ExpandedPropertyInfo == null)
+                    if (this._ExpandedPropertyGetMethodInfo == null)
                     {
                         expander.IsChecked = this.GetIsExpanded(e.Row.Item);
                     }
@@ -444,29 +444,32 @@ namespace Toolkit.WPF.Controls
             // Expanded
             if (!string.IsNullOrEmpty(this.ExpandedPropertyPath))
             {
-                this._ExpandedPropertyInfo = type?.GetProperty(this.ExpandedPropertyPath);
+                var propertyInfo = type?.GetProperty(this.ExpandedPropertyPath);
+                this._ExpandedPropertyGetMethodInfo = propertyInfo.GetMethod;
+                this._ExpandedPropertySetMethodInfo = propertyInfo.SetMethod;
             }
 
             // Children
             if (!string.IsNullOrEmpty(this.ChildrenPropertyPath))
             {
                 this._ChildrenPropertyInfo = type?.GetProperty(this.ChildrenPropertyPath);
+                this._ChildrenPropertyGetMethodInfo = this._ChildrenPropertyInfo.GetMethod;
             }
 
             // FilterTarget
             if (!string.IsNullOrEmpty(this.FilterTargetPropertyPath))
             {
-                this._FilterTargetPropertyInfo = type?.GetProperty(this.FilterTargetPropertyPath);
+                this._FilterTargetPropertyGetMethodInfo = type?.GetProperty(this.FilterTargetPropertyPath).GetMethod;
             }
             else if (!string.IsNullOrEmpty((this.Binding as Binding)?.Path?.Path))
             {
-                this._FilterTargetPropertyInfo = type?.GetProperty(((Binding)this.Binding).Path.Path);
+                this._FilterTargetPropertyGetMethodInfo = type?.GetProperty(((Binding)this.Binding).Path.Path).GetMethod;
             }
 
             // TreeInfoの構築
             foreach (var item in this._DataGrid.ItemsSource)
             {
-                this.SetIsExpanded(item, (bool?)this._ExpandedPropertyInfo?.GetValue(item) == true);
+                this.SetIsExpanded(item, (bool?)this._ExpandedPropertyGetMethodInfo?.Invoke(item, null) == true);
             }
 
             this._CollectionView = this._DataGrid.Items;
@@ -516,7 +519,7 @@ namespace Toolkit.WPF.Controls
                 // フィルターする前の状態を復活させる
                 foreach (var info in this._TreeInfo)
                 {
-                    this.SetIsExpanded(info.Key, info.Value.IsExpandedPreserved);
+                    this.SetIsExpanded(info.Key, info.Value.IsExpandedSaved);
                     info.Value.IsHitFilterDescendant = false;
                     info.Value.IsHitFilter = false;
                 }
@@ -528,9 +531,9 @@ namespace Toolkit.WPF.Controls
                 if (string.IsNullOrEmpty(this._FilterText))
                 {
                     // フィルターする前の状態を保存する
-                    foreach (var info in this._TreeInfo)
+                    foreach (var value in this._TreeInfo.Values)
                     {
-                        info.Value.IsExpandedPreserved = info.Value.IsExpanded;
+                        value.IsExpandedSaved = value.IsExpanded;
                     }
                 }
 
@@ -539,13 +542,17 @@ namespace Toolkit.WPF.Controls
                 // フィルタにヒットするか更新する
                 foreach (var info in this._TreeInfo)
                 {
-                    info.Value.IsHitFilter = this._FilterTargetPropertyInfo.GetValue(info.Key).ToString().ToLower().Contains(this._FilterText);
+                    info.Value.IsHitFilter = this._FilterTargetPropertyGetMethodInfo.Invoke(info.Key, null).ToString().ToLower().Contains(this._FilterText);
                 }
 
                 // ツリー情報を更新
                 foreach(var info in this._TreeInfo)
                 {
-                    this.UpdateTreeInfo(info.Key, info.Value.IsParentExpanded, info.Value.IsParentVisible, info.Value.IsHitFilterAncestor, info.Value.Depth);
+                    // UpdateTreeInfo で再帰的に適用されるのでRootのものだけ更新を呼べばいい
+                    if( info.Value.IsRoot )
+                    {
+                        this.UpdateTreeInfo(info.Key, info.Value.IsParentExpanded, info.Value.IsParentVisible, info.Value.IsHitFilterAncestor, info.Value.Depth);
+                    }
                 }
 
                 // フィルターの結果で開閉状態を設定する
@@ -556,31 +563,6 @@ namespace Toolkit.WPF.Controls
             }
 
             this.RefreshFilter();
-        }
-
-        /// <summary>
-        /// Tree情報更新
-        /// </summary>
-        private bool UpdateTreeInfo(object item, bool isParentExpanded = true, bool isParentVisible = true, bool isHitFilterAncestor = false, int depth = 0)
-        {
-            if (!this._TreeInfo.TryGetValue(item, out var info))
-            {
-                info = new TreeInfo();
-                this._TreeInfo.Add(item, info);
-            }
-
-            info.UpdateTreeInfo( isParentExpanded, isParentVisible, isHitFilterAncestor, depth);
-
-            if (this._ChildrenPropertyInfo?.GetValue(item) is IEnumerable<object> children)
-            {
-                info.IsHitFilterDescendant = false;
-                foreach (var child in children)
-                {
-                    info.IsHitFilterDescendant |= this.UpdateTreeInfo(child, info.IsExpanded, info.IsVisible, (info.IsHitFilter || info.IsHitFilterAncestor), info.Depth + 1);
-                }
-                
-            }
-            return info.IsHitFilterDescendant || info.IsHitFilter;
         }
 
         /// <summary>
@@ -596,7 +578,32 @@ namespace Toolkit.WPF.Controls
 
             info.IsExpanded = isExpanded;
             info.IsHitFilterDescendant = this.UpdateTreeInfo(item, info.IsParentExpanded, info.IsParentVisible, info.IsHitFilterAncestor, info.Depth);
-            this._ExpandedPropertyInfo?.SetValue(item, info.IsExpanded);
+            this._ExpandedPropertySetMethodInfo?.Invoke(item, new object[] { info.IsExpanded });
+        }
+
+        /// <summary>
+        /// Tree情報更新
+        /// </summary>
+        private bool UpdateTreeInfo(object item, bool isParentExpanded = true, bool isParentVisible = true, bool isHitFilterAncestor = false, int depth = 0)
+        {
+            if (!this._TreeInfo.TryGetValue(item, out var info))
+            {
+                info = new TreeInfo();
+                this._TreeInfo.Add(item, info);
+            }
+
+            info.UpdateTreeInfo(isParentExpanded, isParentVisible, isHitFilterAncestor, depth);
+
+            if (this._ChildrenPropertyGetMethodInfo?.Invoke(item, null) is IEnumerable<object> children)
+            {
+                info.IsHitFilterDescendant = false;
+                foreach (var child in children)
+                {
+                    info.IsHitFilterDescendant |= this.UpdateTreeInfo(child, info.IsExpanded, info.IsVisible, (info.IsHitFilter || info.IsHitFilterAncestor), info.Depth + 1);
+                }
+
+            }
+            return info.IsHitFilterDescendant || info.IsHitFilter;
         }
 
         /// <summary>
@@ -637,7 +644,7 @@ namespace Toolkit.WPF.Controls
         private bool HasChildren(object item)
         {
             System.Diagnostics.Debug.Assert(item.GetType() == this._ChildrenPropertyInfo?.ReflectedType, "CellEditing 状態で開閉はできません");
-            return (this._ChildrenPropertyInfo?.GetValue(item) as IEnumerable<object>)?.Any() ?? false;
+            return (this._ChildrenPropertyGetMethodInfo?.Invoke(item, null) as IEnumerable<object>)?.Any() ?? false;
         }
 
         /// <summary>
@@ -669,7 +676,7 @@ namespace Toolkit.WPF.Controls
             {
                 foreach (var item in e.NewItems)
                 {
-                    this.SetIsExpanded(item, (this._ExpandedPropertyInfo?.GetValue(item) as bool?) == true);
+                    this.SetIsExpanded(item, (this._ExpandedPropertyGetMethodInfo?.Invoke(item, null) as bool?) == true);
                 }
             }
 
@@ -705,7 +712,7 @@ namespace Toolkit.WPF.Controls
                 IsHitFilter           = 0x0008,
                 IsHitFilterAncestor   = 0x0010,
                 IsHitFilterDescendant = 0x0020,
-                IsExpandedPreserved   = 0x0030, // フィルタ前の開閉状態
+                IsExpandedSaved       = 0x0030, // フィルタ前の開閉状態
             }
 
             /// <summary>
@@ -752,7 +759,7 @@ namespace Toolkit.WPF.Controls
             /// <summary>
             /// フィルタ前の開閉状態
             /// </summary>
-            public bool IsExpandedPreserved { get => this.IsOnBit(Flags.IsExpandedPreserved); set => this.ChangeBit(Flags.IsExpandedPreserved, value); }
+            public bool IsExpandedSaved { get => this.IsOnBit(Flags.IsExpandedSaved); set => this.ChangeBit(Flags.IsExpandedSaved, value); }
 
             /// <summary>
             /// ルート要素か
@@ -764,7 +771,9 @@ namespace Toolkit.WPF.Controls
             /// </summary>
             public int Depth { get; private set; }
 
-
+            /// <summary>
+            /// ツリー情報を更新
+            /// </summary>
             public void UpdateTreeInfo(bool isParentExpanded, bool isParentVisible, bool isHitFilterAncestor, int depth = 0 )
             {
                 this.ChangeBit(Flags.IsParentExpanded, isParentExpanded);
@@ -774,11 +783,17 @@ namespace Toolkit.WPF.Controls
                 this.Depth = depth;
             }
 
+            /// <summary>
+            /// フラグの変更
+            /// </summary>
             private void ChangeBit(Flags flags, bool value)
             {
                 this._Flags = value ? (this._Flags | flags) : (this._Flags & ~flags);
             }
 
+            /// <summary>
+            /// 指定フラグがtrueか
+            /// </summary>
             private bool IsOnBit(Flags flags)
             {
                 return (this._Flags & flags) == flags;
@@ -791,9 +806,13 @@ namespace Toolkit.WPF.Controls
         private Predicate<object> _UserFilter;
 
         private readonly Dictionary<object, TreeInfo> _TreeInfo;
-        private PropertyInfo _ExpandedPropertyInfo;
+
         private PropertyInfo _ChildrenPropertyInfo;
-        private PropertyInfo _FilterTargetPropertyInfo;
+
+        private MethodInfo _ExpandedPropertyGetMethodInfo;
+        private MethodInfo _ExpandedPropertySetMethodInfo;
+        private MethodInfo _ChildrenPropertyGetMethodInfo;
+        private MethodInfo _FilterTargetPropertyGetMethodInfo;
         
         private INotifyCollectionChanged _ItemsSource;
         private ICollectionView _CollectionView;
