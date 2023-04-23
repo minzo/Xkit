@@ -47,6 +47,8 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
+        #region Treeプロパティ関連
+
         /// <summary>
         /// 子要素のプロパティパス
         /// </summary>
@@ -85,6 +87,8 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for FilterTargetPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty FilterTargetPropertyPathProperty =
             DependencyProperty.Register("FilterTargetPropertyPath", typeof(string), typeof(DataGridTreeColumn), new PropertyMetadata(null));
+
+        #endregion
 
         #region Icon
 
@@ -516,12 +520,31 @@ namespace Toolkit.WPF.Controls
         {
             if (string.IsNullOrEmpty(filterText))
             {
-                // フィルターする前の状態を復活させる
+                // 現在選択されている行を列挙する
+                var selectedItems = this._DataGrid.SelectedCells.Select(i => i.Item)
+                    .Concat(this._DataGrid.SelectedItems.OfType<object>());
+
+                // フィルタにヒットするか更新する
                 foreach (var info in this._TreeInfo)
                 {
-                    this.SetIsExpanded(info.Key, info.Value.IsExpandedSaved);
-                    info.Value.IsHitFilterDescendant = false;
-                    info.Value.IsHitFilter = false;
+                    info.Value.IsHitFilter = selectedItems.Contains(info.Key);
+                }
+
+                // ツリー情報を更新
+                foreach (var info in this._TreeInfo)
+                {
+                    // UpdateTreeInfo で再帰的に適用されるのでRootのものだけ更新を呼べばいい
+                    if (info.Value.IsRoot)
+                    {
+                        this.UpdateTreeInfo(info.Key, info.Value.IsParentExpanded, info.Value.IsParentVisible, info.Value.IsHitFilterAncestor, info.Value.Depth);
+                    }
+                }
+
+                // フィルターの結果で開閉状態を設定する
+                foreach (var info in this._TreeInfo)
+                {
+                    // 子孫がフィルターにヒットしているなら開いておく, フィルタにヒットしていなかったらフィルタ前の開閉状態にする
+                    this.SetIsExpanded(info.Key, info.Value.IsHitFilterDescendant || info.Value.IsExpandedSaved);
                 }
 
                 this._FilterText = filterText;
@@ -546,10 +569,10 @@ namespace Toolkit.WPF.Controls
                 }
 
                 // ツリー情報を更新
-                foreach(var info in this._TreeInfo)
+                foreach (var info in this._TreeInfo)
                 {
                     // UpdateTreeInfo で再帰的に適用されるのでRootのものだけ更新を呼べばいい
-                    if( info.Value.IsRoot )
+                    if (info.Value.IsRoot)
                     {
                         this.UpdateTreeInfo(info.Key, info.Value.IsParentExpanded, info.Value.IsParentVisible, info.Value.IsHitFilterAncestor, info.Value.Depth);
                     }
@@ -558,6 +581,7 @@ namespace Toolkit.WPF.Controls
                 // フィルターの結果で開閉状態を設定する
                 foreach (var info in this._TreeInfo)
                 {
+                    // 子孫がフィルターにヒットしているなら開いておく
                     this.SetIsExpanded(info.Key, info.Value.IsHitFilterDescendant);
                 }
             }
@@ -601,7 +625,6 @@ namespace Toolkit.WPF.Controls
                 {
                     info.IsHitFilterDescendant |= this.UpdateTreeInfo(child, info.IsExpanded, info.IsVisible, (info.IsHitFilter || info.IsHitFilterAncestor), info.Depth + 1);
                 }
-
             }
             return info.IsHitFilterDescendant || info.IsHitFilter;
         }
@@ -700,19 +723,16 @@ namespace Toolkit.WPF.Controls
             //   ・先祖か子孫の中に直接フィルタにヒットしている要素がない場合は一切表示することがない
             //
 
-            // todo
-            //   フィルタ解除時に選んだ要素だけは見える状態を維持し開閉状態を復元する
-
             [Flags]
             enum Flags : int
             {
-                IsExpanded            = 0x0001,
-                IsParentVisible       = 0x0002,
-                IsParentExpanded      = 0x0004,
-                IsHitFilter           = 0x0008,
-                IsHitFilterAncestor   = 0x0010,
-                IsHitFilterDescendant = 0x0020,
-                IsExpandedSaved       = 0x0030, // フィルタ前の開閉状態
+                IsExpanded            = 0x0001 << 0,
+                IsParentVisible       = 0x0001 << 1,
+                IsParentExpanded      = 0x0001 << 2,
+                IsHitFilter           = 0x0001 << 3,
+                IsHitFilterAncestor   = 0x0001 << 4,
+                IsHitFilterDescendant = 0x0001 << 5,
+                IsExpandedSaved       = 0x0001 << 6, // フィルタ前の開閉状態
             }
 
             /// <summary>
@@ -744,7 +764,7 @@ namespace Toolkit.WPF.Controls
             /// <summary>
             /// 先祖要素がフィルタにヒットしているか
             /// </summary>
-            public bool IsHitFilterAncestor { get => this.IsOnBit(Flags.IsHitFilterAncestor); set => this.ChangeBit(Flags.IsHitFilterAncestor, value); }
+            public bool IsHitFilterAncestor { get => this.IsOnBit(Flags.IsHitFilterAncestor); private set => this.ChangeBit(Flags.IsHitFilterAncestor, value); }
 
             /// <summary>
             /// 子孫要素がフィルタにヒットしているか
