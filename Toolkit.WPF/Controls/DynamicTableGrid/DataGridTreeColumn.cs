@@ -202,13 +202,21 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public void ExpandAll()
         {
-            if (this._DataGrid.ItemsSource != null)
+            // 開閉状態を更新する
+            foreach (var info in this._TreeInfo)
             {
-                foreach (var item in this._DataGrid.ItemsSource)
+                info.Value.IsExpanded = true;
+                this._ExpandedPropertySetMethodInfo?.Invoke(info.Key, new object[] { info.Value.IsExpanded });
+            }
+
+            // ツリー情報を更新
+            foreach (var info in this._TreeInfo)
+            {
+                // UpdateTreeInfo で再帰的に適用されるのでRootのものだけ更新を呼べばいい
+                if (info.Value.IsRoot)
                 {
-                    this.SetIsExpanded(item, true);
+                    this.UpdateTreeInfo(info.Key, info.Value);
                 }
-                this.RefreshFilter();
             }
         }
 
@@ -217,13 +225,21 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public void CloseAll()
         {
-            if (this._DataGrid.ItemsSource != null)
+            // 開閉状態を更新する
+            foreach (var info in this._TreeInfo)
             {
-                foreach (var item in this._DataGrid.ItemsSource)
+                info.Value.IsExpanded = false;
+                this._ExpandedPropertySetMethodInfo?.Invoke(info.Key, new object[] { info.Value.IsExpanded });
+            }
+
+            // ツリー情報を更新
+            foreach (var info in this._TreeInfo)
+            {
+                // UpdateTreeInfo で再帰的に適用されるのでRootのものだけ更新を呼べばいい
+                if (info.Value.IsRoot)
                 {
-                    this.SetIsExpanded(item, false);
+                    this.UpdateTreeInfo(info.Key, info.Value);
                 }
-                this.RefreshFilter();
             }
         }
 

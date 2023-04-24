@@ -73,9 +73,23 @@ namespace Toolkit.WPF.Sample
                 },
             };
 
+            // this.TreeRootItems = new ObservableCollection<TreeGridItem>() { CreateTree(10, 5) };
+
             this.Items = this.TreeRootItems
                 .EnumerateTreeDepthFirst(i => i.Children)
                 .ToObservableCollection();
+        }
+
+        static TreeGridItem CreateTree(int childrenNum, int depth)
+        {
+            var item = new TreeGridItem(string.Empty);
+
+            if( depth > 0)
+            {
+                item.Children.AddRange(Enumerable.Range(0, childrenNum).Select(i => CreateTree(childrenNum, depth - 1)));
+            }
+
+            return item;
         }
 
         private string _FilterText = string.Empty;
