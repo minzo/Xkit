@@ -522,7 +522,10 @@ namespace Toolkit.WPF.Controls
             {
                 // 現在選択されている行を列挙する
                 var selectedItems = this._DataGrid.SelectedCells.Select(i => i.Item)
-                    .Concat(this._DataGrid.SelectedItems.OfType<object>());
+                    .Concat(this._DataGrid.SelectedItems.OfType<object>())
+                    .Where(i => i != null);
+
+                this._FilterText = filterText;
 
                 // フィルタにヒットするか更新する
                 foreach (var info in this._TreeInfo)
@@ -536,7 +539,7 @@ namespace Toolkit.WPF.Controls
                     // UpdateTreeInfo で再帰的に適用されるのでRootのものだけ更新を呼べばいい
                     if (info.Value.IsRoot)
                     {
-                        this.UpdateTreeInfo(info.Key, info.Value.IsParentExpanded, info.Value.IsParentVisible, info.Value.IsHitFilterAncestor, info.Value.Depth);
+                        this.UpdateTreeInfo(info.Key, info.Value);
                     }
                 }
 
@@ -546,8 +549,6 @@ namespace Toolkit.WPF.Controls
                     // 子孫がフィルターにヒットしているなら開いておく, フィルタにヒットしていなかったらフィルタ前の開閉状態にする
                     this.SetIsExpanded(info.Key, info.Value.IsHitFilterDescendant || info.Value.IsExpandedSaved);
                 }
-
-                this._FilterText = filterText;
             }
             else
             {
@@ -565,7 +566,7 @@ namespace Toolkit.WPF.Controls
                 // フィルタにヒットするか更新する
                 foreach (var info in this._TreeInfo)
                 {
-                    info.Value.IsHitFilter = this._FilterTargetPropertyGetMethodInfo.Invoke(info.Key, null).ToString().ToLower().Contains(this._FilterText);
+                    info.Value.IsHitFilter = this._FilterTargetPropertyGetMethodInfo?.Invoke(info.Key, null).ToString().ToLower().Contains(this._FilterText) ?? true;
                 }
 
                 // ツリー情報を更新
@@ -574,7 +575,7 @@ namespace Toolkit.WPF.Controls
                     // UpdateTreeInfo で再帰的に適用されるのでRootのものだけ更新を呼べばいい
                     if (info.Value.IsRoot)
                     {
-                        this.UpdateTreeInfo(info.Key, info.Value.IsParentExpanded, info.Value.IsParentVisible, info.Value.IsHitFilterAncestor, info.Value.Depth);
+                        this.UpdateTreeInfo(info.Key, info.Value);
                     }
                 }
 
@@ -601,32 +602,35 @@ namespace Toolkit.WPF.Controls
             }
 
             info.IsExpanded = isExpanded;
-            info.IsHitFilterDescendant = this.UpdateTreeInfo(item, info.IsParentExpanded, info.IsParentVisible, info.IsHitFilterAncestor, info.Depth);
+            this.UpdateTreeInfo(item, info);
             this._ExpandedPropertySetMethodInfo?.Invoke(item, new object[] { info.IsExpanded });
         }
 
         /// <summary>
         /// Tree情報更新
         /// </summary>
-        private bool UpdateTreeInfo(object item, bool isParentExpanded = true, bool isParentVisible = true, bool isHitFilterAncestor = false, int depth = 0)
+        private void UpdateTreeInfo(object item, TreeInfo itemInfo)
         {
-            if (!this._TreeInfo.TryGetValue(item, out var info))
-            {
-                info = new TreeInfo();
-                this._TreeInfo.Add(item, info);
-            }
-
-            info.UpdateTreeInfo(isParentExpanded, isParentVisible, isHitFilterAncestor, depth);
-
             if (this._ChildrenPropertyGetMethodInfo?.Invoke(item, null) is IEnumerable<object> children)
             {
-                info.IsHitFilterDescendant = false;
                 foreach (var child in children)
                 {
-                    info.IsHitFilterDescendant |= this.UpdateTreeInfo(child, info.IsExpanded, info.IsVisible, (info.IsHitFilter || info.IsHitFilterAncestor), info.Depth + 1);
+                    if (!this._TreeInfo.TryGetValue(child, out var childInfo))
+                    {
+                        childInfo = new TreeInfo();
+                        this._TreeInfo.Add(child, childInfo);
+                    }
+
+                    // 親の状態から子のTreeInfoの状態を更新する
+                    childInfo.UpdateInfo(itemInfo.IsExpanded, itemInfo.IsVisible, (itemInfo.IsHitFilter || itemInfo.IsHitFilterAncestor), itemInfo.Depth + 1);
+
+                    // 子のさらに子の状態を更新する
+                    this.UpdateTreeInfo(child, childInfo);
+
+                    // 子の状態が更新されたら親にとって子孫がフィルタにヒットしているかを更新する
+                    itemInfo.IsHitFilterDescendant |= (childInfo.IsHitFilter || childInfo.IsHitFilterDescendant);
                 }
             }
-            return info.IsHitFilterDescendant || info.IsHitFilter;
         }
 
         /// <summary>
@@ -794,7 +798,7 @@ namespace Toolkit.WPF.Controls
             /// <summary>
             /// ツリー情報を更新
             /// </summary>
-            public void UpdateTreeInfo(bool isParentExpanded, bool isParentVisible, bool isHitFilterAncestor, int depth = 0 )
+            public void UpdateInfo(bool isParentExpanded, bool isParentVisible, bool isHitFilterAncestor, int depth = 0 )
             {
                 this.ChangeBit(Flags.IsParentExpanded, isParentExpanded);
                 this.ChangeBit(Flags.IsParentVisible, isParentVisible);
