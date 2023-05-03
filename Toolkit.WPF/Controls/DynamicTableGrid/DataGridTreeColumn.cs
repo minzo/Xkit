@@ -190,7 +190,6 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public DataGridTreeColumn()
         {
-            this._ResourceDictionary = Resource;
             this._TreeInfo = new Dictionary<object, TreeInfo>();
             this.EnableToggleButtonAssist = false;
         }
@@ -206,7 +205,7 @@ namespace Toolkit.WPF.Controls
             foreach (var info in this._TreeInfo)
             {
                 info.Value.IsExpanded = true;
-                this._ExpandedPropertySetMethodInfo?.Invoke(info.Key, new object[] { info.Value.IsExpanded });
+                this._ExpandedPropertySetMethodInfo?.Invoke(info.Key, TrueArgs);
             }
 
             // ツリー情報を更新
@@ -218,6 +217,8 @@ namespace Toolkit.WPF.Controls
                     this.UpdateTreeInfo(info.Key, info.Value);
                 }
             }
+
+            this.RefreshFilter();
         }
 
         /// <summary>
@@ -229,7 +230,7 @@ namespace Toolkit.WPF.Controls
             foreach (var info in this._TreeInfo)
             {
                 info.Value.IsExpanded = false;
-                this._ExpandedPropertySetMethodInfo?.Invoke(info.Key, new object[] { info.Value.IsExpanded });
+                this._ExpandedPropertySetMethodInfo?.Invoke(info.Key, FalseArgs);
             }
 
             // ツリー情報を更新
@@ -280,7 +281,7 @@ namespace Toolkit.WPF.Controls
         {
             this.SetIsExpanded(item, isExpanded);
 
-            if (this._ChildrenPropertyInfo?.GetValue(item) is IEnumerable<object> children)
+            if (this._ChildrenPropertyGetMethodInfo?.Invoke(item, null) is IEnumerable<object> children)
             {
                 foreach (var child in children)
                 {
@@ -299,13 +300,37 @@ namespace Toolkit.WPF.Controls
             bool isUseDefaultTextBox = cell.IsEditing && template == null && selector == null;
             var key = isUseDefaultTextBox ? "TextBoxCellEditingTemplate" : "CellTemplate";
 
-            var element = (this._ResourceDictionary[key] as DataTemplate).LoadContent() as FrameworkElement;
+            var element = (Resource[key] as DataTemplate).LoadContent() as FrameworkElement;
 
             var grid = element as Grid;
             var expander = element.FindName("Expander") as ToggleButton;
             var iconPresenter = element.FindName("Icon") as ContentPresenter;
             var contentPresenter = element.FindName("Content") as ContentPresenter;
             var textBox = element.FindName("TextBox") as TextBox;
+
+            // cell
+            cell.PreviewKeyDown += (s, e) =>
+            {
+                // 編集中のCellではArrowキーでの移動は無効化する(DataGridCellでない場合も同様)
+                if ((s as DataGridCell)?.IsEditing ?? true)
+                {
+                    return;
+                }
+
+                if ((e.KeyboardDevice.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
+                {
+                    if (e.KeyboardDevice.IsKeyDown(Key.Left))
+                    {
+                        expander.IsChecked = false;
+                        e.Handled = true;
+                    }
+                    else if (e.KeyboardDevice.IsKeyDown(Key.Right))
+                    {
+                        expander.IsChecked = true;
+                        e.Handled = true;
+                    }
+                }
+            };
 
             // Grid
             grid.Margin = new Thickness(this.GetDepth(dataItem) * DepthMarginUnit, 0D, 0D, 0D);
@@ -430,6 +455,8 @@ namespace Toolkit.WPF.Controls
             // CollectionViewをクリア
             if (this._CollectionView != null)
             {
+                this._CollectionView.CurrentChanging -= this.SaveCurrentSelection;
+                this._CollectionView.CurrentChanged -= this.RestoreCurrentSelection;
                 (this._CollectionView as ICollectionViewLiveShaping)?.LiveFilteringProperties.Clear();
                 this._CollectionView = null;
             }
@@ -493,6 +520,10 @@ namespace Toolkit.WPF.Controls
             }
 
             this._CollectionView = this._DataGrid.Items;
+
+            this._CollectionView.CurrentChanging += this.SaveCurrentSelection;
+            this._CollectionView.CurrentChanged += this.RestoreCurrentSelection;
+
             if (this._CollectionView is ICollectionViewLiveShaping liveShaping && !string.IsNullOrEmpty(this.ExpandedPropertyPath))
             {
                 liveShaping.IsLiveFiltering = true;
@@ -522,9 +553,10 @@ namespace Toolkit.WPF.Controls
                         this._CollectionView.Filter = item => this.GetIsVisibleOnFilter(item) && this._UserFilter?.Invoke(item) != false;
                     }
                 }
-                catch(InvalidOperationException)
+                catch (InvalidOperationException e)
                 {
                     // Editing状態でフィルターされた場合に例外を捕まえる
+                    System.Diagnostics.Debug.WriteLine($"Catchしている例外: {e.GetType().Name} {e.Message}\n {e.StackTrace}");
                 }
             }
         }
@@ -537,8 +569,9 @@ namespace Toolkit.WPF.Controls
             if (string.IsNullOrEmpty(filterText))
             {
                 // 現在選択されている行を列挙する
-                var selectedItems = this._DataGrid.SelectedCells.Select(i => i.Item)
-                    .Concat(this._DataGrid.SelectedItems.OfType<object>())
+                var selectedItems = this._DataGrid.SelectedCells
+                    .Where(i => i.IsValid)
+                    .Select(i => i.Item)
                     .Where(i => i != null);
 
                 this._FilterText = filterText;
@@ -613,13 +646,20 @@ namespace Toolkit.WPF.Controls
         {
             if (!this._TreeInfo.TryGetValue(item, out var info))
             {
+                // 仮想化している場合に MS.Internal.NamedObject 型の {DisconnectedItem} という名前の item が入ってくることがある
+                // Treeにはかかわらないものなので何もしない
+                if (item.ToString() == "{DisconnectedItem}")
+                {
+                    return;
+                }
+                
                 info = new TreeInfo();
                 this._TreeInfo.Add(item, info);
             }
 
             info.IsExpanded = isExpanded;
             this.UpdateTreeInfo(item, info);
-            this._ExpandedPropertySetMethodInfo?.Invoke(item, new object[] { info.IsExpanded });
+            this._ExpandedPropertySetMethodInfo?.Invoke(item, info.IsExpanded ? TrueArgs : FalseArgs);
         }
 
         /// <summary>
@@ -726,6 +766,48 @@ namespace Toolkit.WPF.Controls
             // フィルター状態を更新する CollectionChanged のたびに行うともったいない
             this.RefreshFilter();
         }
+
+        /// <summary>
+        /// 現在の選択状態を保存します
+        /// </summary>
+        private void SaveCurrentSelection(object sender, EventArgs e)
+        {
+            // SelectionUnit が FullRow のときにはセルの選択状態が変更できない
+            // DataGrid.SelectedCells の要素を変更すると例外になる
+            // FullRow のときはフィルタ状態が変わっても選択状態は復元されるようなので何もしないでおく
+            if (this._DataGrid.SelectionUnit == DataGridSelectionUnit.FullRow)
+            {
+                return;
+            }
+
+            this._SelectedCells.Clear();
+            this._SelectedCells.AddRange(this._DataGrid.SelectedCells);
+        }
+
+        /// <summary>
+        /// 現在の選択状態を復元します
+        /// </summary>
+        private void RestoreCurrentSelection(object sender, EventArgs e)
+        {
+            // SelectionUnit が FullRow のときにはセルの選択状態が変更できない
+            // DataGrid.SelectedCells の要素を変更すると例外になる
+            // FullRow のときはフィルタ状態が変わっても選択状態は復元されるようなので何もしないでおく
+            if (this._DataGrid.SelectionUnit == DataGridSelectionUnit.FullRow)
+            {
+                return; 
+            }
+
+            foreach (var info in this._SelectedCells)
+            {
+                if (info.IsValid && this._DataGrid.Items.Contains(info.Item))
+                {
+                    this._DataGrid.SelectedCells.Add(new DataGridCellInfo(info.Item, info.Column));
+                }
+            }
+            this._SelectedCells.Clear();
+        }
+
+        private readonly List<DataGridCellInfo> _SelectedCells = new List<DataGridCellInfo>();
 
         /// <summary>
         /// ツリー情報
@@ -858,7 +940,6 @@ namespace Toolkit.WPF.Controls
         private ICollectionView _CollectionView;
 
         private DataGrid _DataGrid;
-        private readonly ResourceDictionary _ResourceDictionary;
 
         /// <summary>
         /// 静的コンストラクタ
@@ -868,8 +949,11 @@ namespace Toolkit.WPF.Controls
             Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/DynamicTableGrid/DataGridTreeColumn.xaml") };
         }
 
+        private const double DepthMarginUnit = 12D;
         private static readonly ResourceDictionary Resource;
-        private static readonly double DepthMarginUnit = 12D;
+
+        private static readonly object[] TrueArgs = new object[] { true };
+        private static readonly object[] FalseArgs = new object[] { false };
 
         /// <summary>
         /// VisualChildrenを列挙する

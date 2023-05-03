@@ -40,6 +40,7 @@
                 <ColumnDefinition Width="100"/>
                 <ColumnDefinition Width="4" />
                 <ColumnDefinition />
+                <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
             <DockPanel>
@@ -69,6 +70,27 @@
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
                 SelectionUnit="CellOrRowHeader"
+                EnableRowVirtualization="True"
+                VirtualizingPanel.IsVirtualizing="True"
+                ItemsSource="{Binding Items, Mode=OneTime}"
+                tkitwpf:DataGridTreeColumn.FilterText="{Binding FilterText}">
+                <DataGrid.Columns>
+                    <tkitwpf:DataGridTreeColumn
+                        Header="Tree"
+                        IconTemplate="{StaticResource IconTemplate}"
+                        Binding="{Binding Name}"
+                        ExpandedPropertyPath="IsExpanded"
+                        ChildrenPropertyPath="Children"
+                        />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <DataGrid
+                x:Name="DataGridFullRow"
+                Grid.Column="3" 
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                SelectionUnit="FullRow"
                 EnableRowVirtualization="True"
                 VirtualizingPanel.IsVirtualizing="True"
                 ItemsSource="{Binding Items, Mode=OneTime}"
