@@ -780,8 +780,12 @@ namespace Toolkit.WPF.Controls
                 return;
             }
 
-            this._SelectedCells.Clear();
-            this._SelectedCells.AddRange(this._DataGrid.SelectedCells);
+            // 選択されているセルがあったら保存する
+            if (this._DataGrid.SelectedCells.Count > 0)
+            {
+                this._SavedSelectedCells.Clear();
+                this._SavedSelectedCells.AddRange(this._DataGrid.SelectedCells);
+            }
         }
 
         /// <summary>
@@ -794,20 +798,25 @@ namespace Toolkit.WPF.Controls
             // FullRow のときはフィルタ状態が変わっても選択状態は復元されるようなので何もしないでおく
             if (this._DataGrid.SelectionUnit == DataGridSelectionUnit.FullRow)
             {
-                return; 
+                return;
             }
 
-            foreach (var info in this._SelectedCells)
+            if (this._SavedSelectedCells.Count > 0)
             {
-                if (info.IsValid && this._DataGrid.Items.Contains(info.Item))
+                this._DataGrid.SelectedCells.Clear();
+                foreach (var info in this._SavedSelectedCells)
                 {
-                    this._DataGrid.SelectedCells.Add(new DataGridCellInfo(info.Item, info.Column));
+                    if (info.IsValid && this._DataGrid.Items.Contains(info.Item))
+                    {
+                        this._DataGrid.SelectedCells.Add(new DataGridCellInfo(info.Item, info.Column));
+                    }
                 }
+
+                this._SavedSelectedCells.Clear();
             }
-            this._SelectedCells.Clear();
         }
 
-        private readonly List<DataGridCellInfo> _SelectedCells = new List<DataGridCellInfo>();
+        private readonly List<DataGridCellInfo> _SavedSelectedCells = new List<DataGridCellInfo>();
 
         /// <summary>
         /// ツリー情報
