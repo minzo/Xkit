@@ -95,15 +95,12 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// Icon
         /// </summary>
-        public object Icon
-        {
-            get { return (object)this.GetValue(IconProperty); }
-            set { this.SetValue(IconProperty, value); }
-        }
+        public object Icon { get; set; }
 
-        // Using a DependencyProperty as the backing store for Icon.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty IconProperty =
-            DependencyProperty.Register("Icon", typeof(object), typeof(DataGridTreeColumn), new PropertyMetadata(null));
+        /// <summary>
+        /// IconBinding（Iconプロパティの設定が優先されます)
+        /// </summary>
+        public BindingBase IconBinding { get; set; }
 
         /// <summary>
         /// IconTemplate
@@ -204,8 +201,12 @@ namespace Toolkit.WPF.Controls
             // 開閉状態を更新する
             foreach (var info in this._TreeInfo)
             {
-                info.Value.IsExpanded = true;
-                this._ExpandedPropertySetMethodInfo?.Invoke(info.Key, TrueArgs);
+                // 動的メソッド呼び出しを減らすために変更があったものだけ呼び出す
+                if (info.Value.IsExpanded != true)
+                {
+                    info.Value.IsExpanded = true;
+                    this._ExpandedPropertySetMethodInfo?.Invoke(info.Key, TrueArgs);
+                }
             }
 
             // ツリー情報を更新
@@ -229,8 +230,12 @@ namespace Toolkit.WPF.Controls
             // 開閉状態を更新する
             foreach (var info in this._TreeInfo)
             {
-                info.Value.IsExpanded = false;
-                this._ExpandedPropertySetMethodInfo?.Invoke(info.Key, FalseArgs);
+                // 動的メソッド呼び出しを減らすために変更があったものだけ呼び出す
+                if (info.Value.IsExpanded != false)
+                {
+                    info.Value.IsExpanded = false;
+                    this._ExpandedPropertySetMethodInfo?.Invoke(info.Key, FalseArgs);
+                }
             }
 
             // ツリー情報を更新
@@ -242,6 +247,8 @@ namespace Toolkit.WPF.Controls
                     this.UpdateTreeInfo(info.Key, info.Value);
                 }
             }
+
+            this.RefreshFilter();
         }
 
         /// <summary>
@@ -321,12 +328,12 @@ namespace Toolkit.WPF.Controls
                 {
                     if (e.KeyboardDevice.IsKeyDown(Key.Left))
                     {
-                        expander.IsChecked = false;
+                        expander.SetCurrentValue(ToggleButton.IsCheckedProperty, false);
                         e.Handled = true;
                     }
                     else if (e.KeyboardDevice.IsKeyDown(Key.Right))
                     {
-                        expander.IsChecked = true;
+                        expander.SetCurrentValue(ToggleButton.IsCheckedProperty, true);
                         e.Handled = true;
                     }
                 }
@@ -337,15 +344,22 @@ namespace Toolkit.WPF.Controls
 
             // Expander
             expander.Visibility = this.HasChildren(dataItem) ? Visibility.Visible : Visibility.Hidden;
-            expander.IsChecked = this.GetIsExpanded(dataItem);
-            TrySetBinding(expander, ToggleButton.IsCheckedProperty, this.ExpandedPropertyPath);
+            expander.SetCurrentValue(ToggleButton.IsCheckedProperty, this.GetIsExpanded(dataItem));
+            TrySetBinding(expander, ToggleButton.IsCheckedProperty, this._IsExpandedBinding);
             expander.Checked += this.OnToggleChanged;
             expander.Unchecked += this.OnToggleChanged;
 
             // Icon
-            iconPresenter.Content = this.Icon;
             iconPresenter.ContentTemplate = this.IconTemplate;
             iconPresenter.ContentTemplateSelector = this.IconTemplateSelector;
+            if (this.Icon != null)
+            {
+                iconPresenter.SetCurrentValue(ContentPresenter.ContentProperty, this.Icon);
+            }
+            else
+            {
+                TrySetBinding(iconPresenter, ContentPresenter.ContentProperty, this.IconBinding);
+            }
 
             // Content
             if (isUseDefaultTextBox)
@@ -430,7 +444,7 @@ namespace Toolkit.WPF.Controls
                     // ExpandedPropertyPath が指定されていないときは自分の情報から復元する
                     if (this._ExpandedPropertyGetMethodInfo == null)
                     {
-                        expander.IsChecked = this.GetIsExpanded(e.Row.Item);
+                        expander.SetCurrentValue(ToggleButton.IsCheckedProperty, this.GetIsExpanded(e.Row.Item));
                     }
                 }
             }
@@ -494,6 +508,9 @@ namespace Toolkit.WPF.Controls
                 var propertyInfo = type?.GetProperty(this.ExpandedPropertyPath);
                 this._ExpandedPropertyGetMethodInfo = propertyInfo.GetMethod;
                 this._ExpandedPropertySetMethodInfo = propertyInfo.SetMethod;
+                this._IsExpandedBinding = new Binding(this.ExpandedPropertyPath) {
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                };
             }
 
             // Children
@@ -657,9 +674,13 @@ namespace Toolkit.WPF.Controls
                 this._TreeInfo.Add(item, info);
             }
 
-            info.IsExpanded = isExpanded;
+            if (info.IsExpanded != isExpanded)
+            {
+                info.IsExpanded = isExpanded;
+                this._ExpandedPropertySetMethodInfo?.Invoke(item, info.IsExpanded ? TrueArgs : FalseArgs);
+            }
+
             this.UpdateTreeInfo(item, info);
-            this._ExpandedPropertySetMethodInfo?.Invoke(item, info.IsExpanded ? TrueArgs : FalseArgs);
         }
 
         /// <summary>
@@ -940,10 +961,12 @@ namespace Toolkit.WPF.Controls
 
         private PropertyInfo _ChildrenPropertyInfo;
 
-        private MethodInfo _ExpandedPropertyGetMethodInfo;
-        private MethodInfo _ExpandedPropertySetMethodInfo;
         private MethodInfo _ChildrenPropertyGetMethodInfo;
         private MethodInfo _FilterTargetPropertyGetMethodInfo;
+        private MethodInfo _ExpandedPropertyGetMethodInfo;
+        private MethodInfo _ExpandedPropertySetMethodInfo;
+
+        private BindingBase _IsExpandedBinding;
         
         private INotifyCollectionChanged _ItemsSource;
         private ICollectionView _CollectionView;

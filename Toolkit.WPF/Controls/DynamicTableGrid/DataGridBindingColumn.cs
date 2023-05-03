@@ -411,31 +411,6 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// TrySetBinding
         /// </summary>
-        protected static bool TrySetBinding(DependencyObject dependencyObject, DependencyProperty dependencyProperty, string propertyPath)
-        {
-            if (dependencyObject == null)
-            {
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(propertyPath))
-            {
-                BindingOperations.ClearBinding(dependencyObject, dependencyProperty);
-                return false;
-            }
-            else
-            {
-                BindingOperations.SetBinding(dependencyObject, dependencyProperty, new Binding(propertyPath)
-                {
-                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
-                });
-                return true;
-            }
-        }
-
-        /// <summary>
-        /// TrySetBinding
-        /// </summary>
         protected static bool TrySetBinding(DependencyObject dependencyObject, DependencyProperty dependencyProperty, BindingBase binding)
         {
             if (binding != null)

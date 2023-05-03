@@ -71,6 +71,7 @@
                 CanUserDeleteRows="False"
                 SelectionUnit="CellOrRowHeader"
                 EnableRowVirtualization="True"
+                VirtualizingPanel.VirtualizationMode="Standard"
                 VirtualizingPanel.IsVirtualizing="True"
                 ItemsSource="{Binding Items, Mode=OneTime}"
                 tkitwpf:DataGridTreeColumn.FilterText="{Binding FilterText}">
@@ -92,13 +93,14 @@
                 CanUserDeleteRows="False"
                 SelectionUnit="FullRow"
                 EnableRowVirtualization="True"
+                VirtualizingPanel.VirtualizationMode="Standard"
                 VirtualizingPanel.IsVirtualizing="True"
-                ItemsSource="{Binding Items, Mode=OneTime}"
+                ItemsSource="{Binding Items2, Mode=OneTime}"
                 tkitwpf:DataGridTreeColumn.FilterText="{Binding FilterText}">
                 <DataGrid.Columns>
                     <tkitwpf:DataGridTreeColumn
                         Header="Tree"
-                        IconTemplate="{StaticResource IconTemplate}"
+                        IconBinding="{Binding Icon, Mode=OneWay}"
                         Binding="{Binding Name}"
                         ExpandedPropertyPath="IsExpanded"
                         ChildrenPropertyPath="Children"

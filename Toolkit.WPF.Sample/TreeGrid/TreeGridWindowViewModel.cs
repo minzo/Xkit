@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Corekit.Extensions;
 
@@ -12,6 +13,8 @@ namespace Toolkit.WPF.Sample
 {
     public class TreeGridItem : INotifyPropertyChanged
     {
+        public string Icon { get; set; }
+
         public string Name { get; set; }
      
         public List<TreeGridItem> Children { get; set; } = new List<TreeGridItem>();
@@ -20,10 +23,13 @@ namespace Toolkit.WPF.Sample
 
         public TreeGridItem(string name)
         {
+            this.Icon = Interlocked.Increment(ref Count).ToString();
             this.Name = name;
         }
 
         private bool _IsExpanded = false;
+
+        private static int Count = 0;
 
 #pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
@@ -41,6 +47,8 @@ namespace Toolkit.WPF.Sample
         public ObservableCollection<TreeGridItem> Items { get; }
 
         public ObservableCollection<TreeGridItem> TreeRootItems { get; }
+
+        public ObservableCollection<TreeGridItem> Items2 { get; }
 
         public TreeGridWindowViewModel()
         {
@@ -73,9 +81,11 @@ namespace Toolkit.WPF.Sample
                 },
             };
 
-            // this.TreeRootItems = new ObservableCollection<TreeGridItem>() { CreateTree(10, 5) };
-
             this.Items = this.TreeRootItems
+                .EnumerateTreeDepthFirst(i => i.Children)
+                .ToObservableCollection();
+
+            this.Items2 = CreateTree(5, 5)
                 .EnumerateTreeDepthFirst(i => i.Children)
                 .ToObservableCollection();
         }
