@@ -26,6 +26,17 @@ namespace Corekit.Extensions
         }
 
         /// <summary>
+        /// XmlSerializerでDeserializeします
+        /// </summary>
+        public static T DeserializeXml<T>(string filePath)
+        {
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                return (T)Cache<T>.Serializer.Deserialize(stream);
+            }
+        }
+
+        /// <summary>
         /// Deserialize
         /// </summary>
         public static T Deserialize<T>(this XmlSerializer serializer, string filePath)
