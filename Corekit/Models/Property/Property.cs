@@ -17,6 +17,7 @@ namespace Corekit.Models
         /// </summary>
         public Property(TypeDefinition typeDefinition)
         {
+            this._InheritSource = null;
             this.TypeDefinition = typeDefinition;
 
             // 型の値を設定
