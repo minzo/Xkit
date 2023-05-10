@@ -32,6 +32,8 @@
     
     <DockPanel>
         <StatusBar DockPanel.Dock="Top">
+            <Button Command="{Binding AddChildOfSelectdItemCommand, Mode=OneTime}" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" />
+            <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" />
             <tkitwpf:FilterTextBox MinWidth="100" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged, Delay=100}" WatermarkText="フィルタ" />
         </StatusBar>
         
@@ -50,7 +52,7 @@
                     VirtualizingPanel.IsVirtualizing="True"
                     IsTextSearchEnabled="False">
                     <TreeView.ItemTemplate>
-                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                        <HierarchicalDataTemplate ItemsSource="{Binding Children, Mode=OneTime}">
                             <TextBlock Text="{Binding Name}" />
                         </HierarchicalDataTemplate>
                     </TreeView.ItemTemplate>
@@ -73,7 +75,9 @@
                 EnableRowVirtualization="True"
                 VirtualizingPanel.VirtualizationMode="Standard"
                 VirtualizingPanel.IsVirtualizing="True"
-                ItemsSource="{Binding Items, Mode=OneTime}"
+                SelectedItem="{Binding SelectedItem}"
+                RowHeaderWidth="30"
+                ItemsSource="{Binding TreeRootItems, Mode=OneTime, Converter={x:Static tkitwpf:FlattenTreeToListOfDepthFirstOrdering.Converter}, ConverterParameter=Children}"
                 tkitwpf:DataGridTreeColumn.FilterText="{Binding FilterText}">
                 <DataGrid.Columns>
                     <tkitwpf:DataGridTreeColumn
@@ -95,7 +99,7 @@
                 EnableRowVirtualization="True"
                 VirtualizingPanel.VirtualizationMode="Standard"
                 VirtualizingPanel.IsVirtualizing="True"
-                ItemsSource="{Binding Items2, Mode=OneTime}"
+                ItemsSource="{Binding TreeRootItems2, Mode=OneTime, Converter={x:Static tkitwpf:FlattenTreeToListOfDepthFirstOrdering.Converter}, ConverterParameter=Children}"
                 tkitwpf:DataGridTreeColumn.FilterText="{Binding FilterText}">
                 <DataGrid.Columns>
                     <tkitwpf:DataGridTreeColumn

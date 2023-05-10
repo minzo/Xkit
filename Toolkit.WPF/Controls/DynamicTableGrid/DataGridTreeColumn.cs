@@ -672,9 +672,13 @@ namespace Toolkit.WPF.Controls
                 
                 info = new TreeInfo();
                 this._TreeInfo.Add(item, info);
+
+                // ここで item が Depth = 0 ではない場合に正しい TreeInfo にならないので更新が必要
+                // 特に後から要素が追加された場合になることがわかっている
+                // info.UpdateInfo(info.IsParentExpanded, info.IsParentVisible, info.IsHitFilterAncestor, info.Depth);
             }
 
-            if (info.IsExpanded != isExpanded)
+            if (info.IsExpanded != isExpanded) 
             {
                 info.IsExpanded = isExpanded;
                 this._ExpandedPropertySetMethodInfo?.Invoke(item, info.IsExpanded ? TrueArgs : FalseArgs);
@@ -995,6 +999,135 @@ namespace Toolkit.WPF.Controls
             var count = VisualTreeHelper.GetChildrenCount(dp);
             var children = Enumerable.Range(0, count).Select(i => VisualTreeHelper.GetChild(dp, i));
             return children.Concat(children.SelectMany(i => EnumerateChildren(i)));
+        }
+    }
+
+    /// <summary>
+    /// 木構造を深さ優先順序のリストに変換するコンバーター
+    /// </summary>
+    [ValueConversion(typeof(IEnumerable<object>), typeof(System.Collections.ObjectModel.ObservableCollection<object>))]
+    public class FlattenTreeToListOfDepthFirstOrdering : IValueConverter
+    {
+        /// <summary>
+        /// Staticなコンバーター
+        /// </summary>
+        public static IValueConverter Converter { get; } = new FlattenTreeToListOfDepthFirstOrdering();
+
+        /// <summary>
+        /// 変換
+        /// </summary>
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            var source = value as IEnumerable<object>;
+            if (source == null)
+            {
+                return value;
+            }
+
+            var target = new System.Collections.ObjectModel.ObservableCollection<object>();
+
+            this.SubscribeCollectionChangedEvent(source, parameter.ToString(), source, target);
+
+            return target;
+        }
+
+        /// <summary>
+        /// 変換
+        /// </summary>
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// 変更通知を購読する
+        /// </summary>
+        private void SubscribeCollectionChangedEvent(IEnumerable<object> items, string childrenPropertyName, IEnumerable<object> source, IList<object> target)
+        {
+            if (items is INotifyCollectionChanged a)
+            {
+                a.CollectionChanged += (s, e) => OnSourceCollectionChanged(s, e, source, target, childrenPropertyName);
+            }
+
+            foreach (var item in items)
+            {
+                target.Add(item);
+
+                var children = GetChildren(item, childrenPropertyName);
+                this.SubscribeCollectionChangedEvent(children, childrenPropertyName, source, target);
+            }
+        }
+
+        /// <summary>
+        /// Sourceコレクション変更通知
+        /// </summary>
+        private static void OnSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e, IEnumerable<object> source, IList<object> target, string propertyName)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                target.Clear();
+            }
+
+            if (e.OldItems != null)
+            {
+                foreach (var item in e.OldItems)
+                {
+                    target.Remove(item);
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                int index = 0;
+                foreach (var item in EnumerateTreeDepthFirst(source, i => GetChildren(i, propertyName)))
+                {
+                    if (index >= target.Count)
+                    {
+                        break;
+                    }
+                    else if (item == target[index])
+                    {
+                        index++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                foreach (var item in e.NewItems)
+                {
+                    target.Insert(index, item);
+                    index++;
+                }
+            }
+        }
+
+        /// <summary
+        /// 子供を列挙します
+        /// </summary>
+        private static IEnumerable<object> GetChildren(object item, string propertyName)
+        {
+            var info = item.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+            return info?.GetValue(item) as IEnumerable<object> ?? Enumerable.Empty<object>();
+        }
+
+        /// <summary>
+        /// 木構造の深さ優先探索
+        /// </summary>
+        private static IEnumerable<T> EnumerateTreeDepthFirst<T>(IEnumerable<T> items, Func<T, IEnumerable<T>> selector)
+        {
+            foreach (var item in items)
+            {
+                yield return item;
+
+                var children = EnumerateTreeDepthFirst(selector(item), selector) ?? Enumerable.Empty<T>();
+
+                foreach (var child in children)
+                {
+                    yield return child;
+                }
+            }
         }
     }
 }

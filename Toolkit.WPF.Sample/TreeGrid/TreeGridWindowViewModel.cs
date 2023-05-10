@@ -7,7 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Corekit.Extensions;
+using Toolkit.WPF.Commands;
 
 namespace Toolkit.WPF.Sample
 {
@@ -17,7 +19,7 @@ namespace Toolkit.WPF.Sample
 
         public string Name { get; set; }
      
-        public List<TreeGridItem> Children { get; set; } = new List<TreeGridItem>();
+        public ObservableCollection<TreeGridItem> Children { get; set; } = new ObservableCollection<TreeGridItem>();
 
         public bool IsExpanded { get => this._IsExpanded; set => this.SetProperty(ref this._IsExpanded, value); }
 
@@ -44,35 +46,49 @@ namespace Toolkit.WPF.Sample
             set => this.SetProperty(ref this._FilterText, value);
         }
 
+        public TreeGridItem SelectedItem { get; set; }
+
         public ObservableCollection<TreeGridItem> Items { get; }
 
         public ObservableCollection<TreeGridItem> TreeRootItems { get; }
 
         public ObservableCollection<TreeGridItem> Items2 { get; }
 
+        public ObservableCollection<TreeGridItem> TreeRootItems2 { get; }
+
+        public ICommand AddChildOfSelectdItemCommand { get; }
+
         public TreeGridWindowViewModel()
         {
+            this.AddChildOfSelectdItemCommand = new DelegateCommand((_) => {
+                if (this.SelectedItem != null)
+                {
+                    this.SelectedItem.Children.Add(new TreeGridItem("Test"));
+                }
+            });
+
+
             this.TreeRootItems = new ObservableCollection<TreeGridItem>() {
                 new TreeGridItem( "くだもの" ){
-                    Children = new List<TreeGridItem>(){
+                    Children = new ObservableCollection<TreeGridItem>(){
                         new TreeGridItem("ばなな"),
                         new TreeGridItem("みかん"),
                         new TreeGridItem("りんご"),
                     }
                 },
                 new TreeGridItem( "やさい" ){
-                    Children = new List<TreeGridItem>(){
+                    Children = new ObservableCollection<TreeGridItem>(){
                         new TreeGridItem("だいこん"),
                         new TreeGridItem("にんじん"),
                         new TreeGridItem("たまねぎ"),
                     }
                 },
                 new TreeGridItem( "どうぶつ" ){
-                    Children = new List<TreeGridItem>(){
+                    Children = new ObservableCollection<TreeGridItem>(){
                         new TreeGridItem("いぬ"),
                         new TreeGridItem("ねこ")
                         {
-                            Children = new List<TreeGridItem>(){
+                            Children = new ObservableCollection<TreeGridItem>(){
                                 new TreeGridItem("みけ"),
                                 new TreeGridItem("しろ")
                             }
@@ -85,7 +101,8 @@ namespace Toolkit.WPF.Sample
                 .EnumerateTreeDepthFirst(i => i.Children)
                 .ToObservableCollection();
 
-            this.Items2 = CreateTree(5, 5)
+            this.TreeRootItems2 = CreateTree(5, 5).Children;
+            this.Items2 = this.TreeRootItems2
                 .EnumerateTreeDepthFirst(i => i.Children)
                 .ToObservableCollection();
         }
@@ -96,7 +113,10 @@ namespace Toolkit.WPF.Sample
 
             if( depth > 0)
             {
-                item.Children.AddRange(Enumerable.Range(0, childrenNum).Select(i => CreateTree(childrenNum, depth - 1)));
+                for (var i = 0; i < childrenNum; i++)
+                {
+                    item.Children.Add(CreateTree(childrenNum, depth - 1));
+                }
             }
 
             return item;
