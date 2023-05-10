@@ -210,14 +210,7 @@ namespace Toolkit.WPF.Controls
             }
 
             // ツリー情報を更新
-            foreach (var info in this._TreeInfo)
-            {
-                // UpdateTreeInfo で再帰的に適用されるのでRootのものだけ更新を呼べばいい
-                if (info.Value.IsRoot)
-                {
-                    this.UpdateTreeInfo(info.Key, info.Value);
-                }
-            }
+            this.UpdateTreeInfoAll();
 
             this.RefreshFilter();
         }
@@ -239,14 +232,7 @@ namespace Toolkit.WPF.Controls
             }
 
             // ツリー情報を更新
-            foreach (var info in this._TreeInfo)
-            {
-                // UpdateTreeInfo で再帰的に適用されるのでRootのものだけ更新を呼べばいい
-                if (info.Value.IsRoot)
-                {
-                    this.UpdateTreeInfo(info.Key, info.Value);
-                }
-            }
+            this.UpdateTreeInfoAll();
 
             this.RefreshFilter();
         }
@@ -533,8 +519,15 @@ namespace Toolkit.WPF.Controls
             // TreeInfoの構築
             foreach (var item in this._DataGrid.ItemsSource)
             {
-                this.SetIsExpanded(item, (bool?)this._ExpandedPropertyGetMethodInfo?.Invoke(item, null) == true);
+                if (!this._TreeInfo.ContainsKey(item))
+                {
+                    var info = new TreeInfo() { IsExpanded = (this._ExpandedPropertyGetMethodInfo?.Invoke(item, null) as bool?) == true };
+                    this._TreeInfo.Add(item, info);
+                }
             }
+
+            // TreeInfoの更新
+            this.UpdateTreeInfoAll();
 
             this._CollectionView = this._DataGrid.Items;
 
@@ -593,21 +586,14 @@ namespace Toolkit.WPF.Controls
 
                 this._FilterText = filterText;
 
-                // フィルタにヒットするか更新する
+                // フィルタにヒットするか更新する(選択していた行はフィルタにヒットしていたことにして表示される状態にする)
                 foreach (var info in this._TreeInfo)
                 {
                     info.Value.IsHitFilter = selectedItems.Contains(info.Key);
                 }
 
                 // ツリー情報を更新
-                foreach (var info in this._TreeInfo)
-                {
-                    // UpdateTreeInfo で再帰的に適用されるのでRootのものだけ更新を呼べばいい
-                    if (info.Value.IsRoot)
-                    {
-                        this.UpdateTreeInfo(info.Key, info.Value);
-                    }
-                }
+                this.UpdateTreeInfoAll();
 
                 // フィルターの結果で開閉状態を設定する
                 foreach (var info in this._TreeInfo)
@@ -636,14 +622,7 @@ namespace Toolkit.WPF.Controls
                 }
 
                 // ツリー情報を更新
-                foreach (var info in this._TreeInfo)
-                {
-                    // UpdateTreeInfo で再帰的に適用されるのでRootのものだけ更新を呼べばいい
-                    if (info.Value.IsRoot)
-                    {
-                        this.UpdateTreeInfo(info.Key, info.Value);
-                    }
-                }
+                this.UpdateTreeInfoAll();
 
                 // フィルターの結果で開閉状態を設定する
                 foreach (var info in this._TreeInfo)
@@ -669,13 +648,8 @@ namespace Toolkit.WPF.Controls
                 {
                     return;
                 }
-                
-                info = new TreeInfo();
-                this._TreeInfo.Add(item, info);
 
-                // ここで item が Depth = 0 ではない場合に正しい TreeInfo にならないので更新が必要
-                // 特に後から要素が追加された場合になることがわかっている
-                // info.UpdateInfo(info.IsParentExpanded, info.IsParentVisible, info.IsHitFilterAncestor, info.Depth);
+                System.Diagnostics.Debug.Fail("TreeInfo not found");
             }
 
             if (info.IsExpanded != isExpanded) 
@@ -710,6 +684,21 @@ namespace Toolkit.WPF.Controls
 
                     // 子の状態が更新されたら親にとって子孫がフィルタにヒットしているかを更新する
                     itemInfo.IsHitFilterDescendant |= (childInfo.IsHitFilter || childInfo.IsHitFilterDescendant);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 全Tree情報の更新
+        /// </summary>
+        private void UpdateTreeInfoAll()
+        {
+            foreach (var info in this._TreeInfo)
+            {
+                // UpdateTreeInfo で再帰的に適用されるのでRootのものだけ更新を呼べばいい
+                if (info.Value.IsRoot)
+                {
+                    this.UpdateTreeInfo(info.Key, info.Value);
                 }
             }
         }
@@ -784,7 +773,26 @@ namespace Toolkit.WPF.Controls
             {
                 foreach (var item in e.NewItems)
                 {
-                    this.SetIsExpanded(item, (this._ExpandedPropertyGetMethodInfo?.Invoke(item, null) as bool?) == true);
+                    if (!this._TreeInfo.ContainsKey(item))
+                    {
+                        // フィルターにヒットしていることにして追加された行が表示される状態にしておく
+                        var info = new TreeInfo()
+                        {
+                            IsExpanded = (this._ExpandedPropertyGetMethodInfo?.Invoke(item, null) as bool?) == true,
+                            IsHitFilter = true
+                        };
+                        this._TreeInfo.Add(item, info);
+                    }
+                }
+
+                // ツリー情報を更新
+                this.UpdateTreeInfoAll();
+
+                // フィルターの結果で開閉状態を設定する
+                foreach (var info in this._TreeInfo)
+                {
+                    // 子孫がフィルターにヒットしているなら開いておく, フィルタにヒットしていなかったら現在の開閉状態にする
+                    this.SetIsExpanded(info.Key, info.Value.IsHitFilterDescendant || info.Value.IsExpanded);
                 }
             }
 
