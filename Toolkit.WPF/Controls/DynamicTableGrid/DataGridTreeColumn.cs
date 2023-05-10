@@ -1032,7 +1032,15 @@ namespace Toolkit.WPF.Controls
                 return value;
             }
 
-            var target = new System.Collections.ObjectModel.ObservableCollection<object>();
+            System.Collections.ObjectModel.ObservableCollection<object> target;
+            if (source is ITypedList list)
+            {
+                target = new TypedCollection<object>(list);
+            }
+            else
+            {
+                target = new System.Collections.ObjectModel.ObservableCollection<object>();
+            }
 
             this.SubscribeCollectionChangedEvent(source, parameter.ToString(), source, target);
 
@@ -1109,6 +1117,29 @@ namespace Toolkit.WPF.Controls
                     index++;
                 }
             }
+        }
+
+        /// <summary>
+        /// TypedCollection (ITypedList対応)
+        /// </summary>
+        private class TypedCollection<T> : System.Collections.ObjectModel.ObservableCollection<T>, ITypedList, IList
+        {
+            public TypedCollection(ITypedList list)
+            {
+                this._List = list ?? throw new ArgumentNullException(nameof(list));
+            }
+
+            public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)
+            {
+                return this._List.GetItemProperties(listAccessors);
+            }
+
+            public string GetListName(PropertyDescriptor[] listAccessors)
+            {
+                return this._List.GetListName(listAccessors);
+            }
+
+            private readonly ITypedList _List;
         }
 
         /// <summary
