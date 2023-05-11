@@ -31,17 +31,13 @@
     </Window.Resources>
     
     <DockPanel>
-        <StatusBar DockPanel.Dock="Top">
-            <Button Command="{Binding AddChildOfSelectdItemCommand, Mode=OneTime}" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" />
-            <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" />
-            <tkitwpf:FilterTextBox MinWidth="100" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged, Delay=100}" WatermarkText="フィルタ" />
-        </StatusBar>
         
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100"/>
                 <ColumnDefinition Width="4" />
                 <ColumnDefinition />
+                <ColumnDefinition Width="4" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
@@ -66,36 +62,47 @@
 
             <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
 
-            <DataGrid
-                x:Name="DataGrid"
-                Grid.Column="2" 
-                CanUserAddRows="False"
-                CanUserDeleteRows="False"
-                SelectionUnit="CellOrRowHeader"
-                EnableRowVirtualization="True"
-                VirtualizingPanel.VirtualizationMode="Standard"
-                VirtualizingPanel.IsVirtualizing="True"
-                SelectedItem="{Binding SelectedItem}"
-                RowHeaderWidth="30"
-                ItemsSource="{Binding TreeRootItems, Mode=OneTime, Converter={x:Static tkitwpf:FlattenTreeToListOfDepthFirstOrdering.Converter}, ConverterParameter=Children}"
-                tkitwpf:DataGridTreeColumn.FilterText="{Binding FilterText}">
-                <DataGrid.Columns>
-                    <tkitwpf:DataGridTreeColumn
-                        Header="Tree"
-                        IconTemplate="{StaticResource IconTemplate}"
-                        Binding="{Binding Name}"
-                        ExpandedPropertyPath="IsExpanded"
-                        ChildrenPropertyPath="Children"
-                        />
-                </DataGrid.Columns>
-            </DataGrid>
+            <DockPanel Grid.Column="2">
+                <StatusBar DockPanel.Dock="Top">
+                    <Button Command="{Binding AddChildOfSelectdItemCommand, Mode=OneTime}" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" />
+                    <Button Command="{Binding RemoveSelectedItemCommand, Mode=OneTime}" Content="&#xE711;" FontFamily="Segoe MDL2 Assets" />
+                    <tkitwpf:FilterTextBox MinWidth="100" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged, Delay=100}" WatermarkText="フィルタ" />
+                </StatusBar>
+
+                <DataGrid
+                    CanUserAddRows="False"
+                    CanUserDeleteRows="False"
+                    CanUserResizeRows="False"
+                    RowHeaderWidth="24"
+                    SelectionUnit="FullRow"
+                    EnableRowVirtualization="True"
+                    VirtualizingPanel.VirtualizationMode="Standard"
+                    VirtualizingPanel.IsVirtualizing="True"
+                    SelectedItem="{Binding SelectedItem}"
+                    ItemsSource="{Binding TreeRootItems, Mode=OneTime, Converter={x:Static tkitwpf:FlattenTreeToListOfDepthFirstOrdering.Converter}, ConverterParameter=Children}"
+                    tkitwpf:DataGridTreeColumn.FilterText="{Binding FilterText}">
+                    <DataGrid.Columns>
+                        <tkitwpf:DataGridTreeColumn
+                            Header="Tree"
+                            IconTemplate="{StaticResource IconTemplate}"
+                            Binding="{Binding Name}"
+                            ExpandedPropertyPath="IsExpanded"
+                            ChildrenPropertyPath="Children"
+                            />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+            </DockPanel>
+
+            <GridSplitter Grid.Column="3" Width="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
 
             <DataGrid
-                x:Name="DataGridFullRow"
-                Grid.Column="3" 
+                Grid.Column="4" 
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
-                SelectionUnit="FullRow"
+                CanUserResizeRows="False"
+                RowHeaderWidth="24"
+                SelectionUnit="CellOrRowHeader"
                 EnableRowVirtualization="True"
                 VirtualizingPanel.VirtualizationMode="Standard"
                 VirtualizingPanel.IsVirtualizing="True"

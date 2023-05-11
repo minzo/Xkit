@@ -58,12 +58,27 @@ namespace Toolkit.WPF.Sample
 
         public ICommand AddChildOfSelectdItemCommand { get; }
 
+        public ICommand RemoveSelectedItemCommand { get; }
+
         public TreeGridWindowViewModel()
         {
             this.AddChildOfSelectdItemCommand = new DelegateCommand((_) => {
                 if (this.SelectedItem != null)
                 {
                     this.SelectedItem.Children.Add(new TreeGridItem("Test"));
+                }
+            });
+
+            this.RemoveSelectedItemCommand = new DelegateCommand((_) => {
+                if (this.SelectedItem != null)
+                {
+                    var parent = this.TreeRootItems
+                        .EnumerateTreeBreadthFirst(i => i.Children)
+                        .FirstOrDefault(i => i.Children.Contains(this.SelectedItem));
+                    if (parent != null)
+                    {
+                        parent.Children.Remove(this.SelectedItem);
+                    }
                 }
             });
 
