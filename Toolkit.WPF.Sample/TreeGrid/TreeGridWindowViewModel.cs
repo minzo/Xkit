@@ -79,6 +79,10 @@ namespace Toolkit.WPF.Sample
                     {
                         parent.Children.Remove(this.SelectedItem);
                     }
+                    else
+                    {
+                        this.TreeRootItems.Remove(this.SelectedItem);
+                    }
                 }
             });
 

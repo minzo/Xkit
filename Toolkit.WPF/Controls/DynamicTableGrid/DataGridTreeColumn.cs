@@ -1086,7 +1086,7 @@ namespace Toolkit.WPF.Controls
 
             if (e.OldItems != null)
             {
-                foreach (var item in e.OldItems)
+                foreach (var item in EnumerateTreeDepthFirst(e.OldItems.OfType<object>(), i => GetChildren(i, propertyName)))
                 {
                     target.Remove(item);
                 }
