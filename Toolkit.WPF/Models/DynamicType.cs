@@ -65,20 +65,19 @@ namespace Toolkit.WPF.Models
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public DynamicType(string fullName, IEnumerable<PropertyInfo> collection)
+        public DynamicType(string fullName, Type baseType, IReadOnlyList<PropertyInfo> collection)
         {
             this.GUID = Guid.NewGuid();
             this.FullName  = fullName ?? throw new ArgumentNullException($"{nameof(fullName)} is null");            
-            var names= this.FullName.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
+            var names = this.FullName.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
             this.Name = names.LastOrDefault();
             this.Namespace = string.Join("::", names.Where(i => i != this.Name));
 
-            this.BaseType = typeof(object);
+            this.BaseType = baseType;
             this.UnderlyingSystemType = typeof(object);
 
             if (collection is INotifyCollectionChanged notify)
             {
-
             }
 
             this._PropertyInfo = new ObservableCollection<PropertyInfo>(collection);
@@ -87,6 +86,14 @@ namespace Toolkit.WPF.Models
             {
                 property.PropertyChanged += this.OnPropertyChanged;
             }
+        }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public DynamicType(string fullName, IReadOnlyList<PropertyInfo> collection)
+            : this(fullName, typeof(object), collection)
+        {
         }
 
         #region Attribute
@@ -235,20 +242,11 @@ namespace Toolkit.WPF.Models
             throw new NotImplementedException();
         }
 
-        protected override bool IsCOMObjectImpl()
-        {
-            throw new NotImplementedException();
-        }
+        protected override bool IsCOMObjectImpl() => false;
 
-        protected override bool IsPointerImpl()
-        {
-            throw new NotImplementedException();
-        }
+        protected override bool IsPointerImpl() => false;
 
-        protected override bool IsPrimitiveImpl()
-        {
-            throw new NotImplementedException();
-        }
+        protected override bool IsPrimitiveImpl() => false;
 
         public override bool IsDefined(Type attributeType, bool inherit)
         {
@@ -308,6 +306,12 @@ namespace Toolkit.WPF.Models
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
         #endregion
+    }
+
+
+
+    public class DynamicTypeInfo : TypeDelegator
+    {
     }
 }
 
