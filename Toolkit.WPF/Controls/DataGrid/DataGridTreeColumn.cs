@@ -990,7 +990,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         static DataGridTreeColumn()
         {
-            Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/DynamicTableGrid/DataGridTreeColumn.xaml") };
+            Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/DataGrid/DataGridTreeColumn.xaml") };
         }
 
         private const double DepthMarginUnit = 12D;
