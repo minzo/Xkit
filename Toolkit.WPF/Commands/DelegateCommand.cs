@@ -98,7 +98,7 @@ namespace Toolkit.WPF.Commands
 
         public string Description { 
             get => this._Description;
-            set => this.SetProperty(ref this._Description, value);
+            set => this.SetProperty(ref this._Description, value, nameof(this.Description));
         }
 
         public MenuCommand(Action<object> execute, Func<object, bool> canExecute = null)

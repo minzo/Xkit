@@ -18,7 +18,7 @@ namespace Toolkit.WPF.Sample
             {
                 if (this.SetProperty(ref this._SelectedUnit, value))
                 {
-                    this.SetProperty(nameof(this.FileEntries), this.GetFileInfos());
+                    this.SetProperty(this.GetFileInfos(), nameof(this.FileEntries));
                 }
             }
         }
@@ -34,7 +34,7 @@ namespace Toolkit.WPF.Sample
 
         public FilterTextBoxWindowViewModel()
         {
-            this.SetProperty(nameof(this.FileEntries), this.GetFileInfos());
+            this.SetProperty(this.GetFileInfos(), nameof(this.FileEntries));
         }
 
         public IEnumerable<FileInfo> GetFileInfos()

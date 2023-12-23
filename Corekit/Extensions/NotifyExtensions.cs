@@ -16,9 +16,9 @@ namespace Corekit.Extensions
         /// <summary>
         /// プロパティをセットしてプロパティ変更通知を送る
         /// </summary>
-        public static bool SetProperty<TSelf, T>(this TSelf self, in string propertyName, T value) where TSelf : INotifyPropertyChanged
+        public static bool SetProperty<TSelf, T>(this TSelf self, T value, in string targetPropertyName ) where TSelf : INotifyPropertyChanged
         {
-            var info = typeof(TSelf).GetPropertyInfo(propertyName);
+            var info = typeof(TSelf).GetPropertyInfo(targetPropertyName);
             if (info == null)
             {
                 return false;
@@ -31,7 +31,7 @@ namespace Corekit.Extensions
             }
 
             info.SetValue(self, value);
-            InvokePropertyChanged(self, in propertyName);
+            InvokePropertyChanged(self, in targetPropertyName);
             return true;
         }
 
