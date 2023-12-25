@@ -841,7 +841,7 @@ namespace Toolkit.WPF.Controls
                 {
                     if (info.IsValid && this._DataGrid.Items.Contains(info.Item))
                     {
-                        this._DataGrid.SelectedCells.Add(new DataGridCellInfo(info.Item, info.Column));
+                        this._DataGrid.SelectedCells.Add(info);
                     }
                 }
 
