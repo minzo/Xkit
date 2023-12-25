@@ -11,7 +11,7 @@ namespace Corekit.Models
     /// DynamicProperty
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Value:{Value}")]
-    public class DynamicProperty<T> : IDynamicProperty
+    public class DynamicProperty<T> : IDynamicProperty<T>
     {
         /// <summary>
         /// 定義
