@@ -11,42 +11,6 @@ namespace Corekit.Models
     /// <summary>
     /// プロパティ定義
     /// </summary>
-    public interface IDynamicPropertyDefinition : INotifyPropertyChanged
-    {
-        /// <summary>
-        /// プロパティ定義の名前
-        /// </summary>
-        string Name { get; set; }
-
-        /// <summary>
-        /// 読み取り専用・編集不可能か（nullは未指定なのでそのほかの要因に従う）
-        /// </summary>
-        bool? IsReadOnly { get; }
-
-        /// <summary>
-        /// 表示されるか
-        /// </summary>
-        bool IsVisible { get; }
-
-        /// <summary>
-        /// 型
-        /// </summary>
-        Type ValueType { get; }
-
-        /// <summary>
-        /// デフォルト値
-        /// </summary>
-        object GetDefaultValue();
-
-        /// <summary>
-        /// プロパティから生成
-        /// </summary>
-        IDynamicProperty Create(IDynamicItem owner);
-    }
-
-    /// <summary>
-    /// プロパティ定義
-    /// </summary>
     public class DynamicPropertyDefinition<T> : IDynamicPropertyDefinition
     {
         /// <summary>
@@ -93,15 +57,11 @@ namespace Corekit.Models
         /// </summary>
         public IDynamicProperty Create(IDynamicItem owner) => new DynamicProperty<T>(this, owner);
 
-
-        public event PropertyChangingEventHandler PropertyChanging;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private string _Name = null;
         private bool? _IsReadOnly = null;
         private bool _IsVisible = true;
 
+        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// プロパティ設定
@@ -110,7 +70,6 @@ namespace Corekit.Models
         {
             if (!Equals(field, value))
             {
-                this.PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
                 field = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
                 return true;

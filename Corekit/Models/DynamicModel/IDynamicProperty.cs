@@ -10,7 +10,7 @@ namespace Corekit.Models
     /// <summary>
     /// DynamicPropertyのインターフェース
     /// </summary>
-    public interface IDynamicProperty : INotifyPropertyChanging, INotifyPropertyChanged
+    public interface IDynamicProperty : INotifyPropertyChanged
     {
         /// <summary>
         /// 定義

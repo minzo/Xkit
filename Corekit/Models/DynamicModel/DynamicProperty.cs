@@ -46,7 +46,6 @@ namespace Corekit.Models
                         newValue.PropertyChanged += this.OnPropertyChanged;
                     }
 
-                    this.PropertyChanging?.Invoke(this, _ChangingEventArgs);
                     this._Value = value;
                     this.PropertyChanged?.Invoke(this, _ChangedEventArgs);
                 }
@@ -93,9 +92,7 @@ namespace Corekit.Models
 
         private T _Value;
 
-        public event PropertyChangingEventHandler PropertyChanging;
         public event PropertyChangedEventHandler PropertyChanged;
-        private static readonly PropertyChangingEventArgs _ChangingEventArgs = new PropertyChangingEventArgs(nameof(Value));
         private static readonly PropertyChangedEventArgs _ChangedEventArgs = new PropertyChangedEventArgs(nameof(Value));
     }
 }
