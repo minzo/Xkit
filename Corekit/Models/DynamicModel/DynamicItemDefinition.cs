@@ -5,7 +5,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using Corekit.Extensions;
 
 namespace Corekit.Models
 {
@@ -75,18 +74,18 @@ namespace Corekit.Models
         /// </summary>
         public DynamicItemDefinition(IEnumerable<IDynamicPropertyDefinition> collection)
         {
-            if(collection is INotifyCollectionChanged notify)
+            if (collection is INotifyCollectionChanged notify)
             {
-                notify.CollectionChanged += (s, e) => {
-                    e.OldItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => this._Collection.Remove(i));
-                    int insertIndex = e.NewStartingIndex;
-                    e.NewItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => this._Collection.Insert(insertIndex++, i));
-                };
+                notify.CollectionChanged += this.OnPropertyDefinitionCollectionChanged;
             }
 
             this._Collection = new ObservableCollection<IDynamicPropertyDefinition>(collection);
             this._Collection.CollectionChanged += this.OnCollectionChanged;
-            this._Collection.ForEach(i => i.PropertyChanged += this.OnPropertyChanged);
+
+            foreach (var i in this._Collection)
+            {
+                i.PropertyChanged += this.OnPropertyChanged;
+            }
         }
 
         /// <summary>
@@ -122,12 +121,48 @@ namespace Corekit.Models
         }
 
         /// <summary>
+        /// 情報元のプロパティ定義のコレクションの増減通知
+        /// </summary>
+        private void OnPropertyDefinitionCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (var i in e.OldItems.Cast<IDynamicPropertyDefinition>())
+                {
+                    this._Collection.Remove(i);
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                int insertIndex = e.NewStartingIndex;
+                foreach (var i in e.NewItems.Cast<IDynamicPropertyDefinition>())
+                {
+                    this._Collection.Insert(insertIndex++, i);
+                }
+            }
+        }
+
+        /// <summary>
         /// プロパティの定義の増減通知
         /// </summary>
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            e.OldItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => i.PropertyChanged -= this.OnPropertyChanged);
-            e.NewItems?.Cast<IDynamicPropertyDefinition>().ForEach(i => i.PropertyChanged += this.OnPropertyChanged);
+            if (e.OldItems != null)
+            {
+                foreach (var i in e.OldItems.Cast<IDynamicPropertyDefinition>())
+                {
+                    i.PropertyChanged -= this.OnPropertyChanged;
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (var i in e.NewItems.Cast<IDynamicPropertyDefinition>())
+                {
+                    i.PropertyChanged += this.OnPropertyChanged;
+                }
+            }
 
             this.CollectionChanged?.Invoke(this, e);
         }
@@ -170,15 +205,32 @@ namespace Corekit.Models
             {
                 notify.CollectionChanged += (s, e) =>
                 {
-                    int removeIndex = e.OldStartingIndex;
-                    e.OldItems?.Cast<T>().ForEach(i => items.RemoveAt(removeIndex));
+                    if(e.OldItems != null)
+                    {
+                        int removeIndex = e.OldStartingIndex;
+                        foreach (var i in e.OldItems.Cast<T>())
+                        {
+                            items.RemoveAt(removeIndex);
+                        }
+                    }
 
-                    int insertIndex = e.NewStartingIndex;
-                    e.NewItems?.Cast<T>().ForEach(i => items.Insert(insertIndex++, predicate(i)));
+                    if(e.NewItems != null)
+                    {
+                        int insertIndex = e.NewStartingIndex;
+                        foreach (var i in e.NewItems.Cast<T>())
+                        {
+                            items.Insert(insertIndex++, predicate(i));
+                        }
+                    }
                 };
             }
 
             return new DynamicItemDefinition(items as IEnumerable<IDynamicPropertyDefinition>);
+        }
+
+        private static void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+
         }
     }
 }

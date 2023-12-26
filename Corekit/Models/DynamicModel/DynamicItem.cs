@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using Corekit.Extensions;
 
 namespace Corekit.Models
 {
@@ -51,8 +50,14 @@ namespace Corekit.Models
             }
 
             this.Definition = definition;
-            this.Definition.ForEach(i => this.AddProperty(i.Create(this)));
+
+            foreach (var property_definition in this.Definition)
+            {
+                this.AddProperty(property_definition.Create(this));
+            }
+
             this._IsAttached = true;
+
             return this;
         }
 
@@ -201,20 +206,32 @@ namespace Corekit.Models
         {
             if (e.Action == NotifyCollectionChangedAction.Move)
             {
-                e.OldItems?
-                    .Cast<IDynamicPropertyDefinition>()
-                    .ForEach(i => this.MoveProperty(i.Name, e.NewStartingIndex));
+                if (e.OldItems != null)
+                {
+                    foreach (var definition in e.OldItems.Cast<IDynamicPropertyDefinition>())
+                    {
+                        this.MoveProperty(definition.Name, e.NewStartingIndex);
+                    }
+                }
             }
             else
             {
-                e.OldItems?
-                    .Cast<IDynamicPropertyDefinition>()
-                    .ForEach(i => this.RemoveProperty(i.Name));
+                if (e.OldItems != null)
+                {
+                    foreach (var definition in e.OldItems.Cast<IDynamicPropertyDefinition>())
+                    {
+                        this.RemoveProperty(definition.Name);
+                    }
+                }
 
-                int insertIndex = e.NewStartingIndex;
-                e.NewItems?
-                    .Cast<IDynamicPropertyDefinition>()
-                    .ForEach(i => this.InsertProperty(insertIndex++, i.Create(this)));
+                if (e.NewItems != null)
+                {
+                    int insertIndex = e.NewStartingIndex;
+                    foreach (var definition in e.NewItems.Cast<IDynamicPropertyDefinition>())
+                    {
+                        this.InsertProperty(insertIndex++, definition.Create(this));
+                    }
+                }
             }
         }
 
