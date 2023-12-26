@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace Corekit.Models
 {
@@ -30,7 +25,7 @@ namespace Corekit.Models
         /// <summary>
         /// 継承している状態か
         /// </summary>
-        public bool IsInherited => this._HasValue && this._InheritanceSource != null;
+        public bool IsInherited => !this._HasValue && (this._InheritanceSource != null || this.Owner is InheritanceItem);
 
         /// <summary>
         /// 値
@@ -40,7 +35,12 @@ namespace Corekit.Models
             get => this.GetValue_();
             set
             {
-                if (!Equals(this._Value, value))
+                // 値がセットされたときに有効な値を持っていなかったので今回HasValueはTrueとなる
+                bool isHasValueChanged = !this._HasValue;
+                this._HasValue = true;
+
+                bool isValueChanged = !Equals(this._Value, value);
+                if (isValueChanged)
                 {
                     if (this._Value is INotifyPropertyChanged oldValue)
                     {
@@ -53,6 +53,10 @@ namespace Corekit.Models
                     }
 
                     this._Value = value;
+                }
+
+                if (isValueChanged || isHasValueChanged)
+                {
                     this.PropertyChanged?.Invoke(this, _ChangedEventArgs);
                 }
             }
@@ -105,13 +109,17 @@ namespace Corekit.Models
         /// </summary>
         private T GetValue_()
         {
-            if (this.IsInherited)
+            if (this._HasValue)
+            {
+                return this._Value;
+            }
+            else if (this._InheritanceSource != null)
             {
                 return this._InheritanceSource.Value;
             }
-            else if (this._HasValue)
+            else if (this.Owner is InheritanceItem inheritance)
             {
-                return this._Value;
+                return inheritance.GetPropertyValue<T>(this.Definition.Name);
             }
             else
             {
@@ -128,7 +136,7 @@ namespace Corekit.Models
         }
 
         private IDynamicProperty<T> _InheritanceSource = null;
-        private bool _HasValue = true;
+        private bool _HasValue = false;
         private T _Value;
 
         public event PropertyChangedEventHandler PropertyChanged;
