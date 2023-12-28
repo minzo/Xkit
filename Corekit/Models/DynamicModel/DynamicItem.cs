@@ -233,6 +233,9 @@ namespace Corekit.Models
                     }
                 }
             }
+
+            // PropertyDescriptor を再生成するために null にする
+            this._PropertyDescriptorCollection = null;
         }
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -258,8 +261,12 @@ namespace Corekit.Models
         public EventDescriptorCollection GetEvents(Attribute[] attributes) => this.GetEvents();
         public PropertyDescriptorCollection GetProperties()
         {
-            var descriptors = this.Value.Select(i => new DynamicPropertyDescriptor(i)).ToArray();
-            return new PropertyDescriptorCollection(descriptors);
+            if (this._PropertyDescriptorCollection == null)
+            {
+                var descriptors = this.Value.Select(i => new DynamicPropertyDescriptor(i)).ToArray();
+                this._PropertyDescriptorCollection = new PropertyDescriptorCollection(descriptors);
+            }
+            return this._PropertyDescriptorCollection;
         }
         public PropertyDescriptorCollection GetProperties(Attribute[] attributes) => this.GetProperties();
         public object GetPropertyOwner(PropertyDescriptor pd) => this;
@@ -267,6 +274,7 @@ namespace Corekit.Models
         #endregion
 
         private bool _IsAttached = false;
+        private PropertyDescriptorCollection _PropertyDescriptorCollection = null;
 
         private static readonly IDynamicPropertyDefinition definition__ = new DynamicPropertyDefinition<DynamicPropertyCollection>()
         {
