@@ -5,7 +5,7 @@ namespace Corekit.Models
     /// <summary>
     /// 継承プロパティ
     /// </summary>
-    public class InheritanceProperty<T> : IDynamicProperty
+    public class InheritanceProperty<T> : IDynamicProperty<T>
     {
         /// <summary>
         /// 定義
@@ -87,6 +87,7 @@ namespace Corekit.Models
         public void DisableInheritance()
         {
             this._InheritanceSource = null;
+            this._HasValue = true;
         }
 
         /// <summary>
@@ -105,6 +106,11 @@ namespace Corekit.Models
         }
 
         /// <summary>
+        /// 継承を考慮せずにこのインスタンスが保持している値を取得します
+        /// </summary>
+        protected T RawValue => this._Value;
+
+        /// <summary>
         /// 値を取得する
         /// </summary>
         private T GetValue_()
@@ -117,7 +123,7 @@ namespace Corekit.Models
             {
                 return this._InheritanceSource.Value;
             }
-            else if (this.Owner is InheritanceItem inheritance)
+            else if (this.Owner is InheritanceItem inheritance && inheritance.IsInherited)
             {
                 return inheritance.GetPropertyValue<T>(this.Definition.Name);
             }

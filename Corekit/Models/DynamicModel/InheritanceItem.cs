@@ -11,7 +11,7 @@ namespace Corekit.Models
     /// <summary>
     /// DynamicItem
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Name:{Definition.Name} Count:{Value.Count}")]
+    [System.Diagnostics.DebuggerDisplay("Name:{Definition.Name} Count:{Value.Count} IsInherited:{IsInherited}")]
     public class InheritanceItem : InheritanceProperty<DynamicPropertyCollection>, IDynamicItem, ICustomTypeDescriptor
     {
         /// <summary>
@@ -51,12 +51,14 @@ namespace Corekit.Models
 
             this.Definition = definition;
 
-            foreach (var property_definition in this.Definition)
+            foreach (var i in this.Definition)
             {
-                this.AddProperty(property_definition.Create(this));
+                this.AddProperty(i.Create(this));
             }
 
             this._IsAttached = true;
+
+            this.DisableInheritance();
 
             return this;
         }
@@ -100,7 +102,7 @@ namespace Corekit.Models
         /// </summary>
         public object GetPropertyValue(int index)
         {
-            return this.Value[index]?.GetValue();
+            return this.GetProperty(index)?.GetValue();
         }
 
         /// <summary>
@@ -108,7 +110,7 @@ namespace Corekit.Models
         /// </summary>
         public T GetPropertyValue<T>(int index)
         {
-            return (T)this.Value[index]?.GetValue();
+            return (T)this.GetProperty(index)?.GetValue();
         }
 
         /// <summary>
@@ -116,7 +118,8 @@ namespace Corekit.Models
         /// </summary>
         public void SetPropertyValue(string propertyName, object value)
         {
-            this.Value.FirstOrDefault(i => i.Definition.Name == propertyName)?.SetValue(value);
+            this.DisableInheritance();
+            this.RawValue.FirstOrDefault(i => i.Definition.Name == propertyName)?.SetValue(value);
         }
 
         /// <summary>
@@ -124,7 +127,8 @@ namespace Corekit.Models
         /// </summary>
         public void SetPropertyValue<T>(string propertyName, T value)
         {
-            this.Value.FirstOrDefault(i => i.Definition.Name == propertyName)?.SetValue(value);
+            this.DisableInheritance();
+            this.RawValue.FirstOrDefault(i => i.Definition.Name == propertyName)?.SetValue(value);
         }
 
         /// <summary>
@@ -132,7 +136,8 @@ namespace Corekit.Models
         /// </summary>
         public void SetPropertyValue(int index, object value)
         {
-            this.Value[index]?.SetValue(value);
+            this.DisableInheritance();
+            this.GetProperty(index)?.SetValue(value);
         }
 
         /// <summary>
@@ -140,7 +145,8 @@ namespace Corekit.Models
         /// </summary>
         public void SetPropertyValue<T>(int index, T value)
         {
-            this.Value[index]?.SetValue(value);
+            this.DisableInheritance();
+            this.GetProperty(index)?.SetValue(value);
         }
 
         #endregion
@@ -164,11 +170,11 @@ namespace Corekit.Models
 
             if (index < 0)
             {
-                this.Value.Add(property);
+                this.RawValue.Add(property);
             }
             else
             {
-                this.Value.Insert(index, property);
+                this.RawValue.Insert(index, property);
             }
         }
 
@@ -180,7 +186,7 @@ namespace Corekit.Models
             var property = this.Value.FirstOrDefault(i => i.Definition.Name == propertyName);
             if (property != null)
             {
-                this.Value.Remove(property);
+                this.RawValue.Remove(property);
                 property.PropertyChanged -= this.OnPropertyChanged;
             }
         }
@@ -193,8 +199,8 @@ namespace Corekit.Models
             var property = this.Value.FirstOrDefault(i => i.Definition.Name == propertyName);
             if (property != null)
             {
-                this.Value.Remove(property);
-                this.Value.Insert(newIndex, property);
+                this.RawValue.Remove(property);
+                this.RawValue.Insert(newIndex, property);
             }
         }
 
@@ -233,6 +239,9 @@ namespace Corekit.Models
                     }
                 }
             }
+
+            // PropertyDescriptor を再生成するために null にする
+            this._PropertyDescriptorCollection = null;
         }
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -248,7 +257,7 @@ namespace Corekit.Models
         #region ICustomTypeDescripter
 
         public AttributeCollection GetAttributes() => AttributeCollection.Empty;
-        public string GetClassName() => nameof(DynamicItem);
+        public string GetClassName() => nameof(InheritanceItem);
         public string GetComponentName() => definition__.Name;
         public TypeConverter GetConverter() => null;
         public EventDescriptor GetDefaultEvent() => null;
@@ -258,8 +267,12 @@ namespace Corekit.Models
         public EventDescriptorCollection GetEvents(Attribute[] attributes) => this.GetEvents();
         public PropertyDescriptorCollection GetProperties()
         {
-            var descriptors = this.Value.Select(i => new DynamicPropertyDescriptor(i)).ToArray();
-            return new PropertyDescriptorCollection(descriptors);
+            if (this._PropertyDescriptorCollection == null)
+            {
+                var descriptors = this.Definition.Select(i => new DynamicPropertyDescriptor(i)).ToArray();
+                this._PropertyDescriptorCollection = new PropertyDescriptorCollection(descriptors);
+            }
+            return this._PropertyDescriptorCollection;
         }
         public PropertyDescriptorCollection GetProperties(Attribute[] attributes) => this.GetProperties();
         public object GetPropertyOwner(PropertyDescriptor pd) => this;
@@ -267,8 +280,9 @@ namespace Corekit.Models
         #endregion
 
         private bool _IsAttached = false;
+        private PropertyDescriptorCollection _PropertyDescriptorCollection = null;
 
-        private static readonly IDynamicPropertyDefinition definition__ = new DynamicPropertyDefinition<DynamicPropertyCollection>()
+        private static readonly IDynamicPropertyDefinition definition__ = new InheritancePropertyDefinition<DynamicPropertyCollection>()
         {
             Name = nameof(InheritanceItem),
         };
