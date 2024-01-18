@@ -72,8 +72,8 @@ namespace Toolkit.WPF.Sample
                     .SelectMany(i => i.TriggerItems)
                     .ToList();
 
-                this.SetProperty(nameof(this.SelectedCells), cells);
-                this.SetProperty(nameof(this.SelectedTriggers), triggers);
+                this.SetProperty(cells, nameof(this.SelectedCells));
+                this.SetProperty(triggers, nameof(this.SelectedTriggers));
             }
         }
 
