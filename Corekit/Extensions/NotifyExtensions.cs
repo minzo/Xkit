@@ -40,7 +40,7 @@ namespace Corekit.Extensions
         /// </summary>
         public static bool SetProperty<TSelf, T>(this TSelf self, ref T field, T value, [CallerMemberName] in string propertyName = null) where TSelf : INotifyPropertyChanged
         {
-            if (Equals(field, value))
+            if (EqualityComparer<T>.Default.Equals(field, value))
             {
                 return false;
             }
