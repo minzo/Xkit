@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -34,9 +32,7 @@ namespace Toolkit.WPF.Controls
         {
             if (TryFindChild(this, "templateRoot", out Border border))
             {
-                border.SetBinding(Border.BackgroundProperty, new Binding(nameof(this.Background)) {
-                    RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) { AncestorType = typeof(Control) }
-                });
+                border.SetBinding(Border.BackgroundProperty, BackgroundBinding);
             }
 
             this._DataGridColumnOwner = EnumerateParent(this).OfType<DataGridCell>().FirstOrDefault()?.Column;
@@ -116,5 +112,10 @@ namespace Toolkit.WPF.Controls
 
         private DataGrid _DataGridOwner;
         private DataGridColumn _DataGridColumnOwner;
+
+        private static readonly Binding BackgroundBinding = new Binding(nameof(Background))
+        {
+            RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) { AncestorType = typeof(Control) }
+        };
     }
 }
