@@ -5,6 +5,7 @@ using System.Data.SQLite;
 using System.Text;
 using Corekit.DB;
 using System.Linq;
+using System.Data;
 
 namespace Corekit.DB.Tests
 {
@@ -19,6 +20,14 @@ namespace Corekit.DB.Tests
             public int Id { get; set; }
         }
 
+        [DbTable("TestRecord01")]
+        class Record01
+        {
+            [DbPrimaryKey]
+            [DbColumn]
+            public int Id { get; set; }
+        }
+
         [TestInitialize]
         public void Initialize()
         {
@@ -26,6 +35,11 @@ namespace Corekit.DB.Tests
             {
                 System.IO.File.Delete(this._DBPath);
             }
+
+            using var context = new DbContext<SQLiteConnection>($"Data Source={this._DBPath}");
+            using var dbOperator = context.GetOperator();
+            dbOperator.ExecuteCreateTable<Record01>();
+            dbOperator.ExecuteInsertItems(Enumerable.Range(0, 1000).Select(i => new Record01() { Id = i }));
         }
 
         [TestCleanup]
@@ -66,6 +80,31 @@ namespace Corekit.DB.Tests
                     Assert.IsFalse(isExistTable);
                 }
             }
+        }
+
+        [TestMethod]
+        public void ExecuteReaderAndExecuteScalar()
+        {
+            var tableName = "TestRecord01";
+
+            using var context = new DbContext<SQLiteConnection>($"Data Source={this._DBPath}");
+            using var dbOperator = context.GetOperator();
+
+            IEnumerable<IDataReader> EnumerableQuery(DbOperator o)
+            {
+                return o.ExecuteReader($"SELECT id FROM {tableName}");
+            }
+
+            var reader = EnumerableQuery(dbOperator);
+            long sumId = 0;
+            foreach(var row in reader)
+            {
+                sumId += row.GetInt32("id");
+            }
+
+            long sumDb = (long)dbOperator.ExecuteScalar($"SELECT sum(id) FROM {tableName}");
+
+            Assert.AreEqual(sumId, sumDb);
         }
 
         private readonly string _DBPath = "Test.db";
