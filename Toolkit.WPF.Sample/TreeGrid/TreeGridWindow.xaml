@@ -6,7 +6,8 @@
         xmlns:tkitwpf="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
         xmlns:local="clr-namespace:Toolkit.WPF.Sample"
         mc:Ignorable="d"
-        Title="TreeGridWindow" Height="450" Width="800">
+        d:DataContext="{d:DesignInstance Type={x:Type local:TreeGridWindowViewModel}}"
+        Title="TreeGridWindow" Height="450" Width="1200">
     <Window.DataContext>
         <local:TreeGridWindowViewModel />
     </Window.DataContext>
@@ -35,6 +36,8 @@
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="4" />
+                <ColumnDefinition />
                 <ColumnDefinition Width="4" />
                 <ColumnDefinition />
                 <ColumnDefinition Width="4" />
@@ -118,6 +121,18 @@
                         />
                 </DataGrid.Columns>
             </DataGrid>
+
+            <GridSplitter Grid.Column="5" Width="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+
+            <tkitwpf:TreeDataGrid
+                Grid.Column="6" 
+                ItemsSource="{Binding Items, Mode=OneTime}"
+                RowChildrenPropertyPath="Children"
+                RowExpandedPropertyPath="IsExpanded"
+                ColumnsSource="{Binding Items2, Mode=OneTime}"
+                ColumnChildrenPropertyPath="Children"
+                ColumnExpandedPropertyPath="IsExpanded">
+            </tkitwpf:TreeDataGrid>
         </Grid>
     </DockPanel>
 </Window>
