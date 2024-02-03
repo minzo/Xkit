@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -554,6 +555,9 @@ namespace Toolkit.WPF.Controls
             {
                 try
                 {
+                    // Editing 状態だった場合はその状態を確定させておく
+                    this.DataGridOwner.CommitEdit();
+
                     if (string.IsNullOrEmpty(this._FilterText))
                     {
                         this._CollectionView.Filter = item => this.GetIsVisible(item);
@@ -985,16 +989,8 @@ namespace Toolkit.WPF.Controls
 
         private DataGrid _DataGrid;
 
-        /// <summary>
-        /// 静的コンストラクタ
-        /// </summary>
-        static DataGridTreeColumn()
-        {
-            Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/DataGrid/DataGridTreeColumn.xaml") };
-        }
-
         private const double DepthMarginUnit = 12D;
-        private static readonly ResourceDictionary Resource;
+        private static readonly ResourceDictionary Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/DataGrid/DataGridTreeColumn.xaml") };
 
         private static readonly object[] TrueArgs = new object[] { true };
         private static readonly object[] FalseArgs = new object[] { false };
