@@ -2,11 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Configuration;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.PortableExecutable;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Media;
+using Toolkit.WPF.Extensions;
 
 namespace Toolkit.WPF.Controls
 {
@@ -15,6 +21,21 @@ namespace Toolkit.WPF.Controls
     /// </summary>
     public class TreeDataGrid : DataGrid
     {
+        /// <summary>
+        /// 行情報
+        /// </summary>
+        public IEnumerable RowsSource
+        {
+            get { return (IEnumerable)this.GetValue(RowsSourceProperty); }
+            set { this.SetValue(RowsSourceProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for RowsSource.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty RowsSourceProperty =
+            DependencyProperty.Register("RowsSource", typeof(IEnumerable), typeof(TreeDataGrid), new PropertyMetadata(null, (d,e) => {
+                ((TreeDataGrid)d).ItemsSource = (IEnumerable)e.NewValue;
+            }));
+
         /// <summary>
         /// 列情報
         /// </summary>
@@ -30,20 +51,39 @@ namespace Toolkit.WPF.Controls
                 ((TreeDataGrid)d).OnColumnsSourceChanged(e.OldValue as IEnumerable, e.NewValue as IEnumerable); }
             ));
 
+        #region Column HeaderTempalte/HeaderTemplateSelector
 
-
-
-        public static bool GetIsExpanded(DependencyObject obj)
+        /// <summary>
+        /// ColumnHeaderTemplate
+        /// </summary>
+        public DataTemplate ColumnHeaderTemplate
         {
-            return (bool)obj.GetValue(IsExpandedProperty);
+            get { return (DataTemplate)this.GetValue(ColumnHeaderTemplateProperty); }
+            set { this.SetValue(ColumnHeaderTemplateProperty, value); }
         }
 
-        public static void SetIsExpanded(DependencyObject obj, bool value)
+        // Using a DependencyProperty as the backing store for ColumnHeaderTemplate.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ColumnHeaderTemplateProperty =
+            DependencyProperty.Register("ColumnHeaderTemplate", typeof(DataTemplate), typeof(TreeDataGrid), new PropertyMetadata(null));
+
+
+        /// <summary>
+        /// ColumnHeaderTemplateSelector
+        /// </summary>
+        public DataTemplateSelector ColumnHeaderTemplateSelector
         {
-            obj.SetValue(IsExpandedProperty, value);
+            get { return (DataTemplateSelector)this.GetValue(ColumnHeaderTemplateSelectorProperty); }
+            set { this.SetValue(ColumnHeaderTemplateSelectorProperty, value); }
         }
 
-        public static readonly DependencyProperty IsExpandedProperty =
+        // Using a DependencyProperty as the backing store for ColumnHeaderTemplateSelector.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ColumnHeaderTemplateSelectorProperty =
+            DependencyProperty.Register("ColumnHeaderTemplateSelector", typeof(DataTemplateSelector), typeof(TreeDataGrid), new PropertyMetadata(null));
+
+        #endregion
+
+
+        private static readonly DependencyProperty IsExpandedProperty =
             DependencyProperty.RegisterAttached("IsExpanded", typeof(bool), typeof(TreeDataGrid), new PropertyMetadata(false, (d, e) => {
 
                 if (d is DataGridRow row)
@@ -51,7 +91,7 @@ namespace Toolkit.WPF.Controls
                     if (EnumerateParent(row).FirstOrDefault(i => i is TreeDataGrid) is TreeDataGrid grid)
                     {
                         grid._TreeInfoRow.SetIsExpanded(row.DataContext, (bool)e.NewValue);
-                        grid.RefreshRowFilter();
+                        grid.UpdateRowTreeAll();
                     }
                 }
 
@@ -60,17 +100,17 @@ namespace Toolkit.WPF.Controls
                     if (typeof(DataGridColumn).GetProperty("DataGridOwner", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(column) is TreeDataGrid grid)
                     {
                         grid._TreeInfoColumn.SetIsExpanded(column.Header, (bool)e.NewValue);
-                        grid.RefreshColumnFilter();
+                        grid.UpdateColumnTreeAll();
                     }
                 }
             }));
 
         // Using a DependencyProperty as the backing store for TreeExpanderVisibility.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty TreeExpanderVisibilityProperty =
+        private static readonly DependencyProperty TreeExpanderVisibilityProperty =
             DependencyProperty.RegisterAttached("TreeExpanderVisibility", typeof(Visibility), typeof(TreeDataGrid), new PropertyMetadata(Visibility.Visible));
 
         // Using a DependencyProperty as the backing store for TreeDepth.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty TreeDepthMarginProperty =
+        private static readonly DependencyProperty TreeDepthMarginProperty =
             DependencyProperty.RegisterAttached("TreeDepthMargin", typeof(Thickness), typeof(TreeDataGrid), new PropertyMetadata(default(Thickness)));
 
 
@@ -184,32 +224,47 @@ namespace Toolkit.WPF.Controls
             }
         }
 
+        /// <summary>
+        /// DataGridRow 生成時に呼ばれます
+        /// </summary>
+        protected override DependencyObject GetContainerForItemOverride()
+        {
+            var row = (DataGridRow)base.GetContainerForItemOverride();
+            TrySetBinding(row, DataGridRow.HeaderProperty, _RowHeaderBinding);
+            TrySetBinding(row, TreeDataGrid.IsExpandedProperty, this._RowExpandedBinding);
+            row.HeaderTemplate = _RowHeaderTemplate;
+            return row;
+        }
+
+        /// <summary>
+        /// OnRowLoading
+        /// </summary>
         protected override void OnLoadingRow(DataGridRowEventArgs e)
         {
             base.OnLoadingRow(e);
+            this.UpdateRowTree(e.Row);
+        }
 
-            var row = e.Row;
-            row.HeaderTemplate = _RowHeaderTemplate;
-            row.Header = row.DataContext;
+        /// <summary>
+        /// 全ての Row に現在のTreeの状態を設定します
+        /// </summary>
+        private void UpdateRowTreeAll()
+        {
+            foreach (var row in EnumerateChildren(this).OfType<DataGridRow>())
+            {
+                this.UpdateRowTree(row);
+            }
+        }
 
+        /// <summary>
+        /// Row に現在のTreeの状態を設定します
+        /// </summary>
+        private void UpdateRowTree(DataGridRow row)
+        {
             row.Visibility = this._TreeInfoRow.GetIsVisible(row.DataContext) ? Visibility.Visible : Visibility.Collapsed;
             row.SetCurrentValue(IsExpandedProperty, this._TreeInfoRow.GetIsExpanded(row.DataContext));
             row.SetCurrentValue(TreeExpanderVisibilityProperty, this._TreeInfoRow.HasChildren(row.DataContext) ? Visibility.Visible : Visibility.Collapsed);
             row.SetCurrentValue(TreeDepthMarginProperty, new Thickness(this._TreeInfoRow.GetDepth(row.DataContext) * DepthMarginUnit, 0D, 0D, 0D));
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private void RefreshRowFilter()
-        {
-            foreach (var row in EnumerateChildren(this).OfType<DataGridRow>())
-            {
-                row.Visibility = this._TreeInfoRow.GetIsVisible(row.DataContext) ? Visibility.Visible : Visibility.Collapsed;
-                row.SetCurrentValue(IsExpandedProperty, this._TreeInfoRow.GetIsExpanded(row.DataContext));
-                row.SetCurrentValue(TreeExpanderVisibilityProperty, this._TreeInfoRow.HasChildren(row.DataContext) ? Visibility.Visible : Visibility.Collapsed);
-                row.SetCurrentValue(TreeDepthMarginProperty, new Thickness(this._TreeInfoRow.GetDepth(row.DataContext) * DepthMarginUnit, 0D, 0D, 0D));
-            }
         }
 
         #endregion
@@ -242,7 +297,7 @@ namespace Toolkit.WPF.Controls
                 }
                 this._TreeInfoColumn.Setup(this.ColumnChildrenPropertyPath, this.ColumnExpandedPropertyPath);
                 this._TreeInfoColumn.UpdateTreeInfoAll();
-                this.RefreshColumnFilter();
+                this.UpdateColumnTreeAll();
             }
         }
 
@@ -257,7 +312,8 @@ namespace Toolkit.WPF.Controls
                 {
                     var column = this.Columns[i];
                     this.Columns.Remove(column);
-                    this._TreeInfoColumn.Remove(column);
+                    var item = e.OldItems[i];
+                    this._TreeInfoColumn.Remove(item);
                 }
             }
 
@@ -275,20 +331,21 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void AddColumn(object item)
         {
-            var column = new DataGridTextColumn()
-            {
-                HeaderTemplate = _ColumnHeaderTemplate,
-                Header = item,
-            };
+            var column = new DataGridTextColumn();
+
+            column.HeaderTemplate = _ColumnHeaderTemplate;
+            column.Header = item;
+
+            TrySetBinding(column, TreeDataGrid.IsExpandedProperty, this._ColumnExpandedBinding);
 
             this.Columns.Add(column);
             this._TreeInfoColumn.Add(item);
         }
 
         /// <summary>
-        /// 
+        /// Column に現在のTreeの状態を設定します
         /// </summary>
-        private void RefreshColumnFilter()
+        private void UpdateColumnTreeAll()
         {
             foreach(var column in this.Columns)
             {
@@ -308,12 +365,26 @@ namespace Toolkit.WPF.Controls
         static TreeDataGrid()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(typeof(TreeDataGrid)));
+
             EnableRowVirtualizationProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(true));
             EnableColumnVirtualizationProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(true));
+            VirtualizingPanel.IsVirtualizingProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(true));
 
-            if (Resource["RowHeaderTemplate"] is DataTemplate rowHeaderempalte)
+            RowHeaderTemplateProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(null, (d, e) => { }, (d, e) => e));
+
+            AutoGenerateColumnsProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(false));
+            CanUserAddRowsProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(false));
+            CanUserDeleteRowsProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(false));
+            CanUserResizeRowsProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(false));
+            CanUserSortColumnsProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(false));
+            CanUserReorderColumnsProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(false));
+            CanUserResizeColumnsProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(false));
+
+            SelectionUnitProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(DataGridSelectionUnit.CellOrRowHeader));
+
+            if (Resource["RowHeaderTemplate"] is DataTemplate rowHeaderTemplate)
             {
-                _RowHeaderTemplate = rowHeaderempalte;
+                _RowHeaderTemplate = rowHeaderTemplate;
             }
 
             if (Resource["ColumnHeaderTemplate"] is DataTemplate columnHeaderTemplate)
@@ -329,8 +400,30 @@ namespace Toolkit.WPF.Controls
         {
             this._TreeInfoRow = new TreeInfoUnit();
             this._TreeInfoColumn = new TreeInfoUnit();
-            base.AutoGenerateColumns = false;
+
+            this.Resources.MergedDictionaries.Add(Resource);
         }
+
+        /// <summary>
+        /// 初期化処理
+        /// </summary>
+        protected override void OnInitialized(EventArgs e)
+        {
+            base.OnInitialized(e);
+
+            if (!string.IsNullOrEmpty(this.RowExpandedPropertyPath))
+            {
+                this._RowExpandedBinding = new Binding(this.RowExpandedPropertyPath);
+            }
+
+            if (!string.IsNullOrEmpty(this.ColumnChildrenPropertyPath))
+            {
+                this._ColumnExpandedBinding = new Binding(this.ColumnExpandedPropertyPath);
+            }
+        }
+
+        private BindingBase _RowExpandedBinding;
+        private BindingBase _ColumnExpandedBinding;
 
         private const double DepthMarginUnit = 12D;
         private readonly TreeInfoUnit _TreeInfoRow;
@@ -338,6 +431,8 @@ namespace Toolkit.WPF.Controls
 
         private static readonly DataTemplate _RowHeaderTemplate;
         private static readonly DataTemplate _ColumnHeaderTemplate;
+
+        private static readonly BindingBase _RowHeaderBinding = new Binding("DataContext") { RelativeSource = new RelativeSource(RelativeSourceMode.Self) };
 
         private static readonly ResourceDictionary Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/TreeDataGrid/TreeDataGrid.xaml") };
 
@@ -702,6 +797,23 @@ namespace Toolkit.WPF.Controls
         #region Utilities
 
         /// <summary>
+        /// TrySetBinding
+        /// </summary>
+        private static bool TrySetBinding(DependencyObject dependencyObject, DependencyProperty dependencyProperty, BindingBase binding)
+        {
+            if (binding != null)
+            {
+                BindingOperations.SetBinding(dependencyObject, dependencyProperty, binding);
+                return true;
+            }
+            else
+            {
+                BindingOperations.ClearBinding(dependencyObject, dependencyProperty);
+                return false;
+            }
+        }
+
+        /// <summary>
         /// VisualParentを列挙する
         /// </summary>
         private static IEnumerable<DependencyObject> EnumerateParent(DependencyObject dp)
@@ -720,15 +832,6 @@ namespace Toolkit.WPF.Controls
             var count = VisualTreeHelper.GetChildrenCount(dp);
             var children = Enumerable.Range(0, count).Select(i => VisualTreeHelper.GetChild(dp, i));
             return children.Concat(children.SelectMany(i => EnumerateChildren(i)));
-        }
-
-        /// <summary>
-        /// 指定した型のVisualChildを取得します
-        /// </summary>
-        private static bool TryFindChild<T>(DependencyObject dp, out T child)
-        {
-            child = EnumerateChildren(dp).OfType<T>().FirstOrDefault(i => i != null);
-            return child != null;
         }
 
         #endregion

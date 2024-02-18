@@ -4,7 +4,6 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Toolkit.WPF;component/Controls/DynamicTableGrid/DynamicTableGrid.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Toolkit.WPF;component/Controls/CombinationGrid/CombinationGrid.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/Toolkit.WPF;component/Controls/TreeDataGrid/TreeDataGrid.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
 </ResourceDictionary>

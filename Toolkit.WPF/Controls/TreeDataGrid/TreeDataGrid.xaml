@@ -71,7 +71,12 @@
                 Visibility="{Binding Path=Column.(local:TreeDataGrid.TreeExpanderVisibility), Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridColumnHeader}}}"
                 />
             <ContentControl Name="Icon" Grid.Column="1" Margin="0 0 4 0" />
-            <TextBlock Grid.Column="2" Text="{Binding Name, Mode=OneWay}" />
+            <ContentPresenter 
+                Name="Content" 
+                Grid.Column="2" 
+                ContentTemplate="{Binding ColumnHeaderTemplate, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}"
+                ContentTemplateSelector="{Binding ColumnHeaderTemplateSelector, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                />
         </Grid>
     </DataTemplate>
 
@@ -93,22 +98,52 @@
                 Visibility="{Binding Path=(local:TreeDataGrid.TreeExpanderVisibility), Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}}"
                 />
             <ContentControl Name="Icon" Grid.Column="1" Margin="0 0 4 0" />
-            <TextBlock Grid.Column="2" Text="{Binding Name, Mode=OneWay}" />
+            <ContentPresenter
+                Name="Content" 
+                Grid.Column="2"
+                ContentTemplate="{Binding RowHeaderTemplate, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" 
+                ContentTemplateSelector="{Binding RowHeaderTemplateSelector, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" 
+                />
         </Grid>
+
     </DataTemplate>
 
     <Style TargetType="{x:Type local:TreeDataGrid}" BasedOn="{StaticResource {x:Type DataGrid}}">
-        <Setter Property="CanUserAddRows" Value="False" />
-        <Setter Property="CanUserDeleteRows" Value="False" />
-        <Setter Property="CanUserResizeRows" Value="False" />
-        <Setter Property="CanUserSortColumns" Value="False" />
-        <Setter Property="CanUserReorderColumns" Value="False" />
-        <Setter Property="CanUserResizeColumns" Value="True" />
-        <Setter Property="SelectionUnit" Value="CellOrRowHeader" />
         <Setter Property="BorderBrush" Value="#F0F0F0" />
         <Setter Property="HorizontalGridLinesBrush" Value="#CECECE" />
         <Setter Property="VerticalGridLinesBrush" Value="#CECECE" />
-        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True" />
     </Style>
+
+    <!--<Style TargetType="{x:Type DataGridRowHeader}" BasedOn="{StaticResource {x:Type DataGridRowHeader}}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type DataGridRowHeader}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.Margin>
+                            <Binding Path="(local:TreeDataGrid.TreeDepthMargin)" Mode="OneWay" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}" />
+                        </Grid.Margin>
+                        <ToggleButton 
+                            Name="Expander"
+                            Grid.Column="0" 
+                            Style="{StaticResource {x:Type ToggleButton}}"
+                            IsChecked="{Binding Path=(local:TreeDataGrid.IsExpanded), Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}}"
+                            Visibility="{Binding Path=(local:TreeDataGrid.TreeExpanderVisibility), Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}}"                />
+                        <ContentControl Name="Icon" Grid.Column="1" Margin="0 0 4 0" />
+                        <ContentPresenter
+                            Name="Content" 
+                            Grid.Column="2"
+                            ContentTemplate="{Binding HeaderTemplate, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}}" 
+                            ContentTemplateSelector="{Binding HeaderTemplateSelector, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}}"
+                            />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>-->
 
 </ResourceDictionary>
