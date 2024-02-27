@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
+using System.Data.Common;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
@@ -198,7 +199,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnRowIsExpandedChanged(DataGridRow row, bool newValue)
         {
-            this._TreeInfoColumn.SetIsExpanded(row.DataContext, newValue);
+            this._TreeInfoRow.SetIsExpanded(row.DataContext, newValue);
             this.UpdateRowTreeAll();
 
         }
@@ -240,10 +241,10 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void UpdateRowTree(DataGridRow row)
         {
-            row.Visibility = this._TreeInfoRow.GetIsVisible(row.DataContext) ? Visibility.Visible : Visibility.Collapsed;
-            row.SetCurrentValue(IsExpandedProperty, this._TreeInfoRow.GetIsExpanded(row.DataContext));
-            row.SetCurrentValue(TreeExpanderVisibilityProperty, this._TreeInfoRow.HasChildren(row.DataContext) ? Visibility.Visible : Visibility.Collapsed);
-            row.SetCurrentValue(TreeDepthMarginProperty, new Thickness(this._TreeInfoRow.GetDepth(row.DataContext) * DepthMarginUnit, 0D, 0D, 0D));
+            row.SetCurrentValue(DataGridRow.VisibilityProperty, this._TreeInfoRow.GetIsVisible(row.DataContext) ? Visibility.Visible : Visibility.Collapsed);
+            row.SetCurrentValue(TreeDataGrid.IsExpandedProperty, this._TreeInfoRow.GetIsExpanded(row.DataContext));
+            row.SetCurrentValue(TreeDataGrid.TreeExpanderVisibilityProperty, this._TreeInfoRow.HasChildren(row.DataContext) ? Visibility.Visible : Visibility.Collapsed);
+            row.SetCurrentValue(TreeDataGrid.TreeDepthMarginProperty, new Thickness(this._TreeInfoRow.GetDepth(row.DataContext) * DepthMarginUnit, 0D, 0D, 0D));
         }
 
         #endregion
@@ -339,10 +340,10 @@ namespace Toolkit.WPF.Controls
             foreach(var column in this.Columns)
             {
                 var hasChildren = this._TreeInfoColumn.HasChildren(column.Header);
-                column.Visibility = this._TreeInfoColumn.GetIsVisible(column.Header) ? Visibility.Visible : Visibility.Collapsed;
-                column.SetCurrentValue(IsExpandedProperty, this._TreeInfoColumn.GetIsExpanded(column.Header));
-                column.SetCurrentValue(TreeExpanderVisibilityProperty, hasChildren ? Visibility.Visible : Visibility.Collapsed);
-                column.SetCurrentValue(TreeDepthMarginProperty, new Thickness(0D, this._TreeInfoColumn.GetDepth(column.Header) * DepthMarginUnit, 0D, 0D));
+                column.SetCurrentValue(DataGridColumn.VisibilityProperty, this._TreeInfoColumn.GetIsVisible(column.Header) ? Visibility.Visible : Visibility.Collapsed);
+                column.SetCurrentValue(TreeDataGrid.IsExpandedProperty, this._TreeInfoColumn.GetIsExpanded(column.Header));
+                column.SetCurrentValue(TreeDataGrid.TreeExpanderVisibilityProperty, hasChildren ? Visibility.Visible : Visibility.Collapsed);
+                column.SetCurrentValue(TreeDataGrid.TreeDepthMarginProperty, new Thickness(0D, this._TreeInfoColumn.GetDepth(column.Header) * DepthMarginUnit, 0D, 0D));
             }
 
             if (this._DataGridColumnsPanel != null)
