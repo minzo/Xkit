@@ -83,37 +83,6 @@ namespace Toolkit.WPF.Controls
         #endregion
 
 
-        private static readonly DependencyProperty IsExpandedProperty =
-            DependencyProperty.RegisterAttached("IsExpanded", typeof(bool), typeof(TreeDataGrid), new PropertyMetadata(false, (d, e) => {
-
-                if (d is DataGridRow row)
-                {
-                    if (EnumerateParent(row).FirstOrDefault(i => i is TreeDataGrid) is TreeDataGrid grid)
-                    {
-                        grid._TreeInfoRow.SetIsExpanded(row.DataContext, (bool)e.NewValue);
-                        grid.UpdateRowTreeAll();
-                    }
-                }
-
-                if (d is DataGridColumnHeader columnHeader)
-                {
-                    if (typeof(DataGridColumn).GetProperty("DataGridOwner", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(columnHeader.Column) is TreeDataGrid grid)
-                    {
-                        grid._TreeInfoColumn.SetIsExpanded(columnHeader.Column.Header, (bool)e.NewValue);
-                        grid.UpdateColumnTreeAll();
-                    }
-                }
-            }));
-
-        // Using a DependencyProperty as the backing store for TreeExpanderVisibility.  This enables animation, styling, binding, etc...
-        private static readonly DependencyProperty TreeExpanderVisibilityProperty =
-            DependencyProperty.RegisterAttached("TreeExpanderVisibility", typeof(Visibility), typeof(TreeDataGrid), new PropertyMetadata(Visibility.Visible));
-
-        // Using a DependencyProperty as the backing store for TreeDepth.  This enables animation, styling, binding, etc...
-        private static readonly DependencyProperty TreeDepthMarginProperty =
-            DependencyProperty.RegisterAttached("TreeDepthMargin", typeof(Thickness), typeof(TreeDataGrid), new PropertyMetadata(default(Thickness)));
-
-
         #region Treeプロパティ関連
 
         /// <summary>
@@ -222,6 +191,16 @@ namespace Toolkit.WPF.Controls
                     this._TreeInfoRow.Add(item);
                 }
             }
+        }
+
+        /// <summary>
+        /// 行の開閉状態が変わったときに呼ばれます
+        /// </summary>
+        private void OnRowIsExpandedChanged(DataGridRow row, bool newValue)
+        {
+            this._TreeInfoColumn.SetIsExpanded(row.DataContext, newValue);
+            this.UpdateRowTreeAll();
+
         }
 
         /// <summary>
@@ -343,6 +322,16 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
+        /// 列の開閉状態が変わったときに呼ばれます
+        /// </summary>
+        private void OnColumnIsExpandedChanged(DataGridColumn column, bool newValue)
+        {
+            this._TreeInfoColumn.SetIsExpanded(column.Header, newValue);
+            this.UpdateColumnTreeAll();
+
+        }
+
+        /// <summary>
         /// Column に現在のTreeの状態を設定します
         /// </summary>
         private void UpdateColumnTreeAll()
@@ -361,6 +350,41 @@ namespace Toolkit.WPF.Controls
                 foreach (var header in this._DataGridColumnsPanel.Children.OfType<DataGridColumnHeader>())
                 {
                     TrySetBinding(header, TreeDataGrid.IsExpandedProperty, this._ColumnExpandedBinding);
+                }
+            }
+        }
+
+        #endregion
+
+        #region ツリーのための添付プロパティ
+
+        private static readonly DependencyProperty IsExpandedProperty =
+            DependencyProperty.RegisterAttached("IsExpanded", typeof(bool), typeof(TreeDataGrid), new PropertyMetadata(false, OnIsExpandedChanged));
+
+        private static readonly DependencyProperty TreeExpanderVisibilityProperty =
+            DependencyProperty.RegisterAttached("TreeExpanderVisibility", typeof(Visibility), typeof(TreeDataGrid), new PropertyMetadata(Visibility.Visible));
+
+        private static readonly DependencyProperty TreeDepthMarginProperty =
+            DependencyProperty.RegisterAttached("TreeDepthMargin", typeof(Thickness), typeof(TreeDataGrid), new PropertyMetadata(default(Thickness)));
+
+        /// <summary>
+        /// 開閉状態が変わったときに呼ばれます
+        /// </summary>
+        private static void OnIsExpandedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is DataGridRow row)
+            {
+                if (EnumerateParent(row).FirstOrDefault(i => i is TreeDataGrid) is TreeDataGrid grid)
+                {
+                    grid.OnRowIsExpandedChanged(row, (bool)e.NewValue);
+                }
+            }
+
+            if (d is DataGridColumnHeader columnHeader)
+            {
+                if (_MethodInfoDataGridColumnGetDataGridOwner.Invoke(columnHeader.Column, null) is TreeDataGrid grid)
+                {
+                    grid.OnColumnIsExpandedChanged(columnHeader.Column, (bool)e.NewValue);
                 }
             }
         }
@@ -469,6 +493,7 @@ namespace Toolkit.WPF.Controls
         private static readonly DataTemplate _ColumnHeaderTemplate;
 
         private static readonly BindingBase _RowHeaderBinding = new Binding("DataContext") { RelativeSource = new RelativeSource(RelativeSourceMode.Self) };
+        private static readonly MethodInfo _MethodInfoDataGridColumnGetDataGridOwner = typeof(DataGridColumn).GetProperty("DataGridOwner", BindingFlags.NonPublic | BindingFlags.Instance).GetMethod;
 
         private static readonly ResourceDictionary Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/TreeDataGrid/TreeDataGrid.xaml") };
 
