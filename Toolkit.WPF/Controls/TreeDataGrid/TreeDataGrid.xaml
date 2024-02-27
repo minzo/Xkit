@@ -67,7 +67,7 @@
             <ToggleButton 
                 Grid.Column="0"
                 Style="{StaticResource {x:Type ToggleButton}}"
-                IsChecked="{Binding Path=Column.(local:TreeDataGrid.IsExpanded), Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridColumnHeader}}}"
+                IsChecked="{Binding Path=(local:TreeDataGrid.IsExpanded), Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridColumnHeader}}}"
                 Visibility="{Binding Path=Column.(local:TreeDataGrid.TreeExpanderVisibility), Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridColumnHeader}}}"
                 />
             <ContentControl Name="Icon" Grid.Column="1" Margin="0 0 4 0" />

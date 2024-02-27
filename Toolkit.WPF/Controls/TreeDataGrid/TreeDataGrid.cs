@@ -95,11 +95,11 @@ namespace Toolkit.WPF.Controls
                     }
                 }
 
-                if (d is DataGridColumn column)
+                if (d is DataGridColumnHeader columnHeader)
                 {
-                    if (typeof(DataGridColumn).GetProperty("DataGridOwner", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(column) is TreeDataGrid grid)
+                    if (typeof(DataGridColumn).GetProperty("DataGridOwner", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(columnHeader.Column) is TreeDataGrid grid)
                     {
-                        grid._TreeInfoColumn.SetIsExpanded(column.Header, (bool)e.NewValue);
+                        grid._TreeInfoColumn.SetIsExpanded(columnHeader.Column.Header, (bool)e.NewValue);
                         grid.UpdateColumnTreeAll();
                     }
                 }
@@ -355,6 +355,14 @@ namespace Toolkit.WPF.Controls
                 column.SetCurrentValue(TreeExpanderVisibilityProperty, hasChildren ? Visibility.Visible : Visibility.Collapsed);
                 column.SetCurrentValue(TreeDepthMarginProperty, new Thickness(0D, this._TreeInfoColumn.GetDepth(column.Header) * DepthMarginUnit, 0D, 0D));
             }
+
+            if (this._DataGridColumnsPanel != null)
+            {
+                foreach (var header in this._DataGridColumnsPanel.Children.OfType<DataGridColumnHeader>())
+                {
+                    TrySetBinding(header, TreeDataGrid.IsExpandedProperty, this._ColumnExpandedBinding);
+                }
+            }
         }
 
         #endregion
@@ -402,6 +410,8 @@ namespace Toolkit.WPF.Controls
             this._TreeInfoColumn = new TreeInfoUnit();
 
             this.Resources.MergedDictionaries.Add(Resource);
+
+            this.Loaded += this.OnLoaded;
         }
 
         /// <summary>
@@ -416,11 +426,37 @@ namespace Toolkit.WPF.Controls
                 this._RowExpandedBinding = new Binding(this.RowExpandedPropertyPath);
             }
 
-            if (!string.IsNullOrEmpty(this.ColumnChildrenPropertyPath))
+            if (!string.IsNullOrEmpty(this.ColumnExpandedPropertyPath))
             {
-                this._ColumnExpandedBinding = new Binding(this.ColumnExpandedPropertyPath);
+                this._ColumnExpandedBinding = new Binding($"Column.Header.{this.ColumnExpandedPropertyPath}") {
+                    RelativeSource = new RelativeSource(RelativeSourceMode.Self)
+                };
             }
         }
+
+        /// <summary>
+        /// OnLoaded
+        /// </summary>
+        private void OnLoaded(object sender, EventArgs e)
+        {
+            var presenter = EnumerateChildren(this)
+                .OfType<DataGridColumnHeadersPresenter>()
+                .FirstOrDefault(i => i.Name == "PART_ColumnHeadersPresenter");
+
+            this._DataGridColumnsPanel = EnumerateChildren(presenter)
+               .OfType<DataGridCellsPanel>()
+               .FirstOrDefault();
+
+            if (this._DataGridColumnsPanel != null)
+            {
+                foreach (var header in this._DataGridColumnsPanel.Children.OfType<DataGridColumnHeader>())
+                {
+                    TrySetBinding(header, TreeDataGrid.IsExpandedProperty, this._ColumnExpandedBinding);
+                }
+            }
+        }
+
+        private DataGridCellsPanel _DataGridColumnsPanel;
 
         private BindingBase _RowExpandedBinding;
         private BindingBase _ColumnExpandedBinding;
