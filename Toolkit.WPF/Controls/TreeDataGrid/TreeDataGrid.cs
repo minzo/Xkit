@@ -1,23 +1,15 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Configuration;
-using System.Data.Common;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.PortableExecutable;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Media;
-using Toolkit.WPF.Extensions;
 
 namespace Toolkit.WPF.Controls
 {
@@ -441,7 +433,7 @@ namespace Toolkit.WPF.Controls
         #region ツリーのための添付プロパティ
 
         private static readonly DependencyProperty IsExpandedProperty =
-            DependencyProperty.RegisterAttached("IsExpanded", typeof(bool), typeof(TreeDataGrid), new PropertyMetadata(false, OnIsExpandedChanged));
+            DependencyProperty.RegisterAttached("IsExpanded", typeof(bool), typeof(TreeDataGrid), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnIsExpandedChanged));
 
         private static readonly DependencyProperty TreeExpanderVisibilityProperty =
             DependencyProperty.RegisterAttached("TreeExpanderVisibility", typeof(Visibility), typeof(TreeDataGrid), new PropertyMetadata(Visibility.Visible));
