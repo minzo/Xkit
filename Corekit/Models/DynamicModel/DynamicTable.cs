@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Xml.Linq;
 using Corekit.Extensions;
 
 namespace Corekit.Models
