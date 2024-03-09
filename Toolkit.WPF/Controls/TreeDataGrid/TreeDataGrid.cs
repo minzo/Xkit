@@ -1,13 +1,17 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Configuration;
 using System.Data.Common;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -49,8 +53,53 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for ColumnsSource.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ColumnsSourceProperty =
             DependencyProperty.Register("ColumnsSource", typeof(IEnumerable), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
-                ((TreeDataGrid)d).OnColumnsSourceChanged(e.OldValue as IEnumerable, e.NewValue as IEnumerable); }
-            ));
+                ((TreeDataGrid)d).OnColumnsSourceChanged(e.OldValue as IEnumerable, e.NewValue as IEnumerable);
+            }));
+
+        /// <summary>
+        /// 行のプロパティパス
+        /// </summary>
+        public string RowPropertyPath
+        {
+            get { return (string)this.GetValue(RowPropertyPathProperty); }
+            set { this.SetValue(RowPropertyPathProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for RowPropertyPath.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty RowPropertyPathProperty =
+            DependencyProperty.Register("RowPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(string.Empty));
+
+        /// <summary>
+        /// 列のプロパティパス
+        /// </summary>
+        public string ColumnPropertyPath
+        {
+            get { return (string)this.GetValue(ColumnPropertyPathProperty); }
+            set { this.SetValue(ColumnPropertyPathProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ColumnPropertyPath.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ColumnPropertyPathProperty =
+            DependencyProperty.Register("ColumnPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(string.Empty));
+
+        /// <summary>
+        /// テーブル情報
+        /// </summary>
+        public object DataSource
+        {
+            get { return (object)this.GetValue(DataSourceProperty); }
+            set { this.SetValue(DataSourceProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for DataSource.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty DataSourceProperty =
+            DependencyProperty.Register("DataSource", typeof(object), typeof(TreeDataGrid), new PropertyMetadata(null));
+
+        /// <summary>
+        /// セルに  Binding するプロパティを区切る文字
+        /// デフォルトは . になっていて Row.Col ( Row の持つ Col というプロパティ) に Binding されるようになっている
+        /// </summary>
+        public string CellBindingPropertySepalateCharacter { get; set; } = ".";
 
         #region Column HeaderTempalte/HeaderTemplateSelector
 
@@ -83,6 +132,35 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
+        #region DataTemplateSelector
+
+        /// <summary>
+        /// CellTemplateSelector
+        /// </summary>
+        public DataTemplateSelector CellTemplateSelector
+        {
+            get { return (DataTemplateSelector)this.GetValue(CellTemplateSelectorProperty); }
+            set { this.SetValue(CellTemplateSelectorProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CellTemplateSelector.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CellTemplateSelectorProperty =
+            DependencyProperty.Register("CellTemplateSelector", typeof(DataTemplateSelector), typeof(TreeDataGrid), new PropertyMetadata(null));
+
+        /// <summary>
+        /// CellEditingTemplateSelector
+        /// </summary>
+        public DataTemplateSelector CellEditingTemplateSelector
+        {
+            get { return (DataTemplateSelector)this.GetValue(CellEditingTemplateSelectorProperty); }
+            set { this.SetValue(CellEditingTemplateSelectorProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CellEditingTemplateSelector.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CellEditingTemplateSelectorProperty =
+            DependencyProperty.Register("CellEditingTemplateSelector", typeof(DataTemplateSelector), typeof(TreeDataGrid), new PropertyMetadata(null));
+
+        #endregion
 
         #region Treeプロパティ関連
 
@@ -311,10 +389,13 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void AddColumn(object item)
         {
-            var column = new DataGridTextColumn();
-
-            column.HeaderTemplate = _ColumnHeaderTemplate;
-            column.Header = item;
+            var column = new DataGridTransposeColumn()
+            {
+                HeaderTemplate = _ColumnHeaderTemplate,
+                Header = item,
+                CellTemplateSelector = this.CellTemplateSelector,
+                CellEditingTemplateSelector = this.CellEditingTemplateSelector
+            };
 
             TrySetBinding(column, TreeDataGrid.IsExpandedProperty, this._ColumnExpandedBinding);
 
@@ -497,6 +578,76 @@ namespace Toolkit.WPF.Controls
         private static readonly MethodInfo _MethodInfoDataGridColumnGetDataGridOwner = typeof(DataGridColumn).GetProperty("DataGridOwner", BindingFlags.NonPublic | BindingFlags.Instance).GetMethod;
 
         private static readonly ResourceDictionary Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/TreeDataGrid/TreeDataGrid.xaml") };
+
+        /// <summary>
+        /// DataGridColumn
+        /// </summary>
+        private class DataGridTransposeColumn : DataGridBindingColumn
+        {
+            /// <summary>
+            /// LoadTempalteContent
+            /// </summary>
+            protected override FrameworkElement LoadTemplateContent(DataGridCell cell, object dataItem, DataTemplate template, DataTemplateSelector selector)
+            {
+                // _DataSourceBinding が null なら作る
+                this._DataSourceBinding = this._DataSourceBinding ?? new Binding("DataSource") { Source = this.DataGridOwner };
+
+                // DataGridCell の DataContext を item にせずに DataSource にする
+                TrySetBinding(cell, DataGridCell.DataContextProperty, this._DataSourceBinding);
+
+                var control = new ContentControl()
+                {
+                    ContentTemplate = template,
+                    ContentTemplateSelector = selector,
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                };
+
+
+                if (this.DataGridOwner is TreeDataGrid grid)
+                {
+                    string rowPropertyPath = null;
+                    var rowItemProperties = ((IItemProperties)this.DataGridOwner.Items).ItemProperties;
+                    if (rowItemProperties.FirstOrDefault(i => i.Name == grid.RowPropertyPath && i.PropertyType == typeof(string))?.Descriptor is PropertyDescriptor descriptor)
+                    {
+                        rowPropertyPath = (string)descriptor.GetValue(dataItem);
+                    }
+                    else
+                    {
+                        rowPropertyPath = (string)dataItem.GetType()
+                            .GetProperty(grid.RowPropertyPath)
+                            .GetValue(dataItem);
+                    }
+
+                    var columnPropertyPath = (string)this.Header?.GetType()
+                        .GetProperty(grid.ColumnPropertyPath)
+                        .GetValue(this.Header);
+
+                    bool isExistsRow = !string.IsNullOrWhiteSpace(rowPropertyPath);
+                    bool isExistsColumn = !string.IsNullOrWhiteSpace(columnPropertyPath);
+
+                    Binding binding = null;
+                    if (isExistsRow && isExistsColumn)
+                    {
+                        binding = new Binding($"{rowPropertyPath}{grid.CellBindingPropertySepalateCharacter}{columnPropertyPath}");
+                    }
+                    else if (isExistsRow)
+                    {
+                        binding = new Binding(rowPropertyPath);
+                    }
+                    else if (isExistsColumn)
+                    {
+                        binding = new Binding(columnPropertyPath);
+                    }
+
+                    TrySetBinding(control, ContentControl.ContentProperty, binding);
+                }
+
+                return control;
+            }
+
+            private Binding _DataSourceBinding;
+        }
 
         #region TreeInfo
 

@@ -1,15 +1,10 @@
 ﻿using Corekit.Extensions;
 using Corekit.Models;
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Dynamic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.Xml;
-using System.Windows.Media.TextFormatting;
 
 namespace Toolkit.WPF.Sample
 {
@@ -68,6 +63,13 @@ namespace Toolkit.WPF.Sample
         public object Value { get; set; }
     }
 
+    public class DataTable : DynamicObject
+    {
+        public override bool TryGetMember(GetMemberBinder binder, out object result)
+        {
+            return base.TryGetMember(binder, out result);
+        }
+    }
 
     internal class TreeCombinationWindowViewModel
     {
@@ -79,8 +81,7 @@ namespace Toolkit.WPF.Sample
 
         public IList<DataKey> Items1 { get; }
 
-        public InheritanceTable<int> Table { get; }
-
+        public object Table { get; }
 
         public TreeCombinationWindowViewModel()
         {
@@ -100,6 +101,7 @@ namespace Toolkit.WPF.Sample
                 }),
             });
 
+
             this.Items0 = this.Root0
                 .EnumerateTreeDepthFirst(i => i.Children)
                 .ToList();
@@ -108,7 +110,7 @@ namespace Toolkit.WPF.Sample
                 .EnumerateTreeDepthFirst(i => i.Children)
                 .ToList();
 
-            this.Table = new InheritanceTable<int>(this.Items0, this.Items1);
+            this.Table = new InheritanceTable<int>(this.Items0, this.Items1) { Name = "テスト" };
         }
     }
 }

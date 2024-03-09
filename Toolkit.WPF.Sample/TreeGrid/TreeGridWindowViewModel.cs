@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Dynamic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Corekit.Extensions;
 using Toolkit.WPF.Commands;
@@ -38,6 +37,15 @@ namespace Toolkit.WPF.Sample
 #pragma warning restore CS0067
     }
 
+    class Table : DynamicObject
+    {
+        public override bool TryGetMember(GetMemberBinder binder, out object result)
+        {
+            result = 10;
+            return true;
+        }
+    }
+
 
     public class TreeGridWindowViewModel : INotifyPropertyChanged
     {
@@ -55,6 +63,8 @@ namespace Toolkit.WPF.Sample
         public ObservableCollection<TreeGridItem> Items2 { get; }
 
         public ObservableCollection<TreeGridItem> TreeRootItems2 { get; }
+
+        public object Table { get; }
 
         public ICommand AddChildOfSelectdItemCommand { get; }
 
@@ -124,11 +134,13 @@ namespace Toolkit.WPF.Sample
             this.Items2 = this.TreeRootItems2
                 .EnumerateTreeDepthFirst(i => i.Children)
                 .ToObservableCollection();
+
+            this.Table = new Table();
         }
 
         static TreeGridItem CreateTree(int childrenNum, int depth)
         {
-            var item = new TreeGridItem(string.Empty);
+            var item = new TreeGridItem($"Name_{childrenNum}_{depth}");
 
             if( depth > 0)
             {

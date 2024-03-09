@@ -6,92 +6,99 @@
         xmlns:tkitwpf="clr-namespace:Toolkit.WPF.Controls;assembly=Toolkit.WPF"
         xmlns:local="clr-namespace:Toolkit.WPF.Sample"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type={x:Type local:TreeCombinationWindowViewModel}}"
         Title="TreeCombinationWindow" Height="450" Width="800">
     <Window.DataContext>
         <local:TreeCombinationWindowViewModel />
     </Window.DataContext>
 
     <Window.Resources>
-
-        <!-- ExpanderToggleButton -->
-        <Style TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ToggleButton}">
-                        <Border x:Name="border"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="0"
-                            Background="Transparent"
-                            Width="{TemplateBinding Width}"
-                            Height="{TemplateBinding Height}"
-                            SnapsToDevicePixels="True">
-                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <Path x:Name="Expanded" Data="M0,9C0,9 5,4.5 5,4.5 5,4.5 0,0 0,0 0,0 0,9 0,9z" HorizontalAlignment="Left" Height="9" Margin="2,1,1,1" Opacity="0.4" Stretch="Fill" SnapsToDevicePixels="True" Stroke="{TemplateBinding Foreground}" StrokeThickness="1" VerticalAlignment="Center" Width="5"/>
-                                <Path x:Name="Collapsed" Data="M0,6C0,6 6,6 6,6 6,6 6,0 6,0 6,0 0,6 0,6z" Fill="#FFA3A3A3" HorizontalAlignment="Left" Height="6" Margin="1,2,1,1" Stretch="Fill" SnapsToDevicePixels="True" Stroke="{TemplateBinding Foreground}" StrokeThickness="1" Visibility="Hidden" VerticalAlignment="Center" Width="6"/>
-                            </Grid>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Visibility" TargetName="Expanded" Value="Hidden" />
-                                <Setter Property="Visibility" TargetName="Collapsed" Value="Visible" />
-                            </Trigger>
-                            <Trigger Property="IsChecked" Value="False">
-                                <Setter Property="Visibility" TargetName="Expanded" Value="Visible" />
-                                <Setter Property="Visibility" TargetName="Collapsed" Value="Hidden" />
-                            </Trigger>
-                            <Trigger Property="Button.IsDefaulted" Value="True">
-                                <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
-                                <Setter Property="BorderThickness" TargetName="border" Value="0" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="BorderBrush" TargetName="border" Value="#FFADB2B5"/>
-                                <Setter Property="Foreground" Value="#FF838383"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Fill" TargetName="Expanded" Value="#FFE7E7E7" />
-                                <Setter Property="Stroke" TargetName="Expanded" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
-                                <Setter Property="Fill" TargetName="Collapsed" Value="#FFE7E7E7" />
-                                <Setter Property="Stroke" TargetName="Collapsed" Value="#FF888888" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <DataTemplate x:Key="RowHeaderTemplate">
-            <StackPanel MaxWidth="80" Orientation="Horizontal" DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRowHeader}}}">
-                <ToggleButton Style="{StaticResource {x:Type ToggleButton}}" />
-                <TextBlock Text="{Binding Definition.Name, Mode=OneWay}" />
-            </StackPanel>
+        <DataTemplate x:Key="HeaderTemplate">
+            <TextBlock Text="{Binding Name, Mode=OneTime}" />
         </DataTemplate>
 
-        <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
-            <Setter Property="ContentTemplate">
-                <Setter.Value>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <ToggleButton Style="{StaticResource {x:Type ToggleButton}}" />
-                            <TextBlock Text="{Binding Definition.Name}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <!-- CellTemplateSelector -->
+        <tkitwpf:DynamicPropertyTemplateSelector 
+            x:Key="CellTemplateSelector" 
+            xmlns:system="clr-namespace:System;assembly=mscorlib"
+            xmlns:collection="clr-namespace:System.Collections;assembly=mscorlib">
+            <DataTemplate DataType="{x:Type system:Int32}">
+                <TextBlock Text="{Binding Value}" Style="{StaticResource TextBlock}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Single}">
+                <TextBlock Text="{Binding Value, StringFormat={}{0:0.00######}}" Style="{StaticResource TextBlock}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Double}">
+                <TextBlock Text="{Binding Value, StringFormat={}{0:0.00######}}" Style="{StaticResource TextBlock}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:String}">
+                <TextBlock Text="{Binding Value}" Style="{StaticResource TextBlock}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Boolean}">
+                <Border Style="{StaticResource CheckBoxBorder}">
+                    <CheckBox IsChecked="{Binding Value}" Style="{StaticResource CheckBox}" />
+                </Border>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type Color}">
+                <Border 
+                Background="{Binding Value, Converter={StaticResource ColorToBrush}}" 
+                ToolTip="{Binding Value}" 
+                Margin="4"
+                BorderBrush="Silver"
+                BorderThickness="1"
+                CornerRadius="2" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type collection:ICollection}">
+                <TextBlock TextAlignment="Center" Style="{StaticResource TextBlock}">
+                <Run Text="要素数" /><Run Text="{Binding Value.Count, Mode=OneWay}" /><Run Text="個" />
+                </TextBlock>
+            </DataTemplate>
+        </tkitwpf:DynamicPropertyTemplateSelector>
+
+        <!-- CellEditingTemplateSelector -->
+        <tkitwpf:DynamicPropertyTemplateSelector
+            x:Key="CellEditingTemplateSelector"
+            xmlns:system="clr-namespace:System;assembly=mscorlib"
+            xmlns:collection="clr-namespace:System.Collections;assembly=mscorlib">
+            <DataTemplate DataType="{x:Type system:Int32}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBox}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Single}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBox}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Double}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBox}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:String}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBox}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Boolean}">
+                <Border Style="{StaticResource CheckBoxBorder}">
+                    <CheckBox IsChecked="{Binding Value}" Style="{StaticResource CheckBox}" />
+                </Border>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type Color}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBox}" />
+            </DataTemplate>
+        </tkitwpf:DynamicPropertyTemplateSelector>
 
     </Window.Resources>
 
-    <tkitwpf:DynamicTableGrid
-        RowHeaderTemplate="{StaticResource RowHeaderTemplate}"
-        ItemsSource="{Binding Table, Mode=OneTime}"
-        />
-
-    <!--<tkitwpf:HierarchicalGrid
-        RowHeaderWidth="80"
-        RowHeaderTemplate="{StaticResource RowHeaderTemplate}"
+    <tkitwpf:TreeDataGrid
         RowsSource="{Binding Items0, Mode=OneTime}"
+        RowPropertyPath="Name"
+        RowChildrenPropertyPath="Children"
+        RowHeaderTemplate="{StaticResource HeaderTemplate}"
+
         ColumnsSource="{Binding Items1, Mode=OneTime}"
-        />-->
+        ColumnPropertyPath="Name"
+        ColumnChildrenPropertyPath="Children"            
+        ColumnHeaderTemplate="{StaticResource HeaderTemplate}"
+        
+        CellTemplateSelector="{StaticResource CellTemplateSelector}"
+        CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}"
+        
+        DataSource="{Binding Table, Mode=OneWay}"
+        />
 
 </Window>

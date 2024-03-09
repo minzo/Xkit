@@ -13,6 +13,11 @@
     </Window.DataContext>
 
     <Window.Resources>
+
+        <DataTemplate x:Key="HeaderTemplate">
+            <TextBlock Text="{Binding Name, Mode=OneWay}" Background="Silver" />
+        </DataTemplate>
+
         <DataTemplate x:Key="IconTemplate">
             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8B7;" Width="16" VerticalAlignment="Center"/>
         </DataTemplate>
@@ -29,6 +34,71 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- CellTemplateSelector -->
+        <tkitwpf:DynamicPropertyTemplateSelector 
+            x:Key="CellTemplateSelector" 
+            xmlns:system="clr-namespace:System;assembly=mscorlib"
+            xmlns:collection="clr-namespace:System.Collections;assembly=mscorlib">
+            <DataTemplate DataType="{x:Type system:Int32}">
+                <TextBlock Text="{Binding Value}" Style="{StaticResource TextBlock}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Single}">
+                <TextBlock Text="{Binding Value, StringFormat={}{0:0.00######}}" Style="{StaticResource TextBlock}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Double}">
+                <TextBlock Text="{Binding Value, StringFormat={}{0:0.00######}}" Style="{StaticResource TextBlock}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:String}">
+                <TextBlock Text="{Binding Value}" Style="{StaticResource TextBlock}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Boolean}">
+                <Border Style="{StaticResource CheckBoxBorder}">
+                    <CheckBox IsChecked="{Binding Value}" Style="{StaticResource CheckBox}" />
+                </Border>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type Color}">
+                <Border 
+                Background="{Binding Value, Converter={StaticResource ColorToBrush}}" 
+                ToolTip="{Binding Value}" 
+                Margin="4"
+                BorderBrush="Silver"
+                BorderThickness="1"
+                CornerRadius="2" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type collection:ICollection}">
+                <TextBlock TextAlignment="Center" Style="{StaticResource TextBlock}">
+                <Run Text="要素数" /><Run Text="{Binding Value.Count, Mode=OneWay}" /><Run Text="個" />
+                </TextBlock>
+            </DataTemplate>
+        </tkitwpf:DynamicPropertyTemplateSelector>
+
+        <!-- CellEditingTemplateSelector -->
+        <tkitwpf:DynamicPropertyTemplateSelector
+            x:Key="CellEditingTemplateSelector"
+            xmlns:system="clr-namespace:System;assembly=mscorlib"
+            xmlns:collection="clr-namespace:System.Collections;assembly=mscorlib">
+            <DataTemplate DataType="{x:Type system:Int32}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBox}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Single}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBox}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Double}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBox}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:String}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBox}" />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type system:Boolean}">
+                <Border Style="{StaticResource CheckBoxBorder}">
+                    <CheckBox IsChecked="{Binding Value}" Style="{StaticResource CheckBox}" />
+                </Border>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type Color}">
+                <TextBox Text="{Binding Value}" Style="{StaticResource TextBox}" />
+            </DataTemplate>
+        </tkitwpf:DynamicPropertyTemplateSelector>
     </Window.Resources>
     
     <DockPanel>
@@ -126,13 +196,22 @@
 
             <tkitwpf:TreeDataGrid
                 Grid.Column="6" 
-                ItemsSource="{Binding Items, Mode=OneTime}"
+
+                RowsSource="{Binding TreeRootItems, Mode=OneTime, Converter={x:Static tkitwpf:FlattenTreeToListOfDepthFirstOrdering.Converter}, ConverterParameter=Children}"
+                RowPropertyPath="Name"
                 RowChildrenPropertyPath="Children"
                 RowExpandedPropertyPath="IsExpanded"
-                ColumnsSource="{Binding Items2, Mode=OneTime}"
+                RowHeaderTemplate="{StaticResource HeaderTemplate}"
+
+                ColumnsSource="{Binding TreeRootItems2, Mode=OneTime, Converter={x:Static tkitwpf:FlattenTreeToListOfDepthFirstOrdering.Converter}, ConverterParameter=Children}"
+                ColumnPropertyPath="Name"
                 ColumnChildrenPropertyPath="Children"
-                ColumnExpandedPropertyPath="IsExpanded">
-            </tkitwpf:TreeDataGrid>
+                ColumnExpandedPropertyPath="IsExpanded"
+                ColumnHeaderTemplate="{StaticResource HeaderTemplate}"
+                
+                DataSource="{Binding Table, Mode=OneWay}"
+                CellBindingPropertySepalateCharacter="___"
+                />
         </Grid>
     </DockPanel>
 </Window>
