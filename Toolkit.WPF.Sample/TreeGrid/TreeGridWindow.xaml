@@ -15,7 +15,7 @@
     <Window.Resources>
 
         <DataTemplate x:Key="HeaderTemplate">
-            <TextBlock Text="{Binding Name, Mode=OneWay}" Background="Silver" />
+            <TextBlock Text="{Binding Name, Mode=OneWay}" />
         </DataTemplate>
 
         <DataTemplate x:Key="IconTemplate">

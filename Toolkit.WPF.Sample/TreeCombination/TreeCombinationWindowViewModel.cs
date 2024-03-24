@@ -3,6 +3,7 @@ using Corekit.Models;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
 
@@ -11,6 +12,7 @@ namespace Toolkit.WPF.Sample
     /// <summary>
     /// 
     /// </summary>
+    [DebuggerDisplay("Name:{Name}")]
     public class DataKey : IInheritanceTableFrame
     {
         public string Name { get; set; }
@@ -71,7 +73,7 @@ namespace Toolkit.WPF.Sample
         }
     }
 
-    internal class TreeCombinationWindowViewModel
+    internal class TreeCombinationWindowViewModel : INotifyPropertyChanged
     {
         public DataKey Root0 { get; }
 
@@ -82,6 +84,10 @@ namespace Toolkit.WPF.Sample
         public IList<DataKey> Items1 { get; }
 
         public object Table { get; }
+
+        public string RowFilterText { get => this._RowFilterText; set => this.SetProperty(ref this._RowFilterText, value); }
+
+        public string ColumnFilterText { get => this._ColumnFilterText; set => this.SetProperty(ref this._ColumnFilterText, value); }
 
         public TreeCombinationWindowViewModel()
         {
@@ -96,11 +102,13 @@ namespace Toolkit.WPF.Sample
             this.Root1 = new DataKey("Root1", new[] {
                 new DataKey("どうぶつ", new[]{
                     new DataKey("いぬ"),
-                    new DataKey("ねこ"),
+                    new DataKey("ねこ", new[]{
+                        new DataKey("みけ"),
+                        new DataKey("しろ"),
+                    }),
                     new DataKey("うま"),
                 }),
             });
-
 
             this.Items0 = this.Root0
                 .EnumerateTreeDepthFirst(i => i.Children)
@@ -112,5 +120,12 @@ namespace Toolkit.WPF.Sample
 
             this.Table = new InheritanceTable<int>(this.Items0, this.Items1) { Name = "テスト" };
         }
+
+        private string _RowFilterText;
+        private string _ColumnFilterText;
+
+#pragma warning disable CS0067
+        public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
     }
 }

@@ -17,6 +17,10 @@
             <TextBlock Text="{Binding Name, Mode=OneTime}" />
         </DataTemplate>
 
+        <Style TargetType="{x:Type DataGridRowHeader}" BasedOn="{StaticResource {x:Type DataGridRowHeader}}">
+            <Setter Property="Width" Value="Auto" />
+        </Style>
+
         <!-- CellTemplateSelector -->
         <tkitwpf:DynamicPropertyTemplateSelector 
             x:Key="CellTemplateSelector" 
@@ -84,21 +88,33 @@
 
     </Window.Resources>
 
-    <tkitwpf:TreeDataGrid
-        RowsSource="{Binding Items0, Mode=OneTime}"
-        RowPropertyPath="Name"
-        RowChildrenPropertyPath="Children"
-        RowHeaderTemplate="{StaticResource HeaderTemplate}"
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <tkitwpf:FilterTextBox WatermarkText="行フィルター" Text="{Binding RowFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=500}" />
+            <tkitwpf:FilterTextBox WatermarkText="列フィルター" Text="{Binding ColumnFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=500}" />
+        </StackPanel>
+        
+        <tkitwpf:TreeDataGrid
+            RowsSource="{Binding Items0, Mode=OneTime}"
+            RowPropertyPath="Name"
+            RowChildrenPropertyPath="Children"
+            RowHeaderTemplate="{StaticResource HeaderTemplate}"
+            RowFilterTargetPropertyPath="Name"
+            RowFilterText="{Binding RowFilterText, Mode=OneWay}"
 
-        ColumnsSource="{Binding Items1, Mode=OneTime}"
-        ColumnPropertyPath="Name"
-        ColumnChildrenPropertyPath="Children"            
-        ColumnHeaderTemplate="{StaticResource HeaderTemplate}"
+            ColumnsSource="{Binding Items1, Mode=OneTime}"
+            ColumnPropertyPath="Name"
+            ColumnChildrenPropertyPath="Children"            
+            ColumnHeaderTemplate="{StaticResource HeaderTemplate}"
+            ColumnFilterTargetPropertyPath="Name"
+            ColumnFilterText="{Binding ColumnFilterText, Mode=OneWay}"
         
-        CellTemplateSelector="{StaticResource CellTemplateSelector}"
-        CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}"
+            CellTemplateSelector="{StaticResource CellTemplateSelector}"
+            CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}"
         
-        DataSource="{Binding Table, Mode=OneWay}"
-        />
+            DataSource="{Binding Table, Mode=OneWay}"
+            />
+    </DockPanel>
+
 
 </Window>

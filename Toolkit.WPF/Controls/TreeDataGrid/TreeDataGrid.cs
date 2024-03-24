@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Data.Common;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -29,7 +30,7 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for RowsSource.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty RowsSourceProperty =
-            DependencyProperty.Register("RowsSource", typeof(IEnumerable), typeof(TreeDataGrid), new PropertyMetadata(null, (d,e) => {
+            DependencyProperty.Register("RowsSource", typeof(IEnumerable), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
                 ((TreeDataGrid)d).ItemsSource = (IEnumerable)e.NewValue;
             }));
 
@@ -86,6 +87,62 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for DataSource.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty DataSourceProperty =
             DependencyProperty.Register("DataSource", typeof(object), typeof(TreeDataGrid), new PropertyMetadata(null));
+
+        /// <summary>
+        /// 行フィルターテキスト
+        /// </summary>
+        public string RowFilterText
+        {
+            get { return (string)this.GetValue(RowFilterTextProperty); }
+            set { this.SetValue(RowFilterTextProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for RowFilterText.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty RowFilterTextProperty =
+            DependencyProperty.Register("RowFilterText", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
+                ((TreeDataGrid)d).OnRowFilterTextChanged(e.NewValue as string);
+            }));
+
+        /// <summary>
+        /// 列フィルターテキスト
+        /// </summary>
+        public string ColumnFilterText
+        {
+            get { return (string)this.GetValue(ColumnFilterTextProperty); }
+            set { this.SetValue(ColumnFilterTextProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ColumnFilterText.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ColumnFilterTextProperty =
+            DependencyProperty.Register("ColumnFilterText", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
+                ((TreeDataGrid)d).OnColumnFilterTextChanged(e.NewValue as string);
+            }));
+
+        /// <summary>
+        /// 行フィルターの対象にするプロパティのパス
+        /// </summary>
+        public string RowFilterTargetPropertyPath
+        {
+            get { return (string)this.GetValue(RowFilterTargetPropertyPathProperty); }
+            set { this.SetValue(RowFilterTargetPropertyPathProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for RowFilterTargetPropertyPath.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty RowFilterTargetPropertyPathProperty =
+            DependencyProperty.Register("RowFilterTargetPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null));
+
+        /// <summary>
+        /// 列フィルターの対象にするプロパティのパス
+        /// </summary>
+        public string ColumnFilterTargetPropertyPath
+        {
+            get { return (string)this.GetValue(ColumnFilterTargetPropertyPathProperty); }
+            set { this.SetValue(ColumnFilterTargetPropertyPathProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ColumnFilterTargetPropertyPath.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ColumnFilterTargetPropertyPathProperty =
+            DependencyProperty.Register("ColumnFilterTargetPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null));
 
         /// <summary>
         /// セルに  Binding するプロパティを区切る文字
@@ -237,7 +294,7 @@ namespace Toolkit.WPF.Controls
                 {
                     this._TreeInfoRow.Add(item);
                 }
-                this._TreeInfoRow.Setup(this.RowChildrenPropertyPath, this.RowExpandedPropertyPath);
+                this._TreeInfoRow.Setup(this.RowChildrenPropertyPath, this.RowExpandedPropertyPath, this.RowFilterTargetPropertyPath ?? this.RowPropertyPath);
                 this._TreeInfoRow.UpdateTreeInfoAll();
             }
         }
@@ -271,7 +328,6 @@ namespace Toolkit.WPF.Controls
         {
             this._TreeInfoRow.SetIsExpanded(row.DataContext, newValue);
             this.UpdateRowTreeAll();
-
         }
 
         /// <summary>
@@ -317,6 +373,23 @@ namespace Toolkit.WPF.Controls
             row.SetCurrentValue(TreeDataGrid.TreeDepthMarginProperty, new Thickness(this._TreeInfoRow.GetDepth(row.DataContext) * DepthMarginUnit, 0D, 0D, 0D));
         }
 
+        /// <summary>
+        /// 行フィルターテキストが変更されたときに呼ばれます
+        /// </summary>
+        private void OnRowFilterTextChanged(string filterText)
+        {
+            var selectedItems = this.SelectedCells
+                .Where(i => i.IsValid)
+                .Select(i => i.Item)
+                .Where(i => i != null)
+                .Distinct()
+                .ToList();
+
+            this._TreeInfoRow.ApplyFilter(filterText, selectedItems);
+
+            this.UpdateRowTreeAll();
+        }
+
         #endregion
 
         #region Column
@@ -345,7 +418,7 @@ namespace Toolkit.WPF.Controls
                 {
                     this.AddColumn(item);
                 }
-                this._TreeInfoColumn.Setup(this.ColumnChildrenPropertyPath, this.ColumnExpandedPropertyPath);
+                this._TreeInfoColumn.Setup(this.ColumnChildrenPropertyPath, this.ColumnExpandedPropertyPath, this.ColumnFilterTargetPropertyPath ?? this.ColumnPropertyPath);
                 this._TreeInfoColumn.UpdateTreeInfoAll();
                 this.UpdateColumnTreeAll();
             }
@@ -389,8 +462,6 @@ namespace Toolkit.WPF.Controls
                 CellEditingTemplateSelector = this.CellEditingTemplateSelector
             };
 
-            TrySetBinding(column, TreeDataGrid.IsExpandedProperty, this._ColumnExpandedBinding);
-
             this.Columns.Add(column);
             this._TreeInfoColumn.Add(item);
         }
@@ -402,7 +473,6 @@ namespace Toolkit.WPF.Controls
         {
             this._TreeInfoColumn.SetIsExpanded(column.Header, newValue);
             this.UpdateColumnTreeAll();
-
         }
 
         /// <summary>
@@ -410,22 +480,46 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void UpdateColumnTreeAll()
         {
-            foreach(var column in this.Columns)
+            foreach (var column in this.Columns)
             {
+
                 var hasChildren = this._TreeInfoColumn.HasChildren(column.Header);
-                column.SetCurrentValue(DataGridColumn.VisibilityProperty, this._TreeInfoColumn.GetIsVisible(column.Header) ? Visibility.Visible : Visibility.Collapsed);
-                column.SetCurrentValue(TreeDataGrid.IsExpandedProperty, this._TreeInfoColumn.GetIsExpanded(column.Header));
+                var visibility = this._TreeInfoColumn.GetIsVisible(column.Header) ? Visibility.Visible : Visibility.Collapsed;
+
                 column.SetCurrentValue(TreeDataGrid.TreeExpanderVisibilityProperty, hasChildren ? Visibility.Visible : Visibility.Collapsed);
                 column.SetCurrentValue(TreeDataGrid.TreeDepthMarginProperty, new Thickness(0D, this._TreeInfoColumn.GetDepth(column.Header) * DepthMarginUnit, 0D, 0D));
+                column.SetCurrentValue(DataGridColumn.VisibilityProperty, visibility);
             }
+        }
 
-            if (this._DataGridColumnsPanel != null)
+        /// <summary>
+        /// DataGridColumnHeader が表示されてから値を設定する必要があるものを処理する
+        /// </summary>
+        private void UpdateDataGridColumnHeader(object sender, SizeChangedEventArgs e)
+        {
+            foreach (var header in this._DataGridColumnsPanel.Children.OfType<DataGridColumnHeader>())
             {
-                foreach (var header in this._DataGridColumnsPanel.Children.OfType<DataGridColumnHeader>())
-                {
-                    TrySetBinding(header, TreeDataGrid.IsExpandedProperty, this._ColumnExpandedBinding);
-                }
+                TrySetBinding(header, TreeDataGrid.IsExpandedProperty, this._ColumnExpandedBinding);
+                var isExpanded = this._TreeInfoColumn.GetIsExpanded(header.Column.Header);
+                header.SetCurrentValue(TreeDataGrid.IsExpandedProperty, isExpanded);
             }
+        }
+
+        /// <summary>
+        /// 列フィルターテキストが変更されたときに呼ばれます
+        /// </summary>
+        private void OnColumnFilterTextChanged(string filterText)
+        {
+            var selectedItems = this.SelectedCells
+                .Where(i => i.IsValid)
+                .Select(i => i.Column.Header)
+                .Where(i => i != null)
+                .Distinct()
+                .ToList();
+
+            this._TreeInfoColumn.ApplyFilter(filterText, selectedItems);
+
+            this.UpdateColumnTreeAll();
         }
 
         #endregion
@@ -547,10 +641,10 @@ namespace Toolkit.WPF.Controls
 
             if (this._DataGridColumnsPanel != null)
             {
-                foreach (var header in this._DataGridColumnsPanel.Children.OfType<DataGridColumnHeader>())
-                {
-                    TrySetBinding(header, TreeDataGrid.IsExpandedProperty, this._ColumnExpandedBinding);
-                }
+                // DataGridColumnHeader は列が表示されていないときは列挙できず値を変更することができないので
+                // DataGridColumnHeader が表示されたタイミングとしてちょうどいいイベントで設定しておく
+                this.UpdateDataGridColumnHeader(this._DataGridColumnsPanel, null);
+                this._DataGridColumnsPanel.SizeChanged += this.UpdateDataGridColumnHeader;
             }
         }
 
@@ -659,7 +753,7 @@ namespace Toolkit.WPF.Controls
             /// <summary>
             /// セットアップ
             /// </summary>
-            public void Setup(string childrenPropertyPath, string expandedPropertyPath)
+            public void Setup(string childrenPropertyPath, string expandedPropertyPath, string filterTargetPropertyPath)
             {
                 if (this._ItemAccessor.IsValid)
                 {
@@ -668,9 +762,10 @@ namespace Toolkit.WPF.Controls
 
                 childrenPropertyPath = this._ItemAccessor.ChildrenPropertyPath ?? childrenPropertyPath;
                 expandedPropertyPath = this._ItemAccessor.ExpandedPropertyPath ?? expandedPropertyPath;
+                filterTargetPropertyPath = this._ItemAccessor.FilterTargetPropertyPath ?? filterTargetPropertyPath;
 
                 var item = this._TreeInfo.FirstOrDefault().Key;
-                this._ItemAccessor = new Accessor(item?.GetType(), childrenPropertyPath, expandedPropertyPath);
+                this._ItemAccessor = new Accessor(item?.GetType(), childrenPropertyPath, expandedPropertyPath, filterTargetPropertyPath);
             }
 
             /// <summary>
@@ -732,15 +827,16 @@ namespace Toolkit.WPF.Controls
             /// </summary>
             public bool GetIsVisible(object item)
             {
-                return this._TreeInfo.TryGetValue(item, out var info) ? info.IsVisible : false;
-            }
-
-            /// <summary>
-            /// フィルター時に表示されるかを取得します
-            /// </summary>
-            public bool GetIsVisibleOnFilter(object item)
-            {
-                return this._TreeInfo.TryGetValue(item, out var info) ? info.IsVisibleOnFilter : false;
+                if (string.IsNullOrEmpty(this._FilterText))
+                {
+                    // 通常（フィルタされてないとき）
+                    return this._TreeInfo.TryGetValue(item, out var info) ? info.IsVisible : false;
+                }
+                else
+                {
+                    // フィルタ時
+                    return this._TreeInfo.TryGetValue(item, out var info) ? info.IsVisibleOnFilter : false;
+                }
             }
 
             /// <summary>
@@ -771,11 +867,67 @@ namespace Toolkit.WPF.Controls
             }
 
             /// <summary>
+            /// フィルターを適用する
+            /// </summary>
+            public void ApplyFilter(string filterText, IEnumerable<object> selectedItems)
+            {
+                if (string.IsNullOrEmpty(filterText))
+                {
+                    this._FilterText = filterText;
+
+                    // フィルタにヒットするか更新する(選択していた行はフィルタにヒットしていたことにして表示される状態にする)
+                    foreach (var info in this._TreeInfo)
+                    {
+                        info.Value.IsHitFilter = selectedItems.Contains(info.Key);
+                    }
+
+                    // ツリー情報を更新
+                    this.UpdateTreeInfoAll();
+
+                    // フィルターの結果で開閉状態を設定する
+                    foreach (var info in this._TreeInfo)
+                    {
+                        // 子孫がフィルターにヒットしているなら開いておく, フィルタにヒットしていなかったらフィルタ前の開閉状態にする
+                        this.SetIsExpanded(info.Key, info.Value.IsHitFilterDescendant || info.Value.IsExpandedSaved);
+                    }
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(this._FilterText))
+                    {
+                        // フィルターする前の状態を保存する
+                        foreach (var value in this._TreeInfo.Values)
+                        {
+                            value.IsExpandedSaved = value.IsExpanded;
+                        }
+                    }
+
+                    this._FilterText = filterText.ToLower();
+
+                    // フィルタにヒットするか更新する
+                    foreach (var info in this._TreeInfo)
+                    {
+                        info.Value.IsHitFilter = this._ItemAccessor.GetFilterTarget(info.Key)?.ToString().ToLower().Contains(this._FilterText) ?? true;
+                    }
+
+                    // ツリー情報を更新
+                    this.UpdateTreeInfoAll();
+
+                    // フィルターの結果で開閉状態を設定する
+                    foreach (var info in this._TreeInfo)
+                    {
+                        // 子孫がフィルターにヒットしているなら開いておく
+                        this.SetIsExpanded(info.Key, info.Value.IsHitFilterDescendant);
+                    }
+                }
+            }
+
+            /// <summary>
             /// 全Tree情報を更新します
             /// </summary>
             public void UpdateTreeInfoAll()
             {
-                this.Setup(this._ItemAccessor.ChildrenPropertyPath, this._ItemAccessor.ExpandedPropertyPath);
+                this.Setup(this._ItemAccessor.ChildrenPropertyPath, this._ItemAccessor.ExpandedPropertyPath, this._ItemAccessor.FilterTargetPropertyPath);
 
                 foreach (var info in this._TreeInfo)
                 {
@@ -794,6 +946,9 @@ namespace Toolkit.WPF.Controls
             {
                 var children = this._ItemAccessor.GetChildren(item);
 
+                // 子孫がフィルタにヒットしているかを先にリセットしておく
+                itemInfo.IsHitFilterDescendant = false;
+
                 foreach (var child in children)
                 {
                     if (!this._TreeInfo.TryGetValue(child, out var childInfo))
@@ -809,6 +964,7 @@ namespace Toolkit.WPF.Controls
                     this.UpdateTreeInfo(child, childInfo);
 
                     // 子の状態が更新されたら親にとって子孫がフィルタにヒットしているかを更新する
+                    // 複数の子のうち1つでもヒットしていたら true にするので OR をとる
                     itemInfo.IsHitFilterDescendant |= (childInfo.IsHitFilter || childInfo.IsHitFilterDescendant);
                 }
             }
@@ -854,13 +1010,13 @@ namespace Toolkit.WPF.Controls
                 /// <summary>
                 /// 親要素が表示されているかどうか
                 /// </summary>
-                public bool IsParentVisible { get => this.IsOnBit(Flags.IsParentVisible); private set => this.ChangeBit(Flags.IsParentVisible, value); }
+                private bool IsParentVisible { get => this.IsOnBit(Flags.IsParentVisible); set => this.ChangeBit(Flags.IsParentVisible, value); }
 
                 /// <summary>
                 /// 親要素が開いているかどうか
                 /// 親要素が開いていてもさらに親の要素が閉じていると表示されないことがあるため表示状態とは別です
                 /// </summary>
-                public bool IsParentExpanded { get => this.IsOnBit(Flags.IsParentExpanded); private set => this.ChangeBit(Flags.IsParentExpanded, value); }
+                private bool IsParentExpanded { get => this.IsOnBit(Flags.IsParentExpanded); set => this.ChangeBit(Flags.IsParentExpanded, value); }
 
                 /// <summary>
                 /// フィルタにヒットしているか
@@ -939,10 +1095,13 @@ namespace Toolkit.WPF.Controls
 
                 public string ExpandedPropertyPath => this._ExpandedPropertyPath;
 
-                public Accessor(Type type, string childrenPropertyPath, string expandedPropertyPath)
+                public string FilterTargetPropertyPath => this._FilterTargetPropertyPath;
+
+                public Accessor(Type type, string childrenPropertyPath, string expandedPropertyPath, string filterTargetPropertyPath)
                 {
                     this._ChildrenPropertyPath = childrenPropertyPath;
                     this._ExpandedPropertyPath = expandedPropertyPath;
+                    this._FilterTargetPropertyPath = filterTargetPropertyPath;
 
                     if (type == null)
                     {
@@ -964,6 +1123,12 @@ namespace Toolkit.WPF.Controls
                     {
                         this._ChildrenPropertyGetMethodInfo = this._Type?.GetProperty(this._ChildrenPropertyPath).GetMethod;
                     }
+
+                    // FilterTarget
+                    if (!string.IsNullOrEmpty(this._FilterTargetPropertyPath))
+                    {
+                        this._FilterTargetPropertyGetMethodInfo = this._Type?.GetProperty(this._FilterTargetPropertyPath)?.GetMethod;
+                    }
                 }
 
                 public IEnumerable<object> GetChildren(object item)
@@ -981,18 +1146,26 @@ namespace Toolkit.WPF.Controls
                     this._ExpandedPropertySetMethodInfo?.Invoke(item, isExpanded ? TrueArgs : FalseArgs);
                 }
 
+                public object GetFilterTarget(object item)
+                {
+                    return this._FilterTargetPropertyGetMethodInfo?.Invoke(item, null);
+                }
+
                 private readonly string _ChildrenPropertyPath;
                 private readonly string _ExpandedPropertyPath;
+                private readonly string _FilterTargetPropertyPath;
 
                 private readonly Type _Type;
                 private readonly MethodInfo _ChildrenPropertyGetMethodInfo;
                 private readonly MethodInfo _ExpandedPropertyGetMethodInfo;
                 private readonly MethodInfo _ExpandedPropertySetMethodInfo;
+                private readonly MethodInfo _FilterTargetPropertyGetMethodInfo;
 
                 private static readonly object[] TrueArgs = new object[] { true };
                 private static readonly object[] FalseArgs = new object[] { false };
             }
 
+            private string _FilterText;
             private Accessor _ItemAccessor;
             private readonly Dictionary<object, TreeInfo> _TreeInfo;
         }
