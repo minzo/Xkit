@@ -92,25 +92,29 @@
         <StackPanel DockPanel.Dock="Top">
             <tkitwpf:FilterTextBox WatermarkText="行フィルター" Text="{Binding RowFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=500}" />
             <tkitwpf:FilterTextBox WatermarkText="列フィルター" Text="{Binding ColumnFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=500}" />
+            <CheckBox Name="TransposeCheckBox" Content="転置する" />
         </StackPanel>
         
         <tkitwpf:TreeDataGrid
             RowsSource="{Binding Items0, Mode=OneTime}"
             RowPropertyPath="Name"
             RowChildrenPropertyPath="Children"
-            RowHeaderTemplate="{StaticResource HeaderTemplate}"
             RowFilterTargetPropertyPath="Name"
-            RowFilterText="{Binding RowFilterText, Mode=OneWay}"
 
             ColumnsSource="{Binding Items1, Mode=OneTime}"
             ColumnPropertyPath="Name"
             ColumnChildrenPropertyPath="Children"            
-            ColumnHeaderTemplate="{StaticResource HeaderTemplate}"
             ColumnFilterTargetPropertyPath="Name"
+
+            RowFilterText="{Binding RowFilterText, Mode=OneWay}"
             ColumnFilterText="{Binding ColumnFilterText, Mode=OneWay}"
-        
+
+            RowHeaderTemplate="{StaticResource HeaderTemplate}"
+            ColumnHeaderTemplate="{StaticResource HeaderTemplate}"
             CellTemplateSelector="{StaticResource CellTemplateSelector}"
             CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}"
+            
+            Transpose="{Binding IsChecked, ElementName=TransposeCheckBox}"
         
             DataSource="{Binding Table, Mode=OneWay}"
             />

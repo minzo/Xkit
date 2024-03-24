@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Data.Common;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -31,7 +31,14 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for RowsSource.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty RowsSourceProperty =
             DependencyProperty.Register("RowsSource", typeof(IEnumerable), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
-                ((TreeDataGrid)d).ItemsSource = (IEnumerable)e.NewValue;
+                if (((TreeDataGrid)d).Transpose)
+                {
+                    ((TreeDataGrid)d).OnColumnsSourceChanged(e.OldValue as IEnumerable, e.NewValue as IEnumerable);
+                }
+                else
+                {
+                    ((TreeDataGrid)d).OnRowsSourceChanged(e.OldValue as IEnumerable, e.NewValue as IEnumerable);
+                }
             }));
 
         /// <summary>
@@ -46,7 +53,14 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for ColumnsSource.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ColumnsSourceProperty =
             DependencyProperty.Register("ColumnsSource", typeof(IEnumerable), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
-                ((TreeDataGrid)d).OnColumnsSourceChanged(e.OldValue as IEnumerable, e.NewValue as IEnumerable);
+                if (((TreeDataGrid)d).Transpose)
+                {
+                    ((TreeDataGrid)d).OnRowsSourceChanged(e.OldValue as IEnumerable, e.NewValue as IEnumerable);
+                }
+                else
+                {
+                    ((TreeDataGrid)d).OnColumnsSourceChanged(e.OldValue as IEnumerable, e.NewValue as IEnumerable);
+                }
             }));
 
         /// <summary>
@@ -143,6 +157,26 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for ColumnFilterTargetPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ColumnFilterTargetPropertyPathProperty =
             DependencyProperty.Register("ColumnFilterTargetPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null));
+
+        /// <summary>
+        /// 転置する
+        /// </summary>
+        public bool Transpose
+        {
+            get { return (bool)this.GetValue(TransposeProperty); }
+            set { this.SetValue(TransposeProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for Transpose.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty TransposeProperty =
+            DependencyProperty.Register("Transpose", typeof(bool), typeof(TreeDataGrid), new PropertyMetadata(false, (d, e) => {
+                var oldRowsSource = (bool)e.OldValue ? ((TreeDataGrid)d).ColumnsSource : ((TreeDataGrid)d).RowsSource;
+                var newRowsSource = (bool)e.NewValue ? ((TreeDataGrid)d).ColumnsSource : ((TreeDataGrid)d).RowsSource;
+                var oldColumnsSource = (bool)e.OldValue ? ((TreeDataGrid)d).RowsSource : ((TreeDataGrid)d).ColumnsSource;
+                var newColumnsSource = (bool)e.NewValue ? ((TreeDataGrid)d).RowsSource : ((TreeDataGrid)d).ColumnsSource;
+                ((TreeDataGrid)d).OnRowsSourceChanged(oldRowsSource, newRowsSource);
+                ((TreeDataGrid)d).OnColumnsSourceChanged(oldColumnsSource, newColumnsSource);
+            }));
 
         /// <summary>
         /// セルに  Binding するプロパティを区切る文字
@@ -272,20 +306,19 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// ItemsSource が変化したときに呼ばれます
         /// </summary>
-        protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
+        private void OnRowsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
         {
-            base.OnItemsSourceChanged(oldValue, newValue);
-
+            this.ItemsSource = newValue;
             this._TreeInfoRow.Clear();
 
             if (oldValue is INotifyCollectionChanged oValue)
             {
-                oValue.CollectionChanged -= this.OnItemsSourceCollectionChanged;
+                oValue.CollectionChanged -= this.OnRowsSourceCollectionChanged;
             }
 
             if (newValue is INotifyCollectionChanged nValue)
             {
-                nValue.CollectionChanged += this.OnItemsSourceCollectionChanged;
+                nValue.CollectionChanged += this.OnRowsSourceCollectionChanged;
             }
 
             if (newValue != null)
@@ -302,7 +335,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// ItemsSource の要素数が変化したときに呼ばれます
         /// </summary>
-        private void OnItemsSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnRowsSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.OldItems != null)
             {
@@ -456,10 +489,11 @@ namespace Toolkit.WPF.Controls
         {
             var column = new DataGridTransposeColumn()
             {
+                Binding = this._DataSourceBinding,
                 HeaderTemplate = _ColumnHeaderTemplate,
                 Header = item,
                 CellTemplateSelector = this.CellTemplateSelector,
-                CellEditingTemplateSelector = this.CellEditingTemplateSelector
+                CellEditingTemplateSelector = this.CellEditingTemplateSelector,
             };
 
             this.Columns.Add(column);
@@ -601,6 +635,8 @@ namespace Toolkit.WPF.Controls
             this._TreeInfoRow = new TreeInfoUnit();
             this._TreeInfoColumn = new TreeInfoUnit();
 
+            this._DataSourceBinding = new Binding("DataSource") { Source = this };
+
             this.Resources.MergedDictionaries.Add(Resource);
 
             this.Loaded += this.OnLoaded;
@@ -657,6 +693,8 @@ namespace Toolkit.WPF.Controls
         private readonly TreeInfoUnit _TreeInfoRow;
         private readonly TreeInfoUnit _TreeInfoColumn;
 
+        private readonly BindingBase _DataSourceBinding;
+
         private static readonly DataTemplate _RowHeaderTemplate;
         private static readonly DataTemplate _ColumnHeaderTemplate;
 
@@ -664,6 +702,25 @@ namespace Toolkit.WPF.Controls
         private static readonly MethodInfo _MethodInfoDataGridColumnGetDataGridOwner = typeof(DataGridColumn).GetProperty("DataGridOwner", BindingFlags.NonPublic | BindingFlags.Instance).GetMethod;
 
         private static readonly ResourceDictionary Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/TreeDataGrid/TreeDataGrid.xaml") };
+
+        private class Tree
+        {
+            public string PropertyPath { get; set; }
+
+            public string ChildrenPropertyPath { get; set; }
+
+            public string FilterTargetProeprtyPath { get; set; }
+
+            public TreeInfoUnit TreeInfo { get; }
+
+            public Tree()
+            {
+                this.TreeInfo = new TreeInfoUnit();
+            }
+        }
+
+        private Tree _Row;
+        private Tree _Col;
 
         /// <summary>
         /// DataGridColumn
@@ -675,11 +732,8 @@ namespace Toolkit.WPF.Controls
             /// </summary>
             protected override FrameworkElement LoadTemplateContent(DataGridCell cell, object dataItem, DataTemplate template, DataTemplateSelector selector)
             {
-                // _DataSourceBinding が null なら作る
-                this._DataSourceBinding = this._DataSourceBinding ?? new Binding("DataSource") { Source = this.DataGridOwner };
-
                 // DataGridCell の DataContext を item にせずに DataSource にする
-                TrySetBinding(cell, DataGridCell.DataContextProperty, this._DataSourceBinding);
+                TrySetBinding(cell, DataGridCell.DataContextProperty, this.Binding);
 
                 var control = new ContentControl()
                 {
@@ -689,25 +743,17 @@ namespace Toolkit.WPF.Controls
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                 };
 
-
                 if (this.DataGridOwner is TreeDataGrid grid)
                 {
-                    string rowPropertyPath = null;
-                    var rowItemProperties = ((IItemProperties)this.DataGridOwner.Items).ItemProperties;
-                    if (rowItemProperties.FirstOrDefault(i => i.Name == grid.RowPropertyPath && i.PropertyType == typeof(string))?.Descriptor is PropertyDescriptor descriptor)
-                    {
-                        rowPropertyPath = (string)descriptor.GetValue(dataItem);
-                    }
-                    else
-                    {
-                        rowPropertyPath = (string)dataItem.GetType()
-                            .GetProperty(grid.RowPropertyPath)
-                            .GetValue(dataItem);
-                    }
+                    // 転置状態を考慮して行と列のプロパティ名を取得する
+                    var dataGridRowPropertyPath = grid.Transpose ? grid.ColumnPropertyPath : grid.RowPropertyPath;
+                    var dataGridColumnProperptyPath = grid.Transpose ? grid.RowPropertyPath : grid.ColumnPropertyPath;
 
-                    var columnPropertyPath = (string)this.Header?.GetType()
-                        .GetProperty(grid.ColumnPropertyPath)
-                        .GetValue(this.Header);
+                    // DataGrid の Row として表示されているものからプロパティパスを取得する
+                    var rowPropertyPath = this.GetPropertyPathValue(dataItem, dataGridRowPropertyPath, true);
+
+                    // DataGrid の Column として表示されているものからプロパティパスを取得する
+                    var columnPropertyPath = this.GetPropertyPathValue(this.Header, dataGridColumnProperptyPath, false);
 
                     bool isExistsRow = !string.IsNullOrWhiteSpace(rowPropertyPath);
                     bool isExistsColumn = !string.IsNullOrWhiteSpace(columnPropertyPath);
@@ -715,7 +761,14 @@ namespace Toolkit.WPF.Controls
                     Binding binding = null;
                     if (isExistsRow && isExistsColumn)
                     {
-                        binding = new Binding($"{rowPropertyPath}{grid.CellBindingPropertySepalateCharacter}{columnPropertyPath}");
+                        if (grid.Transpose)
+                        {
+                            binding = new Binding($"{columnPropertyPath}{grid.CellBindingPropertySepalateCharacter}{rowPropertyPath}");
+                        }
+                        else
+                        {
+                            binding = new Binding($"{rowPropertyPath}{grid.CellBindingPropertySepalateCharacter}{columnPropertyPath}");
+                        }
                     }
                     else if (isExistsRow)
                     {
@@ -732,7 +785,24 @@ namespace Toolkit.WPF.Controls
                 return control;
             }
 
-            private Binding _DataSourceBinding;
+            /// <summary>
+            /// dataItem の指定されたプロパティから値を取得します
+            /// </summary>
+            private string GetPropertyPathValue(object dataItem, string propertyPath, bool tryUsePropertyDescriptor)
+            {
+                if (tryUsePropertyDescriptor)
+                {
+                    // PropertyDescriptor 経由での取得を先に試し、失敗した場合は Reflection で値を取得する
+                    var rowItemProperties = ((IItemProperties)this.DataGridOwner.Items).ItemProperties;
+                    var itemPropertyInfo = rowItemProperties.FirstOrDefault(i => i.Name == propertyPath && i.PropertyType == typeof(string));
+                    if (itemPropertyInfo?.Descriptor is PropertyDescriptor descriptor)
+                    {
+                        return (string)descriptor.GetValue(dataItem);
+                    }
+                }
+
+                return (string)dataItem.GetType().GetProperty(propertyPath).GetValue(dataItem);
+            }
         }
 
         #region TreeInfo
