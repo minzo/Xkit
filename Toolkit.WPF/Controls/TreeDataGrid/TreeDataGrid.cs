@@ -20,6 +20,25 @@ namespace Toolkit.WPF.Controls
     public class TreeDataGrid : DataGrid
     {
         /// <summary>
+        /// セルに  Binding するプロパティを区切る文字
+        /// デフォルトは . になっていて Row.Col ( Row の持つ Col というプロパティ) に Binding されるようになっている
+        /// </summary>
+        public string CellBindingPropertySepalateCharacter { get; set; } = ".";
+
+        /// <summary>
+        /// テーブル情報
+        /// </summary>
+        public object DataSource
+        {
+            get { return (object)this.GetValue(DataSourceProperty); }
+            set { this.SetValue(DataSourceProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for DataSource.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty DataSourceProperty =
+            DependencyProperty.Register("DataSource", typeof(object), typeof(TreeDataGrid), new PropertyMetadata(null));
+
+        /// <summary>
         /// 行情報
         /// </summary>
         public IEnumerable RowsSource
@@ -31,14 +50,7 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for RowsSource.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty RowsSourceProperty =
             DependencyProperty.Register("RowsSource", typeof(IEnumerable), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
-                if (((TreeDataGrid)d).Transpose)
-                {
-                    ((TreeDataGrid)d).OnColumnsSourceChanged(e.OldValue as IEnumerable, e.NewValue as IEnumerable);
-                }
-                else
-                {
-                    ((TreeDataGrid)d).OnRowsSourceChanged(e.OldValue as IEnumerable, e.NewValue as IEnumerable);
-                }
+                ((TreeDataGrid)d).ChangeItemsSource(((TreeDataGrid)d).EnableTranspose, ((TreeDataGrid)d).EnableTranspose);
             }));
 
         /// <summary>
@@ -53,14 +65,7 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for ColumnsSource.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ColumnsSourceProperty =
             DependencyProperty.Register("ColumnsSource", typeof(IEnumerable), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
-                if (((TreeDataGrid)d).Transpose)
-                {
-                    ((TreeDataGrid)d).OnRowsSourceChanged(e.OldValue as IEnumerable, e.NewValue as IEnumerable);
-                }
-                else
-                {
-                    ((TreeDataGrid)d).OnColumnsSourceChanged(e.OldValue as IEnumerable, e.NewValue as IEnumerable);
-                }
+                ((TreeDataGrid)d).ChangeItemsSource(((TreeDataGrid)d).EnableTranspose, ((TreeDataGrid)d).EnableTranspose);
             }));
 
         /// <summary>
@@ -74,7 +79,9 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for RowPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty RowPropertyPathProperty =
-            DependencyProperty.Register("RowPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(string.Empty));
+            DependencyProperty.Register("RowPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(string.Empty, (d, e) => {
+                ((TreeDataGrid)d)._BaseRowInfo.PropertyPath = (string)e.NewValue;
+            }));
 
         /// <summary>
         /// 列のプロパティパス
@@ -87,20 +94,11 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for ColumnPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ColumnPropertyPathProperty =
-            DependencyProperty.Register("ColumnPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(string.Empty));
+            DependencyProperty.Register("ColumnPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(string.Empty, (d, e) => {
+                ((TreeDataGrid)d)._BaseColmnInfo.PropertyPath = (string)e.NewValue;
+            }));
 
-        /// <summary>
-        /// テーブル情報
-        /// </summary>
-        public object DataSource
-        {
-            get { return (object)this.GetValue(DataSourceProperty); }
-            set { this.SetValue(DataSourceProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for DataSource.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty DataSourceProperty =
-            DependencyProperty.Register("DataSource", typeof(object), typeof(TreeDataGrid), new PropertyMetadata(null));
+        #region フィルター関連プロパティ
 
         /// <summary>
         /// 行フィルターテキスト
@@ -143,7 +141,9 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for RowFilterTargetPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty RowFilterTargetPropertyPathProperty =
-            DependencyProperty.Register("RowFilterTargetPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null));
+            DependencyProperty.Register("RowFilterTargetPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
+                ((TreeDataGrid)d)._BaseRowInfo.FilterTargetPropertyPath = (string)e.NewValue;
+            }));
 
         /// <summary>
         /// 列フィルターの対象にするプロパティのパス
@@ -156,33 +156,26 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for ColumnFilterTargetPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ColumnFilterTargetPropertyPathProperty =
-            DependencyProperty.Register("ColumnFilterTargetPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null));
+            DependencyProperty.Register("ColumnFilterTargetPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
+                ((TreeDataGrid)d)._BaseColmnInfo.FilterTargetPropertyPath = (string)e.NewValue;
+            }));
+
+        #endregion
 
         /// <summary>
         /// 転置する
         /// </summary>
-        public bool Transpose
+        public bool EnableTranspose
         {
-            get { return (bool)this.GetValue(TransposeProperty); }
-            set { this.SetValue(TransposeProperty, value); }
+            get { return (bool)this.GetValue(EnableTransposeProperty); }
+            set { this.SetValue(EnableTransposeProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for Transpose.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty TransposeProperty =
-            DependencyProperty.Register("Transpose", typeof(bool), typeof(TreeDataGrid), new PropertyMetadata(false, (d, e) => {
-                var oldRowsSource = (bool)e.OldValue ? ((TreeDataGrid)d).ColumnsSource : ((TreeDataGrid)d).RowsSource;
-                var newRowsSource = (bool)e.NewValue ? ((TreeDataGrid)d).ColumnsSource : ((TreeDataGrid)d).RowsSource;
-                var oldColumnsSource = (bool)e.OldValue ? ((TreeDataGrid)d).RowsSource : ((TreeDataGrid)d).ColumnsSource;
-                var newColumnsSource = (bool)e.NewValue ? ((TreeDataGrid)d).RowsSource : ((TreeDataGrid)d).ColumnsSource;
-                ((TreeDataGrid)d).OnRowsSourceChanged(oldRowsSource, newRowsSource);
-                ((TreeDataGrid)d).OnColumnsSourceChanged(oldColumnsSource, newColumnsSource);
+        public static readonly DependencyProperty EnableTransposeProperty =
+            DependencyProperty.Register("EnableTranspose", typeof(bool), typeof(TreeDataGrid), new PropertyMetadata(false, (d, e) => {
+                ((TreeDataGrid)d).ChangeItemsSource((bool)e.OldValue, (bool)e.NewValue); ;
             }));
-
-        /// <summary>
-        /// セルに  Binding するプロパティを区切る文字
-        /// デフォルトは . になっていて Row.Col ( Row の持つ Col というプロパティ) に Binding されるようになっている
-        /// </summary>
-        public string CellBindingPropertySepalateCharacter { get; set; } = ".";
 
         #region Column HeaderTempalte/HeaderTemplateSelector
 
@@ -258,7 +251,9 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for RowChildrenPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty RowChildrenPropertyPathProperty =
-            DependencyProperty.Register("RowChildrenPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null));
+            DependencyProperty.Register("RowChildrenPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
+                ((TreeDataGrid)d)._BaseRowInfo.ChildrenPropertyPath = (string)e.NewValue;
+            }));
 
         /// <summary>
         /// 子要素のプロパティパス
@@ -271,7 +266,9 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for ChildrenPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ChildrenPropertyPathProperty =
-            DependencyProperty.Register("ChildrenPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null));
+            DependencyProperty.Register("ChildrenPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
+                ((TreeDataGrid)d)._BaseColmnInfo.ChildrenPropertyPath = (string)e.NewValue;
+            }));
 
         /// <summary>
         /// 行の開閉状態のプロパティ名
@@ -284,7 +281,9 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for RowExpandedPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty RowExpandedPropertyPathProperty =
-            DependencyProperty.Register("RowExpandedPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null));
+            DependencyProperty.Register("RowExpandedPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
+                ((TreeDataGrid)d)._BaseRowInfo.ExpandedPropertyPath = (string)e.NewValue;
+            }));
 
         /// <summary>
         /// 列の開閉状態のプロパティ名
@@ -297,7 +296,9 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for ColumnExpandedPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ColumnExpandedPropertyPathProperty =
-            DependencyProperty.Register("ColumnExpandedPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null));
+            DependencyProperty.Register("ColumnExpandedPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
+                ((TreeDataGrid)d)._BaseColmnInfo.ExpandedPropertyPath = (string)e.NewValue;
+            }));
 
         #endregion
 
@@ -306,10 +307,13 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// ItemsSource が変化したときに呼ばれます
         /// </summary>
-        private void OnRowsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
+        private void OnRowsSourceChanged(IEnumerable oldValue, IEnumerable newValue, bool transpose = false)
         {
-            this.ItemsSource = newValue;
-            this._TreeInfoRow.Clear();
+            // 転置のときはリセット不要
+            if (!transpose)
+            {
+                this._RowInfo.TreeInfo.Clear();
+            }
 
             if (oldValue is INotifyCollectionChanged oValue)
             {
@@ -321,14 +325,16 @@ namespace Toolkit.WPF.Controls
                 nValue.CollectionChanged += this.OnRowsSourceCollectionChanged;
             }
 
+            this.ItemsSource = newValue;
+
             if (newValue != null)
             {
                 foreach(var item in newValue)
                 {
-                    this._TreeInfoRow.Add(item);
+                    this._RowInfo.TreeInfo.Add(item);
                 }
-                this._TreeInfoRow.Setup(this.RowChildrenPropertyPath, this.RowExpandedPropertyPath, this.RowFilterTargetPropertyPath ?? this.RowPropertyPath);
-                this._TreeInfoRow.UpdateTreeInfoAll();
+                this._RowInfo.TreeInfo.Setup(this._RowInfo.ChildrenPropertyPath, this._RowInfo.ExpandedPropertyPath, this._RowInfo.FilterTargetPropertyPath);
+                this._RowInfo.TreeInfo.UpdateTreeInfoAll();
             }
         }
 
@@ -341,7 +347,7 @@ namespace Toolkit.WPF.Controls
             {
                 foreach (var item in e.OldItems)
                 {
-                    this._TreeInfoRow.Remove(item);
+                    this._RowInfo.TreeInfo.Remove(item);
                 }
             }
 
@@ -349,7 +355,7 @@ namespace Toolkit.WPF.Controls
             {
                 foreach (var item in e.NewItems)
                 {
-                    this._TreeInfoRow.Add(item);
+                    this._RowInfo.TreeInfo.Add(item);
                 }
             }
         }
@@ -359,7 +365,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnRowIsExpandedChanged(DataGridRow row, bool newValue)
         {
-            this._TreeInfoRow.SetIsExpanded(row.DataContext, newValue);
+            this._RowInfo.TreeInfo.SetIsExpanded(row.DataContext, newValue);
             this.UpdateRowTreeAll();
         }
 
@@ -370,7 +376,7 @@ namespace Toolkit.WPF.Controls
         {
             var row = (DataGridRow)base.GetContainerForItemOverride();
             TrySetBinding(row, DataGridRow.HeaderProperty, _RowHeaderBinding);
-            TrySetBinding(row, TreeDataGrid.IsExpandedProperty, this._RowExpandedBinding);
+            TrySetBinding(row, TreeDataGrid.IsExpandedProperty, this._RowInfo.RowExpandedBinding);
             row.HeaderTemplate = _RowHeaderTemplate;
             return row;
         }
@@ -400,10 +406,10 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void UpdateRowTree(DataGridRow row)
         {
-            row.SetCurrentValue(DataGridRow.VisibilityProperty, this._TreeInfoRow.GetIsVisible(row.DataContext) ? Visibility.Visible : Visibility.Collapsed);
-            row.SetCurrentValue(TreeDataGrid.IsExpandedProperty, this._TreeInfoRow.GetIsExpanded(row.DataContext));
-            row.SetCurrentValue(TreeDataGrid.TreeExpanderVisibilityProperty, this._TreeInfoRow.HasChildren(row.DataContext) ? Visibility.Visible : Visibility.Collapsed);
-            row.SetCurrentValue(TreeDataGrid.TreeDepthMarginProperty, new Thickness(this._TreeInfoRow.GetDepth(row.DataContext) * DepthMarginUnit, 0D, 0D, 0D));
+            row.SetCurrentValue(DataGridRow.VisibilityProperty, this._RowInfo.TreeInfo.GetIsVisible(row.DataContext) ? Visibility.Visible : Visibility.Collapsed);
+            row.SetCurrentValue(TreeDataGrid.IsExpandedProperty, this._RowInfo.TreeInfo.GetIsExpanded(row.DataContext));
+            row.SetCurrentValue(TreeDataGrid.TreeExpanderVisibilityProperty, this._RowInfo.TreeInfo.HasChildren(row.DataContext) ? Visibility.Visible : Visibility.Collapsed);
+            row.SetCurrentValue(TreeDataGrid.TreeDepthMarginProperty, new Thickness(this._RowInfo.TreeInfo.GetDepth(row.DataContext) * DepthMarginUnit, 0D, 0D, 0D));
         }
 
         /// <summary>
@@ -418,7 +424,7 @@ namespace Toolkit.WPF.Controls
                 .Distinct()
                 .ToList();
 
-            this._TreeInfoRow.ApplyFilter(filterText, selectedItems);
+            this._RowInfo.TreeInfo.ApplyFilter(filterText, selectedItems);
 
             this.UpdateRowTreeAll();
         }
@@ -430,10 +436,15 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// ColumnsSource が変化したときに呼ばれます
         /// </summary>
-        private void OnColumnsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
+        private void OnColumnsSourceChanged(IEnumerable oldValue, IEnumerable newValue, bool transpose = false)
         {
+            // 転置のときはリセット不要
+            if (!transpose)
+            {
+                this._ColInfo.TreeInfo.Clear();
+            }
+
             this.Columns.Clear();
-            this._TreeInfoColumn.Clear();
 
             if (oldValue is INotifyCollectionChanged oValue)
             {
@@ -451,8 +462,9 @@ namespace Toolkit.WPF.Controls
                 {
                     this.AddColumn(item);
                 }
-                this._TreeInfoColumn.Setup(this.ColumnChildrenPropertyPath, this.ColumnExpandedPropertyPath, this.ColumnFilterTargetPropertyPath ?? this.ColumnPropertyPath);
-                this._TreeInfoColumn.UpdateTreeInfoAll();
+
+                this._ColInfo.TreeInfo.Setup(this._ColInfo.ChildrenPropertyPath, this._ColInfo.ExpandedPropertyPath, this._ColInfo.FilterTargetPropertyPath);
+                this._ColInfo.TreeInfo.UpdateTreeInfoAll();
                 this.UpdateColumnTreeAll();
             }
         }
@@ -469,7 +481,7 @@ namespace Toolkit.WPF.Controls
                     var column = this.Columns[i];
                     this.Columns.Remove(column);
                     var item = e.OldItems[i];
-                    this._TreeInfoColumn.Remove(item);
+                    this._ColInfo.TreeInfo.Remove(item);
                 }
             }
 
@@ -497,7 +509,7 @@ namespace Toolkit.WPF.Controls
             };
 
             this.Columns.Add(column);
-            this._TreeInfoColumn.Add(item);
+            this._ColInfo.TreeInfo.Add(item);
         }
 
         /// <summary>
@@ -505,7 +517,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnColumnIsExpandedChanged(DataGridColumn column, bool newValue)
         {
-            this._TreeInfoColumn.SetIsExpanded(column.Header, newValue);
+            this._ColInfo.TreeInfo.SetIsExpanded(column.Header, newValue);
             this.UpdateColumnTreeAll();
         }
 
@@ -516,12 +528,11 @@ namespace Toolkit.WPF.Controls
         {
             foreach (var column in this.Columns)
             {
-
-                var hasChildren = this._TreeInfoColumn.HasChildren(column.Header);
-                var visibility = this._TreeInfoColumn.GetIsVisible(column.Header) ? Visibility.Visible : Visibility.Collapsed;
+                var hasChildren = this._ColInfo.TreeInfo.HasChildren(column.Header);
+                var visibility = this._ColInfo.TreeInfo.GetIsVisible(column.Header) ? Visibility.Visible : Visibility.Collapsed;
 
                 column.SetCurrentValue(TreeDataGrid.TreeExpanderVisibilityProperty, hasChildren ? Visibility.Visible : Visibility.Collapsed);
-                column.SetCurrentValue(TreeDataGrid.TreeDepthMarginProperty, new Thickness(0D, this._TreeInfoColumn.GetDepth(column.Header) * DepthMarginUnit, 0D, 0D));
+                column.SetCurrentValue(TreeDataGrid.TreeDepthMarginProperty, new Thickness(0D, this._ColInfo.TreeInfo.GetDepth(column.Header) * DepthMarginUnit, 0D, 0D));
                 column.SetCurrentValue(DataGridColumn.VisibilityProperty, visibility);
             }
         }
@@ -533,8 +544,8 @@ namespace Toolkit.WPF.Controls
         {
             foreach (var header in this._DataGridColumnsPanel.Children.OfType<DataGridColumnHeader>())
             {
-                TrySetBinding(header, TreeDataGrid.IsExpandedProperty, this._ColumnExpandedBinding);
-                var isExpanded = this._TreeInfoColumn.GetIsExpanded(header.Column.Header);
+                TrySetBinding(header, TreeDataGrid.IsExpandedProperty, this._ColInfo.ColumnExpandedBinding);
+                var isExpanded = this._ColInfo.TreeInfo.GetIsExpanded(header.Column.Header);
                 header.SetCurrentValue(TreeDataGrid.IsExpandedProperty, isExpanded);
             }
         }
@@ -551,7 +562,7 @@ namespace Toolkit.WPF.Controls
                 .Distinct()
                 .ToList();
 
-            this._TreeInfoColumn.ApplyFilter(filterText, selectedItems);
+            this._ColInfo.TreeInfo.ApplyFilter(filterText, selectedItems);
 
             this.UpdateColumnTreeAll();
         }
@@ -632,34 +643,14 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         public TreeDataGrid()
         {
-            this._TreeInfoRow = new TreeInfoUnit();
-            this._TreeInfoColumn = new TreeInfoUnit();
+            this._RowInfo = this._BaseRowInfo = new TableFrameInfo();
+            this._ColInfo = this._BaseColmnInfo = new TableFrameInfo();
 
             this._DataSourceBinding = new Binding("DataSource") { Source = this };
 
             this.Resources.MergedDictionaries.Add(Resource);
 
             this.Loaded += this.OnLoaded;
-        }
-
-        /// <summary>
-        /// 初期化処理
-        /// </summary>
-        protected override void OnInitialized(EventArgs e)
-        {
-            base.OnInitialized(e);
-
-            if (!string.IsNullOrEmpty(this.RowExpandedPropertyPath))
-            {
-                this._RowExpandedBinding = new Binding(this.RowExpandedPropertyPath);
-            }
-
-            if (!string.IsNullOrEmpty(this.ColumnExpandedPropertyPath))
-            {
-                this._ColumnExpandedBinding = new Binding($"Column.Header.{this.ColumnExpandedPropertyPath}") {
-                    RelativeSource = new RelativeSource(RelativeSourceMode.Self)
-                };
-            }
         }
 
         /// <summary>
@@ -684,16 +675,38 @@ namespace Toolkit.WPF.Controls
             }
         }
 
+        /// <summary>
+        /// 表示状態を転置します
+        /// </summary>
+        private void ChangeItemsSource(bool oldTranspose, bool newTranspose)
+        {
+            bool isTranposeChanged = oldTranspose != newTranspose;
+
+            var oldRowsSource = oldTranspose ? this.ColumnsSource : this.RowsSource;
+            var newRowsSource = newTranspose ? this.ColumnsSource : this.RowsSource;
+
+            var oldColumnsSource = oldTranspose ? this.RowsSource : this.ColumnsSource;
+            var newColumnsSource = newTranspose ? this.RowsSource : this.ColumnsSource;
+
+            this.OnRowsSourceChanged(oldRowsSource, newRowsSource, isTranposeChanged);
+            this.OnColumnsSourceChanged(oldColumnsSource, newColumnsSource, isTranposeChanged);
+
+            this._RowInfo = newTranspose ? this._BaseColmnInfo : this._BaseRowInfo;
+            this._ColInfo = newTranspose ? this._BaseRowInfo : this._BaseColmnInfo;
+        }
+
         private DataGridCellsPanel _DataGridColumnsPanel;
 
-        private BindingBase _RowExpandedBinding;
-        private BindingBase _ColumnExpandedBinding;
+        // 転置状態に則したテーブル行と列の情報
+        private TableFrameInfo _RowInfo;
+        private TableFrameInfo _ColInfo;
 
-        private const double DepthMarginUnit = 12D;
-        private readonly TreeInfoUnit _TreeInfoRow;
-        private readonly TreeInfoUnit _TreeInfoColumn;
+        // 転置状態に関わらないテーブル行と列の情報
+        private readonly TableFrameInfo _BaseRowInfo;
+        private readonly TableFrameInfo _BaseColmnInfo;
 
         private readonly BindingBase _DataSourceBinding;
+        private const double DepthMarginUnit = 12D;
 
         private static readonly DataTemplate _RowHeaderTemplate;
         private static readonly DataTemplate _ColumnHeaderTemplate;
@@ -703,24 +716,53 @@ namespace Toolkit.WPF.Controls
 
         private static readonly ResourceDictionary Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/TreeDataGrid/TreeDataGrid.xaml") };
 
-        private class Tree
+        /// <summary>
+        /// テーブルの行と列の情報を統一的に扱うクラス
+        /// </summary>
+        private class TableFrameInfo
         {
             public string PropertyPath { get; set; }
 
             public string ChildrenPropertyPath { get; set; }
 
-            public string FilterTargetProeprtyPath { get; set; }
+            public string ExpandedPropertyPath
+            {
+                get => this._ExpandedPropertyPath;
+                set => this.UpdateExpandedPropertyPath(value);
+            }
+
+            public string FilterTargetPropertyPath { get; set; }
 
             public TreeInfoUnit TreeInfo { get; }
 
-            public Tree()
+            public BindingBase RowExpandedBinding { get; private set; }
+
+            public BindingBase ColumnExpandedBinding { get; private set; }
+
+            public TableFrameInfo()
             {
                 this.TreeInfo = new TreeInfoUnit();
             }
-        }
 
-        private Tree _Row;
-        private Tree _Col;
+            private void UpdateExpandedPropertyPath(string value)
+            {
+                if( value != this._ExpandedPropertyPath)
+                {
+                    this._ExpandedPropertyPath = value;
+
+                    if (!string.IsNullOrEmpty(this._ExpandedPropertyPath))
+                    {
+                        this.RowExpandedBinding = new Binding(this._ExpandedPropertyPath);
+                        this.ColumnExpandedBinding = new Binding($"Column.Header.{this._ExpandedPropertyPath}")
+                        {
+                            RelativeSource = new RelativeSource(RelativeSourceMode.Self)
+                        };
+                    }
+                }
+            }
+
+            private string _ExpandedPropertyPath;
+        }
 
         /// <summary>
         /// DataGridColumn
@@ -745,15 +787,11 @@ namespace Toolkit.WPF.Controls
 
                 if (this.DataGridOwner is TreeDataGrid grid)
                 {
-                    // 転置状態を考慮して行と列のプロパティ名を取得する
-                    var dataGridRowPropertyPath = grid.Transpose ? grid.ColumnPropertyPath : grid.RowPropertyPath;
-                    var dataGridColumnProperptyPath = grid.Transpose ? grid.RowPropertyPath : grid.ColumnPropertyPath;
-
                     // DataGrid の Row として表示されているものからプロパティパスを取得する
-                    var rowPropertyPath = this.GetPropertyPathValue(dataItem, dataGridRowPropertyPath, true);
+                    var rowPropertyPath = this.GetPropertyPathValue(dataItem, grid._RowInfo.PropertyPath, true);
 
                     // DataGrid の Column として表示されているものからプロパティパスを取得する
-                    var columnPropertyPath = this.GetPropertyPathValue(this.Header, dataGridColumnProperptyPath, false);
+                    var columnPropertyPath = this.GetPropertyPathValue(this.Header, grid._ColInfo.PropertyPath, false);
 
                     bool isExistsRow = !string.IsNullOrWhiteSpace(rowPropertyPath);
                     bool isExistsColumn = !string.IsNullOrWhiteSpace(columnPropertyPath);
@@ -761,7 +799,7 @@ namespace Toolkit.WPF.Controls
                     Binding binding = null;
                     if (isExistsRow && isExistsColumn)
                     {
-                        if (grid.Transpose)
+                        if (grid.EnableTranspose)
                         {
                             binding = new Binding($"{columnPropertyPath}{grid.CellBindingPropertySepalateCharacter}{rowPropertyPath}");
                         }
@@ -835,6 +873,11 @@ namespace Toolkit.WPF.Controls
                 filterTargetPropertyPath = this._ItemAccessor.FilterTargetPropertyPath ?? filterTargetPropertyPath;
 
                 var item = this._TreeInfo.FirstOrDefault().Key;
+                if (item == null)
+                {
+                    return;
+                }
+
                 this._ItemAccessor = new Accessor(item?.GetType(), childrenPropertyPath, expandedPropertyPath, filterTargetPropertyPath);
             }
 
