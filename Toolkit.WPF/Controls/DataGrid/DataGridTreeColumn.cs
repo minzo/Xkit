@@ -671,6 +671,9 @@ namespace Toolkit.WPF.Controls
         {
             if (this._ChildrenPropertyGetMethodInfo?.Invoke(item, null) is IEnumerable<object> children)
             {
+                // 子孫がフィルタにヒットしているかを先にリセットしておく
+                itemInfo.IsHitFilterDescendant = false;
+
                 foreach (var child in children)
                 {
                     if (!this._TreeInfo.TryGetValue(child, out var childInfo))
@@ -686,6 +689,7 @@ namespace Toolkit.WPF.Controls
                     this.UpdateTreeInfo(child, childInfo);
 
                     // 子の状態が更新されたら親にとって子孫がフィルタにヒットしているかを更新する
+                    // 複数の子のうち1つでもヒットしていたら true にするので OR をとる
                     itemInfo.IsHitFilterDescendant |= (childInfo.IsHitFilter || childInfo.IsHitFilterDescendant);
                 }
             }
