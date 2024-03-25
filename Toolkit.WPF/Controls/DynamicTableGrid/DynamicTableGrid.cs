@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Controls.Primitives;
 using System.ComponentModel;
+using static Toolkit.WPF.Controls.DynamicTableGrid.DragAndDrop;
 
 namespace Toolkit.WPF.Controls
 {
@@ -120,43 +121,19 @@ namespace Toolkit.WPF.Controls
         #region 並び替え情報
         
         /// <summary>
-        /// 並べ替え情報
-        /// </summary>
-        public struct ReorderInfo
-        {
-            public enum InsertType
-            {
-                InsertPrev,
-                InsertNext,
-                InsertChild
-            }
-
-            public object Item { get; }
-
-            public object Target { get; }
-
-            public InsertType Type { get; }
-
-            public ReorderInfo(object item, object target, InsertType insertType)
-            {
-                this.Target = target;
-                this.Item = item;
-                this.Type = insertType;
-            }
-        }
-
-        /// <summary>
         /// 並び替えられた際に実行するアクション
         /// </summary>
-        public Action<ReorderInfo> ReorderAction
+        public Action<(object Item, object Target, DragAndDrop.InsertType InsertType)> ReorderAction
         {
-            get { return (Action<ReorderInfo>)this.GetValue(ReorderActionProperty); }
+            get { return (Action<(object Item, object Target, DragAndDrop.InsertType InsertType)>)this.GetValue(ReorderActionProperty); }
             set { this.SetValue(ReorderActionProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for ReorderAction.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ReorderActionProperty =
-            DependencyProperty.Register("ReorderAction", typeof(Action<ReorderInfo>), typeof(DynamicTableGrid), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+            DependencyProperty.Register("ReorderAction", typeof(Action<(object Item, object Target, DragAndDrop.InsertType InsertType)>), typeof(DynamicTableGrid), new PropertyMetadata(null, (d, e) => {
+                ((DynamicTableGrid)d)._DragAndDrop.ReorderAction = (Action<(object Item, object Target, DragAndDrop.InsertType InsertType)>)e.NewValue;
+            }));
 
         #endregion
 
@@ -255,12 +232,10 @@ namespace Toolkit.WPF.Controls
             this.PreviewMouseWheel += this.OnPreviewMouseWheel;
             this.KeyDown += this.OnKeyDown;
 
-            this.PreviewMouseDown += this.TryDrag;
-            this.PreviewMouseMove += this.TryDrag;
-            this.AllowDrop = true;
-            this.Drop += this.Droped;
             this.Loaded += this.OnLoaded;
             this.Unloaded += this.OnUnloaded;
+
+            this._DragAndDrop = new DragAndDrop(this, typeof(DataGridRow), typeof(DataGridRowHeader));
 
             this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Copy, (s, e) => this.OnCopy(), (s, e) => e.CanExecute = true));
             this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Paste, (s, e) => this.OnPaste(), (s, e) => e.CanExecute = true));
@@ -632,82 +607,157 @@ namespace Toolkit.WPF.Controls
             this.SetCurrentValue(DynamicTableGrid.SelectedInfosProperty, cellInfos);
         }
 
-        #region 行のドラッグ & ドロップによる並べ替え
+        #region ドラッグドロップ処理
 
         /// <summary>
-        /// ドラッグ
+        /// ドラッグ&ドロップ処理クラス
         /// </summary>
-        private void TryDrag(object sender, MouseEventArgs e)
+        public class DragAndDrop
         {
-            if (e.LeftButton != MouseButtonState.Pressed)
+            public enum InsertType
             {
-                this._DragElement = null;
-                return;
+                InsertPrev, // 対象の前に挿入
+                InsertNext, // 対象の後に挿入
+                InsertChild // 対象の子として挿入
+            };
+
+            /// <summary>
+            /// 子要素への挿入を有効にする
+            /// </summary>
+            public bool EnableInsertChild { get; set; } = true;
+
+            /// <summary>
+            /// 並べ替え時に呼ばれる処理を設定します
+            /// </summary>
+            public Action<(object Item, object Target, InsertType InsertType)> ReorderAction { get; set; }
+
+            /// <summary>
+            /// コンストラクタ
+            /// </summary>
+            public DragAndDrop(FrameworkElement dragSourceElement, Type dragTargetElementType, Type dragGripElementType = null)
+            {
+                this._DragTargetElementType = dragTargetElementType ?? throw new ArgumentNullException(nameof(dragTargetElementType));
+                this._DragGripElementType = dragGripElementType ?? this._DragTargetElementType;
+
+                dragSourceElement.PreviewMouseDown += this.TryDrag;
+                dragSourceElement.PreviewMouseMove += this.TryDrag;
+                dragSourceElement.Drop += this.Droped;
+                dragSourceElement.AllowDrop = true;
             }
 
-            if (this._DragElement == null)
+            /// <summary>
+            /// ドラッグ処理
+            /// </summary>
+            private void TryDrag(object sender, MouseEventArgs e)
             {
-                var rowHeader = EnumerateParent(this.InputHitTest(e.GetPosition(this)) as FrameworkElement)
-                    .OfType<DataGridRowHeader>()
-                    .FirstOrDefault();
-
-                if (rowHeader?.IsRowSelected == true)
+                // マウスが押されていなかったらドロップ対象をクリアする
+                if (e.LeftButton != MouseButtonState.Pressed)
                 {
-                    this._DragElement = EnumerateParent(rowHeader).OfType<DataGridRow>().FirstOrDefault();
-                    this._DragStartPosition = e.GetPosition(this);
+                    this._DragTargetElement = null;
+                    return;
                 }
 
-                return;
-            }
+                var dropSourceElement = (FrameworkElement)sender;
+                var position = e.GetPosition(dropSourceElement);
 
-            var position = e.GetPosition(this);
-            bool isDragStart 
-                 = Math.Abs(position.X - this._DragStartPosition.X) >= SystemParameters.MinimumHorizontalDragDistance 
-                || Math.Abs(position.Y - this._DragStartPosition.Y) >= SystemParameters.MinimumVerticalDragDistance;
-
-            if (isDragStart)
-            {
-                using (new Adorners.InsertionAdorner(this, typeof(DataGridRow)))
-                using (new Adorners.GhostAdorner(this, this._DragElement, new Point(0, 0)))
+                // ドラッグ対象がまだ無ければマウスの位置から確定して覚える
+                if (this._DragTargetElement == null)
                 {
-                    DragDrop.DoDragDrop(this, this._DragElement, DragDropEffects.All);
-                    this._DragElement = null;
+                    // ドラッグ開始位置を覚える
+                    this._DragStartPosition = position;
+
+                    // ドラッグでつかめるタイプのエレメントが含まれているか調べる
+                    var origin = (FrameworkElement)dropSourceElement.InputHitTest(position);
+                    var grip = EnumerateParent(origin).FirstOrDefault(i => i.GetType() == this._DragGripElementType);
+                    if (grip == null)
+                    {
+                        return;
+                    }
+
+                    // ドラッグ対象を覚える
+                    var target = (FrameworkElement)EnumerateParent(grip)
+                        .FirstOrDefault(i => i.GetType() != this._DragTargetElementType);
+
+                    this._DragTargetElement = target;
+                    return;
+                }
+
+                // ドラッグ開始の閾値を超えているか調べる
+                var dragDistance = position - this._DragStartPosition;
+                var isDragStart
+                    = Math.Abs(dragDistance.X) >= SystemParameters.MinimumHorizontalDragDistance
+                    || Math.Abs(dragDistance.Y) >= SystemParameters.MinimumVerticalDragDistance;
+                if (!isDragStart)
+                {
+                    return;
+                }
+
+                try
+                {
+                    using (new Adorners.InsertionAdorner(dropSourceElement, this._DragTargetElementType) { EnableInsertChild = this.EnableInsertChild })
+                    using (new Adorners.GhostAdorner(dropSourceElement, this._DragTargetElement, new Point(0, 0)))
+                    {
+                        DragDrop.DoDragDrop(dropSourceElement, this._DragTargetElement, DragDropEffects.All);
+                    }
+                }
+                finally
+                {
+                    this._DragTargetElement = null;
                 }
             }
-        }
 
-        /// <summary>
-        /// ドロップ
-        /// </summary>
-        private void Droped(object sender, DragEventArgs e)
-        {
-            if (this._DragElement == null)
+            /// <summary>
+            /// ドロップ処理
+            /// </summary>
+            private void Droped(object sender, DragEventArgs e)
             {
-                return;
+                if (this._DragTargetElement == null)
+                {
+                    return;
+                }
+
+                var dropSourceElement = (FrameworkElement)sender;
+                var origin = (FrameworkElement)this._DragTargetElement.InputHitTest(e.GetPosition(dropSourceElement));
+                var target = (FrameworkElement)EnumerateParent(origin).FirstOrDefault(i => i.GetType() != this._DragTargetElementType);
+
+                if (target != null)
+                {
+                    var point = e.GetPosition(target);
+                    var width = target.ActualWidth;
+                    var height = target.ActualHeight;
+                    var leftTop = target.TranslatePoint(new Point(0D, 0D), this._DragTargetElement);
+                    var rightBottom = target.TranslatePoint(new Point(0D, height), this._DragTargetElement);
+
+                    var isInsertPrev = point.Y <= leftTop.Y + 7D;
+                    var isInsertNext = point.Y >= rightBottom.Y - 7D;
+
+                    if (!isInsertPrev && !isInsertNext && !this.EnableInsertChild)
+                    {
+                        return;
+                    }
+
+                    var insertType = isInsertPrev ? InsertType.InsertPrev
+                                   : isInsertNext ? InsertType.InsertNext
+                                   : InsertType.InsertChild;
+
+                    this.ReorderAction?.Invoke((Item: this._DragTargetElement.DataContext, Target: target.DataContext, InsertType: insertType));
+                }
             }
 
-            var target = EnumerateParent(this.InputHitTest(e.GetPosition(this)) as FrameworkElement)
-                .OfType<DataGridRowHeader>()
-                .FirstOrDefault();
-
-            if (target != null)
+            private static IEnumerable<DependencyObject> EnumerateParent(DependencyObject dp)
             {
-                var point = e.GetPosition(target);
-                var width = target.ActualWidth;
-                var height = target.ActualHeight;
-                var leftTop = target.TranslatePoint(new Point(0D, 0D), this);
-                var rightBottom = target.TranslatePoint(new Point(0D, height), this);
-
-                var insertType = (point.Y <= leftTop.Y + 7D) ? ReorderInfo.InsertType.InsertPrev
-                               : (point.Y >= rightBottom.Y - 7D) ? ReorderInfo.InsertType.InsertNext
-                               : ReorderInfo.InsertType.InsertChild;
-
-                this.ReorderAction?.Invoke(new ReorderInfo(this._DragElement.DataContext, target.DataContext, insertType));
+                while (dp != null && (dp = VisualTreeHelper.GetParent(dp)) != null)
+                {
+                    yield return dp;
+                }
             }
-        }
 
-        private FrameworkElement _DragElement;
-        private Point _DragStartPosition;
+            private FrameworkElement _DragTargetElement;
+            private Point _DragStartPosition;
+
+            private readonly Type _DragTargetElementType;
+            private readonly Type _DragGripElementType;
+        }
 
         #endregion
 
@@ -1035,6 +1085,7 @@ namespace Toolkit.WPF.Controls
             private bool _IsDisposed;
         }
 
+        private readonly DragAndDrop _DragAndDrop;
         private TiltWheel _TiltWheel;
 
         #region Utilities

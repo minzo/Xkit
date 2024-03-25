@@ -1,8 +1,10 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.DirectoryServices;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -10,7 +12,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
+using static Toolkit.WPF.Controls.DynamicTableGrid;
 
 namespace Toolkit.WPF.Controls
 {
@@ -673,6 +677,9 @@ namespace Toolkit.WPF.Controls
                 this.UpdateDataGridColumnHeader(this._DataGridColumnsPanel, null);
                 this._DataGridColumnsPanel.SizeChanged += this.UpdateDataGridColumnHeader;
             }
+
+            new DragAndDrop(this, typeof(DataGridRow), typeof(DataGridRowHeader));
+            new DragAndDrop(this, typeof(DataGridColumnHeader));
         }
 
         /// <summary>
@@ -1281,6 +1288,160 @@ namespace Toolkit.WPF.Controls
             private string _FilterText;
             private Accessor _ItemAccessor;
             private readonly Dictionary<object, TreeInfo> _TreeInfo;
+        }
+
+        #endregion
+
+        #region ドラッグドロップ処理
+
+        /// <summary>
+        /// ドラッグ&ドロップ処理クラス
+        /// </summary>
+        public class DragAndDrop
+        {
+            public enum InsertType
+            {
+                InsertPrev, // 対象の前に挿入
+                InsertNext, // 対象の後に挿入
+                InsertChild // 対象の子として挿入
+            };
+
+            /// <summary>
+            /// 子要素への挿入を有効にする
+            /// </summary>
+            public bool EnableInsertChild { get; set; } = true;
+
+            /// <summary>
+            /// 並べ替え時に呼ばれる処理を設定します
+            /// </summary>
+            public Action<(object Item, object Target, InsertType InsertType)> ReorderAction { get; set; }
+
+            /// <summary>
+            /// コンストラクタ
+            /// </summary>
+            public DragAndDrop(FrameworkElement dragSourceElement, Type dragTargetElementType, Type dragGripElementType = null)
+            {
+                this._DragTargetElementType = dragTargetElementType ?? throw new ArgumentNullException(nameof(dragTargetElementType));
+                this._DragGripElementType = dragGripElementType ?? this._DragTargetElementType;
+
+                dragSourceElement.PreviewMouseDown += this.TryDrag;
+                dragSourceElement.PreviewMouseMove += this.TryDrag;
+                dragSourceElement.Drop += this.Droped;
+                dragSourceElement.AllowDrop = true;
+            }
+
+            /// <summary>
+            /// ドラッグ処理
+            /// </summary>
+            private void TryDrag(object sender, MouseEventArgs e)
+            {
+                // マウスが押されていなかったらドロップ対象をクリアする
+                if (e.LeftButton != MouseButtonState.Pressed)
+                {
+                    this._DragTargetElement = null;
+                    return;
+                }
+
+                var dropSourceElement = (FrameworkElement)sender;
+                var position = e.GetPosition(dropSourceElement);
+
+                // ドラッグ対象がまだ無ければマウスの位置から確定して覚える
+                if (this._DragTargetElement == null)
+                {
+                    // ドラッグ開始位置を覚える
+                    this._DragStartPosition = position;
+
+                    // ドラッグでつかめるタイプのエレメントが含まれているか調べる
+                    var origin = (FrameworkElement)dropSourceElement.InputHitTest(position);
+                    var grip = EnumerateParent(origin).FirstOrDefault(i => i.GetType() == this._DragGripElementType);
+                    if (grip == null)
+                    {
+                        return;
+                    }
+
+                    // ドラッグ対象を覚える
+                    var target = (FrameworkElement)EnumerateParent(grip)
+                        .FirstOrDefault(i => i.GetType() != this._DragTargetElementType);
+
+                    this._DragTargetElement = target;
+                    return;
+                }
+
+                // ドラッグ開始の閾値を超えているか調べる
+                var dragDistance = position - this._DragStartPosition;
+                var isDragStart
+                    = Math.Abs(dragDistance.X) >= SystemParameters.MinimumHorizontalDragDistance
+                    || Math.Abs(dragDistance.Y) >= SystemParameters.MinimumVerticalDragDistance;
+                if (!isDragStart)
+                {
+                    return;
+                }
+
+                try
+                {
+                    using (new Adorners.InsertionAdorner(dropSourceElement, this._DragTargetElementType) { EnableInsertChild = this.EnableInsertChild })
+                    using (new Adorners.GhostAdorner(dropSourceElement, this._DragTargetElement, new Point(0, 0)))
+                    {
+                        DragDrop.DoDragDrop(dropSourceElement, this._DragTargetElement, DragDropEffects.All);
+                    }
+                }
+                finally
+                {
+                    this._DragTargetElement = null;
+                }
+            }
+
+            /// <summary>
+            /// ドロップ処理
+            /// </summary>
+            private void Droped(object sender, DragEventArgs e)
+            {
+                if (this._DragTargetElement == null)
+                {
+                    return;
+                }
+
+                var dropSourceElement = (FrameworkElement)sender;
+                var origin = (FrameworkElement)this._DragTargetElement.InputHitTest(e.GetPosition(dropSourceElement));
+                var target = (FrameworkElement)EnumerateParent(origin).FirstOrDefault(i => i.GetType() != this._DragTargetElementType);
+
+                if (target != null)
+                {
+                    var point = e.GetPosition(target);
+                    var width = target.ActualWidth;
+                    var height = target.ActualHeight;
+                    var leftTop = target.TranslatePoint(new Point(0D, 0D), this._DragTargetElement);
+                    var rightBottom = target.TranslatePoint(new Point(0D, height), this._DragTargetElement);
+
+                    var isInsertPrev = point.Y <= leftTop.Y + 7D;
+                    var isInsertNext = point.Y >= rightBottom.Y - 7D;
+
+                    if (!isInsertPrev && !isInsertNext && !this.EnableInsertChild)
+                    {
+                        return;
+                    }
+
+                    var insertType = isInsertPrev ? InsertType.InsertPrev
+                                   : isInsertNext ? InsertType.InsertNext
+                                   : InsertType.InsertChild;
+
+                    this.ReorderAction?.Invoke((Item: this._DragTargetElement.DataContext, Target: target.DataContext, InsertType: insertType));
+                }
+            }
+
+            private static IEnumerable<DependencyObject> EnumerateParent(DependencyObject dp)
+            {
+                while (dp != null && (dp = VisualTreeHelper.GetParent(dp)) != null)
+                {
+                    yield return dp;
+                }
+            }
+
+            private FrameworkElement _DragTargetElement;
+            private Point _DragStartPosition;
+
+            private readonly Type _DragTargetElementType;
+            private readonly Type _DragGripElementType;
         }
 
         #endregion
