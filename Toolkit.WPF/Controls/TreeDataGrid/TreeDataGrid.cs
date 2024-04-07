@@ -1,20 +1,16 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.DirectoryServices;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using static Toolkit.WPF.Controls.DynamicTableGrid;
 
 namespace Toolkit.WPF.Controls
 {
@@ -678,8 +674,19 @@ namespace Toolkit.WPF.Controls
                 this._DataGridColumnsPanel.SizeChanged += this.UpdateDataGridColumnHeader;
             }
 
-            new DragAndDrop(this, typeof(DataGridRow), typeof(DataGridRowHeader));
+            new DragAndDrop(this, typeof(DataGridRow), typeof(DataGridRowHeader)) { ReorderAction = this.Reorder };
             new DragAndDrop(this, typeof(DataGridColumnHeader));
+        }
+
+        private void Reorder((object Item, object Target, DragAndDrop.InsertType InsertType) arg)
+        {
+
+            //this.Items.Remove(arg.Item);
+
+            //var targetIndex = this.Items.IndexOf(arg.Target);
+            //var insertIndex = targetIndex + (int)arg.InsertType;
+
+            //this.Items.Insert(insertIndex, arg.Item);
         }
 
         /// <summary>
@@ -1301,9 +1308,9 @@ namespace Toolkit.WPF.Controls
         {
             public enum InsertType
             {
-                InsertPrev, // 対象の前に挿入
-                InsertNext, // 対象の後に挿入
-                InsertChild // 対象の子として挿入
+                InsertPrev = -1, // 対象の前に挿入
+                InsertNext =  1, // 対象の後に挿入
+                InsertChild = 0// 対象の子として挿入
             };
 
             /// <summary>
@@ -1326,8 +1333,10 @@ namespace Toolkit.WPF.Controls
 
                 dragSourceElement.PreviewMouseDown += this.TryDrag;
                 dragSourceElement.PreviewMouseMove += this.TryDrag;
-                dragSourceElement.Drop += this.Droped;
                 dragSourceElement.AllowDrop = true;
+                dragSourceElement.PreviewDrop += this.Droped;
+                // カーソルの状態を Drop を受け付ける見た目にする
+                dragSourceElement.GiveFeedback += (s, e) => e.Handled = true;
             }
 
             /// <summary>
@@ -1382,7 +1391,7 @@ namespace Toolkit.WPF.Controls
                     using (new Adorners.InsertionAdorner(dropSourceElement, this._DragTargetElementType) { EnableInsertChild = this.EnableInsertChild })
                     using (new Adorners.GhostAdorner(dropSourceElement, this._DragTargetElement, new Point(0, 0)))
                     {
-                        DragDrop.DoDragDrop(dropSourceElement, this._DragTargetElement, DragDropEffects.All);
+                        DragDrop.DoDragDrop(dropSourceElement, this._DragTargetElement, DragDropEffects.Move);
                     }
                 }
                 finally
@@ -1402,7 +1411,7 @@ namespace Toolkit.WPF.Controls
                 }
 
                 var dropSourceElement = (FrameworkElement)sender;
-                var origin = (FrameworkElement)this._DragTargetElement.InputHitTest(e.GetPosition(dropSourceElement));
+                var origin = (FrameworkElement)dropSourceElement.InputHitTest(e.GetPosition(dropSourceElement));
                 var target = (FrameworkElement)EnumerateParent(origin).FirstOrDefault(i => i.GetType() != this._DragTargetElementType);
 
                 if (target != null)
@@ -1426,6 +1435,9 @@ namespace Toolkit.WPF.Controls
                                    : InsertType.InsertChild;
 
                     this.ReorderAction?.Invoke((Item: this._DragTargetElement.DataContext, Target: target.DataContext, InsertType: insertType));
+
+                    e.Effects = DragDropEffects.Move;
+                    e.Handled = true;
                 }
             }
 

@@ -12,7 +12,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Controls.Primitives;
 using System.ComponentModel;
-using static Toolkit.WPF.Controls.DynamicTableGrid.DragAndDrop;
 
 namespace Toolkit.WPF.Controls
 {
@@ -616,9 +615,9 @@ namespace Toolkit.WPF.Controls
         {
             public enum InsertType
             {
-                InsertPrev, // 対象の前に挿入
-                InsertNext, // 対象の後に挿入
-                InsertChild // 対象の子として挿入
+                InsertPrev = -1, // 対象の前に挿入
+                InsertNext = 1, // 対象の後に挿入
+                InsertChild = 0// 対象の子として挿入
             };
 
             /// <summary>
@@ -641,8 +640,10 @@ namespace Toolkit.WPF.Controls
 
                 dragSourceElement.PreviewMouseDown += this.TryDrag;
                 dragSourceElement.PreviewMouseMove += this.TryDrag;
-                dragSourceElement.Drop += this.Droped;
                 dragSourceElement.AllowDrop = true;
+                dragSourceElement.PreviewDrop += this.Droped;
+                // カーソルの状態を Drop を受け付ける見た目にする
+                dragSourceElement.GiveFeedback += (s, e) => e.Handled = true;
             }
 
             /// <summary>
@@ -697,7 +698,7 @@ namespace Toolkit.WPF.Controls
                     using (new Adorners.InsertionAdorner(dropSourceElement, this._DragTargetElementType) { EnableInsertChild = this.EnableInsertChild })
                     using (new Adorners.GhostAdorner(dropSourceElement, this._DragTargetElement, new Point(0, 0)))
                     {
-                        DragDrop.DoDragDrop(dropSourceElement, this._DragTargetElement, DragDropEffects.All);
+                        DragDrop.DoDragDrop(dropSourceElement, this._DragTargetElement, DragDropEffects.Move);
                     }
                 }
                 finally
@@ -717,7 +718,7 @@ namespace Toolkit.WPF.Controls
                 }
 
                 var dropSourceElement = (FrameworkElement)sender;
-                var origin = (FrameworkElement)this._DragTargetElement.InputHitTest(e.GetPosition(dropSourceElement));
+                var origin = (FrameworkElement)dropSourceElement.InputHitTest(e.GetPosition(dropSourceElement));
                 var target = (FrameworkElement)EnumerateParent(origin).FirstOrDefault(i => i.GetType() != this._DragTargetElementType);
 
                 if (target != null)
@@ -741,6 +742,9 @@ namespace Toolkit.WPF.Controls
                                    : InsertType.InsertChild;
 
                     this.ReorderAction?.Invoke((Item: this._DragTargetElement.DataContext, Target: target.DataContext, InsertType: insertType));
+
+                    e.Effects = DragDropEffects.Move;
+                    e.Handled = true;
                 }
             }
 
