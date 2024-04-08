@@ -13,7 +13,7 @@ namespace Corekit.Models
     }
 
 
-    public interface IDynamicTable<TItem, TValue> : IDynamicTable, ICollection<TItem> 
+    public interface IDynamicTable<TItem, TValue> : IDynamicTable, IReadOnlyCollection<TItem> 
         where TItem : ICustomTypeDescriptor
     {
         TValue GetPropertyValue(string rowName, string colName);
