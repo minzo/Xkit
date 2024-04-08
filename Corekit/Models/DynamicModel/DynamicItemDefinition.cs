@@ -8,13 +8,21 @@ using System.Linq;
 
 namespace Corekit.Models
 {
-    using DynamicPropertyCollection = ObservableCollection<IDynamicProperty>;
-
     /// <summary>
     /// アイテム定義
     /// </summary>
-    public interface IDynamicItemDefinition : IEnumerable<IDynamicPropertyDefinition>, IDynamicPropertyDefinition
+    public interface IDynamicItemDefinition : IEnumerable<IDynamicPropertyDefinition>
     {
+        /// <summary>
+        /// プロパティ定義の名前
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
+        /// 読み取り専用・編集不可能か（nullは未指定）
+        /// </summary>
+        bool? IsReadOnly { get; }
+
         /// <summary>
         /// 削除可能か
         /// </summary>
@@ -57,28 +65,9 @@ namespace Corekit.Models
         public bool IsMovable { get; set; }
 
         /// <summary>
-        /// 表示されるか
-        /// </summary>
-        public bool IsVisible => true;
-
-        /// <summary>
-        /// 型
-        /// </summary>
-        public Type ValueType => typeof(DynamicItem);
-
-        /// <summary>
         /// インデクサ
         /// </summary>
         public IDynamicPropertyDefinition this[int index] => this._Collection[index];
-
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        public DynamicItemDefinition()
-        {
-            this._Collection = new ObservableCollection<IDynamicPropertyDefinition>();
-            this._Collection.CollectionChanged += this.OnCollectionChanged;
-        }
 
         /// <summary>
         /// コンストラクタ
@@ -100,16 +89,6 @@ namespace Corekit.Models
         }
 
         /// <summary>
-        /// デフォルト値を取得します
-        /// </summary>
-        public object GetDefaultValue() => new DynamicPropertyCollection();
-
-        /// <summary>
-        /// プロパティを生成する
-        /// </summary>
-        public IDynamicProperty Create(IDynamicItem owner) => new DynamicItem(this);
-
-        /// <summary>
         /// 追加
         /// </summary>
         public void Add(IDynamicPropertyDefinition definition)
@@ -124,23 +103,6 @@ namespace Corekit.Models
         {
             this._Collection.Remove(definition);
         }
-
-        /// <summary>
-        /// 挿入
-        /// </summary>
-        public void Insert(int index, IDynamicPropertyDefinition definition)
-        {
-            this._Collection.Insert(index, definition);
-        }
-
-        /// <summary>
-        /// 移動
-        /// </summary>
-        public void Move(int oldIndex, int newIndex)
-        {
-            this._Collection.Move(oldIndex, newIndex);
-        }
-
 
         /// <summary>
         /// コレクションを反復処理する列挙子を返す
@@ -212,7 +174,7 @@ namespace Corekit.Models
         {
             this.PropertyChanged?.Invoke(this, e);
         }
-
+        
         private readonly ObservableCollection<IDynamicPropertyDefinition> _Collection;
 
         #region Event

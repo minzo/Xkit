@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -7,19 +6,13 @@ using System.Linq;
 
 namespace Corekit.Models
 {
-    using DynamicPropertyCollection = System.Collections.ObjectModel.ObservableCollection<IDynamicProperty>;
+    using DynamicPropertyCollection = List<IDynamicProperty>;
 
     /// <summary>
-    /// InheritanceItem
+    /// DynamicItem
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Name:{Definition.Name} Count:{Value.Count} IsInherited:{IsInherited}")]
-    public class InheritanceItem : InheritanceProperty<DynamicPropertyCollection>
-        , IDynamicItem
-        , ICustomTypeDescriptor
-        , IReadOnlyCollection<IDynamicProperty>
-        , ICollection
-        , IReadOnlyList<IDynamicProperty>
-        , ITypedList
+    public class InheritanceItem : InheritanceProperty<DynamicPropertyCollection>, IDynamicItem, ICustomTypeDescriptor
     {
         /// <summary>
         /// 定義
@@ -29,16 +22,14 @@ namespace Corekit.Models
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public InheritanceItem()
-            : base(definition__, null)
+        public InheritanceItem() : base(definition__, null)
         {
         }
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public InheritanceItem(IDynamicItemDefinition definition)
-            : base(definition, null)
+        public InheritanceItem(IDynamicItemDefinition definition) : this()
         {
             this.Attach(definition);
         }
@@ -65,9 +56,9 @@ namespace Corekit.Models
                 this.AddProperty(i.Create(this));
             }
 
-            this.DisableInheritance();
-
             this._IsAttached = true;
+
+            this.DisableInheritance();
 
             return this;
         }
@@ -221,7 +212,7 @@ namespace Corekit.Models
         {
             if (e.Action == NotifyCollectionChangedAction.Move)
             {
-                if (e.OldItems != null)
+                if(e.OldItems != null)
                 {
                     foreach (var definition in e.OldItems.Cast<IDynamicPropertyDefinition>())
                     {
@@ -285,35 +276,6 @@ namespace Corekit.Models
         }
         public PropertyDescriptorCollection GetProperties(Attribute[] attributes) => this.GetProperties();
         public object GetPropertyOwner(PropertyDescriptor pd) => this;
-
-        #endregion
-
-        #region ITypedList
-
-        public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors) => this.GetProperties();
-
-        public string GetListName(PropertyDescriptor[] listAccessors) => this.Definition.Name;
-
-        #endregion
-
-        #region ICollection / IList
-
-        public int Count => this.Value.Count;
-
-        public bool IsSynchronized => false;
-
-        public object SyncRoot => this.Value;
-
-        public IDynamicProperty this[int index] => this.Value[index];
-
-        public void CopyTo(Array array, int index)
-        {
-            throw new NotSupportedException();
-        }
-
-        public IEnumerator<IDynamicProperty> GetEnumerator() => this.Value.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         #endregion
 

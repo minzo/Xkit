@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Xml.Linq;
 using Corekit.Extensions;
 
 namespace Corekit.Models
@@ -12,7 +11,7 @@ namespace Corekit.Models
     /// <summary>
     /// DynamicTable
     /// </summary>
-    public class DynamicTable<T> : DynamicItem, IDynamicTable<DynamicItem, T>
+    public class DynamicTable<T> : TypedCollection<DynamicItem>, IDynamicTable<DynamicItem, T>
     {
         /// <summary>
         /// 行定義
@@ -36,16 +35,6 @@ namespace Corekit.Models
         {
             this._Properties = new ObservableCollection<IDynamicPropertyDefinition>();
             this._Properties.CollectionChanged += this.OnPropertyDefinitionsChanged;
-
-            this._ItemsDefinition = new DynamicItemDefinition();
-            base.Attach(this._ItemsDefinition);
-
-            this.Value.CollectionChanged += this.OnItemDefinitionsChanged;
-        }
-
-        private void Value_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -96,7 +85,7 @@ namespace Corekit.Models
             // 行を追加
             foreach (var row in this.Rows)
             {
-                this.AddItemDefinition(this.CreateItemDefinition(row));
+                this.AddItem(this.CreateDynamicItem(row));
             }
 
             // 列定義追従
@@ -126,16 +115,16 @@ namespace Corekit.Models
                 case NotifyCollectionChangedAction.Move:
                     e.OldItems?
                         .Cast<IDynamicTableFrame>()
-                        .ForEach(i => this.MoveItemDefinition(i.Name, e.NewStartingIndex));
+                        .ForEach(i => this.MoveItem(i.Name, e.NewStartingIndex));
                     break;
 
                 case NotifyCollectionChangedAction.Replace:
                     throw new NotImplementedException();
 
                 case NotifyCollectionChangedAction.Reset:
-                    this.Value.Select(i => i.Definition.Name)
+                    this.Select(i => i.Definition.Name)
                         .ToList()
-                        .ForEach(i => this.RemoveItemDefinition(i));
+                        .ForEach(i => this.RemoveItem(i));
                     break;
 
                 case NotifyCollectionChangedAction.Add:
@@ -143,12 +132,12 @@ namespace Corekit.Models
                 default:
                     e.OldItems?
                         .Cast<IDynamicTableFrame>()
-                        .ForEach(i => this.RemoveItemDefinition(i.Name));
+                        .ForEach(i => this.RemoveItem(i.Name));
 
                     int index = e.NewStartingIndex;
                     e.NewItems?
                         .Cast<IDynamicTableFrame>()
-                        .ForEach(i => this.InsertItemDefinition(index++, this.CreateItemDefinition(i)));
+                        .ForEach(i => this.InsertItem(index++, this.CreateDynamicItem(i)));
                     break;
             }
         }
@@ -191,23 +180,12 @@ namespace Corekit.Models
         }
 
         /// <summary>
-        /// プロパティ定義数変更通知（行定義の変更に伴って呼ばれる）
-        /// </summary>
-        private void OnItemDefinitionsChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            this.CollectionChanged?.Invoke(this, e);
-        }
-
-        /// <summary>
         /// プロパティ定義数変更通知（列定義の変更に伴って呼ばれる）
         /// </summary>
         private void OnPropertyDefinitionsChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             this.PropertyDefinitionsChanged?.Invoke(this, e);
         }
-
-        /// アイテム数変更通知
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
 
         /// プロパティ定義数変更通知
         public event NotifyCollectionChangedEventHandler PropertyDefinitionsChanged;
@@ -222,7 +200,7 @@ namespace Corekit.Models
         /// </summary>
         public T GetPropertyValue(string rowName, string colName)
         {
-            return (T)this.Value.Cast<DynamicItem>().FirstOrDefault(i => i.Definition.Name == rowName)?.GetPropertyValue(colName);
+            return (T)this.FirstOrDefault(i => i.Definition.Name == rowName)?.GetPropertyValue(colName);
         }
 
         /// <summary>
@@ -230,7 +208,7 @@ namespace Corekit.Models
         /// </summary>
         public void SetPropertyValue(string rowName, string colName, T value)
         {
-            this.Value.Cast<DynamicItem>().FirstOrDefault(i => i.Definition.Name == rowName)?.SetPropertyValue(colName, value);
+            this.FirstOrDefault(i => i.Definition.Name == rowName)?.SetPropertyValue(colName, value);
         }
 
         #endregion
@@ -252,52 +230,57 @@ namespace Corekit.Models
         }
 
         /// <summary>
+        /// 行を生成する
+        /// </summary>
+        private DynamicItem CreateDynamicItem(IDynamicTableFrame row)
+        {
+            return new DynamicItem(this.CreateItemDefinition(row));
+        }
+
+        /// <summary>
         /// 行を追加する
         /// </summary>
-        private void AddItemDefinition(IDynamicItemDefinition item)
+        private void AddItem(DynamicItem item)
         {
-            this.InsertItemDefinition(-1, item);
+            this.InsertItem(-1, item);
         }
 
         /// <summary>
         /// 行を挿入する
         /// </summary>
-        private void InsertItemDefinition(int index, IDynamicItemDefinition item)
+        private new void InsertItem(int index, DynamicItem item)
         {
             item.PropertyChanged += this.OnPropertyChanged;
 
             if (index < 0)
             {
-                this._ItemsDefinition.Add(item);
+                this.Add(item);
             }
             else
             {
-                this._ItemsDefinition.Insert(index, item);
+                this.Insert(index, item);
             }
         }
 
         /// <summary>
         /// 行を削除する
         /// </summary>
-        private void RemoveItemDefinition(string name)
+        private void RemoveItem(string rowName)
         {
-            this._ItemsDefinition.Remove(this._ItemsDefinition.FirstOrDefault(i => i.Name == name));
+            var item = this.FirstOrDefault(i => i.Definition.Name == rowName);
+            if (item != null)
+            {
+                this.Remove(item);
+                item.PropertyChanged -= this.OnPropertyChanged;
+            }
         }
 
         /// <summary>
-        /// 列を移動する
+        /// 行を移動する
         /// </summary>
-        private void MoveItemDefinition(string propertyName, int newIndex)
+        private void MoveItem(string rowName, int newIndex)
         {
-            this.MoveItemDefinition(this._ItemsDefinition.IndexOf(i => i.Name == propertyName), newIndex);
-        }
-
-        /// <summary>
-        /// 列を移動する
-        /// </summary>
-        private void MoveItemDefinition(int oldIndex, int newIndex)
-        {
-            this._ItemsDefinition.Move(oldIndex, newIndex);
+            this.MoveItem(this.IndexOf(i => i.Definition.Name == rowName), newIndex);
         }
 
         #endregion
@@ -369,7 +352,7 @@ namespace Corekit.Models
             if (this.Rows == this.Cols)
             {
                 var item = sender as DynamicItem;
-                this.Value.Cast<InheritanceItem>().FirstOrDefault(i => i.Definition.Name == e.PropertyName)?
+                this.FirstOrDefault(i => i.Definition.Name == e.PropertyName)?
                     .SetPropertyValue(item.Definition.Name, item.GetPropertyValue(e.PropertyName));
             }
 
@@ -378,16 +361,9 @@ namespace Corekit.Models
 
         #endregion
 
-        #region IDynamicTable
-
-        public new IEnumerator<DynamicItem> GetEnumerator() => this.Value.Cast<DynamicItem>().GetEnumerator();
-
-        #endregion
-
         protected IReadOnlyList<IDynamicPropertyDefinition> Properties => this._Properties;
 
         private bool _IsAttached = false;
-        private readonly DynamicItemDefinition _ItemsDefinition;
         private readonly ObservableCollection<IDynamicPropertyDefinition> _Properties;
     }
 }
