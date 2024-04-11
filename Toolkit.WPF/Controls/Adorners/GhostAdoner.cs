@@ -22,6 +22,16 @@ namespace Toolkit.WPF.Controls.Adorners
         /// <summary>
         /// コンストラクタ
         /// </summary>
+        public GhostAdorner(UIElement adornedElement, UIElement ghostElement)
+            : this(adornedElement, ghostElement, new Point(1, 1))
+        {
+        }
+
+        /// <summary>
+        /// コンストラクタ
+        /// オフセットが (0, 0) だと Ghost がマウスの座標になるため
+        /// 他のコントロールの Drop イベントなどを阻害する可能性がありますのでご注意ください
+        /// </summary>
         public GhostAdorner(UIElement adornedElement, UIElement ghostElement, Point offset)
             : base(adornedElement)
         {

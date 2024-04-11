@@ -674,8 +674,9 @@ namespace Toolkit.WPF.Controls
                 this._DataGridColumnsPanel.SizeChanged += this.UpdateDataGridColumnHeader;
             }
 
-            new DragAndDrop(this, typeof(DataGridRow), typeof(DataGridRowHeader)) { ReorderAction = this.Reorder };
-            new DragAndDrop(this, typeof(DataGridColumnHeader));
+
+            new DragAndDrop(this, this, typeof(DataGridRow), typeof(DataGridRowHeader)) { ReorderAction = this.Reorder };
+            new DragAndDrop(this, this, typeof(DataGridColumnHeader), typeof(DataGridColumnHeader));
         }
 
         private void Reorder((object Item, object Target, DragAndDrop.InsertType InsertType) arg)
@@ -1326,17 +1327,19 @@ namespace Toolkit.WPF.Controls
             /// <summary>
             /// コンストラクタ
             /// </summary>
-            public DragAndDrop(FrameworkElement dragSourceElement, Type dragTargetElementType, Type dragGripElementType = null)
+            public DragAndDrop(FrameworkElement dragSourceElement, FrameworkElement dropTargetElement, Type dragElementType, Type dragGripElementType = null)
             {
-                this._DragTargetElementType = dragTargetElementType ?? throw new ArgumentNullException(nameof(dragTargetElementType));
-                this._DragGripElementType = dragGripElementType ?? this._DragTargetElementType;
+                this._DragElementType = dragElementType ?? throw new ArgumentNullException(nameof(dragElementType));
+                this._DragGripElementType = dragGripElementType ?? this._DragElementType;
 
+                // Drag 開始の起点となる Element
                 dragSourceElement.PreviewMouseDown += this.TryDrag;
                 dragSourceElement.PreviewMouseMove += this.TryDrag;
-                dragSourceElement.AllowDrop = true;
-                dragSourceElement.PreviewDrop += this.Droped;
-                // カーソルの状態を Drop を受け付ける見た目にする
-                dragSourceElement.GiveFeedback += (s, e) => e.Handled = true;
+
+                // Drop の対象となる Element
+                dropTargetElement.AllowDrop = true;
+                dropTargetElement.Drop += this.Droped;
+                dropTargetElement.GiveFeedback += (s, e) => e.Handled = true; // Drop を許可する見た目になるようにする
             }
 
             /// <summary>
@@ -1347,7 +1350,7 @@ namespace Toolkit.WPF.Controls
                 // マウスが押されていなかったらドロップ対象をクリアする
                 if (e.LeftButton != MouseButtonState.Pressed)
                 {
-                    this._DragTargetElement = null;
+                    this._DragElement = null;
                     return;
                 }
 
@@ -1355,7 +1358,7 @@ namespace Toolkit.WPF.Controls
                 var position = e.GetPosition(dropSourceElement);
 
                 // ドラッグ対象がまだ無ければマウスの位置から確定して覚える
-                if (this._DragTargetElement == null)
+                if (this._DragElement == null)
                 {
                     // ドラッグ開始位置を覚える
                     this._DragStartPosition = position;
@@ -1370,9 +1373,9 @@ namespace Toolkit.WPF.Controls
 
                     // ドラッグ対象を覚える
                     var target = (FrameworkElement)EnumerateParent(grip)
-                        .FirstOrDefault(i => i.GetType() != this._DragTargetElementType);
+                        .FirstOrDefault(i => i.GetType() == this._DragElementType);
 
-                    this._DragTargetElement = target;
+                    this._DragElement = target;
                     return;
                 }
 
@@ -1388,15 +1391,15 @@ namespace Toolkit.WPF.Controls
 
                 try
                 {
-                    using (new Adorners.InsertionAdorner(dropSourceElement, this._DragTargetElementType) { EnableInsertChild = this.EnableInsertChild })
-                    using (new Adorners.GhostAdorner(dropSourceElement, this._DragTargetElement, new Point(0, 0)))
+                    using (new Adorners.InsertionAdorner(dropSourceElement, this._DragElementType) { EnableInsertChild = this.EnableInsertChild })
+                    using (new Adorners.GhostAdorner(dropSourceElement, this._DragElement))
                     {
-                        DragDrop.DoDragDrop(dropSourceElement, this._DragTargetElement, DragDropEffects.Move);
+                        DragDrop.DoDragDrop(this._DragElement, this._DragElement.DataContext, DragDropEffects.Move);
                     }
                 }
                 finally
                 {
-                    this._DragTargetElement = null;
+                    this._DragElement = null;
                 }
             }
 
@@ -1405,22 +1408,22 @@ namespace Toolkit.WPF.Controls
             /// </summary>
             private void Droped(object sender, DragEventArgs e)
             {
-                if (this._DragTargetElement == null)
+                if (this._DragElement == null)
                 {
                     return;
                 }
 
                 var dropSourceElement = (FrameworkElement)sender;
                 var origin = (FrameworkElement)dropSourceElement.InputHitTest(e.GetPosition(dropSourceElement));
-                var target = (FrameworkElement)EnumerateParent(origin).FirstOrDefault(i => i.GetType() != this._DragTargetElementType);
+                var target = (FrameworkElement)EnumerateParent(origin).FirstOrDefault(i => i.GetType() != this._DragElementType);
 
                 if (target != null)
                 {
                     var point = e.GetPosition(target);
                     var width = target.ActualWidth;
                     var height = target.ActualHeight;
-                    var leftTop = target.TranslatePoint(new Point(0D, 0D), this._DragTargetElement);
-                    var rightBottom = target.TranslatePoint(new Point(0D, height), this._DragTargetElement);
+                    var leftTop = target.TranslatePoint(new Point(0D, 0D), this._DragElement);
+                    var rightBottom = target.TranslatePoint(new Point(0D, height), this._DragElement);
 
                     var isInsertPrev = point.Y <= leftTop.Y + 7D;
                     var isInsertNext = point.Y >= rightBottom.Y - 7D;
@@ -1434,7 +1437,7 @@ namespace Toolkit.WPF.Controls
                                    : isInsertNext ? InsertType.InsertNext
                                    : InsertType.InsertChild;
 
-                    this.ReorderAction?.Invoke((Item: this._DragTargetElement.DataContext, Target: target.DataContext, InsertType: insertType));
+                    this.ReorderAction?.Invoke((Item: this._DragElement.DataContext, Target: target.DataContext, InsertType: insertType));
 
                     e.Effects = DragDropEffects.Move;
                     e.Handled = true;
@@ -1449,10 +1452,10 @@ namespace Toolkit.WPF.Controls
                 }
             }
 
-            private FrameworkElement _DragTargetElement;
+            private FrameworkElement _DragElement;
             private Point _DragStartPosition;
 
-            private readonly Type _DragTargetElementType;
+            private readonly Type _DragElementType;
             private readonly Type _DragGripElementType;
         }
 
