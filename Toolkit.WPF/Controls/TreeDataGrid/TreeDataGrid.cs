@@ -238,6 +238,37 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
+        #region CellTemplate
+
+        /// <summary>
+        /// CellTemplate
+        /// </summary>
+        public DataTemplate CellTemplate
+        {
+            get { return (DataTemplate)this.GetValue(CellTemplateProperty); }
+            set { this.SetValue(CellTemplateProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CellTemplate.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CellTemplateProperty =
+            DependencyProperty.Register("CellTemplate", typeof(DataTemplate), typeof(TreeDataGrid), new PropertyMetadata(null));
+
+
+        /// <summary>
+        /// CellEditingTemplate
+        /// </summary>
+        public DataTemplate CellEditingTemplate
+        {
+            get { return (DataTemplate)this.GetValue(CellEditingTemplateProperty); }
+            set { this.SetValue(CellEditingTemplateProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CellEditingTemplate.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CellEditingTemplateProperty =
+            DependencyProperty.Register("CellEditingTemplate", typeof(DataTemplate), typeof(TreeDataGrid), new PropertyMetadata(null));
+
+        #endregion
+
         #region Treeプロパティ関連
 
         /// <summary>
@@ -333,6 +364,7 @@ namespace Toolkit.WPF.Controls
                 {
                     this._RowInfo.TreeInfo.Add(item);
                 }
+
                 this._RowInfo.TreeInfo.Setup(this._RowInfo.ChildrenPropertyPath, this._RowInfo.ExpandedPropertyPath, this._RowInfo.FilterTargetPropertyPath);
                 this._RowInfo.TreeInfo.UpdateTreeInfoAll();
             }
@@ -504,6 +536,8 @@ namespace Toolkit.WPF.Controls
                 Binding = this._DataSourceBinding,
                 HeaderTemplate = _ColumnHeaderTemplate,
                 Header = item,
+                CellTemplate = this.CellTemplate,
+                CellEditingTemplate = this.CellEditingTemplate,
                 CellTemplateSelector = this.CellTemplateSelector,
                 CellEditingTemplateSelector = this.CellEditingTemplateSelector,
             };
@@ -681,13 +715,26 @@ namespace Toolkit.WPF.Controls
 
         private void Reorder((object Item, object Target, DragAndDrop.InsertType InsertType) arg)
         {
+            if ((this.RowsSource ?? this.Items) is IList list)
+            {
+                switch (arg.InsertType)
+                {
+                    case DragAndDrop.InsertType.InsertPrev:
+                        this._BaseRowInfo.TreeInfo.MoveInsertBefore(arg.Item, arg.Target);
+                        break;
+                    case DragAndDrop.InsertType.InsertNext:
+                        this._BaseRowInfo.TreeInfo.MoveInsertAfter(arg.Item, arg.Target);
+                        break;
+                    case DragAndDrop.InsertType.InsertChild:
+                        break;
+                }
 
-            //this.Items.Remove(arg.Item);
-
-            //var targetIndex = this.Items.IndexOf(arg.Target);
-            //var insertIndex = targetIndex + (int)arg.InsertType;
-
-            //this.Items.Insert(insertIndex, arg.Item);
+                // コレクション変更通知が出ない場合は自分で並びを更新する
+                if (!(list is INotifyCollectionChanged))
+                {
+                    this.Items.Refresh();
+                }
+            }
         }
 
         /// <summary>
@@ -727,7 +774,7 @@ namespace Toolkit.WPF.Controls
         private static readonly DataTemplate _ColumnHeaderTemplate;
 
         private static readonly BindingBase _RowHeaderBinding = new Binding("DataContext") { RelativeSource = new RelativeSource(RelativeSourceMode.Self) };
-        private static readonly MethodInfo _MethodInfoDataGridColumnGetDataGridOwner = typeof(DataGridColumn).GetProperty("DataGridOwner", BindingFlags.NonPublic | BindingFlags.Instance).GetMethod;
+        private static readonly MethodInfo _MethodInfoDataGridColumnGetDataGridOwner = typeof(DataGridColumn).GetProperty("DataGridOwner", BindingFlags.NonPublic | BindingFlags.Instance)?.GetMethod;
 
         private static readonly ResourceDictionary Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/TreeDataGrid/TreeDataGrid.xaml") };
 
@@ -738,7 +785,10 @@ namespace Toolkit.WPF.Controls
         {
             public string PropertyPath { get; set; }
 
-            public string ChildrenPropertyPath { get; set; }
+            public string ChildrenPropertyPath {
+                get => this._ChildrenPropertyPath;
+                set => this.UpdateChildrenPropertyPath(value);
+            }
 
             public string ExpandedPropertyPath
             {
@@ -759,11 +809,21 @@ namespace Toolkit.WPF.Controls
                 this.TreeInfo = new TreeInfoUnit();
             }
 
+            private void UpdateChildrenPropertyPath(string value)
+            {
+                if (this._ChildrenPropertyPath != value)
+                {
+                    this._ChildrenPropertyPath = value;
+                    this.TreeInfo.Setup(this._ChildrenPropertyPath, this._ExpandedPropertyPath, this.FilterTargetPropertyPath);
+                }
+            }
+
             private void UpdateExpandedPropertyPath(string value)
             {
                 if( value != this._ExpandedPropertyPath)
                 {
                     this._ExpandedPropertyPath = value;
+                    this.TreeInfo.Setup(this._ChildrenPropertyPath, this._ExpandedPropertyPath, this.FilterTargetPropertyPath);
 
                     if (!string.IsNullOrEmpty(this._ExpandedPropertyPath))
                     {
@@ -776,6 +836,7 @@ namespace Toolkit.WPF.Controls
                 }
             }
 
+            private string _ChildrenPropertyPath;
             private string _ExpandedPropertyPath;
         }
 
@@ -850,11 +911,11 @@ namespace Toolkit.WPF.Controls
                     var itemPropertyInfo = rowItemProperties.FirstOrDefault(i => i.Name == propertyPath && i.PropertyType == typeof(string));
                     if (itemPropertyInfo?.Descriptor is PropertyDescriptor descriptor)
                     {
-                        return (string)descriptor.GetValue(dataItem);
+                        return descriptor.GetValue(dataItem)?.ToString();
                     }
                 }
 
-                return (string)dataItem.GetType().GetProperty(propertyPath).GetValue(dataItem);
+                return dataItem.GetType()?.GetProperty(propertyPath)?.GetValue(dataItem)?.ToString();
             }
         }
 
@@ -878,22 +939,17 @@ namespace Toolkit.WPF.Controls
             /// </summary>
             public void Setup(string childrenPropertyPath, string expandedPropertyPath, string filterTargetPropertyPath)
             {
-                if (this._ItemAccessor.IsValid)
-                {
-                    return;
-                }
-
-                childrenPropertyPath = this._ItemAccessor.ChildrenPropertyPath ?? childrenPropertyPath;
-                expandedPropertyPath = this._ItemAccessor.ExpandedPropertyPath ?? expandedPropertyPath;
-                filterTargetPropertyPath = this._ItemAccessor.FilterTargetPropertyPath ?? filterTargetPropertyPath;
-
                 var item = this._TreeInfo.FirstOrDefault().Key;
                 if (item == null)
                 {
                     return;
                 }
 
-                this._ItemAccessor = new Accessor(item?.GetType(), childrenPropertyPath, expandedPropertyPath, filterTargetPropertyPath);
+                var accessor = new Accessor(item.GetType(), childrenPropertyPath, expandedPropertyPath, filterTargetPropertyPath);
+                if (!Accessor.Equals(ref accessor, ref this._ItemAccessor))
+                {
+                    this._ItemAccessor = new Accessor(item.GetType(), childrenPropertyPath, expandedPropertyPath, filterTargetPropertyPath);
+                }
             }
 
             /// <summary>
@@ -924,6 +980,62 @@ namespace Toolkit.WPF.Controls
             public bool Remove(object item)
             {
                 return this._TreeInfo.Remove(item);
+            }
+
+            /// <summary>
+            /// 要素を指定したターゲットの前に移動します
+            /// </summary>
+            public bool MoveInsertBefore(object item, object target)
+            {
+                var itemParent = this.FindParent(item);
+                var targetParent = this.FindParent(target);
+
+                if (this._ItemAccessor.GetChildren(itemParent) is IList removeList &&
+                    this._ItemAccessor.GetChildren(targetParent) is IList insertList)
+                {
+                    removeList.Remove(item);
+
+                    var insertIndex = insertList.IndexOf(target);
+                    insertList.Insert(insertIndex, item);
+
+                    if (this._TreeInfo.TryGetValue(targetParent, out TreeInfo parentInfo))
+                    {
+                        this.UpdateTreeInfo(targetParent, parentInfo);
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            /// <summary>
+            /// 要素を指定したターゲットの後に移動します
+            /// </summary>
+            public bool MoveInsertAfter(object item, object target)
+            {
+                // target が item の子孫にあると並べ替えられないので失敗にしたい
+                // item や target が属しているリストが Root だったらどうするか
+
+                var itemParent = this.FindParent(item);
+                var targetParent = this.FindParent(target);
+
+                if (this._ItemAccessor.GetChildren(itemParent) is IList removeList &&
+                    this._ItemAccessor.GetChildren(targetParent) is IList insertList)
+                {
+                    removeList.Remove(item);
+
+                    var insertIndex = insertList.IndexOf(target);
+                    insertList.Insert(insertIndex + 1, item);
+
+                    if (this._TreeInfo.TryGetValue(targetParent, out TreeInfo parentInfo))
+                    {
+                        this.UpdateTreeInfo(targetParent, parentInfo);
+                    }
+                    return true;
+                }
+
+                return false;
             }
 
             /// <summary>
@@ -1095,6 +1207,14 @@ namespace Toolkit.WPF.Controls
                     // 複数の子のうち1つでもヒットしていたら true にするので OR をとる
                     itemInfo.IsHitFilterDescendant |= (childInfo.IsHitFilter || childInfo.IsHitFilterDescendant);
                 }
+            }
+
+            /// <summary>
+            /// 指定された要素の親となる要素を検索します
+            /// </summary>
+            private object FindParent(object item)
+            {
+                return this._TreeInfo.FirstOrDefault(i => this._ItemAccessor.GetChildren(i.Key).Any(x => x == item)).Key;
             }
 
             /// <summary>
@@ -1279,6 +1399,14 @@ namespace Toolkit.WPF.Controls
                     return this._FilterTargetPropertyGetMethodInfo?.Invoke(item, null);
                 }
 
+                public static bool Equals(ref readonly Accessor a, ref readonly Accessor b)
+                {
+                    return a._Type == b._Type
+                        && a._ChildrenPropertyPath == b._ChildrenPropertyPath
+                        && a._ExpandedPropertyPath == b._ExpandedPropertyPath
+                        && a._FilterTargetPropertyPath == b._FilterTargetPropertyPath;
+                }
+
                 private readonly string _ChildrenPropertyPath;
                 private readonly string _ExpandedPropertyPath;
                 private readonly string _FilterTargetPropertyPath;
@@ -1425,8 +1553,8 @@ namespace Toolkit.WPF.Controls
                     var leftTop = target.TranslatePoint(new Point(0D, 0D), this._DragElement);
                     var rightBottom = target.TranslatePoint(new Point(0D, height), this._DragElement);
 
-                    var isInsertPrev = point.Y <= leftTop.Y + 7D;
-                    var isInsertNext = point.Y >= rightBottom.Y - 7D;
+                    var isInsertPrev = point.Y >= rightBottom.Y - 7D;
+                    var isInsertNext = point.Y <= leftTop.Y + 7D;
 
                     if (!isInsertPrev && !isInsertNext && !this.EnableInsertChild)
                     {
