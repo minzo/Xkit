@@ -23,7 +23,7 @@ namespace Toolkit.WPF.Controls.Adorners
         /// コンストラクタ
         /// </summary>
         public GhostAdorner(UIElement adornedElement, UIElement ghostElement)
-            : this(adornedElement, ghostElement, new Point(1, 1))
+            : this(adornedElement, ghostElement, new Point(4, 4))
         {
         }
 
@@ -35,7 +35,7 @@ namespace Toolkit.WPF.Controls.Adorners
         public GhostAdorner(UIElement adornedElement, UIElement ghostElement, Point offset)
             : base(adornedElement)
         {
-            this.Opacity = 0.5;
+            this.Opacity = 0.8;
             this.Offset = offset;
             this._Size = ghostElement.RenderSize;
             this._AdornerLayer = AdornerLayer.GetAdornerLayer(this.AdornedElement);
