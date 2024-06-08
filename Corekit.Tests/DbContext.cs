@@ -8,7 +8,6 @@ using System.Data;
 
 namespace Corekit.DB.Tests
 {
-    [TestClass]
     public class DbContext
     {
         [DbTable("TestRecord")]
@@ -109,4 +108,3 @@ namespace Corekit.DB.Tests
         private readonly string _DBPath = "Test.db";
     }
 }
-#endif
