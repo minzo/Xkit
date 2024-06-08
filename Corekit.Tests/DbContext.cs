@@ -4,8 +4,6 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Data;
 
-#if !MACOS
-
 namespace Corekit.DB.Tests
 {
     public class DbContext
