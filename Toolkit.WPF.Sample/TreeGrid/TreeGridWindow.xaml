@@ -210,7 +210,7 @@
                 ColumnHeaderTemplate="{StaticResource HeaderTemplate}"
                 
                 DataSource="{Binding Table, Mode=OneWay}"
-                CellBindingPropertySepalateCharacter="___"
+                CellBindingPropertySeparateString="___"
                 />
         </Grid>
     </DockPanel>
