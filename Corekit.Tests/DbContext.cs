@@ -1,11 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.Text;
-using Corekit.DB;
 using System.Linq;
 using System.Data;
+
+#if !MACOS
 
 namespace Corekit.DB.Tests
 {
@@ -110,3 +109,4 @@ namespace Corekit.DB.Tests
         private readonly string _DBPath = "Test.db";
     }
 }
+#endif
