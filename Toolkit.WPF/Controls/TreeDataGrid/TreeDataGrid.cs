@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Data.Common;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -174,7 +175,7 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for Transpose.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty EnableTransposeProperty =
             DependencyProperty.Register("EnableTranspose", typeof(bool), typeof(TreeDataGrid), new PropertyMetadata(false, (d, e) => {
-                ((TreeDataGrid)d).ChangeItemsSource((bool)e.OldValue, (bool)e.NewValue); ;
+                ((TreeDataGrid)d).ChangeItemsSource((bool)e.OldValue, (bool)e.NewValue);
             }));
 
         #region Column HeaderTempalte/HeaderTemplateSelector
@@ -208,36 +209,6 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
-        #region DataTemplateSelector
-
-        /// <summary>
-        /// CellTemplateSelector
-        /// </summary>
-        public DataTemplateSelector CellTemplateSelector
-        {
-            get { return (DataTemplateSelector)this.GetValue(CellTemplateSelectorProperty); }
-            set { this.SetValue(CellTemplateSelectorProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for CellTemplateSelector.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty CellTemplateSelectorProperty =
-            DependencyProperty.Register("CellTemplateSelector", typeof(DataTemplateSelector), typeof(TreeDataGrid), new PropertyMetadata(null));
-
-        /// <summary>
-        /// CellEditingTemplateSelector
-        /// </summary>
-        public DataTemplateSelector CellEditingTemplateSelector
-        {
-            get { return (DataTemplateSelector)this.GetValue(CellEditingTemplateSelectorProperty); }
-            set { this.SetValue(CellEditingTemplateSelectorProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for CellEditingTemplateSelector.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty CellEditingTemplateSelectorProperty =
-            DependencyProperty.Register("CellEditingTemplateSelector", typeof(DataTemplateSelector), typeof(TreeDataGrid), new PropertyMetadata(null));
-
-        #endregion
-
         #region CellTemplate
 
         /// <summary>
@@ -251,7 +222,12 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for CellTemplate.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty CellTemplateProperty =
-            DependencyProperty.Register("CellTemplate", typeof(DataTemplate), typeof(TreeDataGrid), new PropertyMetadata(null));
+            DependencyProperty.Register("CellTemplate", typeof(DataTemplate), typeof(TreeDataGrid), new PropertyMetadata((d, e) => {
+                foreach(var column in ((TreeDataGrid)d).Columns.OfType<DataGridBindingColumn>())
+                {
+                    column.SetCurrentValue(DataGridBindingColumn.CellTemplateProperty, e.NewValue);
+                }                 
+            }));
 
 
         /// <summary>
@@ -265,7 +241,52 @@ namespace Toolkit.WPF.Controls
 
         // Using a DependencyProperty as the backing store for CellEditingTemplate.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty CellEditingTemplateProperty =
-            DependencyProperty.Register("CellEditingTemplate", typeof(DataTemplate), typeof(TreeDataGrid), new PropertyMetadata(null));
+            DependencyProperty.Register("CellEditingTemplate", typeof(DataTemplate), typeof(TreeDataGrid), new PropertyMetadata((d, e) => {
+                foreach (var column in ((TreeDataGrid)d).Columns.OfType<DataGridBindingColumn>())
+                {
+                    column.SetCurrentValue(DataGridBindingColumn.CellEditingTemplateProperty, e.NewValue);
+                }
+            }));
+
+        #endregion
+
+        #region DataTemplateSelector
+
+        /// <summary>
+        /// CellTemplateSelector
+        /// </summary>
+        public DataTemplateSelector CellTemplateSelector
+        {
+            get { return (DataTemplateSelector)this.GetValue(CellTemplateSelectorProperty); }
+            set { this.SetValue(CellTemplateSelectorProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CellTemplateSelector.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CellTemplateSelectorProperty =
+            DependencyProperty.Register("CellTemplateSelector", typeof(DataTemplateSelector), typeof(TreeDataGrid), new PropertyMetadata((d, e) => {
+                foreach (var column in ((TreeDataGrid)d).Columns.OfType<DataGridBindingColumn>())
+                {
+                    column.SetCurrentValue(DataGridBindingColumn.CellEditingTemplateSelectorProperty, e.NewValue);
+                }
+            }));
+
+        /// <summary>
+        /// CellEditingTemplateSelector
+        /// </summary>
+        public DataTemplateSelector CellEditingTemplateSelector
+        {
+            get { return (DataTemplateSelector)this.GetValue(CellEditingTemplateSelectorProperty); }
+            set { this.SetValue(CellEditingTemplateSelectorProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CellEditingTemplateSelector.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CellEditingTemplateSelectorProperty =
+            DependencyProperty.Register("CellEditingTemplateSelector", typeof(DataTemplateSelector), typeof(TreeDataGrid), new PropertyMetadata((d, e) => {
+                foreach (var column in ((TreeDataGrid)d).Columns.OfType<DataGridBindingColumn>())
+                {
+                    column.SetCurrentValue(DataGridBindingColumn.CellEditingTemplateSelectorProperty, e.NewValue);
+                }
+            }));
 
         #endregion
 
@@ -338,10 +359,10 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// ItemsSource が変化したときに呼ばれます
         /// </summary>
-        private void OnRowsSourceChanged(IEnumerable oldValue, IEnumerable newValue, bool transpose = false)
+        private void OnRowsSourceChanged(IEnumerable oldValue, IEnumerable newValue, bool changed_by_transpose = false)
         {
-            // 転置のときはリセット不要
-            if (!transpose)
+            // 転置による変更のときはリセット不要
+            if (!changed_by_transpose)
             {
                 this._RowInfo.TreeInfo.Clear();
             }
@@ -468,10 +489,10 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// ColumnsSource が変化したときに呼ばれます
         /// </summary>
-        private void OnColumnsSourceChanged(IEnumerable oldValue, IEnumerable newValue, bool transpose = false)
+        private void OnColumnsSourceChanged(IEnumerable oldValue, IEnumerable newValue, bool changed_by_transpose = false)
         {
-            // 転置のときはリセット不要
-            if (!transpose)
+            // 転置による変更のときはリセット不要
+            if (!changed_by_transpose)
             {
                 this._ColInfo.TreeInfo.Clear();
             }
@@ -707,7 +728,6 @@ namespace Toolkit.WPF.Controls
                 this.UpdateDataGridColumnHeader(this._DataGridColumnsPanel, null);
                 this._DataGridColumnsPanel.SizeChanged += this.UpdateDataGridColumnHeader;
             }
-
 
             new DragAndDrop(this, this, typeof(DataGridRow), typeof(DataGridRowHeader)) { ReorderAction = this.Reorder };
             new DragAndDrop(this, this, typeof(DataGridColumnHeader), typeof(DataGridColumnHeader));
@@ -948,7 +968,7 @@ namespace Toolkit.WPF.Controls
                 var accessor = new Accessor(item.GetType(), childrenPropertyPath, expandedPropertyPath, filterTargetPropertyPath);
                 if (!Accessor.Equals(ref accessor, ref this._ItemAccessor))
                 {
-                    this._ItemAccessor = new Accessor(item.GetType(), childrenPropertyPath, expandedPropertyPath, filterTargetPropertyPath);
+                    this._ItemAccessor = accessor;
                 }
             }
 
