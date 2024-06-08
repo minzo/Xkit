@@ -23,7 +23,7 @@ namespace Toolkit.WPF.Controls
         /// セルに  Binding するプロパティを区切る文字
         /// デフォルトは . になっていて Row.Col ( Row の持つ Col というプロパティ) に Binding されるようになっている
         /// </summary>
-        public string CellBindingPropertySepalateCharacter { get; set; } = ".";
+        public string CellBindingPropertySeparateString { get; set; } = ".";
 
         /// <summary>
         /// テーブル情報
@@ -896,11 +896,11 @@ namespace Toolkit.WPF.Controls
                     {
                         if (grid.EnableTranspose)
                         {
-                            binding = new Binding($"{columnPropertyPath}{grid.CellBindingPropertySepalateCharacter}{rowPropertyPath}");
+                            binding = new Binding($"{columnPropertyPath}{grid.CellBindingPropertySeparateString}{rowPropertyPath}");
                         }
                         else
                         {
-                            binding = new Binding($"{rowPropertyPath}{grid.CellBindingPropertySepalateCharacter}{columnPropertyPath}");
+                            binding = new Binding($"{rowPropertyPath}{grid.CellBindingPropertySeparateString}{columnPropertyPath}");
                         }
                     }
                     else if (isExistsRow)
