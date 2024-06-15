@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
+#nullable enable
+
 namespace Corekit.Models
 {
     internal class InheritanceElement
@@ -20,18 +22,22 @@ namespace Corekit.Models
             this._Value = value;
         }
 
-        public object GetValue()
+        public object? GetValue()
         {
             return this._Value;
         }
 
-        private object _Value = null;
+        private object? _Value = null;
     }
 
     /// <summary>
     /// 継承オブジェクト
     /// </summary>
-    public class InheritanceObject : ICustomTypeDescriptor, INotifyPropertyChanged, INotifyCollectionChanged
+    public class InheritanceObject
+        : ICustomTypeProvider
+        , ICustomTypeDescriptor
+        , INotifyPropertyChanged
+        , INotifyCollectionChanged
     {
         /// <summary>
         /// 型情報
@@ -39,14 +45,9 @@ namespace Corekit.Models
         public InheritanceObjectTypeInfo TypeInfo { get; }
 
         /// <summary>
-        /// プロパティ情報
-        /// </summary>
-        public InheritanceObjectPropertyInfo? PropertyInfo { get; }
-
-        /// <summary>
         /// 値
         /// </summary>
-        public object Value { get => this.GetValue(); set => this.SetValue(value); }
+        public object? Value { get => this.GetValue(); set => this.SetValue(value); }
 
         /// <summary>
         /// コンストラクタ
@@ -60,22 +61,12 @@ namespace Corekit.Models
                 properties.CollectionChanged += this.OnTypeInfoPropertiesChanged;
             }
 
-            this._Properties = new ObservableCollection<InheritanceObject>();
+            this._Properties = new ObservableCollection<InheritanceProperty>();
 
             foreach (var propertyInfo in this.TypeInfo.Properties)
             {
-                this.AddProperty(new InheritanceObject(propertyInfo, this));
+                this.AddProperty(new InheritanceProperty(propertyInfo, this));
             }
-        }
-
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        private InheritanceObject(InheritanceObjectPropertyInfo propertyInfo, InheritanceObject owner)
-            : this(propertyInfo.TypeInfo)
-        {
-            this.PropertyInfo = propertyInfo ?? throw new ArgumentNullException(nameof(propertyInfo));
-            this._Owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
 
         /// <summary>
@@ -101,17 +92,12 @@ namespace Corekit.Models
         /// <summary>
         /// 値を取得します
         /// </summary>
-        public object GetValue()
+        public object? GetValue()
         {
             var element = this.GetElement();
             if (element != null)
             {
                 return element.GetValue();
-            }
-
-            if (this.PropertyInfo != null)
-            {
-                return this.PropertyInfo.GetDefaultValue();
             }
 
             throw new InvalidOperationException("");
@@ -120,15 +106,15 @@ namespace Corekit.Models
         /// <summary>
         /// 値を取得します
         /// </summary>
-        public T GetValueAs<T>()
+        public T? GetValueAs<T>()
         {
-            return (T)this.GetValue();
+            return (T?)this.GetValue();
         }
 
         /// <summary>
         /// プロパティを取得します
         /// </summary>
-        public InheritanceObject GetProperty(string propertyName)
+        public InheritanceProperty? GetProperty(string propertyName)
         {
             return this._Properties.FirstOrDefault(i => i.PropertyInfo.Name == propertyName);
         }
@@ -136,7 +122,7 @@ namespace Corekit.Models
         /// <summary>
         /// 値を継承元を設定します
         /// </summary>
-        public void SetInheritanceSource(InheritanceObject inheritanceSource)
+        public void ChangeInheritanceSource(InheritanceObject? inheritanceSource)
         {
             if (inheritanceSource == null)
             {
@@ -155,7 +141,7 @@ namespace Corekit.Models
         /// <summary>
         /// エレメントを取得します
         /// </summary>
-        private InheritanceElement GetElement()
+        private InheritanceElement? GetElement()
         {
             if (this._Element != null)
             {
@@ -164,10 +150,6 @@ namespace Corekit.Models
             else if (this._InheritanceSource != null)
             {
                 return this._InheritanceSource._Element;
-            }
-            else if (this._Owner != null)
-            {
-                return this._Owner.GetElement();
             }
             else
             {
@@ -180,7 +162,7 @@ namespace Corekit.Models
         /// <summary>
         /// プロパティを追加する
         /// </summary>
-        private void AddProperty(InheritanceObject property)
+        private void AddProperty(InheritanceProperty property)
         {
             this.InsertProperty(-1, property);
         }
@@ -188,7 +170,7 @@ namespace Corekit.Models
         /// <summary>
         /// プロパティを挿入する
         /// </summary>
-        private void InsertProperty(int index, InheritanceObject property)
+        private void InsertProperty(int index, InheritanceProperty property)
         {
             property.PropertyChanged += this.OnPropertyChanged;
 
@@ -230,7 +212,7 @@ namespace Corekit.Models
 
         #endregion
 
-        private void OnTypeInfoPropertiesChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnTypeInfoPropertiesChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Move)
             {
@@ -257,7 +239,7 @@ namespace Corekit.Models
                     int insertIndex = e.NewStartingIndex;
                     foreach (var propertyInfo in e.NewItems.Cast<InheritanceObjectPropertyInfo>())
                     {
-                        this.InsertProperty(insertIndex++, new InheritanceObject(propertyInfo, this));
+                        this.InsertProperty(insertIndex++, new InheritanceProperty(propertyInfo, this));
                     }
                 }
             }
@@ -273,25 +255,35 @@ namespace Corekit.Models
 
         }
 
-        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            var property = sender as InheritanceObject;
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property.TypeInfo.Name));
+            if (sender is InheritanceProperty property)
+            {
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property.PropertyInfo.Name));
+            }
         }
 
         private InheritanceObject? _InheritanceSource = null;
         private InheritanceElement? _Element = null;
-        private readonly InheritanceObject? _Owner = null;
-        private readonly ObservableCollection<InheritanceObject> _Properties = null;
+        private readonly ObservableCollection<InheritanceProperty> _Properties;
 
-        private PropertyDescriptorCollection _PropertyDescriptorCollection = null;
+        private PropertyDescriptorCollection _PropertyDescriptorCollection = PropertyDescriptorCollection.Empty;
 
         #region Events
 
 #pragma warning disable CS0067
-        public event PropertyChangedEventHandler PropertyChanged;
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public event NotifyCollectionChangedEventHandler? CollectionChanged;
 #pragma warning restore CS0067
+
+        #endregion
+
+        #region ICustomTypeProvider
+
+        public Type GetCustomType()
+        {
+            return this.TypeInfo;
+        }
 
         #endregion
 
@@ -304,7 +296,7 @@ namespace Corekit.Models
             {
             }
 
-            public InheritanceObjectPropertyDescriptor(InheritanceObject property)
+            public InheritanceObjectPropertyDescriptor(InheritanceProperty property)
                 : this(property.PropertyInfo)
             {
             }
@@ -317,19 +309,19 @@ namespace Corekit.Models
 
             public override bool CanResetValue(object component) => true;
 
-            public override object GetValue(object component)
+            public override object? GetValue(object? component)
             {
-                return (component as InheritanceObject)?.GetProperty(this.Name).GetValue();
+                return (component as InheritanceObject)?.GetProperty(this.Name)?.GetValue();
             }
 
-            public override void SetValue(object component, object value)
+            public override void SetValue(object? component, object? value)
             {
-                (component as InheritanceObject)?.GetProperty(this.Name).SetValue(value);
+                (component as InheritanceObject)?.GetProperty(this.Name)?.SetValue(value);
             }
 
-            public override void ResetValue(object component)
+            public override void ResetValue(object? component)
             {
-                (component as InheritanceObject)?.GetProperty(this.Name).ResetValue();
+                (component as InheritanceObject)?.GetProperty(this.Name)?.ResetValue();
             }
 
             public override bool ShouldSerializeValue(object component) => false;
@@ -347,26 +339,52 @@ namespace Corekit.Models
             return this._PropertyDescriptorCollection;
         }
 
-        public PropertyDescriptorCollection GetProperties(Attribute[] attributes) => this.GetProperties();
+        public PropertyDescriptorCollection GetProperties(Attribute[]? attributes) => this.GetProperties();
 
         public string GetClassName() => this.TypeInfo.Name;
 
         public string GetComponentName() => this.TypeInfo.Name;
 
-        public TypeConverter GetConverter() => null;
+        public TypeConverter? GetConverter() => null;
 
-        public EventDescriptor GetDefaultEvent() => null;
+        public EventDescriptor? GetDefaultEvent() => null;
 
-        public PropertyDescriptor GetDefaultProperty() => TypeDescriptor.GetDefaultProperty(this);
+        public PropertyDescriptor? GetDefaultProperty() => TypeDescriptor.GetDefaultProperty(this);
 
-        public object GetEditor(Type editorBaseType) => TypeDescriptor.GetEditor(this, editorBaseType);
+        public object? GetEditor(Type editorBaseType) => TypeDescriptor.GetEditor(this, editorBaseType);
 
         public EventDescriptorCollection GetEvents() => EventDescriptorCollection.Empty;
 
-        public EventDescriptorCollection GetEvents(Attribute[] attributes) => this.GetEvents();
+        public EventDescriptorCollection GetEvents(Attribute[]? attributes) => this.GetEvents();
 
-        public object GetPropertyOwner(PropertyDescriptor pd) => this;
+        public object GetPropertyOwner(PropertyDescriptor? pd) => this;
 
         #endregion
+    }
+
+    /// <summary>
+    /// 継承プロパティ
+    /// </summary>
+    public sealed class InheritanceProperty : InheritanceObject
+    {
+        /// <summary>
+        /// プロパティの型です
+        /// </summary>
+        public InheritanceObjectPropertyInfo PropertyInfo { get; }
+
+        /// <summary>
+        /// プロパティを保持している継承オブジェクトです
+        /// </summary>
+        public InheritanceObject Owner { get; }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public InheritanceProperty(InheritanceObjectPropertyInfo propertyInfo, InheritanceObject owner)
+            : base(propertyInfo.TypeInfo)
+        {
+            this.PropertyInfo = propertyInfo;
+            this.Owner = owner;
+        }
     }
 }
