@@ -109,6 +109,8 @@ namespace Corekit.Models
 
         public override Type? BaseType => this.BaseTypeInfo;
 
+        public override RuntimeTypeHandle TypeHandle => new RuntimeTypeHandle();
+
         protected override TypeAttributes GetAttributeFlagsImpl()
         {
             return TypeAttributes.Public | TypeAttributes.Class;
