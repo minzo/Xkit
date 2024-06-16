@@ -14,6 +14,7 @@ namespace Corekit.Models
     /// <summary>
     /// 型情報
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay($"{nameof(Name)}={{{nameof(Name)}}}, {nameof(DisplayName)}={{{nameof(DisplayName)}}}")]
     public sealed class InheritanceObjectTypeInfo
         : TypeInfo
         , INotifyPropertyChanged
@@ -51,13 +52,28 @@ namespace Corekit.Models
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public InheritanceObjectTypeInfo(string name)
+        internal InheritanceObjectTypeInfo(string name)
         {
             this.Name = name;
             this.DisplayName = string.Empty;
             this.Description = string.Empty;
             this._Properties = new ObservableCollection<InheritanceObjectPropertyInfo>();
             this._AttributeAttributeCollection = new ObservableCollection<KeyValuePair<string, object>>();
+        }
+
+        /// <summary>
+        /// プロパティを追加する
+        /// </summary>
+        public void AddPrpoperty(string name, InheritanceObjectTypeInfo type)
+        {
+            this.Properties.Add(new InheritanceObjectPropertyInfo(name, type, this));
+        }
+
+        /// <summary>
+        /// プロパティを削除する
+        /// </summary>
+        public void RemoveProperty(string name)
+        {
         }
 
         #region Fields
@@ -302,6 +318,7 @@ namespace Corekit.Models
     /// <summary>
     /// プロパティの型情報
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay($"{nameof(Name)}={{{nameof(Name)}}}, {nameof(DisplayName)}={{{nameof(DisplayName)}}}")]
     public sealed class InheritanceObjectPropertyInfo
         : PropertyInfo
         , INotifyPropertyChanged

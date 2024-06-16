@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 #nullable enable
 
@@ -33,6 +27,7 @@ namespace Corekit.Models
     /// <summary>
     /// 継承オブジェクト
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay($"{{{nameof(TypeInfo)}}}, {{{nameof(Value)}}}")]
     public class InheritanceObject
         : ICustomTypeProvider
         , ICustomTypeDescriptor
@@ -43,6 +38,15 @@ namespace Corekit.Models
         /// 型情報
         /// </summary>
         public InheritanceObjectTypeInfo TypeInfo { get; }
+
+        /// <summary>
+        /// 継承元となるオブジェクト
+        /// </summary>
+        public InheritanceObject? InheritanceSource
+        {
+            get => this._InheritanceSource;
+            set => this.ChangeInheritanceSource(value);
+        }
 
         /// <summary>
         /// 値
@@ -92,15 +96,14 @@ namespace Corekit.Models
         /// <summary>
         /// 値を取得します
         /// </summary>
-        public object? GetValue()
+        public virtual object? GetValue()
         {
             var element = this.GetElement();
             if (element != null)
             {
                 return element.GetValue();
             }
-
-            throw new InvalidOperationException("");
+            return null;
         }
 
         /// <summary>
@@ -122,7 +125,7 @@ namespace Corekit.Models
         /// <summary>
         /// 値を継承元を設定します
         /// </summary>
-        public void ChangeInheritanceSource(InheritanceObject? inheritanceSource)
+        private void ChangeInheritanceSource(InheritanceObject? inheritanceSource)
         {
             if (inheritanceSource == null)
             {
@@ -365,6 +368,7 @@ namespace Corekit.Models
     /// <summary>
     /// 継承プロパティ
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay($"{{{nameof(PropertyInfo)}}}")]
     public sealed class InheritanceProperty : InheritanceObject
     {
         /// <summary>
@@ -380,11 +384,32 @@ namespace Corekit.Models
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public InheritanceProperty(InheritanceObjectPropertyInfo propertyInfo, InheritanceObject owner)
+        internal InheritanceProperty(InheritanceObjectPropertyInfo propertyInfo, InheritanceObject owner)
             : base(propertyInfo.TypeInfo)
         {
             this.PropertyInfo = propertyInfo;
             this.Owner = owner;
+        }
+
+        /// <summary>
+        /// 値を取得します
+        /// </summary>
+        public override object? GetValue()
+        {
+            // 自身に設定された値 か 自身に設定された継承元を使う
+            var value = base.GetValue();
+            if (value != null)
+            {
+                return value;
+            }
+
+            // そうでなければプロパティ所持者の親の持っている同名のプロパティから値をもらう
+            if (this.Owner.InheritanceSource?.GetProperty(this.PropertyInfo.Name) is InheritanceProperty p)
+            {
+                return p.GetValue();
+            }
+
+            return null;
         }
     }
 }
