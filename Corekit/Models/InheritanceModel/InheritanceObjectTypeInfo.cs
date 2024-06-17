@@ -109,7 +109,7 @@ namespace Corekit.Models
 
         public override Type? BaseType => this.BaseTypeInfo;
 
-        public override RuntimeTypeHandle TypeHandle => new RuntimeTypeHandle();
+        public override RuntimeTypeHandle TypeHandle => this.GetType().TypeHandle;
 
         protected override TypeAttributes GetAttributeFlagsImpl()
         {
@@ -295,7 +295,7 @@ namespace Corekit.Models
         /// </summary>
         public override object[] GetCustomAttributes(bool inherit)
         {
-            return Array.Empty<object>();
+            return Array.Empty<Attribute>();
         }
 
         /// <summary>
@@ -303,7 +303,7 @@ namespace Corekit.Models
         /// </summary>
         public override object[] GetCustomAttributes(Type attributeType, bool inherit)
         {
-            return Array.Empty<object>();
+            return Array.Empty<Attribute>();
         }
 
         /// <summary>
@@ -421,47 +421,47 @@ namespace Corekit.Models
         /// </summary>
         public override MethodInfo[] GetAccessors(bool nonPublic)
         {
-            throw new NotImplementedException();
+            return Array.Empty<MethodInfo>();
         }
 
         public override MethodInfo? GetGetMethod(bool nonPublic)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public override ParameterInfo[] GetIndexParameters()
         {
-            throw new NotImplementedException();
+            return Array.Empty<ParameterInfo>();    
         }
 
         public override MethodInfo? GetSetMethod(bool nonPublic)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public override object? GetValue(object? obj, BindingFlags invokeAttr, Binder? binder, object?[]? index, CultureInfo? culture)
         {
-            throw new NotImplementedException();
+            return (obj as InheritanceObject)?.GetValue();
         }
 
         public override void SetValue(object? obj, object? value, BindingFlags invokeAttr, Binder? binder, object?[]? index, CultureInfo? culture)
         {
-            throw new NotImplementedException();
+            (obj as InheritanceObject)?.SetValue(value);
         }
 
         public override object[] GetCustomAttributes(bool inherit)
         {
-            throw new NotImplementedException();
+            return Array.Empty<Attribute>();
         }
 
         public override object[] GetCustomAttributes(Type attributeType, bool inherit)
         {
-            throw new NotImplementedException();
+            return Array.Empty<Attribute>();
         }
 
         public override bool IsDefined(Type attributeType, bool inherit)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         #endregion
