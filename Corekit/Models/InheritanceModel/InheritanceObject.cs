@@ -49,6 +49,11 @@ namespace Corekit.Models
         }
 
         /// <summary>
+        /// 継承している値か
+        /// </summary>
+        public bool IsInherited => this._InheritanceSource != null && this._Element == null;
+
+        /// <summary>
         /// 値
         /// </summary>
         public object? Value { get => this.GetValue(); set => this.SetValue(value); }
@@ -127,17 +132,16 @@ namespace Corekit.Models
         /// </summary>
         private void ChangeInheritanceSource(InheritanceObject? inheritanceSource)
         {
-            if (inheritanceSource == null)
+            if (this._InheritanceSource != null)
             {
-                this._InheritanceSource = null;
+                this._InheritanceSource.PropertyChanged -= this.OnInhertiSourceValueChanged;
             }
-            else if (this.TypeInfo == inheritanceSource.TypeInfo)
+
+            this._InheritanceSource = inheritanceSource;
+
+            if (this._InheritanceSource != null)
             {
-                this._InheritanceSource = inheritanceSource;
-            }
-            else
-            {
-                throw new InvalidOperationException();
+                this._InheritanceSource.PropertyChanged += this.OnInhertiSourceValueChanged;
             }
         }
 
@@ -253,9 +257,16 @@ namespace Corekit.Models
 
         }
 
-        private void OnInhertiSourceValueChanged(object sender, PropertyChangedEventArgs e)
+        /// <summary>
+        /// 継承元のプロパティ変更通知
+        /// </summary>
+        private void OnInhertiSourceValueChanged(object? sender, PropertyChangedEventArgs e)
         {
-
+            // 自分のプロパティも値が変わるので変更通知する
+            if (!string.IsNullOrEmpty(e.PropertyName) && (this.GetProperty(e.PropertyName)?.IsInherited ?? false))
+            {
+                this.PropertyChanged?.Invoke(this, e);
+            }
         }
 
         private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -368,7 +368,6 @@ namespace Corekit.Models
             this._AttributeCollection = new ObservableCollection<KeyValuePair<string, object>>();
         }
 
-
         #region Fields
 
         private readonly InheritanceObjectTypeInfo _OnwerType;
@@ -426,7 +425,7 @@ namespace Corekit.Models
 
         public override MethodInfo? GetGetMethod(bool nonPublic)
         {
-            return null;
+            return typeof(InheritanceProperty).GetMethod(nameof(InheritanceProperty.GetValue));
         }
 
         public override ParameterInfo[] GetIndexParameters()
@@ -436,17 +435,17 @@ namespace Corekit.Models
 
         public override MethodInfo? GetSetMethod(bool nonPublic)
         {
-            return null;
+            return typeof(InheritanceProperty).GetMethod(nameof(InheritanceProperty.SetValue));
         }
 
         public override object? GetValue(object? obj, BindingFlags invokeAttr, Binder? binder, object?[]? index, CultureInfo? culture)
         {
-            return (obj as InheritanceObject)?.GetValue();
+            return (obj as InheritanceObject)?.GetProperty(this.Name)?.GetValue();
         }
 
         public override void SetValue(object? obj, object? value, BindingFlags invokeAttr, Binder? binder, object?[]? index, CultureInfo? culture)
         {
-            (obj as InheritanceObject)?.SetValue(value);
+            (obj as InheritanceObject)?.GetProperty(this.Name)?.SetValue(value);
         }
 
         public override object[] GetCustomAttributes(bool inherit)
