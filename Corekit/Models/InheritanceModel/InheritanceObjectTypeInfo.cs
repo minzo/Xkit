@@ -393,7 +393,7 @@ namespace Corekit.Models
         /// <summary>
         /// 読み取り可能かプロパティかを取得します
         /// </summary>
-        public override bool CanRead => false;
+        public override bool CanRead => true;
 
         /// <summary>
         /// 書き込み可能かプロパティかを取得します

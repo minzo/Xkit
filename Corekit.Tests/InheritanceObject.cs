@@ -21,11 +21,16 @@ namespace Corekit.Tests
         [TestInitialize]
         public void Initialize()
         {
+            var sub = this._Manager.CreateTypeInfo("Vector2f");
+            sub.AddPrpoperty("X", this._Manager.GetTypeInfo(Corekit.Models.InheritanceObjectBuildInTypeName.F32));
+            sub.AddPrpoperty("Y", this._Manager.GetTypeInfo(Corekit.Models.InheritanceObjectBuildInTypeName.F32));
+
             var info = this._Manager.CreateTypeInfo("Test");
             info.AddPrpoperty("String0", this._Manager.GetTypeInfo(Corekit.Models.InheritanceObjectBuildInTypeName.String));
             info.AddPrpoperty("String1", this._Manager.GetTypeInfo(Corekit.Models.InheritanceObjectBuildInTypeName.String));
             info.AddPrpoperty("String2", this._Manager.GetTypeInfo(Corekit.Models.InheritanceObjectBuildInTypeName.String));
             info.AddPrpoperty("String3", this._Manager.GetTypeInfo(Corekit.Models.InheritanceObjectBuildInTypeName.String));
+            info.AddPrpoperty("Vector2", this._Manager.GetTypeInfo("Vector2f"));
         }
 
         [TestMethod]

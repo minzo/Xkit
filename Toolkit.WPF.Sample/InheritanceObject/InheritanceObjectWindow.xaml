@@ -4,12 +4,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Toolkit.WPF.Sample"
+        xmlns:models="clr-namespace:Corekit.Models;assembly=Corekit"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type={x:Type local:InheritanceObjectWindow}}"
         Title="InheritanceObjectWindow" Height="450" Width="800">
     <Window.DataContext>
         <local:InheritanceObjectViewModel />
     </Window.DataContext>
+
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type models:InheritanceObject}">
+            <TextBlock Text="{Binding Value}" Foreground="Gray" />
+        </DataTemplate>
+    </Window.Resources>
+
     <DataGrid 
         ItemsSource="{Binding Items, Mode=OneTime}" 
         />
