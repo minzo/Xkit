@@ -34,6 +34,11 @@ namespace Corekit
         /// </summary>
         public static string GetRelativePath(this string path, string basePath)
         {
+            if (!basePath.EndsWith(System.IO.Path.DirectorySeparatorChar))
+            {
+                basePath += System.IO.Path.DirectorySeparatorChar;
+            }
+
             if (!System.OperatingSystem.IsWindows())
             {
                 // 非Windows環境ではパスをURIとして解釈させるためにfile://追加する
@@ -42,6 +47,8 @@ namespace Corekit
             }
 
             var baseUri = new Uri(System.IO.Path.GetFullPath(basePath));
+
+
             var pathUri = new Uri(path);
             var relativeUri = baseUri.MakeRelativeUri(pathUri);
             return relativeUri.ToString();
