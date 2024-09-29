@@ -47,8 +47,6 @@ namespace Corekit
             }
 
             var baseUri = new Uri(System.IO.Path.GetFullPath(basePath));
-
-
             var pathUri = new Uri(path);
             var relativeUri = baseUri.MakeRelativeUri(pathUri);
             return relativeUri.ToString();
