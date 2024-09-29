@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Intrinsics.Arm;
 
 namespace Corekit
 {
@@ -52,7 +53,8 @@ namespace Corekit
             var baseUri = new Uri(basePath);
             var pathUri = new Uri(path);
             var relativeUri = baseUri.MakeRelativeUri(pathUri);
-            return relativeUri.ToString();
+            var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+            return relativePath;
         }
 
         /// <summary>
