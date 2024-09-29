@@ -22,12 +22,19 @@ namespace Corekit.Extensions.Tests
         [TestMethod]
         public void GetRelativePath()
         {
-            var dirPath  = @"C:\home\TestDir";
-            var filePath = @"C:\home\TestDir\TestData.bin";
+            {
+                var dirPath = @"C:\home\TestDir\";
+                var filePath = @"C:\home\TestDir\TestData.bin";
+                var relativePath = filePath.GetRelativePath(dirPath);
+                Assert.AreEqual(relativePath, "TestData.bin");
+            }
 
-            var relativePath = filePath.GetRelativePath(dirPath);
-
-            Assert.AreEqual(relativePath, "TestData.bin");
+            {
+                var dirPath = @"C:\テスト\";
+                var filePath = @"C:\テスト\TestData.bin";
+                var relativePath = filePath.GetRelativePath(dirPath);
+                Assert.AreEqual(relativePath, "TestData.bin");
+            }
         }
 
         [TestMethod]

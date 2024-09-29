@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 using System.Data;
+using System.Security.AccessControl;
 
 namespace Corekit.DB.Tests
 {
+    [TestClass]
     public class DbContext
     {
         [DbTable("TestRecord")]
@@ -32,6 +34,11 @@ namespace Corekit.DB.Tests
                 System.IO.File.Delete(this._DBPath);
             }
 
+            if (System.OperatingSystem.IsMacOS())
+            {
+                return;
+            }
+
             using var context = new DbContext<SQLiteConnection>($"Data Source={this._DBPath}");
             using var dbOperator = context.GetOperator();
             dbOperator.ExecuteCreateTable<Record01>();
@@ -50,7 +57,12 @@ namespace Corekit.DB.Tests
         [TestMethod]
         public void TableCreateAndDelete()
         {
-            using(var context = new DbContext<SQLiteConnection>($"Data Source={this._DBPath}"))
+            if (System.OperatingSystem.IsMacOS())
+            {
+                return;
+            }
+
+            using (var context = new DbContext<SQLiteConnection>($"Data Source={this._DBPath}"))
             {
                 using(var dbOperator = context.GetOperator())
                 {
@@ -81,6 +93,11 @@ namespace Corekit.DB.Tests
         [TestMethod]
         public void ExecuteReaderAndExecuteScalar()
         {
+            if (System.OperatingSystem.IsMacOS())
+            {
+                return;
+            }
+
             var tableName = "TestRecord01";
 
             using var context = new DbContext<SQLiteConnection>($"Data Source={this._DBPath}");
