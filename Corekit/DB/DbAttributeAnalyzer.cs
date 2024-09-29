@@ -138,7 +138,7 @@ namespace Corekit.DB
             this._TableName = this.AnalyzeTableName(attributes);
 
             // 列情報を取得
-            this._ColumnInfos = type.GetProperties()
+            this._ColumnInfos = type.GetPropertiesOrderByBaseType(BindingFlags.Instance | BindingFlags.Public)
                 .Select(i => new ColumnInfo(i))
                 .Where(i => !string.IsNullOrEmpty(i.ColumnName))
                 .ToArray();
@@ -154,6 +154,15 @@ namespace Corekit.DB
         }
 
         #region クエリ取得
+
+        /// <summary>
+        /// テーブルを作成するクエリを取得
+        /// </summary>
+        private protected string CreateQueryCreateTableIfNotExists(string tableName)
+        {
+            var columns = string.Join(',', this._ColumnInfos.Select(i => $"{i.SanitizedColumnName} {i.Type} {(i.IsPrimaryKey ? "PRIMARY KEY" : string.Empty)}"));
+            return $"CREATE TABLE IF NOT EXISTS {tableName} ({columns});";
+        }
 
         /// <summary>
         /// 行を挿入するクエリを取得
@@ -284,6 +293,11 @@ namespace Corekit.DB
         public static string QueryCreateTableIfNotExists()
         {
             return Analyzer._QueryCreateTableIfNotExists;
+        }
+
+        public static string QueryCreateTableIfNotExists(string tableName)
+        {
+            return Analyzer.CreateQueryCreateTableIfNotExists(tableName);
         }
 
         public static string QueryDeleteTable()

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Intrinsics.Arm;
 
 namespace Corekit
 {
@@ -35,8 +34,8 @@ namespace Corekit
         /// </summary>
         public static string GetRelativePath(this string path, string basePath)
         {
-            basePath = System.IO.Path.GetFullPath(basePath);
-            path = System.IO.Path.GetFullPath(path);
+            basePath = System.IO.Path.GetFullPath(basePath).NormalizePath();
+            path = System.IO.Path.GetFullPath(path).NormalizePath();
 
             if (!basePath.EndsWith(System.IO.Path.DirectorySeparatorChar))
             {

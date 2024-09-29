@@ -36,5 +36,11 @@ namespace Corekit.Extensions
             attribute = info.GetCustomAttribute(typeof(T)) as T;
             return attribute != null;
         }
+
+        public static IEnumerable<PropertyInfo> GetPropertiesOrderByBaseType(this Type type, BindingFlags flags)
+        {
+            return (type.BaseType?.GetPropertiesOrderByBaseType(flags) ?? Enumerable.Empty<PropertyInfo>())
+                .Concat(type.GetProperties(flags | BindingFlags.DeclaredOnly));
+        }
     }
 }

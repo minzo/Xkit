@@ -121,6 +121,14 @@ namespace Corekit.DB
         }
 
         /// <summary>
+        /// テーブルがなければテーブルを生成します
+        /// </summary>
+        public static void ExecuteCreateTableIfNotExists<T>(this DbOperator dbOperator, string tableName)
+        {
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer<T>.QueryCreateTableIfNotExists(tableName));
+        }
+
+        /// <summary>
         /// 行を挿入します
         /// </summary>
         public static void ExecuteInsertItem<T>(this DbOperator dbOperator, T item)
