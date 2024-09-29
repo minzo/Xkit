@@ -161,7 +161,7 @@ namespace Corekit.DB
         private protected string CreateQueryCreateTableIfNotExists(string tableName)
         {
             var columns = string.Join(',', this._ColumnInfos.Select(i => $"{i.SanitizedColumnName} {i.Type} {(i.IsPrimaryKey ? "PRIMARY KEY" : string.Empty)}"));
-            return $"CREATE TABLE IF NOT EXISTS {tableName} ({columns});";
+            return $"CREATE TABLE IF NOT EXISTS '{tableName}' ({columns});";
         }
 
         /// <summary>
@@ -237,6 +237,7 @@ namespace Corekit.DB
         /// </summary>
         private string AnalyzeTableName(IEnumerable<Attribute> attributes)
         {
+            
             return attributes.OfType<DbTableAttribute>().FirstOrDefault()?.TableName ?? string.Empty;
         }
 
@@ -246,7 +247,7 @@ namespace Corekit.DB
         private string AnalyzeCreateTableQuery()
         {
             var columns = string.Join(',', this._ColumnInfos.Select(i => $"{i.SanitizedColumnName} {i.Type} {(i.IsPrimaryKey ? "PRIMARY KEY" : string.Empty)}"));
-            return $"CREATE TABLE {this._TableName} ({columns});";
+            return $"CREATE TABLE '{this._TableName}' ({columns});";
         }
 
         /// <summary>
@@ -255,7 +256,7 @@ namespace Corekit.DB
         private string AnalyzeCreateTableIfNotExistsQuery()
         {
             var columns = string.Join(',', this._ColumnInfos.Select(i => $"{i.SanitizedColumnName} {i.Type} {(i.IsPrimaryKey ? "PRIMARY KEY" : string.Empty)}"));
-            return $"CREATE TABLE IF NOT EXISTS {this._TableName} ({columns});";
+            return $"CREATE TABLE IF NOT EXISTS '{this._TableName}' ({columns});";
         }
 
         /// <summary>
@@ -264,7 +265,7 @@ namespace Corekit.DB
         private string AnalyzeInsertItemQuery()
         {
             var columns = string.Join(',', this._ColumnInfos.Select(i => i.SanitizedColumnName));
-            return $"INSERT INTO {this._TableName} ({columns}) VALUES ";
+            return $"INSERT INTO '{this._TableName}' ({columns}) VALUES ";
         }
 
         #endregion

@@ -89,9 +89,9 @@ namespace Corekit.DB.Tests
 
                 using (var dbOperator = context.GetOperator())
                 {
-                    dbOperator.ExecuteCreateTableIfNotExists<Record>("TestRecordTable");
+                    dbOperator.ExecuteCreateTableIfNotExists<Record>("TestRecord#Table");
                     bool isExistTable = dbOperator
-                        .ExecuteReader("select count(*) from sqlite_master where type = 'table' and name = 'TestRecordTable'")
+                        .ExecuteReader("select count(*) from sqlite_master where type = 'table' and name = 'TestRecord#Table'")
                         .Select(i => i.GetBoolean(0))
                         .FirstOrDefault();
 
