@@ -34,9 +34,10 @@ namespace Corekit
         /// </summary>
         public static string GetRelativePath(this string path, string basePath)
         {
-            var baseUrl = new Uri(System.IO.Path.GetFullPath(basePath));
-            var relativeUrl = new Uri(baseUrl, path);
-            return relativeUrl.LocalPath;
+            var baseUri = new Uri(System.IO.Path.GetFullPath(basePath));
+            var pathUri = new Uri(path);
+            var relativeUri = baseUri.MakeRelativeUri(pathUri);
+            return relativeUri.ToString();
         }
 
         /// <summary>
