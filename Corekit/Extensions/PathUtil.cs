@@ -35,6 +35,7 @@ namespace Corekit
         public static string GetRelativePath(this string path, string basePath)
         {
             basePath = System.IO.Path.GetFullPath(basePath);
+            path = System.IO.Path.GetFullPath(path);
 
             if (!basePath.EndsWith(System.IO.Path.DirectorySeparatorChar))
             {
