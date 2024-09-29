@@ -237,7 +237,7 @@ namespace Corekit.DB
         /// </summary>
         private string AnalyzeTableName(IEnumerable<Attribute> attributes)
         {
-            return attributes.OfType<DbTableAttribute>().FirstOrDefault().TableName;
+            return attributes.OfType<DbTableAttribute>().FirstOrDefault()?.TableName ?? string.Empty;
         }
 
         /// <summary>

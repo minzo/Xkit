@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 using System.Data;
-using System.Security.AccessControl;
 
 namespace Corekit.DB.Tests
 {
@@ -86,6 +85,18 @@ namespace Corekit.DB.Tests
 
                     Assert.IsTrue(System.IO.File.Exists(_DBPath));
                     Assert.IsFalse(isExistTable);
+                }
+
+                using (var dbOperator = context.GetOperator())
+                {
+                    dbOperator.ExecuteCreateTableIfNotExists<Record>("TestRecordTable");
+                    bool isExistTable = dbOperator
+                        .ExecuteReader("select count(*) from sqlite_master where type = 'table' and name = 'TestRecordTable'")
+                        .Select(i => i.GetBoolean(0))
+                        .FirstOrDefault();
+
+                    Assert.IsTrue(System.IO.File.Exists(_DBPath));
+                    Assert.IsTrue(isExistTable);
                 }
             }
         }

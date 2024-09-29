@@ -1,8 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Corekit.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Corekit.Extensions.Tests
 {

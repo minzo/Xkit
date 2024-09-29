@@ -34,26 +34,8 @@ namespace Corekit
         /// </summary>
         public static string GetRelativePath(this string path, string basePath)
         {
-            basePath = System.IO.Path.GetFullPath(basePath).NormalizePath();
-            path = System.IO.Path.GetFullPath(path).NormalizePath();
-
-            if (!basePath.EndsWith(System.IO.Path.DirectorySeparatorChar))
-            {
-                basePath += System.IO.Path.DirectorySeparatorChar;
-            }
-
-            if (!System.OperatingSystem.IsWindows())
-            {
-                // 非Windows環境ではパスをURIとして解釈させるためにfile://追加する
-                basePath = Uri.UriSchemeFile + Uri.SchemeDelimiter + basePath;
-                path = Uri.UriSchemeFile + Uri.SchemeDelimiter + path;
-            }
-
-            var baseUri = new Uri(basePath);
-            var pathUri = new Uri(path);
-            var relativeUri = baseUri.MakeRelativeUri(pathUri);
-            var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
-            return relativePath;
+            return GetRelativePathUnix(path, basePath)
+                .Replace(System.IO.Path.AltDirectorySeparatorChar, System.IO.Path.DirectorySeparatorChar);
         }
 
         /// <summary>
@@ -77,7 +59,26 @@ namespace Corekit
         /// </summary>
         public static string GetRelativePathUnix(this string path, string basePath)
         {
-            return GetRelativePath(path, basePath).GetUnixPath();
+            basePath = System.IO.Path.GetFullPath(basePath).GetUnixPath();
+            path = System.IO.Path.GetFullPath(path).GetUnixPath();
+
+            if (!basePath.EndsWith(System.IO.Path.AltDirectorySeparatorChar))
+            {
+                basePath += System.IO.Path.AltDirectorySeparatorChar;
+            }
+
+            if (!System.OperatingSystem.IsWindows())
+            {
+                // 非Windows環境ではパスをURIとして解釈させるためにfile://追加する
+                basePath = Uri.UriSchemeFile + Uri.SchemeDelimiter + basePath;
+                path = Uri.UriSchemeFile + Uri.SchemeDelimiter + path;
+            }
+
+            var baseUri = new Uri(basePath);
+            var pathUri = new Uri(path);
+            var relativeUri = baseUri.MakeRelativeUri(pathUri);
+            var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+            return relativePath;
         }
 
         /// <summary>
