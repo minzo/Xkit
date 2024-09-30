@@ -43,7 +43,9 @@ namespace Corekit
         /// </summary>
         public static string GetUnixPath(this string path)
         {
-            return path.Replace(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar);
+            // Windows 環境の区切り文字である \ を / に直す
+            // System.IO.Path.DirectorySeparatorChar は環境依存で変わるため \ を直接指定する
+            return path.Replace('\\', System.IO.Path.AltDirectorySeparatorChar);
         }
 
         /// <summary>
