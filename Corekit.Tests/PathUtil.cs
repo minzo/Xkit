@@ -47,7 +47,7 @@ namespace Corekit.Extensions.Tests
             var unixPath = @"C:/home/TestDir/TestData.bin";
 
             var path = filePath.GetUnixPath();
-            Assert.AreEqual(path, unixPath);
+            Assert.AreEqual(unixPath, path);
         }
     }
 }
