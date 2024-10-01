@@ -150,12 +150,20 @@ namespace Corekit.DB
             dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryCreateTable(type));
         }
 
-        // <summary>
+        /// <summary>
         /// テーブルがなければテーブルを生成します
         /// </summary>
         public static void ExecuteCreateTableIfNotExists(this DbOperator dbOperator, Type type)
         {
             dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryCreateTableIfNotExists(type));
+        }
+
+        /// <summary>
+        /// テーブルがなければテーブルを生成します
+        /// </summary>
+        public static void ExecuteCreateTableIfNotExists(this DbOperator dbOperator, Type type, string tableName)
+        {
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryCreateTableIfNotExists(type, tableName));
         }
 
         /// <summary>
@@ -193,9 +201,9 @@ namespace Corekit.DB
         /// <summary>
         /// 複数行を挿入します
         /// </summary>
-        public static void ExecuteInsertItemsIfNotExists(this DbOperator dbOperator, Type type, IEnumerable<object> items)
+        public static void ExecuteInsertItemsIfNotExists(this DbOperator dbOperator, Type type, string tableName, IEnumerable<object> items)
         {
-            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryInsertItemsIfNotExists(type, items));
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryInsertItemsIfNotExists(type, tableName, items));
         }
 
         /// <summary>

@@ -25,6 +25,11 @@ namespace Corekit.DB
             return GetAnalyzer(type)._QueryCreateTableIfNotExists;
         }
 
+        public static string QueryCreateTableIfNotExists(Type type, string tableName)
+        {
+            return GetAnalyzer(type).CreateQueryCreateTableIfNotExists(tableName);
+        }
+
         public static string QueryDeleteTable(Type type)
         {
             return GetAnalyzer(type)._QueryDeleteTable;
@@ -43,6 +48,10 @@ namespace Corekit.DB
         public static string QueryInsertItemsIfNotExists(Type type, IEnumerable items)
         {
             return GetAnalyzer(type).CreateQueryInsertItems(items, true);
+        }
+        public static string QueryInsertItemsIfNotExists(Type type, string tableName, IEnumerable items)
+        {
+            return GetAnalyzer(type).CreateQueryInsertItems(items, tableName, true);
         }
 
         private static DbAttributeAnalyzer GetAnalyzer(Type type)
@@ -148,9 +157,9 @@ namespace Corekit.DB
 
             // クエリ生成
             this._QueryCreateTable = this.AnalyzeCreateTableQuery();
-            this._QueryCreateTableIfNotExists = this.AnalyzeCreateTableIfNotExistsQuery();
+            this._QueryCreateTableIfNotExists = AnalyzeCreateTableIfNotExistsQuery(this._TableName, this._ColumnInfos);
             this._QueryDeleteTable = $"DROP TABLE '{this._TableName}';";
-            this._QueryInsertItemHead = this.AnalyzeInsertItemQuery();
+            this._QueryInsertItemHead = AnalyzeInsertItemQuery(this._TableName, this._ColumnInfos);
         }
 
         #region クエリ取得
@@ -160,8 +169,7 @@ namespace Corekit.DB
         /// </summary>
         private protected string CreateQueryCreateTableIfNotExists(string tableName)
         {
-            var columns = string.Join(',', this._ColumnInfos.Select(i => $"{i.SanitizedColumnName} {i.Type} {(i.IsPrimaryKey ? "PRIMARY KEY" : string.Empty)}"));
-            return $"CREATE TABLE IF NOT EXISTS '{tableName}' ({columns});";
+            return AnalyzeCreateTableIfNotExistsQuery(tableName, this._ColumnInfos);
         }
 
         /// <summary>
@@ -188,10 +196,27 @@ namespace Corekit.DB
         /// </summary>
         private protected string CreateQueryInsertItems(IEnumerable items, bool notExists = false)
         {
+            return this.CreateQueryInsertItemsImpl(items, this._QueryInsertItemHead, notExists);
+        }
+
+        /// <summary>
+        /// 行を挿入するクエリを取得
+        /// </summary>
+        private protected string CreateQueryInsertItems(IEnumerable items, string tableName, bool notExists = false)
+        {
+            var queryInsertItemHead = AnalyzeInsertItemQuery(tableName, this._ColumnInfos);
+            return this.CreateQueryInsertItemsImpl(items, queryInsertItemHead, notExists);
+        }
+
+        /// <summary>
+        /// 行を挿入するクエリを取得
+        /// </summary>
+        private string CreateQueryInsertItemsImpl(IEnumerable items, string queryInsertItemHead, bool notExists = false)
+        {
             var enumerator = items.GetEnumerator();
 
             // Emptyなら空文字列
-            if(!enumerator.MoveNext())
+            if (!enumerator.MoveNext())
             {
                 return string.Empty;
             }
@@ -200,7 +225,7 @@ namespace Corekit.DB
             var builder = new StringBuilder();
 
             // 挿入するクエリの先頭を追加する
-            builder.Append(this._QueryInsertItemHead);
+            builder.Append(queryInsertItemHead);
             builder.Append(' ');
 
             // 1行目を追加する
@@ -209,7 +234,7 @@ namespace Corekit.DB
             builder.Append(')');
 
             // 2行目移行をカンマ区切りで追加
-            while(enumerator.MoveNext())
+            while (enumerator.MoveNext())
             {
                 builder.Append(", ");
                 builder.Append('(');
@@ -218,7 +243,7 @@ namespace Corekit.DB
             }
 
             // PrimaryKeyが重複していなかったら挿入しないオプション
-            if(notExists)
+            if (notExists)
             {
                 builder.Append($" ON conflict({this._PrimaryKeyColumnInfo.ColumnName}) DO NOTHING");
             }
@@ -237,7 +262,6 @@ namespace Corekit.DB
         /// </summary>
         private string AnalyzeTableName(IEnumerable<Attribute> attributes)
         {
-            
             return attributes.OfType<DbTableAttribute>().FirstOrDefault()?.TableName ?? string.Empty;
         }
 
@@ -253,19 +277,19 @@ namespace Corekit.DB
         /// <summary>
         /// テーブルがなかった時にテーブルを生成クエリを取得する
         /// </summary>
-        private string AnalyzeCreateTableIfNotExistsQuery()
+        private static string AnalyzeCreateTableIfNotExistsQuery(string tableName, IEnumerable<ColumnInfo> columnInfos)
         {
-            var columns = string.Join(',', this._ColumnInfos.Select(i => $"{i.SanitizedColumnName} {i.Type} {(i.IsPrimaryKey ? "PRIMARY KEY" : string.Empty)}"));
-            return $"CREATE TABLE IF NOT EXISTS '{this._TableName}' ({columns});";
+            var columns = string.Join(',', columnInfos.Select(i => $"{i.SanitizedColumnName} {i.Type} {(i.IsPrimaryKey ? "PRIMARY KEY" : string.Empty)}"));
+            return $"CREATE TABLE IF NOT EXISTS '{tableName}' ({columns});";
         }
 
         /// <summary>
         /// 行を挿入するクエリ
         /// </summary>
-        private string AnalyzeInsertItemQuery()
+        private static string AnalyzeInsertItemQuery(string tableName, IEnumerable<ColumnInfo> columnInfos)
         {
-            var columns = string.Join(',', this._ColumnInfos.Select(i => i.SanitizedColumnName));
-            return $"INSERT INTO '{this._TableName}' ({columns}) VALUES ";
+            var columns = string.Join(',', columnInfos.Select(i => i.SanitizedColumnName));
+            return $"INSERT INTO '{tableName}' ({columns}) VALUES ";
         }
 
         #endregion
