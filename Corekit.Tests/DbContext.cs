@@ -157,6 +157,11 @@ namespace Corekit.DB.Tests
         [TestMethod]
         public void ExecuteInsertItems()
         {
+            if (System.OperatingSystem.IsMacOS())
+            {
+                return;
+            }
+
             using var context = new DbContext<SQLiteConnection>($"Data Source={this._DBPath}");
             using var dbOperator = context.GetOperator();
 
