@@ -131,6 +131,24 @@ namespace Corekit.DB.Tests
             Assert.AreEqual(sumId, sumDb);
         }
 
+        [TestMethod]
+        public void ExecuteInsertItems()
+        {
+            using var context = new DbContext<SQLiteConnection>($"Data Source={this._DBPath}");
+            using var dbOperator = context.GetOperator();
+
+            var items = Enumerable.Range(0, 3)
+                .Select(i => new Record() { Id = i })
+                .ToList();
+
+            dbOperator.ExecuteCreateTableIfNotExists<Record>();
+
+            dbOperator.ExecuteInsertItems(typeof(Record), items, InsertItemConflictAction.DoNothing );
+            dbOperator.ExecuteInsertItems(typeof(Record), items, InsertItemConflictAction.DoUpdate );
+
+            dbOperator.ExecuteDeleteTable<Record>();
+        }
+
         private readonly string _DBPath = "Test.db";
     }
 }

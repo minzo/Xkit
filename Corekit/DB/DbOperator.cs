@@ -98,6 +98,16 @@ namespace Corekit.DB
     }
 
     /// <summary>
+    /// 行挿入時に PrimaryKey が衝突した時の動作を選択します
+    /// </summary>
+    public enum InsertItemConflictAction
+    {
+        None,
+        DoNothing,
+        DoUpdate,
+    }
+
+    /// <summary>
     /// データベースに対する操作を提供します
     /// </summary>
     public static class DbOperatorExtensions
@@ -137,9 +147,9 @@ namespace Corekit.DB
         /// <summary>
         /// 複数行を挿入します
         /// </summary>
-        public static void ExecuteInsertItems<T>(this DbOperator dbOperator, IEnumerable<T> items)
+        public static void ExecuteInsertItems<T>(this DbOperator dbOperator, IEnumerable<T> items, InsertItemConflictAction action = InsertItemConflictAction.None)
         {
-            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer<T>.QueryInsertItems(items));
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer<T>.QueryInsertItems(items, action));
         }
 
         /// <summary>
@@ -193,17 +203,9 @@ namespace Corekit.DB
         /// <summary>
         /// 複数行を挿入します
         /// </summary>
-        public static void ExecuteInsertItems(this DbOperator dbOperator, Type type, IEnumerable<object> items)
+        public static void ExecuteInsertItems(this DbOperator dbOperator, Type type, IEnumerable<object> items, InsertItemConflictAction action = InsertItemConflictAction.None)
         {
-            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryInsertItems(type, items));
-        }
-
-        /// <summary>
-        /// 複数行を挿入します
-        /// </summary>
-        public static void ExecuteInsertItemsIfNotExists(this DbOperator dbOperator, Type type, string tableName, IEnumerable<object> items)
-        {
-            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryInsertItemsIfNotExists(type, tableName, items));
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryInsertItems(type, items, action));
         }
 
         /// <summary>
@@ -220,20 +222,5 @@ namespace Corekit.DB
     /// </summary>
     public static class DbOperatorExperimentalExtensions
     {
-        /// <summary>
-        /// 複数行を挿入します（PrimaryKeyが一致する行は何もしません)
-        /// </summary>
-        public static void ExecuteInsertItemsIfNotExists<T>(this DbOperator dbOperator, IEnumerable<T> items)
-        {
-            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer<T>.QueryInsertItemsIfNotExists(items));
-        }
-
-        /// <summary>
-        /// 複数行を挿入します（PrimaryKeyが一致する行は何もしません)
-        /// </summary>
-        public static void ExecuteInsertItemsIfNotExists(this DbOperator dbOperator, Type type, IEnumerable items)
-        {
-            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryInsertItemsIfNotExists(type, items));
-        }
     }
 }

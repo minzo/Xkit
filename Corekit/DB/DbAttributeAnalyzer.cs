@@ -40,18 +40,14 @@ namespace Corekit.DB
             return GetAnalyzer(type).CreateQueryInsertItem(item);
         }
 
-        public static string QueryInsertItems(Type type, IEnumerable<object> items)
+        public static string QueryInsertItems(Type type, IEnumerable<object> items, InsertItemConflictAction action)
         {
-            return GetAnalyzer(type).CreateQueryInsertItems(items);
+            return GetAnalyzer(type).CreateQueryInsertItems(items, action);
         }
 
-        public static string QueryInsertItemsIfNotExists(Type type, IEnumerable items)
+        public static string QueryInsertItems(Type type, string tableName, IEnumerable items, InsertItemConflictAction action)
         {
-            return GetAnalyzer(type).CreateQueryInsertItems(items, true);
-        }
-        public static string QueryInsertItemsIfNotExists(Type type, string tableName, IEnumerable items)
-        {
-            return GetAnalyzer(type).CreateQueryInsertItems(items, tableName, true);
+            return GetAnalyzer(type).CreateQueryInsertItems(items, tableName, action);
         }
 
         private static DbAttributeAnalyzer GetAnalyzer(Type type)
@@ -186,32 +182,32 @@ namespace Corekit.DB
         /// <summary>
         /// 行を挿入するクエリを取得
         /// </summary>
-        private protected string CreateQueryInsertItems(IEnumerable<object> items)
+        private protected string CreateQueryInsertItems(IEnumerable<object> items, InsertItemConflictAction action)
         {
-            return this.CreateQueryInsertItems(items as IEnumerable);
+            return this.CreateQueryInsertItems(items as IEnumerable, action);
         }
 
         /// <summary>
         /// 行を挿入するクエリを取得
         /// </summary>
-        private protected string CreateQueryInsertItems(IEnumerable items, bool notExists = false)
+        private protected string CreateQueryInsertItems(IEnumerable items, InsertItemConflictAction action)
         {
-            return this.CreateQueryInsertItemsImpl(items, this._QueryInsertItemHead, notExists);
+            return this.CreateQueryInsertItemsImpl(items, this._QueryInsertItemHead, action);
         }
 
         /// <summary>
         /// 行を挿入するクエリを取得
         /// </summary>
-        private protected string CreateQueryInsertItems(IEnumerable items, string tableName, bool notExists = false)
+        private protected string CreateQueryInsertItems(IEnumerable items, string tableName, InsertItemConflictAction action)
         {
             var queryInsertItemHead = AnalyzeInsertItemQuery(tableName, this._ColumnInfos);
-            return this.CreateQueryInsertItemsImpl(items, queryInsertItemHead, notExists);
+            return this.CreateQueryInsertItemsImpl(items, queryInsertItemHead, action);
         }
 
         /// <summary>
         /// 行を挿入するクエリを取得
         /// </summary>
-        private string CreateQueryInsertItemsImpl(IEnumerable items, string queryInsertItemHead, bool notExists = false)
+        private string CreateQueryInsertItemsImpl(IEnumerable items, string queryInsertItemHead, InsertItemConflictAction action)
         {
             var enumerator = items.GetEnumerator();
 
@@ -243,9 +239,18 @@ namespace Corekit.DB
             }
 
             // PrimaryKeyが重複していなかったら挿入しないオプション
-            if (notExists)
+            switch (action)
             {
-                builder.Append($" ON conflict({this._PrimaryKeyColumnInfo.ColumnName}) DO NOTHING");
+                case InsertItemConflictAction.DoNothing:
+                    builder.Append($" ON conflict({this._PrimaryKeyColumnInfo.ColumnName}) DO NOTHING");
+                    break;
+                case InsertItemConflictAction.DoUpdate:
+                    builder.Append($" ON conflict({this._PrimaryKeyColumnInfo.ColumnName}) DO UPDATE SET ");
+                    builder.AppendJoin(',', this._ColumnInfos.Select(i => $"{i.ColumnName}=EXCLUDED.{i.ColumnName}"));
+                    break;
+                case InsertItemConflictAction.None:
+                default:
+                    break;
             }
 
             builder.Append(';');
@@ -335,14 +340,9 @@ namespace Corekit.DB
             return Analyzer.CreateQueryInsertItem(item);
         }
 
-        public static string QueryInsertItems(IEnumerable<T> items)
+        public static string QueryInsertItems(IEnumerable<T> items, InsertItemConflictAction action)
         {
-            return Analyzer.CreateQueryInsertItems(items);
-        }
-
-        public static string QueryInsertItemsIfNotExists(IEnumerable<T> items)
-        {
-            return Analyzer.CreateQueryInsertItems(items, true);
+            return Analyzer.CreateQueryInsertItems(items, action);
         }
 
         /// <summary>
