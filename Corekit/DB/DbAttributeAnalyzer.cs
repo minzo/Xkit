@@ -35,6 +35,11 @@ namespace Corekit.DB
             return GetAnalyzer(type)._QueryDeleteTable;
         }
 
+        public static string QueryDeleteTable(string tableName)
+        {
+            return CreateQueryDeleteTable(tableName);
+        }
+
         public static string QueryInsertItem(Type type, object item)
         {
             return GetAnalyzer(type).CreateQueryInsertItem(item);
@@ -154,7 +159,7 @@ namespace Corekit.DB
             // クエリ生成
             this._QueryCreateTable = this.AnalyzeCreateTableQuery();
             this._QueryCreateTableIfNotExists = AnalyzeCreateTableIfNotExistsQuery(this._TableName, this._ColumnInfos);
-            this._QueryDeleteTable = $"DROP TABLE '{this._TableName}';";
+            this._QueryDeleteTable = CreateQueryDeleteTable(this._TableName);
             this._QueryInsertItemHead = AnalyzeInsertItemQuery(this._TableName, this._ColumnInfos);
         }
 
@@ -166,6 +171,14 @@ namespace Corekit.DB
         private protected string CreateQueryCreateTableIfNotExists(string tableName)
         {
             return AnalyzeCreateTableIfNotExistsQuery(tableName, this._ColumnInfos);
+        }
+
+        /// <summary>
+        /// テーブルを削除するクエリを取得
+        /// </summary>
+        private protected static string CreateQueryDeleteTable(string tableName)
+        {
+            return $"DROP TABLE '{tableName}';";
         }
 
         /// <summary>

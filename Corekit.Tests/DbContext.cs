@@ -25,6 +25,14 @@ namespace Corekit.DB.Tests
             public int Id { get; set; }
         }
 
+        [DbTable("TestRecord02")]
+        class Record02
+        {
+            [DbPrimaryKey]
+            [DbColumn]
+            public int Id { get; set; }
+        }
+
         [TestInitialize]
         public void Initialize()
         {
@@ -42,6 +50,9 @@ namespace Corekit.DB.Tests
             using var dbOperator = context.GetOperator();
             dbOperator.ExecuteCreateTable<Record01>();
             dbOperator.ExecuteInsertItems(Enumerable.Range(0, 1000).Select(i => new Record01() { Id = i }));
+
+            dbOperator.ExecuteCreateTable<Record02>();
+            dbOperator.ExecuteInsertItems(Enumerable.Range(0, 1000).Select(i => new Record02() { Id = i }));
         }
 
         [TestCleanup]
@@ -98,6 +109,18 @@ namespace Corekit.DB.Tests
                     Assert.IsTrue(System.IO.File.Exists(_DBPath));
                     Assert.IsTrue(isExistTable);
                 }
+
+                using (var dbOperator = context.GetOperator())
+                {
+                    dbOperator.ExecuteDeleteTable("TestRecord#Table");
+                    bool isExistTable = dbOperator
+                        .ExecuteReader("select count(*) from sqlite_master where type = 'table' and name = 'TestRecord#Table'")
+                        .Select(i => i.GetBoolean(0))
+                        .FirstOrDefault();
+
+                    Assert.IsTrue(System.IO.File.Exists(_DBPath));
+                    Assert.IsFalse(isExistTable);
+                }
             }
         }
 
@@ -138,15 +161,11 @@ namespace Corekit.DB.Tests
             using var dbOperator = context.GetOperator();
 
             var items = Enumerable.Range(0, 3)
-                .Select(i => new Record() { Id = i })
+                .Select(i => new Record02() { Id = i })
                 .ToList();
 
-            dbOperator.ExecuteCreateTableIfNotExists<Record>();
-
-            dbOperator.ExecuteInsertItems(typeof(Record), items, InsertItemConflictAction.DoNothing );
-            dbOperator.ExecuteInsertItems(typeof(Record), items, InsertItemConflictAction.DoUpdate );
-
-            dbOperator.ExecuteDeleteTable<Record>();
+            dbOperator.ExecuteInsertItems(typeof(Record02), items, InsertItemConflictAction.DoNothing );
+            dbOperator.ExecuteInsertItems(typeof(Record02), "TestRecord02", items, InsertItemConflictAction.DoUpdate );
         }
 
         private readonly string _DBPath = "Test.db";

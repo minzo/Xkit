@@ -179,6 +179,14 @@ namespace Corekit.DB
         /// <summary>
         /// テーブルを削除します
         /// </summary>
+        public static void ExecuteDeleteTable(this DbOperator dbOperator, string tableName)
+        {
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryDeleteTable(tableName));
+        }
+
+        /// <summary>
+        /// テーブルを削除します
+        /// </summary>
         public static void ExecuteDeleteTable(this DbOperator dbOperator, Type type)
         {
             dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryDeleteTable(type));
@@ -206,6 +214,14 @@ namespace Corekit.DB
         public static void ExecuteInsertItems(this DbOperator dbOperator, Type type, IEnumerable<object> items, InsertItemConflictAction action = InsertItemConflictAction.None)
         {
             dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryInsertItems(type, items, action));
+        }
+
+        /// <summary>
+        /// 複数行を挿入します
+        /// </summary>
+        public static void ExecuteInsertItems(this DbOperator dbOperator, Type type, string tableName, IEnumerable<object> items, InsertItemConflictAction action = InsertItemConflictAction.None)
+        {
+            dbOperator.ExecuteNonQuery(DbAttributeAnalyzer.QueryInsertItems(type, tableName, items, action));
         }
 
         /// <summary>
