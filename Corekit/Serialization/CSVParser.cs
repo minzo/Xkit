@@ -103,6 +103,8 @@ namespace Corekit.Serialization
                         break;
                     default:
                         cell.Append(csvStr[i]);
+                        // エスケープされる文字ではなかったのでfalseに戻す
+                        isEscapeSequenceAfter = false;
                         break;
                 }
             }
