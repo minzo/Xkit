@@ -225,7 +225,7 @@ namespace Toolkit.WPF.Controls
                 foreach(var column in ((TreeDataGrid)d).Columns.OfType<DataGridBindingColumn>())
                 {
                     column.SetCurrentValue(DataGridBindingColumn.CellTemplateProperty, e.NewValue);
-                }                 
+                }
             }));
 
 
@@ -923,6 +923,11 @@ namespace Toolkit.WPF.Controls
             /// </summary>
             private string GetPropertyPathValue(object dataItem, string propertyPath, bool tryUsePropertyDescriptor)
             {
+                if (propertyPath == null)
+                {
+                    return null;
+                }
+
                 if (tryUsePropertyDescriptor)
                 {
                     // PropertyDescriptor 経由での取得を先に試し、失敗した場合は Reflection で値を取得する
