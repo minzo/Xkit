@@ -35,8 +35,6 @@ namespace Toolkit.WPF.Converters
         public static readonly DependencyProperty StringFormatProperty =
             DependencyProperty.Register("StringFormat", typeof(string), typeof(FileSizeUnitConverter), new PropertyMetadata(string.Empty));
 
-
-
         /// <summary>
         /// 単位
         /// </summary>

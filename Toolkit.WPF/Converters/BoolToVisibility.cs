@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Windows;
 using System.Windows.Data;
 
@@ -9,15 +7,18 @@ namespace Toolkit.WPF.Converters
 {
     public class BoolToVisibility : IValueConverter
     {
+        public static readonly IValueConverter DefaultCollapsedIfFalse = new BoolToVisibility();
+        public static readonly IValueConverter DefaultHiddenIfFlase = new BoolToVisibility() { VisibilityIfFalse = Visibility.Hidden };
+
         /// <summary>
         /// TrueのときのVisibility
         /// </summary>
-        public Visibility VisibilityIfTrue { get; set; } = Visibility.Visible;
+        public Visibility? VisibilityIfTrue { get; set; } = Visibility.Visible;
 
         /// <summary>
         /// FalseのときのVisibility
         /// </summary>
-        public Visibility VisibilityIfFalse { get; set; } = Visibility.Collapsed;
+        public Visibility? VisibilityIfFalse { get; set; } = Visibility.Collapsed;
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

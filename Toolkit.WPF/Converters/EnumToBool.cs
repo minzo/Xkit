@@ -8,6 +8,8 @@ namespace Toolkit.WPF.Converters
 {
     public class EnumToBool : IValueConverter
     {
+        public static readonly IValueConverter Default = new EnumToBool();
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var sourceType = value.GetType();

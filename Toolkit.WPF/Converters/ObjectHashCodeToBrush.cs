@@ -13,7 +13,7 @@ namespace Toolkit.WPF.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var mask = (0x01 << 8) - 1;
-            var code = value.GetHashCode();
+            var code = value?.GetHashCode() ?? 0;
             var r = ((code >> 0) & mask);
             var g = ((code >> 8) & mask);
             var b = ((code >> 16) & mask);
