@@ -594,7 +594,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// DataGridColumnHeader が表示されてから値を設定する必要があるものを処理する
         /// </summary>
-        private void UpdateDataGridColumnHeader(object sender, SizeChangedEventArgs e)
+        private void UpdateDataGridColumnHeader()
         {
             foreach (var header in this._DataGridColumnsPanel.Children.OfType<DataGridColumnHeader>())
             {
@@ -724,8 +724,8 @@ namespace Toolkit.WPF.Controls
             {
                 // DataGridColumnHeader は列が表示されていないときは列挙できず値を変更することができないので
                 // DataGridColumnHeader が表示されたタイミングとしてちょうどいいイベントで設定しておく
-                this.UpdateDataGridColumnHeader(this._DataGridColumnsPanel, null);
-                this._DataGridColumnsPanel.SizeChanged += this.UpdateDataGridColumnHeader;
+                this.UpdateDataGridColumnHeader();
+                this._DataGridColumnsPanel.SizeChanged += (s, e) => this.UpdateDataGridColumnHeader();
             }
 
             new DragAndDrop(this, this, typeof(DataGridRow), typeof(DataGridRowHeader)) { ReorderAction = this.Reorder };
@@ -769,11 +769,11 @@ namespace Toolkit.WPF.Controls
             var oldColumnsSource = oldTranspose ? this.RowsSource : this.ColumnsSource;
             var newColumnsSource = newTranspose ? this.RowsSource : this.ColumnsSource;
 
-            this.OnRowsSourceChanged(oldRowsSource, newRowsSource, isTranposeChanged);
-            this.OnColumnsSourceChanged(oldColumnsSource, newColumnsSource, isTranposeChanged);
-
             this._RowInfo = newTranspose ? this._BaseColmnInfo : this._BaseRowInfo;
             this._ColInfo = newTranspose ? this._BaseRowInfo : this._BaseColmnInfo;
+
+            this.OnRowsSourceChanged(oldRowsSource, newRowsSource, isTranposeChanged);
+            this.OnColumnsSourceChanged(oldColumnsSource, newColumnsSource, isTranposeChanged);
         }
 
         private DataGridCellsPanel _DataGridColumnsPanel;
