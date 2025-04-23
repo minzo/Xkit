@@ -113,37 +113,5 @@
         <Setter Property="HorizontalGridLinesBrush" Value="#CECECE" />
         <Setter Property="VerticalGridLinesBrush" Value="#CECECE" />
     </Style>
-
-    <!--<Style TargetType="{x:Type DataGridRowHeader}" BasedOn="{StaticResource {x:Type DataGridRowHeader}}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type DataGridRowHeader}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="20"/>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.Margin>
-                            <Binding Path="(local:TreeDataGrid.TreeDepthMargin)" Mode="OneWay" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}" />
-                        </Grid.Margin>
-                        <ToggleButton 
-                            Name="Expander"
-                            Grid.Column="0" 
-                            Style="{StaticResource {x:Type ToggleButton}}"
-                            IsChecked="{Binding Path=(local:TreeDataGrid.IsExpanded), Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}}"
-                            Visibility="{Binding Path=(local:TreeDataGrid.TreeExpanderVisibility), Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}}"                />
-                        <ContentControl Name="Icon" Grid.Column="1" Margin="0 0 4 0" />
-                        <ContentPresenter
-                            Name="Content" 
-                            Grid.Column="2"
-                            ContentTemplate="{Binding HeaderTemplate, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}}" 
-                            ContentTemplateSelector="{Binding HeaderTemplateSelector, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}}"
-                            />
-                    </Grid>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>-->
-
+    
 </ResourceDictionary>

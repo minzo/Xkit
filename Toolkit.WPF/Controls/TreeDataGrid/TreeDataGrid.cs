@@ -518,6 +518,10 @@ namespace Toolkit.WPF.Controls
                 this._ColInfo.TreeInfo.Setup(this._ColInfo.ChildrenPropertyPath, this._ColInfo.ExpandedPropertyPath, this._ColInfo.FilterTargetPropertyPath);
                 this._ColInfo.TreeInfo.UpdateTreeInfoAll();
                 this.UpdateColumnTreeAll();
+
+                // DataGridColumnHeader は列が表示されていないときは列挙できず値を変更することができないので
+                // DataGridColumnHeader が表示されたあとのタイミングで更新処理がおこなわれるようにタイミングを遅らせて呼ぶ
+                this.Dispatcher.BeginInvoke(() => this.UpdateDataGridColumnHeader(), System.Windows.Threading.DispatcherPriority.Background);
             }
         }
 
@@ -719,14 +723,6 @@ namespace Toolkit.WPF.Controls
             this._DataGridColumnsPanel = EnumerateChildren(presenter)
                .OfType<DataGridCellsPanel>()
                .FirstOrDefault();
-
-            if (this._DataGridColumnsPanel != null)
-            {
-                // DataGridColumnHeader は列が表示されていないときは列挙できず値を変更することができないので
-                // DataGridColumnHeader が表示されたタイミングとしてちょうどいいイベントで設定しておく
-                this.UpdateDataGridColumnHeader();
-                this._DataGridColumnsPanel.SizeChanged += (s, e) => this.UpdateDataGridColumnHeader();
-            }
 
             new DragAndDrop(this, this, typeof(DataGridRow), typeof(DataGridRowHeader)) { ReorderAction = this.Reorder };
             new DragAndDrop(this, this, typeof(DataGridColumnHeader), typeof(DataGridColumnHeader));
