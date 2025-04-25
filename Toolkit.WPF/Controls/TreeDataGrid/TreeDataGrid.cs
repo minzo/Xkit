@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Data.Common;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -97,6 +98,19 @@ namespace Toolkit.WPF.Controls
             DependencyProperty.Register("ColumnPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(string.Empty, (d, e) => {
                 ((TreeDataGrid)d)._BaseColmnInfo.PropertyPath = (string)e.NewValue;
             }));
+
+        /// <summary>
+        /// 選択しているセルの情報
+        /// </summary>
+        public IList<(string RowName, string ColName, object CellContent)> SelectedCellInfoList
+        {
+            get { return (IList<(string, string, object)>)this.GetValue(SelectedCellInfoListProperty); }
+            set { this.SetValue(SelectedCellInfoListProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for SelectedCellInfoList.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty SelectedCellInfoListProperty =
+            DependencyProperty.Register("SelectedCellInfoList", typeof(IList<(string, string, object)>), typeof(TreeDataGrid), new FrameworkPropertyMetadata(new List<(string, string, object)>(), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         #region フィルター関連プロパティ
 
@@ -724,11 +738,29 @@ namespace Toolkit.WPF.Controls
                .OfType<DataGridCellsPanel>()
                .FirstOrDefault();
 
-            new DragAndDrop(this, this, typeof(DataGridRow), typeof(DataGridRowHeader)) { ReorderAction = this.Reorder };
-            new DragAndDrop(this, this, typeof(DataGridColumnHeader), typeof(DataGridColumnHeader));
+            new DragAndDrop(this, this, typeof(DataGridRow), typeof(DataGridRowHeader)) { ReorderAction = this.ReorderRow };
+            new DragAndDrop(this, this, typeof(DataGridColumnHeader), typeof(DataGridColumnHeader)) { ReorderAction = this.ReorderColumn };
         }
 
-        private void Reorder((object Item, object Target, DragAndDrop.InsertType InsertType) arg)
+        /// <summary>
+        /// 選択セル変更時のイベント
+        /// </summary>
+        protected override void OnSelectedCellsChanged(SelectedCellsChangedEventArgs e)
+        {
+            base.OnSelectedCellsChanged(e);
+
+            var list = this.SelectedCells
+                .Where(i => i.IsValid)
+                .Select(i => (
+                    RowName: ((DataGridTransposeColumn)i.Column).GetRowPropertyPath(i.Item),
+                    ColumnName: ((DataGridTransposeColumn)i.Column).GetColumnPropertyPath(),
+                    CellContent: i.Column.GetCellContent(i.Item)?.DataContext))
+                .ToList();
+
+            this.SetCurrentValue(SelectedCellInfoListProperty, list);
+        }
+
+        private void ReorderRow((object Item, object Target, DragAndDrop.InsertType InsertType) arg)
         {
             if ((this.RowsSource ?? this.Items) is IList list)
             {
@@ -751,6 +783,12 @@ namespace Toolkit.WPF.Controls
                 }
             }
         }
+
+        private void ReorderColumn((object Item, object Target, DragAndDrop.InsertType InsertType) arg)
+        {
+            Console.WriteLine("");
+        }
+
 
         /// <summary>
         /// 表示状態を転置します
@@ -876,42 +914,69 @@ namespace Toolkit.WPF.Controls
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                 };
 
-                if (this.DataGridOwner is TreeDataGrid grid)
+                var path = this.GetBindingPropertyPath(dataItem);
+                if (!string.IsNullOrEmpty(path))
                 {
-                    // DataGrid の Row として表示されているものからプロパティパスを取得する
-                    var rowPropertyPath = this.GetPropertyPathValue(dataItem, grid._RowInfo.PropertyPath, true);
-
-                    // DataGrid の Column として表示されているものからプロパティパスを取得する
-                    var columnPropertyPath = this.GetPropertyPathValue(this.Header, grid._ColInfo.PropertyPath, false);
-
-                    bool isExistsRow = !string.IsNullOrWhiteSpace(rowPropertyPath);
-                    bool isExistsColumn = !string.IsNullOrWhiteSpace(columnPropertyPath);
-
-                    Binding binding = null;
-                    if (isExistsRow && isExistsColumn)
-                    {
-                        if (grid.EnableTranspose)
-                        {
-                            binding = new Binding($"{columnPropertyPath}{grid.CellBindingPropertySeparateString}{rowPropertyPath}");
-                        }
-                        else
-                        {
-                            binding = new Binding($"{rowPropertyPath}{grid.CellBindingPropertySeparateString}{columnPropertyPath}");
-                        }
-                    }
-                    else if (isExistsRow)
-                    {
-                        binding = new Binding(rowPropertyPath);
-                    }
-                    else if (isExistsColumn)
-                    {
-                        binding = new Binding(columnPropertyPath);
-                    }
-
-                    TrySetBinding(control, ContentControl.ContentProperty, binding);
+                    TrySetBinding(control, ContentControl.ContentProperty, new Binding(path));
                 }
 
                 return control;
+            }
+
+            /// <summary>
+            /// Binding に使うプロパティパスを取得します
+            /// </summary>
+            private string GetBindingPropertyPath(object dataItem)
+            {
+                var grid = this.DataGridOwner as TreeDataGrid;
+                if (grid == null)
+                {
+                    return null;
+                }
+
+                var rowPropertyPath = this.GetRowPropertyPath(dataItem);
+                var columnPropertyPath = this.GetColumnPropertyPath();
+
+                bool isExistsRow = !string.IsNullOrWhiteSpace(rowPropertyPath);
+                bool isExistsColumn = !string.IsNullOrWhiteSpace(columnPropertyPath);
+
+                if (isExistsRow && isExistsColumn)
+                {
+                    if (grid.EnableTranspose)
+                    {
+                        return $"{columnPropertyPath}{grid.CellBindingPropertySeparateString}{rowPropertyPath}";
+                    }
+                    else
+                    {
+                        return $"{rowPropertyPath}{grid.CellBindingPropertySeparateString}{columnPropertyPath}";
+                    }
+                }
+                else if (isExistsRow)
+                {
+                    return rowPropertyPath;
+                }
+                else if (isExistsColumn)
+                {
+                    return columnPropertyPath;
+                }
+
+                return string.Empty;
+            }
+
+            /// <summary>
+            /// DataGrid の Row として表示されているものからプロパティパスを取得します
+            /// </summary>
+            public string GetRowPropertyPath(object dataItem)
+            {
+                return this.GetPropertyPathValue(dataItem, ((TreeDataGrid)this.DataGridOwner)._RowInfo.PropertyPath, true);
+            }
+
+            /// <summary>
+            /// DataGrid の Column として表示されているものからプロパティパスを取得します
+            /// </summary>
+            public string GetColumnPropertyPath()
+            {
+                return this.GetPropertyPathValue(this.Header, ((TreeDataGrid)this.DataGridOwner)._ColInfo.PropertyPath, false);
             }
 
             /// <summary>
