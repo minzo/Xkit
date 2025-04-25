@@ -833,68 +833,6 @@ namespace Toolkit.WPF.Controls
         private static readonly ResourceDictionary Resource = new ResourceDictionary() { Source = new Uri(@"pack://application:,,,/Toolkit.WPF;component/Controls/TreeDataGrid/TreeDataGrid.xaml") };
 
         /// <summary>
-        /// テーブルの行と列の情報を統一的に扱うクラス
-        /// </summary>
-        private class TableFrameInfo
-        {
-            public string PropertyPath { get; set; }
-
-            public string ChildrenPropertyPath {
-                get => this._ChildrenPropertyPath;
-                set => this.UpdateChildrenPropertyPath(value);
-            }
-
-            public string ExpandedPropertyPath
-            {
-                get => this._ExpandedPropertyPath;
-                set => this.UpdateExpandedPropertyPath(value);
-            }
-
-            public string FilterTargetPropertyPath { get; set; }
-
-            public TreeInfoUnit TreeInfo { get; }
-
-            public BindingBase RowExpandedBinding { get; private set; }
-
-            public BindingBase ColumnExpandedBinding { get; private set; }
-
-            public TableFrameInfo()
-            {
-                this.TreeInfo = new TreeInfoUnit();
-            }
-
-            private void UpdateChildrenPropertyPath(string value)
-            {
-                if (this._ChildrenPropertyPath != value)
-                {
-                    this._ChildrenPropertyPath = value;
-                    this.TreeInfo.Setup(this._ChildrenPropertyPath, this._ExpandedPropertyPath, this.FilterTargetPropertyPath);
-                }
-            }
-
-            private void UpdateExpandedPropertyPath(string value)
-            {
-                if( value != this._ExpandedPropertyPath)
-                {
-                    this._ExpandedPropertyPath = value;
-                    this.TreeInfo.Setup(this._ChildrenPropertyPath, this._ExpandedPropertyPath, this.FilterTargetPropertyPath);
-
-                    if (!string.IsNullOrEmpty(this._ExpandedPropertyPath))
-                    {
-                        this.RowExpandedBinding = new Binding(this._ExpandedPropertyPath);
-                        this.ColumnExpandedBinding = new Binding($"Column.Header.{this._ExpandedPropertyPath}")
-                        {
-                            RelativeSource = new RelativeSource(RelativeSourceMode.Self)
-                        };
-                    }
-                }
-            }
-
-            private string _ChildrenPropertyPath;
-            private string _ExpandedPropertyPath;
-        }
-
-        /// <summary>
         /// DataGridColumn
         /// </summary>
         private class DataGridTransposeColumn : DataGridBindingColumn
@@ -1003,6 +941,68 @@ namespace Toolkit.WPF.Controls
 
                 return dataItem.GetType()?.GetProperty(propertyPath)?.GetValue(dataItem)?.ToString();
             }
+        }
+
+        /// <summary>
+        /// テーブルの行と列の情報を統一的に扱うクラス
+        /// </summary>
+        private class TableFrameInfo
+        {
+            public string PropertyPath { get; set; }
+
+            public string ChildrenPropertyPath {
+                get => this._ChildrenPropertyPath;
+                set => this.UpdateChildrenPropertyPath(value);
+            }
+
+            public string ExpandedPropertyPath
+            {
+                get => this._ExpandedPropertyPath;
+                set => this.UpdateExpandedPropertyPath(value);
+            }
+
+            public string FilterTargetPropertyPath { get; set; }
+
+            public TreeInfoUnit TreeInfo { get; }
+
+            public BindingBase RowExpandedBinding { get; private set; }
+
+            public BindingBase ColumnExpandedBinding { get; private set; }
+
+            public TableFrameInfo()
+            {
+                this.TreeInfo = new TreeInfoUnit();
+            }
+
+            private void UpdateChildrenPropertyPath(string value)
+            {
+                if (this._ChildrenPropertyPath != value)
+                {
+                    this._ChildrenPropertyPath = value;
+                    this.TreeInfo.Setup(this._ChildrenPropertyPath, this._ExpandedPropertyPath, this.FilterTargetPropertyPath);
+                }
+            }
+
+            private void UpdateExpandedPropertyPath(string value)
+            {
+                if( value != this._ExpandedPropertyPath)
+                {
+                    this._ExpandedPropertyPath = value;
+                    this.TreeInfo.Setup(this._ChildrenPropertyPath, this._ExpandedPropertyPath, this.FilterTargetPropertyPath);
+
+                    if (!string.IsNullOrEmpty(this._ExpandedPropertyPath))
+                    {
+                        this.RowExpandedBinding = new Binding(this._ExpandedPropertyPath);
+                        this.ColumnExpandedBinding = new Binding($"Column.Header.{this._ExpandedPropertyPath}")
+                        {
+                            RelativeSource = new RelativeSource(RelativeSourceMode.Self)
+                        };
+                    }
+                }
+            }
+
+            private string _ChildrenPropertyPath;
+            private string _ExpandedPropertyPath;
         }
 
         #region TreeInfo
