@@ -43,6 +43,7 @@ namespace Toolkit.WPF.Controls.Adorners
             this._Brush = new VisualBrush(ghostElement) { Opacity = this.Opacity, Stretch = Stretch.Uniform };
             this._CurrentPoint = GetNowPosition(this.AdornedElement);
             this.AdornedElement.QueryContinueDrag += this.OnQueryContinueDrag;
+            this.IsHitTestVisible = false;
         }
 
         /// <summary>

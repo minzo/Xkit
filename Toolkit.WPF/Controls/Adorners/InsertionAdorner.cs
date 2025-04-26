@@ -49,6 +49,8 @@ namespace Toolkit.WPF.Controls.Adorners
             this._InsertNextBrush.Freeze();
 
             this._TargetFrameworkElementType = targetFramworkElementType;
+
+            this.IsHitTestVisible = false; 
         }
 
         /// <summary>
