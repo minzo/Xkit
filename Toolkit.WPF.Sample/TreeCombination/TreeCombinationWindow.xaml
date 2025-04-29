@@ -96,12 +96,12 @@
         </StackPanel>
         
         <tkitwpf:TreeDataGrid
-            RowsSource="{Binding Items0, Mode=OneTime}"
+            RowRootsSource="{Binding Root0.Children, Mode=OneTime}"
             RowPropertyPath="Name"
             RowChildrenPropertyPath="Children"
             RowFilterTargetPropertyPath="Name"
 
-            ColumnsSource="{Binding Items1, Mode=OneTime}"
+            ColumnRootsSource="{Binding Root1.Children, Mode=OneTime}"
             ColumnPropertyPath="Name"
             ColumnChildrenPropertyPath="Children"            
             ColumnFilterTargetPropertyPath="Name"

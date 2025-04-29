@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Corekit.Models;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,8 +43,10 @@ namespace Toolkit.WPF.Sample
         public Val Val { get; set; } = new Val();
     }
 
-    internal class DataGridBindingTestWindowViewModel
+    internal class DataGridBindingTestWindowViewModel : ICustomTypeDescriptor
     {
+
+
         public List<Item> Items { get; set; }
 
         public DataGridBindingTestWindowViewModel()
@@ -51,6 +55,67 @@ namespace Toolkit.WPF.Sample
             this.Items.Add(new Item() { Name = "0" });
             this.Items.Add(new Item() { Name = "1" });
             this.Items.Add(new Item() { Name = "2" });
+        }
+
+        public AttributeCollection GetAttributes() => AttributeCollection.Empty;
+        public string GetClassName()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetComponentName()
+        {
+            throw new NotImplementedException();
+        }
+
+        public TypeConverter GetConverter()
+        {
+            throw new NotImplementedException();
+        }
+
+        public EventDescriptor GetDefaultEvent()
+        {
+            throw new NotImplementedException();
+        }
+
+        public PropertyDescriptor GetDefaultProperty()
+        {
+            throw new NotImplementedException();
+        }
+
+        public object GetEditor(Type editorBaseType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public EventDescriptorCollection GetEvents()
+        {
+            throw new NotImplementedException();
+        }
+
+        public EventDescriptorCollection GetEvents(Attribute[] attributes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public PropertyDescriptorCollection GetProperties()
+        {
+            var def = new DynamicPropertyDefinition<string>() { Name = "Test" };
+            var descriptor = new DynamicPropertyDescriptor(def);
+
+            var list = new List<PropertyDescriptor>();
+            list.Add(descriptor);
+            return new PropertyDescriptorCollection(list.ToArray());
+        }
+
+        public PropertyDescriptorCollection GetProperties(Attribute[] attributes)
+        {
+            return this.GetProperties();
+        }
+
+        public object GetPropertyOwner(PropertyDescriptor pd)
+        {
+            throw new NotImplementedException();
         }
     }
 }

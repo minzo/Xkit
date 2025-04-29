@@ -197,13 +197,13 @@
             <tkitwpf:TreeDataGrid
                 Grid.Column="6" 
 
-                RowsSource="{Binding TreeRootItems, Mode=OneTime, Converter={x:Static tkitwpf:FlattenTreeToListOfDepthFirstOrdering.Converter}, ConverterParameter=Children}"
+                RowRootsSource="{Binding TreeRootItems, Mode=OneTime, ConverterParameter=Children}"
                 RowPropertyPath="Name"
                 RowChildrenPropertyPath="Children"
                 RowExpandedPropertyPath="IsExpanded"
                 RowHeaderTemplate="{StaticResource HeaderTemplate}"
 
-                ColumnsSource="{Binding TreeRootItems2, Mode=OneTime, Converter={x:Static tkitwpf:FlattenTreeToListOfDepthFirstOrdering.Converter}, ConverterParameter=Children}"
+                ColumnRootsSource="{Binding TreeRootItems2, Mode=OneTime, ConverterParameter=Children}"
                 ColumnPropertyPath="Name"
                 ColumnChildrenPropertyPath="Children"
                 ColumnExpandedPropertyPath="IsExpanded"

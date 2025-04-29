@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Data.Common;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -40,33 +40,33 @@ namespace Toolkit.WPF.Controls
             DependencyProperty.Register("DataSource", typeof(object), typeof(TreeDataGrid), new PropertyMetadata(null));
 
         /// <summary>
-        /// 行情報
+        /// 行のルート情報
         /// </summary>
-        public IEnumerable RowsSource
+        public IEnumerable RowRootsSource
         {
-            get { return (IEnumerable)this.GetValue(RowsSourceProperty); }
-            set { this.SetValue(RowsSourceProperty, value); }
+            get { return (IEnumerable)this.GetValue(RowRootsSourceProperty); }
+            set { this.SetValue(RowRootsSourceProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for RowsSource.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty RowsSourceProperty =
-            DependencyProperty.Register("RowsSource", typeof(IEnumerable), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
-                ((TreeDataGrid)d).ChangeItemsSource(((TreeDataGrid)d).EnableTranspose, ((TreeDataGrid)d).EnableTranspose);
+        // Using a DependencyProperty as the backing store for RowRootsSource.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty RowRootsSourceProperty =
+            DependencyProperty.Register("RowRootsSource", typeof(IEnumerable), typeof(TreeDataGrid), new PropertyMetadata(null, (d,e) => {
+                ((TreeDataGrid)d).OnRowRootsSourceChanged(e.NewValue as IEnumerable);
             }));
 
         /// <summary>
-        /// 列情報
+        /// 列のルート情報
         /// </summary>
-        public IEnumerable ColumnsSource
+        public IEnumerable ColumnRootsSource
         {
-            get { return (IEnumerable)this.GetValue(ColumnsSourceProperty); }
-            set { this.SetValue(ColumnsSourceProperty, value); }
+            get { return (IEnumerable)this.GetValue(ColumnRootsSourceProperty); }
+            set { this.SetValue(ColumnRootsSourceProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for ColumnsSource.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty ColumnsSourceProperty =
-            DependencyProperty.Register("ColumnsSource", typeof(IEnumerable), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
-                ((TreeDataGrid)d).ChangeItemsSource(((TreeDataGrid)d).EnableTranspose, ((TreeDataGrid)d).EnableTranspose);
+        // Using a DependencyProperty as the backing store for ColumnRootsSource.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ColumnRootsSourceProperty =
+            DependencyProperty.Register("ColumnRootsSource", typeof(IEnumerable), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
+                ((TreeDataGrid)d).OnColumnRootsSourceChanged(e.NewValue as IEnumerable);
             }));
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for ColumnPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ColumnPropertyPathProperty =
             DependencyProperty.Register("ColumnPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(string.Empty, (d, e) => {
-                ((TreeDataGrid)d)._BaseColmnInfo.PropertyPath = (string)e.NewValue;
+                ((TreeDataGrid)d)._BaseColumnInfo.PropertyPath = (string)e.NewValue;
             }));
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for ColumnFilterTargetPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ColumnFilterTargetPropertyPathProperty =
             DependencyProperty.Register("ColumnFilterTargetPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
-                ((TreeDataGrid)d)._BaseColmnInfo.FilterTargetPropertyPath = (string)e.NewValue;
+                ((TreeDataGrid)d)._BaseColumnInfo.FilterTargetPropertyPath = (string)e.NewValue;
             }));
 
         #endregion
@@ -188,7 +188,7 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for Transpose.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty EnableTransposeProperty =
             DependencyProperty.Register("EnableTranspose", typeof(bool), typeof(TreeDataGrid), new PropertyMetadata(false, (d, e) => {
-                ((TreeDataGrid)d).ChangeItemsSource((bool)e.OldValue, (bool)e.NewValue);
+                ((TreeDataGrid)d).ChangeEnableTransposeChanged((bool)e.OldValue, (bool)e.NewValue);
             }));
 
         #region Column HeaderTempalte/HeaderTemplateSelector
@@ -332,7 +332,7 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for ChildrenPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ChildrenPropertyPathProperty =
             DependencyProperty.Register("ChildrenPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
-                ((TreeDataGrid)d)._BaseColmnInfo.ChildrenPropertyPath = (string)e.NewValue;
+                ((TreeDataGrid)d)._BaseColumnInfo.ChildrenPropertyPath = (string)e.NewValue;
             }));
 
         /// <summary>
@@ -362,7 +362,7 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for ColumnExpandedPropertyPath.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ColumnExpandedPropertyPathProperty =
             DependencyProperty.Register("ColumnExpandedPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
-                ((TreeDataGrid)d)._BaseColmnInfo.ExpandedPropertyPath = (string)e.NewValue;
+                ((TreeDataGrid)d)._BaseColumnInfo.ExpandedPropertyPath = (string)e.NewValue;
             }));
 
         #endregion
@@ -370,60 +370,49 @@ namespace Toolkit.WPF.Controls
         #region Row
 
         /// <summary>
-        /// ItemsSource が変化したときに呼ばれます
+        /// RowRootsSource が変化したときに呼ばれます
         /// </summary>
-        private void OnRowsSourceChanged(IEnumerable oldValue, IEnumerable newValue, bool changed_by_transpose = false)
+        private void OnRowRootsSourceChanged(IEnumerable newValue)
         {
-            // 転置による変更のときはリセット不要
-            if (!changed_by_transpose)
+            if (!this.EnableTranspose)
             {
-                this._RowInfo.TreeInfo.Clear();
+                this._BaseRowInfo.Items.CollectionChanged -= this.OnRowInfoItemsCollectionChanged;
+            }
+            else
+            {
+                this._BaseRowInfo.Items.CollectionChanged -= this.OnColumnInfoItemsCollectionChanged;
             }
 
-            if (oldValue is INotifyCollectionChanged oValue)
+            this._BaseRowInfo.ChangeRootsSource(newValue);
+
+            if (!this.EnableTranspose)
             {
-                oValue.CollectionChanged -= this.OnRowsSourceCollectionChanged;
+                // RowInfo の RootsSource が変わったことで RowInfo の Items も変わるので通知する
+                this.OnRowInfoItemsChanged();
+                this._BaseRowInfo.Items.CollectionChanged += this.OnRowInfoItemsCollectionChanged;
             }
-
-            if (newValue is INotifyCollectionChanged nValue)
+            else
             {
-                nValue.CollectionChanged += this.OnRowsSourceCollectionChanged;
-            }
-
-            this.ItemsSource = newValue;
-
-            if (newValue != null)
-            {
-                foreach(var item in newValue)
-                {
-                    this._RowInfo.TreeInfo.Add(item);
-                }
-
-                this._RowInfo.TreeInfo.Setup(this._RowInfo.ChildrenPropertyPath, this._RowInfo.ExpandedPropertyPath, this._RowInfo.FilterTargetPropertyPath);
-                this._RowInfo.TreeInfo.UpdateTreeInfoAll();
+                // 転置中なので ColumnInfo の RootsSource が変わる
+                // ColumnInfo の Items も変わるので通知する
+                this.OnColumnInfoItemsChanged();
+                this._BaseRowInfo.Items.CollectionChanged += this.OnColumnInfoItemsCollectionChanged;
             }
         }
 
         /// <summary>
-        /// ItemsSource の要素数が変化したときに呼ばれます
+        /// RowInfo の Items が変化したときに呼ばれます
         /// </summary>
-        private void OnRowsSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnRowInfoItemsChanged()
         {
-            if (e.OldItems != null)
-            {
-                foreach (var item in e.OldItems)
-                {
-                    this._RowInfo.TreeInfo.Remove(item);
-                }
-            }
+            this.ItemsSource = this._RowInfo.Items;
+        }
 
-            if (e.NewItems != null)
-            {
-                foreach (var item in e.NewItems)
-                {
-                    this._RowInfo.TreeInfo.Add(item);
-                }
-            }
+        /// <summary>
+        /// RowInfo の Items の要素数が変化したときに呼ばれます
+        /// </summary>
+        private void OnRowInfoItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
         }
 
         /// <summary>
@@ -500,45 +489,52 @@ namespace Toolkit.WPF.Controls
         #region Column
 
         /// <summary>
-        /// ColumnsSource が変化したときに呼ばれます
+        /// ColumnRootsSource が変化したときに呼ばれます
         /// </summary>
-        private void OnColumnsSourceChanged(IEnumerable oldValue, IEnumerable newValue, bool changed_by_transpose = false)
+        private void OnColumnRootsSourceChanged(IEnumerable newValue)
         {
-            // 転置による変更のときはリセット不要
-            if (!changed_by_transpose)
+            if (this.EnableTranspose)
             {
-                this._ColInfo.TreeInfo.Clear();
+                this._BaseColumnInfo.Items.CollectionChanged -= this.OnRowInfoItemsCollectionChanged;
+            }
+            else
+            {
+                this._BaseColumnInfo.Items.CollectionChanged -= this.OnColumnInfoItemsCollectionChanged;
             }
 
-            this.Columns.Clear();
+            this._BaseColumnInfo.ChangeRootsSource(newValue);
 
-            if (oldValue is INotifyCollectionChanged oValue)
+            if (this.EnableTranspose)
             {
-                oValue.CollectionChanged -= this.OnColumnsSourceCollectionChanged;
+                // 転置中なので RowInfo の RootsSource が変わる
+                // RowInfo の Items も変わるので通知する
+                this.OnRowInfoItemsChanged();
+                this._BaseColumnInfo.Items.CollectionChanged += this.OnRowInfoItemsCollectionChanged;
             }
-
-            if (newValue is INotifyCollectionChanged nValue)
+            else
             {
-                nValue.CollectionChanged += this.OnColumnsSourceCollectionChanged;
-            }
-
-            if (newValue != null)
-            {
-                foreach (var item in newValue)
-                {
-                    this.AddColumn(item);
-                }
-
-                this._ColInfo.TreeInfo.Setup(this._ColInfo.ChildrenPropertyPath, this._ColInfo.ExpandedPropertyPath, this._ColInfo.FilterTargetPropertyPath);
-                this._ColInfo.TreeInfo.UpdateTreeInfoAll();
-                this.UpdateColumnTreeAll();
+                // ColumnInfo の RootsSource が変わったことで ColumnInfo の Items も変わるので通知する
+                this.OnColumnInfoItemsChanged();
+                this._BaseColumnInfo.Items.CollectionChanged += this.OnColumnInfoItemsCollectionChanged;
             }
         }
 
         /// <summary>
-        /// ColumnsSource の要素数が変化したときに呼ばれます
+        /// ColumnInfo の Items が変化したときに呼ばれます
         /// </summary>
-        private void OnColumnsSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnColumnInfoItemsChanged()
+        {
+            this.Columns.Clear();
+            foreach (var item in this._ColInfo.Items)
+            {
+                this.AddColumn(item);
+            }
+        }
+
+        /// <summary>
+        /// ColumnInfo の Items  の要素数が変化したときに呼ばれます
+        /// </summary>
+        private void OnColumnInfoItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.OldItems != null)
             {
@@ -546,8 +542,6 @@ namespace Toolkit.WPF.Controls
                 {
                     var column = this.Columns[i];
                     this.Columns.Remove(column);
-                    var item = e.OldItems[i];
-                    this._ColInfo.TreeInfo.Remove(item);
                 }
             }
 
@@ -576,8 +570,9 @@ namespace Toolkit.WPF.Controls
                 CellEditingTemplateSelector = this.CellEditingTemplateSelector,
             };
 
+            this.UpdateColumnTree(column);
+
             this.Columns.Add(column);
-            this._ColInfo.TreeInfo.Add(item);
         }
 
         /// <summary>
@@ -596,12 +591,7 @@ namespace Toolkit.WPF.Controls
         {
             foreach (var column in this.Columns)
             {
-                var hasChildren = this._ColInfo.TreeInfo.HasChildren(column.Header);
-                var visibility = this._ColInfo.TreeInfo.GetIsVisible(column.Header) ? Visibility.Visible : Visibility.Collapsed;
-
-                column.SetCurrentValue(TreeDataGrid.TreeExpanderVisibilityProperty, hasChildren ? Visibility.Visible : Visibility.Collapsed);
-                column.SetCurrentValue(TreeDataGrid.TreeDepthMarginProperty, new Thickness(0D, this._ColInfo.TreeInfo.GetDepth(column.Header) * DepthMarginUnit, 0D, 0D));
-                column.SetCurrentValue(DataGridColumn.VisibilityProperty, visibility);
+                this.UpdateColumnTree(column);
             }
 
             // DataGridColumnHeader は列が表示されていないときは列挙できず値を変更することができないので
@@ -611,7 +601,22 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
-        /// DataGridColumnHeader が表示されてから値を設定する必要があるものを処理する
+        /// Column に現在のTreeの状態を設定します
+        /// Expander は DataGridColumnHeader が表示されている必要があるので
+        /// UpdateDataGridColumnHeader で処理します
+        /// </summary>
+        private void UpdateColumnTree(DataGridColumn column)
+        {
+            var hasChildren = this._ColInfo.TreeInfo.HasChildren(column.Header);
+            var visibility = this._ColInfo.TreeInfo.GetIsVisible(column.Header) ? Visibility.Visible : Visibility.Collapsed;
+
+            column.SetCurrentValue(TreeDataGrid.TreeExpanderVisibilityProperty, hasChildren ? Visibility.Visible : Visibility.Collapsed);
+            column.SetCurrentValue(TreeDataGrid.TreeDepthMarginProperty, new Thickness(0D, this._ColInfo.TreeInfo.GetDepth(column.Header) * DepthMarginUnit, 0D, 0D));
+            column.SetCurrentValue(DataGridColumn.VisibilityProperty, visibility);
+        }
+
+        /// <summary>
+        /// DataGridColumnHeader が表示されてから値を設定する必要があるものを処理します
         /// </summary>
         private void UpdateDataGridColumnHeader()
         {
@@ -717,7 +722,7 @@ namespace Toolkit.WPF.Controls
         public TreeDataGrid()
         {
             this._RowInfo = this._BaseRowInfo = new TableFrameInfo();
-            this._ColInfo = this._BaseColmnInfo = new TableFrameInfo();
+            this._ColInfo = this._BaseColumnInfo = new TableFrameInfo();
 
             this._DataSourceBinding = new Binding("DataSource") { Source = this };
 
@@ -763,26 +768,26 @@ namespace Toolkit.WPF.Controls
 
         private void ReorderRow((object Item, object Target, DragAndDrop.InsertType InsertType) arg)
         {
-            if ((this.RowsSource ?? this.Items) is IList list)
-            {
-                switch (arg.InsertType)
-                {
-                    case DragAndDrop.InsertType.InsertPrev:
-                        this._BaseRowInfo.TreeInfo.MoveInsertBefore(arg.Item, arg.Target);
-                        break;
-                    case DragAndDrop.InsertType.InsertNext:
-                        this._BaseRowInfo.TreeInfo.MoveInsertAfter(arg.Item, arg.Target);
-                        break;
-                    case DragAndDrop.InsertType.InsertChild:
-                        break;
-                }
+            //if ((this.RowsSource ?? this.Items) is IList list)
+            //{
+            //    switch (arg.InsertType)
+            //    {
+            //        case DragAndDrop.InsertType.InsertPrev:
+            //            this._BaseRowInfo.TreeInfo.MoveInsertBefore(arg.Item, arg.Target);
+            //            break;
+            //        case DragAndDrop.InsertType.InsertNext:
+            //            this._BaseRowInfo.TreeInfo.MoveInsertAfter(arg.Item, arg.Target);
+            //            break;
+            //        case DragAndDrop.InsertType.InsertChild:
+            //            break;
+            //    }
 
-                // コレクション変更通知が出ない場合は自分で並びを更新する
-                if (!(list is INotifyCollectionChanged))
-                {
-                    this.Items.Refresh();
-                }
-            }
+            //    // コレクション変更通知が出ない場合は自分で並びを更新する
+            //    if (!(list is INotifyCollectionChanged))
+            //    {
+            //        this.Items.Refresh();
+            //    }
+            //}
         }
 
         private void ReorderColumn((object Item, object Target, DragAndDrop.InsertType InsertType) arg)
@@ -790,25 +795,28 @@ namespace Toolkit.WPF.Controls
             Console.WriteLine("");
         }
 
-
         /// <summary>
         /// 表示状態を転置します
         /// </summary>
-        private void ChangeItemsSource(bool oldTranspose, bool newTranspose)
+        private void ChangeEnableTransposeChanged(bool oldTranspose, bool newTranspose)
         {
             bool isTranposeChanged = oldTranspose != newTranspose;
 
-            var oldRowsSource = oldTranspose ? this.ColumnsSource : this.RowsSource;
-            var newRowsSource = newTranspose ? this.ColumnsSource : this.RowsSource;
+            // まず接続を切る
+            this._RowInfo.Items.CollectionChanged -= this.OnRowInfoItemsCollectionChanged;
+            this._ColInfo.Items.CollectionChanged -= this.OnColumnInfoItemsCollectionChanged;
 
-            var oldColumnsSource = oldTranspose ? this.RowsSource : this.ColumnsSource;
-            var newColumnsSource = newTranspose ? this.RowsSource : this.ColumnsSource;
+            // 入れ替える
+            this._RowInfo = newTranspose ? this._BaseColumnInfo : this._BaseRowInfo;
+            this._ColInfo = newTranspose ? this._BaseRowInfo : this._BaseColumnInfo;
 
-            this._RowInfo = newTranspose ? this._BaseColmnInfo : this._BaseRowInfo;
-            this._ColInfo = newTranspose ? this._BaseRowInfo : this._BaseColmnInfo;
+            // 再接続する
+            this._RowInfo.Items.CollectionChanged += this.OnRowInfoItemsCollectionChanged;
+            this._ColInfo.Items.CollectionChanged += this.OnColumnInfoItemsCollectionChanged;
 
-            this.OnRowsSourceChanged(oldRowsSource, newRowsSource, isTranposeChanged);
-            this.OnColumnsSourceChanged(oldColumnsSource, newColumnsSource, isTranposeChanged);
+            // 入れ替えた状態で
+            this.OnRowInfoItemsChanged();
+            this.OnColumnInfoItemsChanged();
         }
 
         private DataGridCellsPanel _DataGridColumnsPanel;
@@ -819,7 +827,7 @@ namespace Toolkit.WPF.Controls
 
         // 転置状態に関わらないテーブル行と列の情報
         private readonly TableFrameInfo _BaseRowInfo;
-        private readonly TableFrameInfo _BaseColmnInfo;
+        private readonly TableFrameInfo _BaseColumnInfo;
 
         private readonly BindingBase _DataSourceBinding;
         private const double DepthMarginUnit = 12D;
@@ -969,9 +977,129 @@ namespace Toolkit.WPF.Controls
 
             public BindingBase ColumnExpandedBinding { get; private set; }
 
+            public ObservableCollection<object> Items { get; }
+
             public TableFrameInfo()
             {
                 this.TreeInfo = new TreeInfoUnit();
+                this.Items = new ObservableCollection<object>();
+            }
+
+            public void ChangeRootsSource(IEnumerable rootsSource)
+            {
+                if (object.ReferenceEquals(this._RootsSource, rootsSource))
+                {
+                    return;
+                }
+
+                if (this._RootsSource != null)
+                {
+                    this.TreeInfo.Clear();
+                    this.Items.Clear();
+                    this.UnsubscribeCollectionChangedEvent(this._RootsSource, this._ChildrenPropertyPath, this.Items);
+                }
+
+                this._RootsSource = rootsSource;
+
+                if (this._RootsSource != null)
+                {
+                    this.SubscribeCollectionChangedEvent(this._RootsSource, this._ChildrenPropertyPath, this.Items);
+                    this.TreeInfo.Setup(this.ChildrenPropertyPath, this.ExpandedPropertyPath, this.FilterTargetPropertyPath);
+                    this.TreeInfo.UpdateTreeInfoAll();
+                }
+            }
+
+            private void SubscribeCollectionChangedEvent(IEnumerable items, string childrenPropertyName, IList<object> target)
+            {
+                if (items is INotifyCollectionChanged a)
+                {
+                    a.CollectionChanged += this.OnRootsSourceCollectionChanged;
+                }
+
+                foreach (var item in items)
+                {
+                    target.Add(item);
+                    this.TreeInfo.Add(item);
+                    this.SubscribeCollectionChangedEvent(GetChildren(item, childrenPropertyName), childrenPropertyName, target);
+                }
+            }
+
+            private void UnsubscribeCollectionChangedEvent(IEnumerable items, string childrenPropertyName, IList<object> target)
+            {
+                if (items is INotifyCollectionChanged a)
+                {
+                    a.CollectionChanged -= this.OnRootsSourceCollectionChanged;
+                }
+
+                foreach (var item in items)
+                {
+                    target.Add(item);
+                    this.UnsubscribeCollectionChangedEvent(GetChildren(item, childrenPropertyName), childrenPropertyName, target);
+                }
+            }
+
+            private void OnRootsSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+            {
+                if (e.Action == NotifyCollectionChangedAction.Reset)
+                {
+                }
+
+                if (e.OldItems != null)
+                {
+                    foreach (var item in EnumerateTreeDepthFirst(e.OldItems.OfType<object>(), i => GetChildren(i, this._ChildrenPropertyPath)))
+                    {
+                        this.Items.Remove(item);
+                        this.UnsubscribeCollectionChangedEvent(GetChildren(item, this._ChildrenPropertyPath), this._ChildrenPropertyPath, this.Items);
+                    }
+                }
+
+                if (e.NewItems != null)
+                {
+                    int index = 0;
+                    foreach (var item in EnumerateTreeDepthFirst(this._RootsSource, i => GetChildren(i, this._ChildrenPropertyPath)))
+                    {
+                        if (index >= this.Items.Count)
+                        {
+                            break;
+                        }
+                        else if (item == this.Items[index])
+                        {
+                            index++;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+                    foreach (var item in e.NewItems)
+                    {
+                        this.SubscribeCollectionChangedEvent(GetChildren(item, this._ChildrenPropertyPath), this._ChildrenPropertyPath, this.Items);
+                        this.Items.Insert(index, item);
+                        index++;
+                    }
+                }
+            }
+
+            private static IEnumerable GetChildren(object item, string propertyName)
+            {
+                var info = item.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+                return info?.GetValue(item) as IEnumerable ?? Enumerable.Empty<object>();
+            }
+
+            private static IEnumerable EnumerateTreeDepthFirst(IEnumerable items, Func<object, IEnumerable> selector)
+            {
+                foreach (var item in items)
+                {
+                    yield return item;
+
+                    var children = EnumerateTreeDepthFirst(selector(item), selector) ?? (Enumerable.Empty<object>() as IEnumerable);
+
+                    foreach (var child in children)
+                    {
+                        yield return child;
+                    }
+                }
             }
 
             private void UpdateChildrenPropertyPath(string value)
@@ -1003,6 +1131,7 @@ namespace Toolkit.WPF.Controls
 
             private string _ChildrenPropertyPath;
             private string _ExpandedPropertyPath;
+            private IEnumerable _RootsSource;
         }
 
         #region TreeInfo

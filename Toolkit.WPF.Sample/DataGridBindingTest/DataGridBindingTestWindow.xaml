@@ -40,50 +40,54 @@
         </DataTemplate>
 
     </Window.Resources>
+
+    <StackPanel>
+        <TextBlock Text="{Binding Test}" />
         
-    <DataGrid ItemsSource="{Binding Items,Mode=OneTime}" AutoGenerateColumns="False">
-        <DataGrid.Columns>
-            <DataGridTextColumn Binding="{Binding Name}" />
-            <tkit:DataGridBindingColumn Binding="{Binding Val}" CellEditingTemplate="{StaticResource ValE}" />
-            <tkit:DataGridBindingColumn Binding="{Binding Prop}" CellEditingTemplate="{StaticResource PropE}" />
-            <DataGridTemplateColumn Header="TemplateColumn Class">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate DataType="{x:Type local:Prop}">
-                        <StackPanel Orientation="Horizontal" Background="Blue">
-                            <TextBlock Text="{Binding Prop.Value1}" />
-                            <TextBlock Text="{Binding Prop.Value2}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
-                <DataGridTemplateColumn.CellEditingTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Background="Blue">
-                            <TextBox Text="{Binding Prop.Value1}" />
-                            <TextBox Text="{Binding Prop.Value2}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellEditingTemplate>
-            </DataGridTemplateColumn>
+        <DataGrid ItemsSource="{Binding Items,Mode=OneTime}" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Name}" />
+                <tkit:DataGridBindingColumn Binding="{Binding Val}" CellEditingTemplate="{StaticResource ValE}" />
+                <tkit:DataGridBindingColumn Binding="{Binding Prop}" CellEditingTemplate="{StaticResource PropE}" />
+                <DataGridTemplateColumn Header="TemplateColumn Class">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="{x:Type local:Prop}">
+                            <StackPanel Orientation="Horizontal" Background="Blue">
+                                <TextBlock Text="{Binding Prop.Value1}" />
+                                <TextBlock Text="{Binding Prop.Value2}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Background="Blue">
+                                <TextBox Text="{Binding Prop.Value1}" />
+                                <TextBox Text="{Binding Prop.Value2}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
 
 
-            <DataGridTemplateColumn Header="TemplateColumn Struct">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Background="Red">
-                            <TextBlock Text="{Binding Val.Value1}" />
-                            <TextBlock Text="{Binding Val.Value2}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
-                <DataGridTemplateColumn.CellEditingTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Background="Red">
-                            <TextBox Text="{Binding Val.Value1}" />
-                            <TextBox Text="{Binding Val.Value2}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellEditingTemplate>
-            </DataGridTemplateColumn>
-        </DataGrid.Columns>
-    </DataGrid>
+                <DataGridTemplateColumn Header="TemplateColumn Struct">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Background="Red">
+                                <TextBlock Text="{Binding Val.Value1}" />
+                                <TextBlock Text="{Binding Val.Value2}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Background="Red">
+                                <TextBox Text="{Binding Val.Value1}" />
+                                <TextBox Text="{Binding Val.Value2}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </StackPanel>
 </Window>
