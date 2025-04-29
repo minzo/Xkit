@@ -529,6 +529,11 @@ namespace Toolkit.WPF.Controls
             {
                 this.AddColumn(item);
             }
+
+            // DataGridColumnHeader は列が表示されていないときは列挙できず値を変更することができないので
+            // DataGridColumnHeader が表示されたあとのタイミングで更新処理がおこなわれるようにタイミングを遅らせて呼ぶ
+            // DispatcherPriority は Background だと更新が遅れているのが見えるので Render にする
+            this.Dispatcher.BeginInvoke(() => this.UpdateDataGridColumnHeader(), System.Windows.Threading.DispatcherPriority.Render);
         }
 
         /// <summary>
