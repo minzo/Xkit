@@ -766,6 +766,7 @@ namespace Toolkit.WPF.Controls
                     RowName: ((DataGridTransposeColumn)i.Column).GetRowPropertyPath(i.Item),
                     ColumnName: ((DataGridTransposeColumn)i.Column).GetColumnPropertyPath(),
                     CellContent: i.Column.GetCellContent(i.Item)?.DataContext))
+                .Select(i => this.EnableTranspose ? (RowName: i.ColumnName, ColumnName: i.RowName, CellContent: i.CellContent) : i)
                 .ToList();
 
             this.SetCurrentValue(SelectedCellInfoListProperty, list);
@@ -773,26 +774,17 @@ namespace Toolkit.WPF.Controls
 
         private void ReorderRow((object Item, object Target, DragAndDrop.InsertType InsertType) arg)
         {
-            //if ((this.RowsSource ?? this.Items) is IList list)
-            //{
-            //    switch (arg.InsertType)
-            //    {
-            //        case DragAndDrop.InsertType.InsertPrev:
-            //            this._BaseRowInfo.TreeInfo.MoveInsertBefore(arg.Item, arg.Target);
-            //            break;
-            //        case DragAndDrop.InsertType.InsertNext:
-            //            this._BaseRowInfo.TreeInfo.MoveInsertAfter(arg.Item, arg.Target);
-            //            break;
-            //        case DragAndDrop.InsertType.InsertChild:
-            //            break;
-            //    }
-
-            //    // コレクション変更通知が出ない場合は自分で並びを更新する
-            //    if (!(list is INotifyCollectionChanged))
-            //    {
-            //        this.Items.Refresh();
-            //    }
-            //}
+            switch (arg.InsertType)
+            {
+                case DragAndDrop.InsertType.InsertPrev:
+                    this._RowInfo.MoveInsertBefore(arg.Item, arg.Target);
+                    break;
+                case DragAndDrop.InsertType.InsertNext:
+                    this._RowInfo.TreeInfo.MoveInsertAfter(arg.Item, arg.Target);
+                    break;
+                case DragAndDrop.InsertType.InsertChild:
+                    break;
+            }
         }
 
         private void ReorderColumn((object Item, object Target, DragAndDrop.InsertType InsertType) arg)
@@ -988,6 +980,13 @@ namespace Toolkit.WPF.Controls
             {
                 this.TreeInfo = new TreeInfoUnit();
                 this.Items = new ObservableCollection<object>();
+            }
+
+            public void MoveInsertBefore(object item, object target)
+            {
+                this.TreeInfo.MoveInsertBefore(item, target);
+                this.Items.Remove(item);
+                this.Items.Insert(item);
             }
 
             public void ChangeRootsSource(IEnumerable rootsSource)
