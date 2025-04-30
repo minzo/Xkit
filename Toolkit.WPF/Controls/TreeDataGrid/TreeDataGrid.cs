@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Corekit.Extensions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,6 +7,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -772,6 +774,9 @@ namespace Toolkit.WPF.Controls
             this.SetCurrentValue(SelectedCellInfoListProperty, list);
         }
 
+        /// <summary>
+        /// 行を並び替えます
+        /// </summary>
         private void ReorderRow((object Item, object Target, DragAndDrop.InsertType InsertType) arg)
         {
             switch (arg.InsertType)
@@ -780,16 +785,29 @@ namespace Toolkit.WPF.Controls
                     this._RowInfo.MoveInsertBefore(arg.Item, arg.Target);
                     break;
                 case DragAndDrop.InsertType.InsertNext:
-                    this._RowInfo.TreeInfo.MoveInsertAfter(arg.Item, arg.Target);
+                    this._RowInfo.MoveInsertAfter(arg.Item, arg.Target);
                     break;
                 case DragAndDrop.InsertType.InsertChild:
                     break;
             }
         }
 
+        /// <summary>
+        /// 列を並び替えます
+        /// </summary>
         private void ReorderColumn((object Item, object Target, DragAndDrop.InsertType InsertType) arg)
         {
-            Console.WriteLine("");
+            switch (arg.InsertType)
+            {
+                case DragAndDrop.InsertType.InsertPrev:
+                    this._ColInfo.MoveInsertBefore(arg.Item, arg.Target);
+                    break;
+                case DragAndDrop.InsertType.InsertNext:
+                    this._ColInfo.MoveInsertAfter(arg.Item, arg.Target);
+                    break;
+                case DragAndDrop.InsertType.InsertChild:
+                    break;
+            }
         }
 
         /// <summary>
@@ -984,9 +1002,30 @@ namespace Toolkit.WPF.Controls
 
             public void MoveInsertBefore(object item, object target)
             {
-                this.TreeInfo.MoveInsertBefore(item, target);
-                this.Items.Remove(item);
-                this.Items.Insert(item);
+                var isSucceeded = this.TreeInfo.MoveInsertBefore(item, target);
+                if (!isSucceeded)
+                {
+                    return;
+                }
+
+                if (!(this._RootsSource is INotifyCollectionChanged))
+                {
+                    this.SyncItemsOrder(item);
+                }
+            }
+
+            public void MoveInsertAfter(object item, object target)
+            {
+                var isSucceeded = this.TreeInfo.MoveInsertAfter(item, target);
+                if (!isSucceeded)
+                {
+                    return;
+                }
+
+                if (!(this._RootsSource is INotifyCollectionChanged))
+                {
+                    this.SyncItemsOrder(item);
+                }
             }
 
             public void ChangeRootsSource(IEnumerable rootsSource)
@@ -1037,7 +1076,9 @@ namespace Toolkit.WPF.Controls
 
                 foreach (var item in items)
                 {
-                    target.Add(item);
+                    // 並び替え時に開閉状態を覚えておきたいので消さないが、削除時も情報が残り続けてしまう
+                    // this.TreeInfo.Remove(item);
+                    target.Remove(item);
                     this.UnsubscribeCollectionChangedEvent(GetChildren(item, childrenPropertyName), childrenPropertyName, target);
                 }
             }
@@ -1046,11 +1087,12 @@ namespace Toolkit.WPF.Controls
             {
                 if (e.Action == NotifyCollectionChangedAction.Reset)
                 {
+                    return;
                 }
 
                 if (e.OldItems != null)
                 {
-                    foreach (var item in EnumerateTreeDepthFirst(e.OldItems.OfType<object>(), i => GetChildren(i, this._ChildrenPropertyPath)))
+                    foreach (var item in this.EnumerateTreeDepthFirst(e.OldItems))
                     {
                         this.Items.Remove(item);
                         this.UnsubscribeCollectionChangedEvent(GetChildren(item, this._ChildrenPropertyPath), this._ChildrenPropertyPath, this.Items);
@@ -1060,7 +1102,7 @@ namespace Toolkit.WPF.Controls
                 if (e.NewItems != null)
                 {
                     int index = 0;
-                    foreach (var item in EnumerateTreeDepthFirst(this._RootsSource, i => GetChildren(i, this._ChildrenPropertyPath)))
+                    foreach (var item in this.EnumerateTreeDepthFirst(this._RootsSource))
                     {
                         if (index >= this.Items.Count)
                         {
@@ -1085,20 +1127,83 @@ namespace Toolkit.WPF.Controls
                 }
             }
 
-            private static IEnumerable GetChildren(object item, string propertyName)
+            private void SyncItemsOrder(object item)
             {
-                var info = item.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-                return info?.GetValue(item) as IEnumerable ?? Enumerable.Empty<object>();
+                var index = this.EnumerateTreeDepthFirstIndexOf(this._RootsSource, i => i == item);
+                if (index >= 0)
+                {
+                    var items = this.EnumerateTreeDepthFirst(item);
+
+                    foreach (var i in items)
+                    {
+                        this.Items.Remove(i);
+                    }
+
+                    foreach (var i in items)
+                    {
+                        this.Items.Insert(index, i);
+                        ++index;
+                    }
+                }
             }
 
-            private static IEnumerable EnumerateTreeDepthFirst(IEnumerable items, Func<object, IEnumerable> selector)
+            private int EnumerateTreeDepthFirstIndexOf(IEnumerable source, Func<object, bool> func)
             {
-                foreach (var item in items)
+                var items = this.EnumerateTreeDepthFirst(source);
+
+                var index = 0;
+                foreach(var item in items)
+                {
+                    if (func(item))
+                    {
+                        return index;
+                    }
+                    ++index;
+                }
+
+                return -1;
+            }
+
+            private IEnumerable EnumerateTreeDepthFirst(object item)
+            {
+                if (item == null)
+                {
+                    yield break;
+                }
+
+                yield return item;
+
+                var info = item.GetType()
+                        ?.GetProperty(this._ChildrenPropertyPath, BindingFlags.Public | BindingFlags.Instance)
+                        ?.GetGetMethod();
+
+                var children = this.EnumerateTreeDepthFirst(info?.Invoke(item, null) as IEnumerable, info);
+                foreach (var child in children)
+                {
+                    yield return child;
+                }
+            }
+
+            private IEnumerable EnumerateTreeDepthFirst(IEnumerable source, MethodInfo info = null)
+            {
+                if (source == null)
+                {
+                    yield break;
+                }
+
+                foreach (var item in source)
                 {
                     yield return item;
 
-                    var children = EnumerateTreeDepthFirst(selector(item), selector) ?? (Enumerable.Empty<object>() as IEnumerable);
+                    var itemType = item.GetType();
+                    if (info == null || itemType != info.ReflectedType)
+                    {
+                        info = itemType
+                            ?.GetProperty(this._ChildrenPropertyPath, BindingFlags.Public | BindingFlags.Instance)
+                            ?.GetGetMethod();
+                    }
 
+                    var children = this.EnumerateTreeDepthFirst(info?.Invoke(item, null) as IEnumerable, info);
                     foreach (var child in children)
                     {
                         yield return child;
@@ -1136,6 +1241,12 @@ namespace Toolkit.WPF.Controls
             private string _ChildrenPropertyPath;
             private string _ExpandedPropertyPath;
             private IEnumerable _RootsSource;
+
+            private static IEnumerable GetChildren(object item, string propertyName)
+            {
+                var info = item.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+                return info?.GetValue(item) as IEnumerable ?? Enumerable.Empty<object>();
+            }
         }
 
         #region TreeInfo
@@ -1206,26 +1317,7 @@ namespace Toolkit.WPF.Controls
             /// </summary>
             public bool MoveInsertBefore(object item, object target)
             {
-                var itemParent = this.FindParent(item);
-                var targetParent = this.FindParent(target);
-
-                if (this._ItemAccessor.GetChildren(itemParent) is IList removeList &&
-                    this._ItemAccessor.GetChildren(targetParent) is IList insertList)
-                {
-                    removeList.Remove(item);
-
-                    var insertIndex = insertList.IndexOf(target);
-                    insertList.Insert(insertIndex, item);
-
-                    if (this._TreeInfo.TryGetValue(targetParent, out TreeInfo parentInfo))
-                    {
-                        this.UpdateTreeInfo(targetParent, parentInfo);
-                    }
-
-                    return true;
-                }
-
-                return false;
+                return this.MoveInsertImpl(item, target, isAfter: true);
             }
 
             /// <summary>
@@ -1233,11 +1325,27 @@ namespace Toolkit.WPF.Controls
             /// </summary>
             public bool MoveInsertAfter(object item, object target)
             {
-                // target が item の子孫にあると並べ替えられないので失敗にしたい
-                // item や target が属しているリストが Root だったらどうするか
+                return this.MoveInsertImpl(item, target, isAfter: true);
+            }
 
+            /// <summary>
+            /// 要素を指定したターゲットの前後に移動します
+            /// </summary>
+            private bool MoveInsertImpl(object item, object target, bool isAfter)
+            {
                 var itemParent = this.FindParent(item);
                 var targetParent = this.FindParent(target);
+
+                // 並び替え先が自分の子孫だったら並び替えできない
+                var parent = targetParent;
+                while (parent != null)
+                {
+                    if (parent == item)
+                    {
+                        return false;
+                    }
+                    parent = this.FindParent(parent);
+                }
 
                 if (this._ItemAccessor.GetChildren(itemParent) is IList removeList &&
                     this._ItemAccessor.GetChildren(targetParent) is IList insertList)
@@ -1245,7 +1353,7 @@ namespace Toolkit.WPF.Controls
                     removeList.Remove(item);
 
                     var insertIndex = insertList.IndexOf(target);
-                    insertList.Insert(insertIndex + 1, item);
+                    insertList.Insert(insertIndex + (isAfter ? 1 : 0), item);
 
                     if (this._TreeInfo.TryGetValue(targetParent, out TreeInfo parentInfo))
                     {
