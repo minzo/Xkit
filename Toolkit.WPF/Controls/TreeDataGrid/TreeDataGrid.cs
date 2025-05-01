@@ -627,7 +627,19 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void UpdateDataGridColumnHeader()
         {
-            foreach (var header in this._DataGridColumnsPanel.Children.OfType<DataGridColumnHeader>())
+            var presenter = EnumerateChildren(this)
+                .OfType<DataGridColumnHeadersPresenter>()
+                .FirstOrDefault(i => i.Name == "PART_ColumnHeadersPresenter");
+            if (presenter == null)
+            {
+                return;
+            }
+
+            this._DataGridColumnsPanel = this._DataGridColumnsPanel ?? EnumerateChildren(presenter)
+               .OfType<DataGridCellsPanel>()
+               .FirstOrDefault();
+
+            foreach (var header in this._DataGridColumnsPanel?.Children.OfType<DataGridColumnHeader>() ?? Enumerable.Empty<DataGridColumnHeader>())
             {
                 TrySetBinding(header, TreeDataGrid.IsExpandedProperty, this._ColInfo.ColumnExpandedBinding);
                 var isExpanded = this._ColInfo.TreeInfo.GetIsExpanded(header.Column.Header);
@@ -743,14 +755,6 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnLoaded(object sender, EventArgs e)
         {
-            var presenter = EnumerateChildren(this)
-                .OfType<DataGridColumnHeadersPresenter>()
-                .FirstOrDefault(i => i.Name == "PART_ColumnHeadersPresenter");
-
-            this._DataGridColumnsPanel = EnumerateChildren(presenter)
-               .OfType<DataGridCellsPanel>()
-               .FirstOrDefault();
-
             new DragAndDrop(this, this, typeof(DataGridRow), typeof(DataGridRowHeader)) { ReorderAction = this.ReorderRow };
             new DragAndDrop(this, this, typeof(DataGridColumnHeader), typeof(DataGridColumnHeader)) { ReorderAction = this.ReorderColumn };
         }
