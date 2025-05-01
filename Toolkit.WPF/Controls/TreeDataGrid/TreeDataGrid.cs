@@ -787,9 +787,11 @@ namespace Toolkit.WPF.Controls
             {
                 case DragAndDrop.InsertType.InsertPrev:
                     this._RowInfo.MoveInsertBefore(arg.Item, arg.Target);
+                    this.UpdateRowTreeAll();
                     break;
                 case DragAndDrop.InsertType.InsertNext:
                     this._RowInfo.MoveInsertAfter(arg.Item, arg.Target);
+                    this.UpdateRowTreeAll();
                     break;
                 case DragAndDrop.InsertType.InsertChild:
                     break;
@@ -1006,7 +1008,7 @@ namespace Toolkit.WPF.Controls
 
             public void MoveInsertBefore(object item, object target)
             {
-                var isSucceeded = this.TreeInfo.MoveInsertBefore(item, target);
+                var isSucceeded = this.TreeInfo.MoveInsertBefore(item, target, this._RootsSource as IList);
                 if (!isSucceeded)
                 {
                     return;
@@ -1020,7 +1022,7 @@ namespace Toolkit.WPF.Controls
 
             public void MoveInsertAfter(object item, object target)
             {
-                var isSucceeded = this.TreeInfo.MoveInsertAfter(item, target);
+                var isSucceeded = this.TreeInfo.MoveInsertAfter(item, target, this._RootsSource as IList);
                 if (!isSucceeded)
                 {
                     return;
@@ -1319,23 +1321,23 @@ namespace Toolkit.WPF.Controls
             /// <summary>
             /// 要素を指定したターゲットの前に移動します
             /// </summary>
-            public bool MoveInsertBefore(object item, object target)
+            public bool MoveInsertBefore(object item, object target, IList rootList)
             {
-                return this.MoveInsertImpl(item, target, isAfter: true);
+                return this.MoveInsertImpl(item, target, rootList, isAfter: false);
             }
 
             /// <summary>
             /// 要素を指定したターゲットの後に移動します
             /// </summary>
-            public bool MoveInsertAfter(object item, object target)
+            public bool MoveInsertAfter(object item, object target, IList rootList)
             {
-                return this.MoveInsertImpl(item, target, isAfter: true);
+                return this.MoveInsertImpl(item, target, rootList, isAfter: true);
             }
 
             /// <summary>
             /// 要素を指定したターゲットの前後に移動します
             /// </summary>
-            private bool MoveInsertImpl(object item, object target, bool isAfter)
+            private bool MoveInsertImpl(object item, object target, IList rootList, bool isAfter)
             {
                 var itemParent = this.FindParent(item);
                 var targetParent = this.FindParent(target);
@@ -1351,18 +1353,34 @@ namespace Toolkit.WPF.Controls
                     parent = this.FindParent(parent);
                 }
 
-                if (this._ItemAccessor.GetChildren(itemParent) is IList removeList &&
-                    this._ItemAccessor.GetChildren(targetParent) is IList insertList)
+                var removeList = rootList;
+                if (itemParent != null && this._ItemAccessor.GetChildren(itemParent) is IList list0)
+                {
+                    removeList = list0;
+                }
+
+                var insertList = rootList;
+                if (targetParent != null && this._ItemAccessor.GetChildren(targetParent) is IList list1)
+                {
+                    insertList = list1;
+                }
+
+                if (removeList != null && insertList != null)
                 {
                     removeList.Remove(item);
 
                     var insertIndex = insertList.IndexOf(target);
                     insertList.Insert(insertIndex + (isAfter ? 1 : 0), item);
 
-                    if (this._TreeInfo.TryGetValue(targetParent, out TreeInfo parentInfo))
+                    if (targetParent != null && this._TreeInfo.TryGetValue(targetParent, out TreeInfo parentInfo))
                     {
                         this.UpdateTreeInfo(targetParent, parentInfo);
                     }
+                    else if (this._TreeInfo.TryGetValue(item, out TreeInfo itemInfo))
+                    {
+                        itemInfo.UpdateInfo(isParentExpanded: false, isParentVisible: false, isHitFilterAncestor: false);
+                    }
+
                     return true;
                 }
 
@@ -1874,7 +1892,9 @@ namespace Toolkit.WPF.Controls
 
                 var dropSourceElement = (FrameworkElement)sender;
                 var origin = (FrameworkElement)dropSourceElement.InputHitTest(e.GetPosition(dropSourceElement));
-                var target = (FrameworkElement)EnumerateParent(origin).FirstOrDefault(i => i.GetType() != this._DragElementType);
+                var target = (FrameworkElement)EnumerateParent(origin)
+                    .Where(i => i != this._DragElement)
+                    .FirstOrDefault(i => i.GetType() == this._DragElementType);
 
                 if (target != null)
                 {
