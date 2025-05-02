@@ -422,7 +422,7 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnRowIsExpandedChanged(DataGridRow row, bool newValue)
         {
-            this._RowInfo.TreeInfo.SetIsExpanded(row.DataContext, newValue);
+            this._RowInfo.TreeInfo.SetIsExpanded(row.Item, newValue);
             this.UpdateRowTreeAll();
         }
 
@@ -450,7 +450,7 @@ namespace Toolkit.WPF.Controls
             {
                 if (cell.Column is DataGridTransposeColumn column)
                 {
-                    column.LoadTemplateContent(cell, e.Row.DataContext);
+                    column.LoadTemplateContent(cell, e.Row.Item);
                 }
             }
         }
@@ -471,10 +471,17 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void UpdateRowTree(DataGridRow row)
         {
-            row.SetCurrentValue(DataGridRow.VisibilityProperty, this._RowInfo.TreeInfo.GetIsVisible(row.DataContext) ? Visibility.Visible : Visibility.Collapsed);
-            row.SetCurrentValue(TreeDataGrid.IsExpandedProperty, this._RowInfo.TreeInfo.GetIsExpanded(row.DataContext));
-            row.SetCurrentValue(TreeDataGrid.TreeExpanderVisibilityProperty, this._RowInfo.TreeInfo.HasChildren(row.DataContext) ? Visibility.Visible : Visibility.Collapsed);
-            row.SetCurrentValue(TreeDataGrid.TreeDepthMarginProperty, new Thickness(this._RowInfo.TreeInfo.GetDepth(row.DataContext) * DepthMarginUnit, 0D, 0D, 0D));
+            // 仮想化している場合に MS.Internal.NamedObject 型の {DisconnectedItem} という名前の item が入ってくることがある
+            // Treeにはかかわらないものなので何もしない
+            if (row.Item.ToString() == "{DisconnectedItem}")
+            {
+                return;
+            }
+
+            row.SetCurrentValue(DataGridRow.VisibilityProperty, this._RowInfo.TreeInfo.GetIsVisible(row.Item) ? Visibility.Visible : Visibility.Collapsed);
+            row.SetCurrentValue(TreeDataGrid.IsExpandedProperty, this._RowInfo.TreeInfo.GetIsExpanded(row.Item));
+            row.SetCurrentValue(TreeDataGrid.TreeExpanderVisibilityProperty, this._RowInfo.TreeInfo.HasChildren(row.Item) ? Visibility.Visible : Visibility.Collapsed);
+            row.SetCurrentValue(TreeDataGrid.TreeDepthMarginProperty, new Thickness(this._RowInfo.TreeInfo.GetDepth(row.Item) * DepthMarginUnit, 0D, 0D, 0D));
         }
 
         /// <summary>
@@ -728,7 +735,7 @@ namespace Toolkit.WPF.Controls
             CanUserResizeRowsProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(false));
             CanUserSortColumnsProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(false));
             CanUserReorderColumnsProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(false));
-            CanUserResizeColumnsProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(false));
+            CanUserResizeColumnsProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(true));
 
             SelectionUnitProperty.OverrideMetadata(typeof(TreeDataGrid), new FrameworkPropertyMetadata(DataGridSelectionUnit.CellOrRowHeader));
 
