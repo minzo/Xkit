@@ -445,6 +445,14 @@ namespace Toolkit.WPF.Controls
         {
             base.OnLoadingRow(e);
             this.UpdateRowTree(e.Row);
+
+            foreach (var cell in EnumerateChildren(e.Row).OfType<DataGridCell>())
+            {
+                if (cell.Column is DataGridTransposeColumn column)
+                {
+                    column.LoadTemplateContent(cell, e.Row.DataContext);
+                }
+            }
         }
 
         /// <summary>
@@ -866,6 +874,15 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private class DataGridTransposeColumn : DataGridBindingColumn
         {
+            /// <summary>
+            /// LoadTemplateContent
+            /// </summary>
+            public void LoadTemplateContent(DataGridCell cell, object dataItem)
+            {
+                // DataGridCell の DataContext を item にせずに DataSource にする
+                TrySetBinding(cell, DataGridCell.DataContextProperty, this.Binding);
+            }
+
             /// <summary>
             /// LoadTempalteContent
             /// </summary>
