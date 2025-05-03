@@ -1912,22 +1912,32 @@ namespace Toolkit.WPF.Controls
                     return;
                 }
 
+                // Drop を検知してイベントを発火する要素
                 var dropSourceElement = (FrameworkElement)sender;
-                var origin = (FrameworkElement)dropSourceElement.InputHitTest(e.GetPosition(dropSourceElement));
+
+                // その要素の左上を基準にしたマウスの相対位置
+                var position = e.GetPosition(dropSourceElement);
+
+                // マウス直下の要素
+                var origin = (FrameworkElement)dropSourceElement.InputHitTest(position);
+
+                // マウス直下の要素から親をたどる
                 var target = (FrameworkElement)EnumerateParent(origin)
                     .Where(i => i != this._DragElement)
                     .FirstOrDefault(i => i.GetType() == this._DragElementType);
 
                 if (target != null)
                 {
-                    var point = e.GetPosition(target);
                     var width = target.ActualWidth;
                     var height = target.ActualHeight;
+
                     var leftTop = target.TranslatePoint(new Point(0D, 0D), this._DragElement);
                     var rightBottom = target.TranslatePoint(new Point(0D, height), this._DragElement);
 
-                    var isInsertPrev = point.Y >= rightBottom.Y - 7D;
-                    var isInsertNext = point.Y <= leftTop.Y + 7D;
+                    var point = e.GetPosition(this._DragElement);
+
+                    var isInsertPrev = point.Y <= leftTop.Y + 7D;
+                    var isInsertNext = point.Y >= rightBottom.Y - 7D;
 
                     if (!isInsertPrev && !isInsertNext && !this.EnableInsertChild)
                     {
