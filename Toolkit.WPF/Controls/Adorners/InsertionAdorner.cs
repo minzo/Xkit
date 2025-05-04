@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using Toolkit.WPF.Extensions;
@@ -36,6 +32,16 @@ namespace Toolkit.WPF.Controls.Adorners
         /// 子に挿入するときの色
         /// </summary>
         public Color InsertChildColor { get; set; } = Colors.Red;
+
+        /// <summary>
+        /// 水平方向のドラッグか
+        /// </summary>
+        public bool IsHorizontal { get; set; }
+
+        /// <summary>
+        /// 挿入とみなす領域の大きさ
+        /// </summary>
+        public double InsertArea = 7D;
 
         /// <summary>
         /// コンストラクタ
@@ -75,32 +81,61 @@ namespace Toolkit.WPF.Controls.Adorners
             if (targetElement != null)
             {
                 var point = GetNowPosition(this.AdornedElement);
-                var width = targetElement.ActualWidth;
-                var height = targetElement.ActualHeight;
 
+                var size = new Size(targetElement.ActualWidth, targetElement.ActualHeight);
                 var leftTop = targetElement.TranslatePoint(new Point(0D, 0D), this.AdornedElement);
-                var rightBottom = targetElement.TranslatePoint(new Point(0D, height), this.AdornedElement);
+                var rightBottom = targetElement.TranslatePoint(new Point(size.Width, size.Height), this.AdornedElement);
 
-                const double insertArea = 7D;
-
-                if (point.Y <= leftTop.Y + insertArea)
+                if (this.IsHorizontal)
                 {
-                    this._RenderRect = new Rect(leftTop.X, leftTop.Y, width, 2D);
-                    this._RenderBrush = this._InsertPrevBrush;
-                }
-                else if (point.Y >= rightBottom.Y - insertArea)
-                {
-                    this._RenderRect = new Rect(leftTop.X, rightBottom.Y - 2D, width, 2D);
-                    this._RenderBrush = this._InsertNextBrush;
+                    this.OnQuerContinuceDragHorizontal(point, leftTop, rightBottom, size);
                 }
                 else
                 {
-                    this._RenderRect = new Rect(rightBottom.X, (leftTop.Y + rightBottom.Y) * 0.5, width, 2D);
-                    this._RenderBrush = this._InsertChildBrush;
+                    this.OnQueryContinueDragVertical(point, leftTop, rightBottom, size);
                 }
             }
 
+
             this._AdornerLayer.Update(this.AdornedElement);
+        }
+
+        private void OnQuerContinuceDragHorizontal(Point point, Point leftTop, Point rightBottom, Size size)
+        {
+            if (point.X <= leftTop.X + this.InsertArea)
+            {
+                this._RenderRect = new Rect(leftTop.X, leftTop.Y, 2D, size.Height);
+                this._RenderBrush = this._InsertPrevBrush;
+            }
+            else if (point.X >= rightBottom.X - this.InsertArea)
+            {
+                this._RenderRect = new Rect(rightBottom.X - 2D, leftTop.Y, 2D, size.Height);
+                this._RenderBrush = this._InsertNextBrush;
+            }
+            else
+            {
+                this._RenderRect = new Rect((leftTop.X + rightBottom.X) * 0.5, leftTop.Y, 2D, size.Height);
+                this._RenderBrush = this._InsertChildBrush;
+            }
+        }
+
+        private void OnQueryContinueDragVertical(Point point, Point leftTop, Point rightBottom, Size size)
+        {
+            if (point.Y <= leftTop.Y + this.InsertArea)
+            {
+                this._RenderRect = new Rect(leftTop.X, leftTop.Y, size.Width, 2D);
+                this._RenderBrush = this._InsertPrevBrush;
+            }
+            else if (point.Y >= rightBottom.Y - this.InsertArea)
+            {
+                this._RenderRect = new Rect(leftTop.X, rightBottom.Y - 2D, size.Width, 2D);
+                this._RenderBrush = this._InsertNextBrush;
+            }
+            else
+            {
+                this._RenderRect = new Rect(rightBottom.X, (leftTop.Y + rightBottom.Y) * 0.5, size.Width, 2D);
+                this._RenderBrush = this._InsertChildBrush;
+            }
         }
 
         /// <summary>
