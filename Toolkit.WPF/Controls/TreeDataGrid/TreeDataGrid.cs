@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Windows.Themes;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -768,8 +769,8 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnLoaded(object sender, EventArgs e)
         {
-            new DragAndDrop(this, this, typeof(DataGridRow), typeof(DataGridRowHeader)) { ReorderAction = this.ReorderRow };
-            new DragAndDrop(this, this, typeof(DataGridColumnHeader), typeof(DataGridColumnHeader)) { ReorderAction = this.ReorderColumn };
+            new DragAndDrop(this, this, typeof(DataGridRow), typeof(DataGridRowHeader)) { ReorderAction = this.ReorderRow};
+            new DragAndDrop(this, this, typeof(DataGridColumnHeader), typeof(DataGridColumnHeader)) { ReorderAction = this.ReorderColumn, IsHorizontal = true };
         }
 
         /// <summary>
@@ -826,8 +827,11 @@ namespace Toolkit.WPF.Controls
                     this._ColInfo.MoveInsertAfter(arg.Item, arg.Target);
                     break;
                 case DragAndDrop.InsertType.InsertChild:
+                    this._ColInfo.InsertChild(arg.Item, arg.Target);
                     break;
             }
+
+            this.UpdateColumnTreeAll();
         }
 
         /// <summary>
@@ -1862,6 +1866,16 @@ namespace Toolkit.WPF.Controls
             public bool EnableInsertChild { get; set; } = true;
 
             /// <summary>
+            /// 水平方向のドラッグか
+            /// </summary>
+            public bool IsHorizontal { get; set; } = false;
+
+            /// <summary>
+            /// 挿入とみなす領域の大きさ
+            /// </summary>
+            public double InsertArea = 7D;
+
+            /// <summary>
             /// 並べ替え時に呼ばれる処理を設定します
             /// </summary>
             public Action<(object Item, object Target, InsertType InsertType)> ReorderAction { get; set; }
@@ -1896,6 +1910,8 @@ namespace Toolkit.WPF.Controls
                     return;
                 }
 
+                System.Diagnostics.Debug.WriteLine("TryDrag");
+
                 var dropSourceElement = (FrameworkElement)sender;
                 var position = e.GetPosition(dropSourceElement);
 
@@ -1907,6 +1923,12 @@ namespace Toolkit.WPF.Controls
 
                     // ドラッグでつかめるタイプのエレメントが含まれているか調べる
                     var origin = (FrameworkElement)dropSourceElement.InputHitTest(position);
+
+                    if (EnumerateParent(origin).Any(i => i is Thumb))
+                    {
+                        return;
+                    }
+
                     var grip = EnumerateParent(origin).FirstOrDefault(i => i.GetType() == this._DragGripElementType);
                     if (grip == null)
                     {
@@ -1914,10 +1936,14 @@ namespace Toolkit.WPF.Controls
                     }
 
                     // ドラッグ対象を覚える
-                    var target = (FrameworkElement)EnumerateParent(grip)
-                        .FirstOrDefault(i => i.GetType() == this._DragElementType);
-
-                    this._DragElement = target;
+                    if (grip.GetType() == this._DragElementType)
+                    {
+                        this._DragElement = (FrameworkElement)grip;
+                    }
+                    else
+                    {
+                        this._DragElement = (FrameworkElement)EnumerateParent(grip).FirstOrDefault(i => i.GetType() == this._DragElementType);
+                    }
                     return;
                 }
 
@@ -1926,6 +1952,7 @@ namespace Toolkit.WPF.Controls
                 var isDragStart
                     = Math.Abs(dragDistance.X) >= SystemParameters.MinimumHorizontalDragDistance
                     || Math.Abs(dragDistance.Y) >= SystemParameters.MinimumVerticalDragDistance;
+
                 if (!isDragStart)
                 {
                     return;
@@ -1933,7 +1960,11 @@ namespace Toolkit.WPF.Controls
 
                 try
                 {
-                    using (new Adorners.InsertionAdorner(dropSourceElement, this._DragElementType) { EnableInsertChild = this.EnableInsertChild })
+                    using (new Adorners.InsertionAdorner(dropSourceElement, this._DragElementType) {
+                        EnableInsertChild = this.EnableInsertChild,
+                        IsHorizontal = this.IsHorizontal,
+                        InsertArea = this.InsertArea
+                    })
                     using (new Adorners.GhostAdorner(dropSourceElement, this._DragElement))
                     {
                         DragDrop.DoDragDrop(this._DragElement, this._DragElement.DataContext, DragDropEffects.Move);
@@ -1979,8 +2010,17 @@ namespace Toolkit.WPF.Controls
 
                     var point = e.GetPosition(this._DragElement);
 
-                    var isInsertPrev = point.Y <= leftTop.Y + 7D;
-                    var isInsertNext = point.Y >= rightBottom.Y - 7D;
+                    bool isInsertPrev = false, isInsertNext = false;
+                    if (this.IsHorizontal)
+                    {
+                        isInsertPrev = point.X <= leftTop.X + this.InsertArea;
+                        isInsertNext = point.X >= rightBottom.X - this.InsertArea;
+                    }
+                    else
+                    {
+                        isInsertPrev = point.Y <= leftTop.Y + this.InsertArea;
+                        isInsertNext = point.Y >= rightBottom.Y - this.InsertArea;
+                    }
 
                     if (!isInsertPrev && !isInsertNext && !this.EnableInsertChild)
                     {
