@@ -33,6 +33,11 @@ namespace Toolkit.WPF.Controls.Adorners
         public Color InsertNextColor { get; set; } = Colors.LightPink;
 
         /// <summary>
+        /// 子に挿入するときの色
+        /// </summary>
+        public Color InsertChildColor { get; set; } = Colors.Red;
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         public InsertionAdorner(UIElement adornedElement, Type targetFramworkElementType)
@@ -47,6 +52,9 @@ namespace Toolkit.WPF.Controls.Adorners
 
             this._InsertNextBrush = new SolidColorBrush(this.InsertNextColor);
             this._InsertNextBrush.Freeze();
+
+            this._InsertChildBrush = new SolidColorBrush(this.InsertChildColor);
+            this._InsertChildBrush.Freeze();
 
             this._TargetFrameworkElementType = targetFramworkElementType;
 
@@ -82,11 +90,13 @@ namespace Toolkit.WPF.Controls.Adorners
                 }
                 else if (point.Y >= rightBottom.Y - insertArea)
                 {
-                    this._RenderRect = new Rect(rightBottom.X, rightBottom.Y - 2D, width, 2D);
+                    this._RenderRect = new Rect(leftTop.X, rightBottom.Y - 2D, width, 2D);
                     this._RenderBrush = this._InsertNextBrush;
                 }
                 else
                 {
+                    this._RenderRect = new Rect(rightBottom.X, (leftTop.Y + rightBottom.Y) * 0.5, width, 2D);
+                    this._RenderBrush = this._InsertChildBrush;
                 }
             }
 
@@ -130,6 +140,7 @@ namespace Toolkit.WPF.Controls.Adorners
         private Brush _RenderBrush;
         private readonly Brush _InsertPrevBrush;
         private readonly Brush _InsertNextBrush;
+        private readonly Brush _InsertChildBrush;
         private readonly AdornerLayer _AdornerLayer;
         private bool _IsDisposed;
 

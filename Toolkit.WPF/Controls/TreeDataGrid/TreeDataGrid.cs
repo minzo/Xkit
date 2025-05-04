@@ -800,15 +800,16 @@ namespace Toolkit.WPF.Controls
             {
                 case DragAndDrop.InsertType.InsertPrev:
                     this._RowInfo.MoveInsertBefore(arg.Item, arg.Target);
-                    this.UpdateRowTreeAll();
                     break;
                 case DragAndDrop.InsertType.InsertNext:
                     this._RowInfo.MoveInsertAfter(arg.Item, arg.Target);
-                    this.UpdateRowTreeAll();
                     break;
                 case DragAndDrop.InsertType.InsertChild:
+                    this._RowInfo.InsertChild(arg.Item, arg.Target);
                     break;
             }
+
+            this.UpdateRowTreeAll();
         }
 
         /// <summary>
@@ -1045,6 +1046,20 @@ namespace Toolkit.WPF.Controls
             public void MoveInsertAfter(object item, object target)
             {
                 var isSucceeded = this.TreeInfo.MoveInsertAfter(item, target, this._RootsSource as IList);
+                if (!isSucceeded)
+                {
+                    return;
+                }
+
+                if (!(this._RootsSource is INotifyCollectionChanged))
+                {
+                    this.SyncItemsOrder(item);
+                }
+            }
+
+            public void InsertChild(object item, object target)
+            {
+                var isSucceeded = this.TreeInfo.MoveInsertChild(item, target, this._RootsSource as IList);
                 if (!isSucceeded)
                 {
                     return;
@@ -1357,56 +1372,84 @@ namespace Toolkit.WPF.Controls
             }
 
             /// <summary>
+            /// 要素を指定したターゲットの子要素の最後に移動します
+            /// </summary>
+            public bool MoveInsertChild(object item, object target, IList rootList)
+            {
+                var itemParent = this.FindParent(item);
+                var itemList = rootList;
+                if (itemParent != null && this._ItemAccessor.GetChildren(itemParent) is IList listI)
+                {
+                    itemList = listI;
+                }
+
+                var targetList = rootList;
+                if (this._ItemAccessor.GetChildren(target) is IList listT)
+                {
+                    targetList = listT;
+                }
+
+                return this.MoveInsertImpl(item, itemList, target, targetList, isAfter: true);
+            }
+
+            /// <summary>
             /// 要素を指定したターゲットの前後に移動します
             /// </summary>
             private bool MoveInsertImpl(object item, object target, IList rootList, bool isAfter)
             {
                 var itemParent = this.FindParent(item);
+                var itemList = rootList;
+                if (itemParent != null && this._ItemAccessor.GetChildren(itemParent) is IList listI)
+                {
+                    itemList = listI;
+                }
+
+                var targetParent = this.FindParent(target);
+                var targetList = rootList;
+                if (targetParent != null && this._ItemAccessor.GetChildren(targetParent) is IList listT)
+                {
+                    targetList = listT;
+                }
+
+                return this.MoveInsertImpl(item, itemList, target, targetList, isAfter);
+            }
+
+            /// <summary>
+            /// 要素を指定したターゲットの前後に移動します
+            /// </summary>
+            private bool MoveInsertImpl(object item, IList itemList, object target, IList targetList, bool isAfter)
+            {
                 var targetParent = this.FindParent(target);
 
                 // 並び替え先が自分の子孫だったら並び替えできない
-                var parent = targetParent;
-                while (parent != null)
                 {
-                    if (parent == item)
+                    var parent = targetParent;
+                    while (parent != null)
                     {
-                        return false;
+                        if (parent == item)
+                        {
+                            return false;
+                        }
+                        parent = this.FindParent(parent);
                     }
-                    parent = this.FindParent(parent);
                 }
 
-                var removeList = rootList;
-                if (itemParent != null && this._ItemAccessor.GetChildren(itemParent) is IList list0)
+                itemList.Remove(item);
+
+                var index = targetList.IndexOf(target);
+                var insertIndex = targetList.IndexOf(target) + (isAfter ? 1 : 0);
+                targetList.Insert(insertIndex, item);
+
+                if (targetParent != null && this._TreeInfo.TryGetValue(targetParent, out TreeInfo parentInfo))
                 {
-                    removeList = list0;
+                    this.UpdateTreeInfo(targetParent, parentInfo);
                 }
-
-                var insertList = rootList;
-                if (targetParent != null && this._ItemAccessor.GetChildren(targetParent) is IList list1)
+                else if (this._TreeInfo.TryGetValue(item, out TreeInfo itemInfo))
                 {
-                    insertList = list1;
+                    itemInfo.UpdateInfo(isParentExpanded: false, isParentVisible: false, isHitFilterAncestor: false);
                 }
 
-                if (removeList != null && insertList != null)
-                {
-                    removeList.Remove(item);
-
-                    var insertIndex = insertList.IndexOf(target);
-                    insertList.Insert(insertIndex + (isAfter ? 1 : 0), item);
-
-                    if (targetParent != null && this._TreeInfo.TryGetValue(targetParent, out TreeInfo parentInfo))
-                    {
-                        this.UpdateTreeInfo(targetParent, parentInfo);
-                    }
-                    else if (this._TreeInfo.TryGetValue(item, out TreeInfo itemInfo))
-                    {
-                        itemInfo.UpdateInfo(isParentExpanded: false, isParentVisible: false, isHitFilterAncestor: false);
-                    }
-
-                    return true;
-                }
-
-                return false;
+                return true;
             }
 
             /// <summary>
