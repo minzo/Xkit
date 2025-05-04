@@ -543,7 +543,7 @@ namespace Toolkit.WPF.Controls
             this.Columns.Clear();
             foreach (var item in this._ColInfo.Items)
             {
-                this.AddColumn(item);
+                this.InsertColumn(-1, item);
             }
 
             // DataGridColumnHeader は列が表示されていないときは列挙できず値を変更することができないので
@@ -559,18 +559,20 @@ namespace Toolkit.WPF.Controls
         {
             if (e.OldItems != null)
             {
-                for (var i = e.OldStartingIndex; i < e.OldItems.Count; i++)
+                for (int i = 0; i < e.OldItems.Count; i++)
                 {
-                    var column = this.Columns[i];
+                    var index = e.OldStartingIndex;
+                    var column = this.Columns[index];
                     this.Columns.Remove(column);
                 }
             }
 
             if (e.NewItems != null)
             {
-                foreach (var item in e.NewItems)
+                for (int i = 0; i <  e.NewItems.Count; i++)
                 {
-                    this.AddColumn(item);
+                    var index = e.NewStartingIndex + i;
+                    this.InsertColumn(index, e.NewItems[i]);
                 }
             }
         }
@@ -578,7 +580,7 @@ namespace Toolkit.WPF.Controls
         /// <summary>
         /// DataGridColumn を追加します
         /// </summary>
-        private void AddColumn(object item)
+        private void InsertColumn(int index, object item)
         {
             var column = new DataGridTransposeColumn()
             {
@@ -593,7 +595,14 @@ namespace Toolkit.WPF.Controls
 
             this.UpdateColumnTree(column);
 
-            this.Columns.Add(column);
+            if( index < 0)
+            {
+                this.Columns.Add(column);
+            }
+            else
+            {
+                this.Columns.Insert(index, column);
+            }
         }
 
         /// <summary>
