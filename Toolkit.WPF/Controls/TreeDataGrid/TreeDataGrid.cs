@@ -2018,7 +2018,7 @@ namespace Toolkit.WPF.Controls
                     var height = target.ActualHeight;
 
                     var leftTop = target.TranslatePoint(new Point(0D, 0D), this._DragElement);
-                    var rightBottom = target.TranslatePoint(new Point(0D, height), this._DragElement);
+                    var rightBottom = target.TranslatePoint(new Point(width, height), this._DragElement);
 
                     var point = e.GetPosition(this._DragElement);
 
