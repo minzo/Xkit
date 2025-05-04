@@ -1873,7 +1873,7 @@ namespace Toolkit.WPF.Controls
             /// <summary>
             /// 挿入とみなす領域の大きさ
             /// </summary>
-            public double InsertArea = 7D;
+            public double InsertArea = 16D;
 
             /// <summary>
             /// 並べ替え時に呼ばれる処理を設定します
@@ -1889,7 +1889,7 @@ namespace Toolkit.WPF.Controls
                 this._DragGripElementType = dragGripElementType ?? this._DragElementType;
 
                 // Drag 開始の起点となる Element
-                dragSourceElement.PreviewMouseDown += this.TryDrag;
+                dragSourceElement.PreviewMouseDown += this.DragStart;
                 dragSourceElement.PreviewMouseMove += this.TryDrag;
 
                 // Drop の対象となる Element
@@ -1899,10 +1899,56 @@ namespace Toolkit.WPF.Controls
             }
 
             /// <summary>
+            /// ドラッグ開始処理
+            /// </summary>
+            private void DragStart(object sender, MouseEventArgs e)
+            {
+                if (this._DragElement != null)
+                {
+                    return;
+                }
+
+                var dropSourceElement = (FrameworkElement)sender;
+                var position = e.GetPosition(dropSourceElement);
+
+                //
+                var origin = (FrameworkElement)dropSourceElement.InputHitTest(position);
+
+                if (EnumerateParent(origin).Any(i => i is Thumb))
+                {
+                    return;
+                }
+
+                var grip = EnumerateParent(origin).FirstOrDefault(i => i.GetType() == this._DragGripElementType);
+                if (grip == null)
+                {
+                    return;
+                }
+
+                // ドラッグ対象を覚える
+                if (grip.GetType() == this._DragElementType)
+                {
+                    this._DragElement = (FrameworkElement)grip;
+                }
+                else
+                {
+                    this._DragElement = (FrameworkElement)EnumerateParent(grip).FirstOrDefault(i => i.GetType() == this._DragElementType);
+                }
+
+                // ドラッグ開始位置を覚える
+                this._DragStartPosition = position;
+            }
+
+            /// <summary>
             /// ドラッグ処理
             /// </summary>
             private void TryDrag(object sender, MouseEventArgs e)
             {
+                if (this._DragElement == null)
+                {
+                    return;
+                }
+
                 // マウスが押されていなかったらドロップ対象をクリアする
                 if (e.LeftButton != MouseButtonState.Pressed)
                 {
@@ -1910,42 +1956,8 @@ namespace Toolkit.WPF.Controls
                     return;
                 }
 
-                System.Diagnostics.Debug.WriteLine("TryDrag");
-
                 var dropSourceElement = (FrameworkElement)sender;
                 var position = e.GetPosition(dropSourceElement);
-
-                // ドラッグ対象がまだ無ければマウスの位置から確定して覚える
-                if (this._DragElement == null)
-                {
-                    // ドラッグ開始位置を覚える
-                    this._DragStartPosition = position;
-
-                    // ドラッグでつかめるタイプのエレメントが含まれているか調べる
-                    var origin = (FrameworkElement)dropSourceElement.InputHitTest(position);
-
-                    if (EnumerateParent(origin).Any(i => i is Thumb))
-                    {
-                        return;
-                    }
-
-                    var grip = EnumerateParent(origin).FirstOrDefault(i => i.GetType() == this._DragGripElementType);
-                    if (grip == null)
-                    {
-                        return;
-                    }
-
-                    // ドラッグ対象を覚える
-                    if (grip.GetType() == this._DragElementType)
-                    {
-                        this._DragElement = (FrameworkElement)grip;
-                    }
-                    else
-                    {
-                        this._DragElement = (FrameworkElement)EnumerateParent(grip).FirstOrDefault(i => i.GetType() == this._DragElementType);
-                    }
-                    return;
-                }
 
                 // ドラッグ開始の閾値を超えているか調べる
                 var dragDistance = position - this._DragStartPosition;
