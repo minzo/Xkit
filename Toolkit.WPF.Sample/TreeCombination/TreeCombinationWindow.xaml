@@ -115,6 +115,7 @@
             CellEditingTemplateSelector="{StaticResource CellEditingTemplateSelector}"
             
             EnableTranspose="{Binding IsChecked, ElementName=TransposeCheckBox}"
+            InsertionArea="4"
         
             DataSource="{Binding Table, Mode=OneWay}"
             />

@@ -1,5 +1,4 @@
-﻿using Microsoft.Windows.Themes;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -689,6 +688,36 @@ namespace Toolkit.WPF.Controls
 
         #endregion
 
+        #region 並び替え
+
+        /// <summary>
+        /// 挿入とみなす領域の大きさ
+        /// </summary>
+        public double InsertionArea
+        {
+            get { return (double)this.GetValue(InsertionAreaProperty); }
+            set { this.SetValue(InsertionAreaProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for InsertionArea.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty InsertionAreaProperty =
+            DependencyProperty.Register("InsertionArea", typeof(double), typeof(TreeDataGrid), new PropertyMetadata(16D, (d, e) => {
+
+                var treeDataGrid = ((TreeDataGrid)d);
+
+                if (treeDataGrid._RowDragAndDrop != null)
+                {
+                    treeDataGrid._RowDragAndDrop.InsertArea = (double)e.NewValue;
+                }
+
+                if (treeDataGrid._ColumnDragAndDrop != null)
+                {
+                    treeDataGrid._ColumnDragAndDrop.InsertArea = (double)e.NewValue;
+                }
+            }));
+
+        #endregion
+
         #region ツリーのための添付プロパティ
 
         private static readonly DependencyProperty IsExpandedProperty =
@@ -778,8 +807,18 @@ namespace Toolkit.WPF.Controls
         /// </summary>
         private void OnLoaded(object sender, EventArgs e)
         {
-            new DragAndDrop(this, this, typeof(DataGridRow), typeof(DataGridRowHeader)) { ReorderAction = this.ReorderRow};
-            new DragAndDrop(this, this, typeof(DataGridColumnHeader), typeof(DataGridColumnHeader)) { ReorderAction = this.ReorderColumn, IsHorizontal = true };
+            this._RowDragAndDrop = new DragAndDrop(this, this, typeof(DataGridRow), typeof(DataGridRowHeader))
+            {
+                ReorderAction = this.ReorderRow,
+                InsertArea = this.InsertionArea,
+            };
+
+            this._ColumnDragAndDrop = new DragAndDrop(this, this, typeof(DataGridColumnHeader), typeof(DataGridColumnHeader))
+            {
+                ReorderAction = this.ReorderColumn,
+                InsertArea = this.InsertionArea,
+                IsHorizontal = true
+            };
         }
 
         /// <summary>
@@ -876,6 +915,9 @@ namespace Toolkit.WPF.Controls
         // 転置状態に関わらないテーブル行と列の情報
         private readonly TableFrameInfo _BaseRowInfo;
         private readonly TableFrameInfo _BaseColumnInfo;
+
+        private DragAndDrop _RowDragAndDrop;
+        private DragAndDrop _ColumnDragAndDrop;
 
         private readonly BindingBase _DataSourceBinding;
         private const double DepthMarginUnit = 12D;
@@ -1453,9 +1495,10 @@ namespace Toolkit.WPF.Controls
                 var insertIndex = targetList.IndexOf(target) + (isAfter ? 1 : 0);
                 targetList.Insert(insertIndex, item);
 
-                if (targetParent != null && this._TreeInfo.TryGetValue(targetParent, out TreeInfo parentInfo))
+                var itemParent = this.FindParent(item);
+                if (itemParent != null && this._TreeInfo.TryGetValue(itemParent, out TreeInfo parentInfo))
                 {
-                    this.UpdateTreeInfo(targetParent, parentInfo);
+                    this.UpdateTreeInfo(itemParent, parentInfo);
                 }
                 else if (this._TreeInfo.TryGetValue(item, out TreeInfo itemInfo))
                 {
@@ -1882,7 +1925,7 @@ namespace Toolkit.WPF.Controls
             /// <summary>
             /// 挿入とみなす領域の大きさ
             /// </summary>
-            public double InsertArea = 16D;
+            public double InsertArea { get; set; } = 16D;
 
             /// <summary>
             /// 並べ替え時に呼ばれる処理を設定します

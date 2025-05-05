@@ -41,7 +41,7 @@ namespace Toolkit.WPF.Controls.Adorners
         /// <summary>
         /// 挿入とみなす領域の大きさ
         /// </summary>
-        public double InsertArea = 7D;
+        public double InsertArea { get; set; } = 7D;
 
         /// <summary>
         /// コンストラクタ
@@ -133,7 +133,7 @@ namespace Toolkit.WPF.Controls.Adorners
             }
             else
             {
-                this._RenderRect = new Rect(rightBottom.X, (leftTop.Y + rightBottom.Y) * 0.5, size.Width, 2D);
+                this._RenderRect = new Rect(leftTop.X, (leftTop.Y + rightBottom.Y) * 0.5, size.Width, 2D);
                 this._RenderBrush = this._InsertChildBrush;
             }
         }
