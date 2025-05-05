@@ -1144,13 +1144,14 @@ namespace Toolkit.WPF.Controls
 
                 if (this._RootsSource != null)
                 {
-                    this.SubscribeCollectionChangedEvent(this._RootsSource, this._ChildrenPropertyPath, this.Items);
+                    var index = 0;
+                    this.SubscribeCollectionChangedEvent(ref index, this._RootsSource, this._ChildrenPropertyPath, this.Items);
                     this.TreeInfo.Setup(this.ChildrenPropertyPath, this.ExpandedPropertyPath, this.FilterTargetPropertyPath);
                     this.TreeInfo.UpdateTreeInfoAll();
                 }
             }
 
-            private void SubscribeCollectionChangedEvent(IEnumerable items, string childrenPropertyName, IList<object> target)
+            private void SubscribeCollectionChangedEvent(ref int index, IEnumerable items, string childrenPropertyName, IList<object> target)
             {
                 if (items is INotifyCollectionChanged a)
                 {
@@ -1159,9 +1160,10 @@ namespace Toolkit.WPF.Controls
 
                 foreach (var item in items)
                 {
-                    target.Add(item);
+                    target.Insert(index, item);
+                    index++;
                     this.TreeInfo.Add(item);
-                    this.SubscribeCollectionChangedEvent(GetChildren(item, childrenPropertyName), childrenPropertyName, target);
+                    this.SubscribeCollectionChangedEvent(ref index, GetChildren(item, childrenPropertyName), childrenPropertyName, target);
                 }
             }
 
@@ -1192,35 +1194,22 @@ namespace Toolkit.WPF.Controls
                 {
                     foreach (var item in this.EnumerateTreeDepthFirst(e.OldItems))
                     {
-                        this.Items.Remove(item);
                         this.UnsubscribeCollectionChangedEvent(GetChildren(item, this._ChildrenPropertyPath), this._ChildrenPropertyPath, this.Items);
+                        this.Items.Remove(item);
                     }
                 }
 
-                if (e.NewItems != null)
+                if (e.NewItems != null && e.NewItems.Count > 0)
                 {
-                    int index = 0;
-                    foreach (var item in this.EnumerateTreeDepthFirst(this._RootsSource))
+                    var index = this.EnumerateTreeDepthFirstIndexOf(this._RootsSource, i => i == e.NewItems[0]);
+                    if (index >= 0)
                     {
-                        if (index >= this.Items.Count)
+                        foreach (var item in e.NewItems)
                         {
-                            break;
-                        }
-                        else if (item == this.Items[index])
-                        {
+                            this.Items.Insert(index, item);
                             index++;
+                            this.SubscribeCollectionChangedEvent(ref index, GetChildren(item, this._ChildrenPropertyPath), this._ChildrenPropertyPath, this.Items);
                         }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
-                    foreach (var item in e.NewItems)
-                    {
-                        this.SubscribeCollectionChangedEvent(GetChildren(item, this._ChildrenPropertyPath), this._ChildrenPropertyPath, this.Items);
-                        this.Items.Insert(index, item);
-                        index++;
                     }
                 }
             }
