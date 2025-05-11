@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Data.Common;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -443,14 +444,6 @@ namespace Toolkit.WPF.Controls
         {
             base.OnLoadingRow(e);
             this.UpdateRowTree(e.Row);
-
-            foreach (var cell in EnumerateChildren(e.Row).OfType<DataGridCell>())
-            {
-                if (cell.Column is DataGridTransposeColumn column)
-                {
-                    column.LoadTemplateContent(cell, e.Row.Item);
-                }
-            }
         }
 
         /// <summary>
@@ -936,15 +929,6 @@ namespace Toolkit.WPF.Controls
         private class DataGridTransposeColumn : DataGridBindingColumn
         {
             /// <summary>
-            /// LoadTemplateContent
-            /// </summary>
-            public void LoadTemplateContent(DataGridCell cell, object dataItem)
-            {
-                // DataGridCell の DataContext を item にせずに DataSource にする
-                TrySetBinding(cell, DataGridCell.DataContextProperty, this.Binding);
-            }
-
-            /// <summary>
             /// LoadTempalteContent
             /// </summary>
             protected override FrameworkElement LoadTemplateContent(DataGridCell cell, object dataItem, DataTemplate template, DataTemplateSelector selector)
@@ -954,19 +938,55 @@ namespace Toolkit.WPF.Controls
 
                 var control = new ContentControl()
                 {
+                    Name = "TransposeColumnContent",
                     ContentTemplate = template,
                     ContentTemplateSelector = selector,
                     VerticalAlignment = VerticalAlignment.Stretch,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                 };
 
-                var path = this.GetBindingPropertyPath(dataItem);
+                LoadContentControl(control, this, dataItem);
+
+                // イベントを多重に刺さないように static メソッドにして購読を解除してから追加する
+                cell.Loaded -= OnDataGridCellLoaded;
+                cell.Loaded += OnDataGridCellLoaded;
+
+                return control;
+            }
+
+            /// <summary>
+            /// セルが読み込まれた時の処理
+            /// </summary>
+            private static void OnDataGridCellLoaded(object sender, RoutedEventArgs e)
+            {
+                var cell = (DataGridCell)sender;
+                var column = (DataGridTransposeColumn)cell.Column;
+                var row = EnumerateParent(cell).OfType<DataGridRow>().First();
+
+                // DataGridCell の DataContext を item にせずに DataSource にする
+                // 列の仮想化によってセルが再利用されると‍♀淪‍♀淪‍♂‍♂セルのDataContextがRowを引き継いだ状態に上書きされるので毎回設定する
+                TrySetBinding(cell, DataGridCell.DataContextProperty, column.Binding);
+
+                var control = EnumerateChildren(cell).OfType<ContentControl>().First(i => i.Name == "TransposeColumnContent");
+
+                LoadContentControl(control, column, row.Item);
+            }
+
+            /// <summary>
+            /// DataGridCell の ContentControl の設定をおこなう
+            /// </summary>
+            private static void LoadContentControl(ContentControl control, DataGridTransposeColumn column, object dataItem)
+            {
+                // DataGridCell の DataContext が仮想化の再利用時に正しくならないことがあるので ContentControl の DataContext にも明示的に Binding する
+                TrySetBinding(control, ContentControl.DataContextProperty, column.Binding);
+
+                // DataGridCell が仮想化によって再利用される場合はセルが使われる行と列が変わる可能性があるため Binding の Path も変わる
+                // そのため表示の時に呼ばれる Loaeded のタイミングで Binding を現在の行と列の情報に基づいて更新する
+                var path = column.GetBindingPropertyPath(dataItem);
                 if (!string.IsNullOrEmpty(path))
                 {
                     TrySetBinding(control, ContentControl.ContentProperty, new Binding(path));
                 }
-
-                return control;
             }
 
             /// <summary>
