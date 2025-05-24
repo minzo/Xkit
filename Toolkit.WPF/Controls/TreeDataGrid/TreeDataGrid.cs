@@ -980,6 +980,13 @@ namespace Toolkit.WPF.Controls
                 // DataGridCell の DataContext が仮想化の再利用時に正しくならないことがあるので ContentControl の DataContext にも明示的に Binding する
                 TrySetBinding(control, ContentControl.DataContextProperty, column.Binding);
 
+                // 仮想化している場合に MS.Internal.NamedObject 型の {DisconnectedItem} という名前の item が入ってくることがある
+                // Treeにはかかわらないものなので何もしない
+                if (dataItem?.ToString() == "{DisconnectedItem}")
+                {
+                    return;
+                }
+
                 // DataGridCell が仮想化によって再利用される場合はセルが使われる行と列が変わる可能性があるため Binding の Path も変わる
                 // そのため表示の時に呼ばれる Loaeded のタイミングで Binding を現在の行と列の情報に基づいて更新する
                 var path = column.GetBindingPropertyPath(dataItem);
