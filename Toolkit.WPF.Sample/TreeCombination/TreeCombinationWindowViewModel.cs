@@ -1,5 +1,6 @@
 ﻿using Corekit.Extensions;
 using Corekit.Models;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -89,6 +90,34 @@ namespace Toolkit.WPF.Sample
 
         public string ColumnFilterText { get => this._ColumnFilterText; set => this.SetProperty(ref this._ColumnFilterText, value); }
 
+        public bool IsEnabledFilterFunc
+        {
+            get => this._IsEnabledFilterFunc;
+            set
+            {
+                if (this.SetProperty(ref this._IsEnabledFilterFunc, value))
+                {
+                    if (value)
+                    {
+                        this._RowFilterFunc = item => (item as DataKey).Name.Contains("フ");
+                        this._ColumnFilterFunc = item => (item as DataKey).Name.Contains("ねこ");
+                    }
+                    else
+                    {
+                        this._RowFilterFunc = null;
+                        this._ColumnFilterFunc = null;
+                    }
+
+                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.RowFilterFunc)));
+                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.ColumnFilterFunc)));
+                }
+            }
+        }
+
+        public Func<object, bool> RowFilterFunc => this._RowFilterFunc;
+
+        public Func<object, bool> ColumnFilterFunc => this._ColumnFilterFunc;
+
         public TreeCombinationWindowViewModel()
         {
             this.Root0 = new DataKey("Root0", new[] {
@@ -123,7 +152,9 @@ namespace Toolkit.WPF.Sample
 
         private string _RowFilterText;
         private string _ColumnFilterText;
-
+        private bool _IsEnabledFilterFunc;
+        private Func<object, bool> _RowFilterFunc;
+        private Func<object, bool> _ColumnFilterFunc;
 #pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
 #pragma warning restore CS0067

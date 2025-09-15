@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Data.Common;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -127,7 +128,7 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for RowFilterText.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty RowFilterTextProperty =
             DependencyProperty.Register("RowFilterText", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
-                ((TreeDataGrid)d).OnRowFilterTextChanged(e.NewValue as string);
+                ((TreeDataGrid)d).OnRowFilterConditionChanged(e.NewValue as string);
             }));
 
         /// <summary>
@@ -142,7 +143,7 @@ namespace Toolkit.WPF.Controls
         // Using a DependencyProperty as the backing store for ColumnFilterText.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ColumnFilterTextProperty =
             DependencyProperty.Register("ColumnFilterText", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
-                ((TreeDataGrid)d).OnColumnFilterTextChanged(e.NewValue as string);
+                ((TreeDataGrid)d).OnColumnFilterConditionChanged(e.NewValue as string);
             }));
 
         /// <summary>
@@ -173,6 +174,38 @@ namespace Toolkit.WPF.Controls
         public static readonly DependencyProperty ColumnFilterTargetPropertyPathProperty =
             DependencyProperty.Register("ColumnFilterTargetPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
                 ((TreeDataGrid)d)._BaseColumnInfo.FilterTargetPropertyPath = (string)e.NewValue;
+            }));
+
+        /// <summary>
+        /// 行フィルター関数
+        /// </summary>
+        public Func<object, bool> RowFilter
+        {
+            get { return (Func<object, bool>)this.GetValue(RowFilterProperty); }
+            set { this.SetValue(RowFilterProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for RowFilter.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty RowFilterProperty =
+            DependencyProperty.Register("RowFilter", typeof(Func<object, bool>), typeof(TreeDataGrid), new FrameworkPropertyMetadata(null, (d, e) => {
+                ((TreeDataGrid)d)._BaseRowInfo.FilterFunc = (Func<object, bool>)e.NewValue;
+                ((TreeDataGrid)d).OnRowFilterConditionChanged(((TreeDataGrid)d).RowFilterText);
+            }));
+
+        /// <summary>
+        /// 列フィルター関数
+        /// </summary>
+        public Func<object,bool> ColumnFilter
+        {
+            get { return (Func<object,bool>)this.GetValue(ColumnFilterProperty); }
+            set { this.SetValue(ColumnFilterProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ColumnFilter.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ColumnFilterProperty =
+            DependencyProperty.Register("ColumnFilter", typeof(Func<object,bool>), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
+                ((TreeDataGrid)d)._BaseColumnInfo.FilterFunc = (Func<object, bool>)e.NewValue;
+                ((TreeDataGrid)d).OnColumnFilterConditionChanged(((TreeDataGrid)d).ColumnFilterText);
             }));
 
         #endregion
@@ -476,9 +509,9 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
-        /// 行フィルターテキストが変更されたときに呼ばれます
+        /// 行フィルターの条件が変更されたときに呼ばれます
         /// </summary>
-        private void OnRowFilterTextChanged(string filterText)
+        private void OnRowFilterConditionChanged(string filterText)
         {
             var selectedItems = this.SelectedCells
                 .Where(i => i.IsValid)
@@ -487,7 +520,7 @@ namespace Toolkit.WPF.Controls
                 .Distinct()
                 .ToList();
 
-            this._RowInfo.TreeInfo.ApplyFilter(filterText, selectedItems);
+            this._RowInfo.TreeInfo.ApplyFilter(filterText, this._RowInfo.FilterFunc, selectedItems);
 
             this.UpdateRowTreeAll();
         }
@@ -663,9 +696,9 @@ namespace Toolkit.WPF.Controls
         }
 
         /// <summary>
-        /// 列フィルターテキストが変更されたときに呼ばれます
+        /// 列フィルターの条件が変更されたときに呼ばれます
         /// </summary>
-        private void OnColumnFilterTextChanged(string filterText)
+        private void OnColumnFilterConditionChanged(string filterText)
         {
             var selectedItems = this.SelectedCells
                 .Where(i => i.IsValid)
@@ -674,7 +707,7 @@ namespace Toolkit.WPF.Controls
                 .Distinct()
                 .ToList();
 
-            this._ColInfo.TreeInfo.ApplyFilter(filterText, selectedItems);
+            this._ColInfo.TreeInfo.ApplyFilter(filterText, this._ColInfo.FilterFunc, selectedItems);
 
             this.UpdateColumnTreeAll();
         }
@@ -1096,6 +1129,8 @@ namespace Toolkit.WPF.Controls
             }
 
             public string FilterTargetPropertyPath { get; set; }
+
+            public Func<object, bool> FilterFunc { get; set; }
 
             public TreeInfoUnit TreeInfo { get; }
 
@@ -1553,7 +1588,7 @@ namespace Toolkit.WPF.Controls
             /// </summary>
             public bool GetIsVisible(object item)
             {
-                if (string.IsNullOrEmpty(this._FilterText))
+                if (!this.GetIsFiltering())
                 {
                     // 通常（フィルタされてないとき）
                     return this._TreeInfo.TryGetValue(item, out var info) ? info.IsVisible : false;
@@ -1595,15 +1630,17 @@ namespace Toolkit.WPF.Controls
             /// <summary>
             /// フィルターを適用する
             /// </summary>
-            public void ApplyFilter(string filterText, IEnumerable<object> selectedItems)
+            public void ApplyFilter(string filterText, Func<object, bool> filterFunc, IEnumerable<object> selectedItems)
             {
-                if (string.IsNullOrEmpty(filterText))
+                if (string.IsNullOrEmpty(filterText) && filterFunc == null)
                 {
                     this._FilterText = filterText;
+                    this._FilterFunc = filterFunc;
 
                     // フィルタにヒットするか更新する(選択していた行はフィルタにヒットしていたことにして表示される状態にする)
                     foreach (var info in this._TreeInfo)
                     {
+                        // 選択行に含まれているものも表示するものとして扱う
                         info.Value.IsHitFilter = selectedItems.Contains(info.Key);
                     }
 
@@ -1619,7 +1656,7 @@ namespace Toolkit.WPF.Controls
                 }
                 else
                 {
-                    if (string.IsNullOrEmpty(this._FilterText))
+                    if (!this.GetIsFiltering())
                     {
                         // フィルターする前の状態を保存する
                         foreach (var value in this._TreeInfo.Values)
@@ -1628,12 +1665,27 @@ namespace Toolkit.WPF.Controls
                         }
                     }
 
-                    this._FilterText = filterText.ToLower();
+                    this._FilterText = filterText?.ToLower();
+                    this._FilterFunc = filterFunc;
 
                     // フィルタにヒットするか更新する
                     foreach (var info in this._TreeInfo)
                     {
-                        info.Value.IsHitFilter = this._ItemAccessor.GetFilterTarget(info.Key)?.ToString().ToLower().Contains(this._FilterText) ?? true;
+                        bool isHitFilter = true;
+
+                        // FilterFunc
+                        if (this._FilterFunc != null)
+                        {
+                            isHitFilter &= this._FilterFunc.Invoke(info.Key);
+                        }
+
+                        // 文字列フィルタ
+                        if (!string.IsNullOrEmpty(this._FilterText))
+                        {
+                            isHitFilter &= (this._ItemAccessor.GetFilterTarget(info.Key)?.ToString().ToLower().Contains(this._FilterText) ?? true);
+                        }
+
+                        info.Value.IsHitFilter = isHitFilter;
                     }
 
                     // ツリー情報を更新
@@ -1701,6 +1753,14 @@ namespace Toolkit.WPF.Controls
             private object FindParent(object item)
             {
                 return this._TreeInfo.FirstOrDefault(i => this._ItemAccessor.GetChildren(i.Key).Any(x => x == item)).Key;
+            }
+
+            /// <summary>
+            /// 現在フィルタ中か
+            /// </summary>
+            private bool GetIsFiltering()
+            {
+                return !string.IsNullOrEmpty(this._FilterText) || this._FilterFunc != null;
             }
 
             /// <summary>
@@ -1908,6 +1968,7 @@ namespace Toolkit.WPF.Controls
             }
 
             private string _FilterText;
+            private Func<object, bool> _FilterFunc;
             private Accessor _ItemAccessor;
             private readonly Dictionary<object, TreeInfo> _TreeInfo;
         }
