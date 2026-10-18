@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <TargetFrameworkCore>net8.0</TargetFrameworkCore>
+    <TargetFrameworkWpf>$(TargetFrameworkCore)-windows</TargetFrameworkWpf>
+  </PropertyGroup>
+</Project>
