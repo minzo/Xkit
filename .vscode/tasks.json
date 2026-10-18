@@ -14,6 +14,21 @@
                 "kind": "build",
                 "isDefault": true
             }
-        }
+        },
+
+        {
+            "label": "Build Toolkit.WPF.Sample",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Toolkit.WPF.Sample/Toolkit.WPF.Sample.csproj"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
     ]
 }
