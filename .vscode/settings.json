@@ -3,5 +3,7 @@
         "**/packages": true,
         "**/bin" : true,
         "**/obj" : true
-    }
+    },
+
+    "config.TargetFrameworkCore" : "net8.0"
 }
