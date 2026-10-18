@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>TargetFrameworkWpf</TargetFramework>
+    <TargetFramework>$(TargetFrameworkWpf)</TargetFramework>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
