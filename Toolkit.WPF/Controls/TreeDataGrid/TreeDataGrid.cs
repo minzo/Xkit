@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Data.Common;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -98,6 +97,40 @@ namespace Toolkit.WPF.Controls
         public static readonly DependencyProperty ColumnPropertyPathProperty =
             DependencyProperty.Register("ColumnPropertyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(string.Empty, (d, e) => {
                 ((TreeDataGrid)d)._BaseColumnInfo.PropertyPath = (string)e.NewValue;
+            }));
+
+        /// <summary>
+        /// 行の表示状態のプロパティ
+        /// </summary>
+        public string RowVisibilityPropetyPath
+        {
+            get { return (string)this.GetValue(RowVisibilityPropetyPathProperty); }
+            set { this.SetValue(RowVisibilityPropetyPathProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for RowVisibilityPropetyPath.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty RowVisibilityPropetyPathProperty =
+            DependencyProperty.Register("RowVisibilityPropetyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
+                ((TreeDataGrid)d)._BaseRowInfo.VisibilityBindingPath = (string)e.NewValue;
+                ((TreeDataGrid)d).UpdateRowTreeAll();
+                ((TreeDataGrid)d).UpdateColumnTreeAll();
+            }));
+
+        /// <summary>
+        /// 列の表示状態のプロパティ
+        /// </summary>
+        public string ColumnVisibilityPropetyPath
+        {
+            get { return (string)this.GetValue(ColumnVisibilityPropetyPathProperty); }
+            set { this.SetValue(ColumnVisibilityPropetyPathProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ColumnVisibilityPropetyPath.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ColumnVisibilityPropetyPathProperty =
+            DependencyProperty.Register("ColumnVisibilityPropetyPath", typeof(string), typeof(TreeDataGrid), new PropertyMetadata(null, (d, e) => {
+                ((TreeDataGrid)d)._BaseColumnInfo.VisibilityBindingPath = (string)e.NewValue;
+                ((TreeDataGrid)d).UpdateRowTreeAll();
+                ((TreeDataGrid)d).UpdateColumnTreeAll();
             }));
 
         /// <summary>
@@ -1097,6 +1130,8 @@ namespace Toolkit.WPF.Controls
 
             public string FilterTargetPropertyPath { get; set; }
 
+            public string VisibilityBindingPath { get; set; }
+
             public TreeInfoUnit TreeInfo { get; }
 
             public BindingBase RowExpandedBinding { get; private set; }
@@ -1173,7 +1208,7 @@ namespace Toolkit.WPF.Controls
                 {
                     var index = 0;
                     this.SubscribeCollectionChangedEvent(ref index, this._RootsSource, this._ChildrenPropertyPath, this.Items);
-                    this.TreeInfo.Setup(this.ChildrenPropertyPath, this.ExpandedPropertyPath, this.FilterTargetPropertyPath);
+                    this.TreeInfo.Setup(this.ChildrenPropertyPath, this.ExpandedPropertyPath, this.FilterTargetPropertyPath, this.VisibilityBindingPath);
                     this.TreeInfo.UpdateTreeInfoAll();
                 }
             }
@@ -1330,7 +1365,7 @@ namespace Toolkit.WPF.Controls
                 if (this._ChildrenPropertyPath != value)
                 {
                     this._ChildrenPropertyPath = value;
-                    this.TreeInfo.Setup(this._ChildrenPropertyPath, this._ExpandedPropertyPath, this.FilterTargetPropertyPath);
+                    this.TreeInfo.Setup(this._ChildrenPropertyPath, this._ExpandedPropertyPath, this.FilterTargetPropertyPath, this.VisibilityBindingPath);
                 }
             }
 
@@ -1339,7 +1374,7 @@ namespace Toolkit.WPF.Controls
                 if( value != this._ExpandedPropertyPath)
                 {
                     this._ExpandedPropertyPath = value;
-                    this.TreeInfo.Setup(this._ChildrenPropertyPath, this._ExpandedPropertyPath, this.FilterTargetPropertyPath);
+                    this.TreeInfo.Setup(this._ChildrenPropertyPath, this._ExpandedPropertyPath, this.FilterTargetPropertyPath, this.VisibilityBindingPath);
 
                     if (!string.IsNullOrEmpty(this._ExpandedPropertyPath))
                     {
@@ -1381,7 +1416,7 @@ namespace Toolkit.WPF.Controls
             /// <summary>
             /// セットアップ
             /// </summary>
-            public void Setup(string childrenPropertyPath, string expandedPropertyPath, string filterTargetPropertyPath)
+            public void Setup(string childrenPropertyPath, string expandedPropertyPath, string filterTargetPropertyPath, string visibilityPropertyPath)
             {
                 var item = this._TreeInfo.FirstOrDefault().Key;
                 if (item == null)
@@ -1389,7 +1424,7 @@ namespace Toolkit.WPF.Controls
                     return;
                 }
 
-                var accessor = new Accessor(item.GetType(), childrenPropertyPath, expandedPropertyPath, filterTargetPropertyPath);
+                var accessor = new Accessor(item.GetType(), childrenPropertyPath, expandedPropertyPath, filterTargetPropertyPath, visibilityPropertyPath);
                 if (!Accessor.Equals(ref accessor, ref this._ItemAccessor))
                 {
                     this._ItemAccessor = accessor;
@@ -1553,6 +1588,12 @@ namespace Toolkit.WPF.Controls
             /// </summary>
             public bool GetIsVisible(object item)
             {
+                var visibility = this.GetVisibility(item);
+                if (visibility != Visibility.Visible)
+                {
+                    return false;
+                }
+
                 if (string.IsNullOrEmpty(this._FilterText))
                 {
                     // 通常（フィルタされてないとき）
@@ -1590,6 +1631,14 @@ namespace Toolkit.WPF.Controls
                 }
 
                 this.UpdateTreeInfo(item, info);
+            }
+
+            /// <summary>
+            /// 表示状態を取得します
+            /// </summary>
+            private Visibility GetVisibility(object item)
+            {
+                return this._ItemAccessor.GetVisibility(item);
             }
 
             /// <summary>
@@ -1653,7 +1702,7 @@ namespace Toolkit.WPF.Controls
             /// </summary>
             public void UpdateTreeInfoAll()
             {
-                this.Setup(this._ItemAccessor.ChildrenPropertyPath, this._ItemAccessor.ExpandedPropertyPath, this._ItemAccessor.FilterTargetPropertyPath);
+                this.Setup(this._ItemAccessor.ChildrenPropertyPath, this._ItemAccessor.ExpandedPropertyPath, this._ItemAccessor.FilterTargetPropertyPath, this._ItemAccessor.VisibilityPropertyPath);
 
                 foreach (var info in this._TreeInfo)
                 {
@@ -1831,11 +1880,14 @@ namespace Toolkit.WPF.Controls
 
                 public string FilterTargetPropertyPath => this._FilterTargetPropertyPath;
 
-                public Accessor(Type type, string childrenPropertyPath, string expandedPropertyPath, string filterTargetPropertyPath)
+                public string VisibilityPropertyPath => this._VisibilityPropertyPath;
+
+                public Accessor(Type type, string childrenPropertyPath, string expandedPropertyPath, string filterTargetPropertyPath, string visibilityPropertyPath)
                 {
                     this._ChildrenPropertyPath = childrenPropertyPath;
                     this._ExpandedPropertyPath = expandedPropertyPath;
                     this._FilterTargetPropertyPath = filterTargetPropertyPath;
+                    this._VisibilityPropertyPath = visibilityPropertyPath;
 
                     if (type == null)
                     {
@@ -1863,6 +1915,12 @@ namespace Toolkit.WPF.Controls
                     {
                         this._FilterTargetPropertyGetMethodInfo = this._Type?.GetProperty(this._FilterTargetPropertyPath)?.GetMethod;
                     }
+
+                    // Visibility
+                    if (!string.IsNullOrEmpty(this._VisibilityPropertyPath))
+                    {
+                        this._VisibilityPropertyGetMethodInfo = this._Type?.GetProperty(this._VisibilityPropertyPath)?.GetMethod;
+                    }
                 }
 
                 public IEnumerable<object> GetChildren(object item)
@@ -1885,6 +1943,22 @@ namespace Toolkit.WPF.Controls
                     return this._FilterTargetPropertyGetMethodInfo?.Invoke(item, null);
                 }
 
+                public Visibility GetVisibility(object item)
+                {
+                    var visibility = this._VisibilityPropertyGetMethodInfo?.Invoke(item, null);
+                    if (visibility is Visibility v)
+                    {
+                        return v;
+                    }
+
+                    if (visibility is bool b)
+                    {
+                        return b ? Visibility.Visible : Visibility.Collapsed;
+                    }
+
+                    return Visibility.Visible;
+                }
+
                 public static bool Equals(ref readonly Accessor a, ref readonly Accessor b)
                 {
                     return a._Type == b._Type
@@ -1896,12 +1970,14 @@ namespace Toolkit.WPF.Controls
                 private readonly string _ChildrenPropertyPath;
                 private readonly string _ExpandedPropertyPath;
                 private readonly string _FilterTargetPropertyPath;
+                private readonly string _VisibilityPropertyPath;
 
                 private readonly Type _Type;
                 private readonly MethodInfo _ChildrenPropertyGetMethodInfo;
                 private readonly MethodInfo _ExpandedPropertyGetMethodInfo;
                 private readonly MethodInfo _ExpandedPropertySetMethodInfo;
                 private readonly MethodInfo _FilterTargetPropertyGetMethodInfo;
+                private readonly MethodInfo _VisibilityPropertyGetMethodInfo;
 
                 private static readonly object[] TrueArgs = new object[] { true };
                 private static readonly object[] FalseArgs = new object[] { false };
