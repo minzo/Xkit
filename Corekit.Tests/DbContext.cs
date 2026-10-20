@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Linq;
 using System.Data;
 
@@ -41,12 +40,7 @@ namespace Corekit.DB.Tests
                 System.IO.File.Delete(this._DBPath);
             }
 
-            if (System.OperatingSystem.IsMacOS())
-            {
-                return;
-            }
-
-            using var context = new DbContext<SQLiteConnection>($"Data Source={this._DBPath}");
+            using var context = new DbContext<Microsoft.Data.Sqlite.SqliteConnection>($"Data Source={this._DBPath}");
             using var dbOperator = context.GetOperator();
             dbOperator.ExecuteCreateTable<Record01>();
             dbOperator.ExecuteInsertItems(Enumerable.Range(0, 1000).Select(i => new Record01() { Id = i }));
@@ -67,12 +61,7 @@ namespace Corekit.DB.Tests
         [TestMethod]
         public void TableCreateAndDelete()
         {
-            if (System.OperatingSystem.IsMacOS())
-            {
-                return;
-            }
-
-            using (var context = new DbContext<SQLiteConnection>($"Data Source={this._DBPath}"))
+            using (var context = new DbContext<Microsoft.Data.Sqlite.SqliteConnection>($"Data Source={this._DBPath}"))
             {
                 using(var dbOperator = context.GetOperator())
                 {
@@ -127,14 +116,9 @@ namespace Corekit.DB.Tests
         [TestMethod]
         public void ExecuteReaderAndExecuteScalar()
         {
-            if (System.OperatingSystem.IsMacOS())
-            {
-                return;
-            }
-
             var tableName = "TestRecord01";
 
-            using var context = new DbContext<SQLiteConnection>($"Data Source={this._DBPath}");
+            using var context = new DbContext<Microsoft.Data.Sqlite.SqliteConnection>($"Data Source={this._DBPath}");
             using var dbOperator = context.GetOperator();
 
             IEnumerable<IDataReader> EnumerableQuery(DbOperator o)
@@ -157,12 +141,7 @@ namespace Corekit.DB.Tests
         [TestMethod]
         public void ExecuteInsertItems()
         {
-            if (System.OperatingSystem.IsMacOS())
-            {
-                return;
-            }
-
-            using var context = new DbContext<SQLiteConnection>($"Data Source={this._DBPath}");
+            using var context = new DbContext<Microsoft.Data.Sqlite.SqliteConnection>($"Data Source={this._DBPath}");
             using var dbOperator = context.GetOperator();
 
             var items = Enumerable.Range(0, 3)

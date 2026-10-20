@@ -5,6 +5,5 @@
         "**/obj" : true
     },
 
-    "config.TargetFrameworkCore": "net10.0",
-    "dotnet.defaultSolution": "Xkit.WPF.sln"
+    "config.TargetFrameworkCore": "net10.0"
 }
