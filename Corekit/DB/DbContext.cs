@@ -35,6 +35,7 @@ namespace Corekit.DB
         /// </summary>
         public void Dispose()
         {
+            this._Connection?.Close();
             this._Connection?.Dispose();
             this._Connection = null;
         }

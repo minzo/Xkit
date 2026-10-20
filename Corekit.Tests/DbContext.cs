@@ -32,15 +32,15 @@ namespace Corekit.DB.Tests
             public int Id { get; set; }
         }
 
-        [TestInitialize]
-        public void Initialize()
+        [GlobalTestInitialize]
+        public static void Initialize()
         {
-            if (System.IO.File.Exists(this._DBPath))
+            if (System.IO.File.Exists(_DBPath))
             {
-                System.IO.File.Delete(this._DBPath);
+                System.IO.File.Delete(_DBPath);
             }
 
-            using var context = new DbContext<Microsoft.Data.Sqlite.SqliteConnection>($"Data Source={this._DBPath}");
+            using var context = new DbContext<Microsoft.Data.Sqlite.SqliteConnection>($"Data Source={_DBPath}");
             using var dbOperator = context.GetOperator();
             dbOperator.ExecuteCreateTable<Record01>();
             dbOperator.ExecuteInsertItems(Enumerable.Range(0, 1000).Select(i => new Record01() { Id = i }));
@@ -49,19 +49,19 @@ namespace Corekit.DB.Tests
             dbOperator.ExecuteInsertItems(Enumerable.Range(0, 1000).Select(i => new Record02() { Id = i }));
         }
 
-        [TestCleanup]
-        public void Cleanup()
+        [GlobalTestCleanup]
+        public static void Cleanup()
         {
-            if(System.IO.File.Exists(this._DBPath))
+            if(System.IO.File.Exists(_DBPath))
             {
-                System.IO.File.Delete(this._DBPath);
+                System.IO.File.Delete(_DBPath);
             }
         }
 
         [TestMethod]
         public void TableCreateAndDelete()
         {
-            using (var context = new DbContext<Microsoft.Data.Sqlite.SqliteConnection>($"Data Source={this._DBPath}"))
+            using (var context = new DbContext<Microsoft.Data.Sqlite.SqliteConnection>($"Data Source={_DBPath}"))
             {
                 using(var dbOperator = context.GetOperator())
                 {
@@ -71,7 +71,7 @@ namespace Corekit.DB.Tests
                             .Select(i => i.GetBoolean(0))
                             .FirstOrDefault();
 
-                    Assert.IsTrue(System.IO.File.Exists(this._DBPath));
+                    Assert.IsTrue(System.IO.File.Exists(_DBPath));
                     Assert.IsTrue(isExistTable);
                 }
 
@@ -118,7 +118,7 @@ namespace Corekit.DB.Tests
         {
             var tableName = "TestRecord01";
 
-            using var context = new DbContext<Microsoft.Data.Sqlite.SqliteConnection>($"Data Source={this._DBPath}");
+            using var context = new DbContext<Microsoft.Data.Sqlite.SqliteConnection>($"Data Source={_DBPath}");
             using var dbOperator = context.GetOperator();
 
             IEnumerable<IDataReader> EnumerableQuery(DbOperator o)
@@ -141,7 +141,7 @@ namespace Corekit.DB.Tests
         [TestMethod]
         public void ExecuteInsertItems()
         {
-            using var context = new DbContext<Microsoft.Data.Sqlite.SqliteConnection>($"Data Source={this._DBPath}");
+            using var context = new DbContext<Microsoft.Data.Sqlite.SqliteConnection>($"Data Source={_DBPath}");
             using var dbOperator = context.GetOperator();
 
             var items = Enumerable.Range(0, 3)
@@ -152,6 +152,6 @@ namespace Corekit.DB.Tests
             dbOperator.ExecuteInsertItems(typeof(Record02), "TestRecord02", items, InsertItemConflictAction.DoUpdate );
         }
 
-        private readonly string _DBPath = "Test.db";
+        private static readonly string _DBPath = "Test.db";
     }
 }
