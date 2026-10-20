@@ -9,10 +9,10 @@ namespace Corekit.Extensions.Tests
         public void GetFileNameWithoutAllExtensions()
         {
             var filePath0 = @"file.txt.zip";
-            Assert.AreEqual(filePath0.GetFileNameWithoutAllExtensions(), "file");
+            Assert.AreEqual("file", filePath0.GetFileNameWithoutAllExtensions());
 
             var filePath1 = @"file.txt.zip.bin";
-            Assert.AreEqual(filePath1.GetFileNameWithoutAllExtensions(), "file");
+            Assert.AreEqual("file", filePath1.GetFileNameWithoutAllExtensions());
         }
 
         [TestMethod]

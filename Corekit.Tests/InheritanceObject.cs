@@ -66,13 +66,13 @@ namespace Corekit.Tests
             {
                 var p = io.GetProperty("String0");
                 p.Value = "Hoge0";
-                Assert.AreEqual(p.Value, "Hoge0");
+                Assert.AreEqual("Hoge0", p.Value);
             }
 
             {
                 var p = io.GetProperty("String1");
                 p.Value = "Hoge1";
-                Assert.AreEqual(p.Value, "Hoge1");
+                Assert.AreEqual("Hoge1", p.Value);
             }
 
             {
