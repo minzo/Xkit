@@ -32,8 +32,8 @@ namespace Corekit.DB.Tests
             public int Id { get; set; }
         }
 
-        [GlobalTestInitialize]
-        public static void Initialize()
+        [TestInitialize]
+        public void Initialize()
         {
             if (System.IO.File.Exists(_DBPath))
             {
@@ -49,10 +49,12 @@ namespace Corekit.DB.Tests
             dbOperator.ExecuteInsertItems(Enumerable.Range(0, 1000).Select(i => new Record02() { Id = i }));
         }
 
-        [GlobalTestCleanup]
-        public static void Cleanup()
+        [TestCleanup]
+        public void Cleanup()
         {
-            if(System.IO.File.Exists(_DBPath))
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+
+            if (System.IO.File.Exists(_DBPath))
             {
                 System.IO.File.Delete(_DBPath);
             }
